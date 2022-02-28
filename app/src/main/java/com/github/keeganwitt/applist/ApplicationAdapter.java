@@ -76,25 +76,21 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
                 if (this.appInfoField.equals(AppInfoField.APK_SIZE)) {
                     appInfoView.setText(getApkSizeText(this.context, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.APP_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getAppBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, applicationInfo).getAppBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.CACHE_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getCacheBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, applicationInfo).getCacheBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.DATA_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getDataBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, applicationInfo).getDataBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.ENABLED)) {
                     appInfoView.setText(getEnabledText(applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getExternalCacheBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, applicationInfo).getExternalCacheBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
                     appInfoView.setText(getFirstInstalledText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.LAST_UPDATED)) {
                     appInfoView.setText(getLastUpdatedText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.MIN_SDK)) {
-                    appInfoView.setText(applicationInfo.minSdkVersion);
+                    appInfoView.setText(String.valueOf(applicationInfo.minSdkVersion));
                 } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
                     appInfoView.setText(getPackageInstallerName(getPackageInstaller(this.packageManager, applicationInfo)));
                 } else if (this.appInfoField.equals(AppInfoField.PACKAGE_NAME)) {
@@ -102,10 +98,9 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
                 } else if (this.appInfoField.equals(AppInfoField.PERMISSIONS)) {
                     appInfoView.setText(getPermissionsText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
-                    appInfoView.setText(applicationInfo.targetSdkVersion);
+                    appInfoView.setText(String.valueOf(applicationInfo.targetSdkVersion));
                 } else if (this.appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getTotalBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, applicationInfo).getTotalBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.VERSION)) {
                     appInfoView.setText(getVersionText(this.packageManager, applicationInfo));
                 }
