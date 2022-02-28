@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist;
 
+import android.app.AppOpsManager;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.format.Formatter;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,7 +24,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSize;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalled;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdated;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
+import static java.util.Comparator.comparing;
 
 public class MainActivity extends ListActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -32,11 +43,15 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemSele
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        this.appInfoFields = Arrays.asList(AppInfoField.values());
-        this.packageManager = getPackageManager();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (!hasUsageStatsPermission(MainActivity.this)) {
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        }
+
+        this.appInfoFields = Arrays.asList(AppInfoField.values());
+        this.packageManager = getPackageManager();
 
         Spinner spin = findViewById(R.id.spinner);
         spin.setOnItemSelectedListener(this);
@@ -86,22 +101,83 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemSele
 
     private class LoadApplications extends AsyncTask<Void, Void, Void> {
         private ProgressDialog progress = null;
-        private Context context;
-        private AppInfoField appInfoField;
+        private final Context context;
+        private final AppInfoField appInfoField;
+        private final PackageManager packageManager;
 
         public LoadApplications(Context context, AppInfoField appInfoField) {
             this.context = context;
             this.appInfoField = appInfoField;
+            this.packageManager = this.context.getPackageManager();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
-            // TODO: sort by selected field
-            installedApplications.sort(Comparator
-                    .comparing((ApplicationInfo ai) -> String.valueOf(getPackageInstaller(packageManager, ai)))
-                    .thenComparing(ai -> String.valueOf(ai.loadLabel(packageManager)))
-            );
+            Comparator<ApplicationInfo> comparator;
+            boolean sortedByPackageLabel = false;
+            if (this.appInfoField.equals(AppInfoField.APK_SIZE)) {
+                comparator = comparing(ai -> getApkSize(this.context, ai));
+            } else if (this.appInfoField.equals(AppInfoField.APP_SIZE)) {
+                comparator = comparing(ai -> getStorageUsage(this.context, ai).getAppBytes());
+            } else if (this.appInfoField.equals(AppInfoField.CACHE_SIZE)) {
+                comparator = comparing(ai -> Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, ai).getCacheBytes()));
+            } else if (this.appInfoField.equals(AppInfoField.DATA_SIZE)) {
+                comparator = comparing(ai -> Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, ai).getDataBytes()));
+            } else if (this.appInfoField.equals(AppInfoField.ENABLED)) {
+                comparator = comparing(ApplicationInfoUtils::getEnabledText);
+            } else if (this.appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
+                comparator = comparing(ai -> Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, ai).getExternalCacheBytes()));
+            } else if (this.appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
+                comparator = comparing(ai -> {
+                    try {
+                        return getFirstInstalled(this.packageManager, ai).getTime();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        return 0L;
+                    }
+                });
+            } else if (this.appInfoField.equals(AppInfoField.LAST_UPDATED)) {
+                comparator = comparing(ai -> {
+                    try {
+                        return getLastUpdated(this.packageManager, ai).getTime();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        return 0L;
+                    }
+                });
+            } else if (this.appInfoField.equals(AppInfoField.MIN_SDK)) {
+                comparator = comparing(ai -> ai.minSdkVersion);
+            } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
+                comparator = comparing(ai -> getPackageInstallerName(getPackageInstaller(this.packageManager, ai)));
+            } else if (this.appInfoField.equals(AppInfoField.PACKAGE_NAME)) {
+                comparator = comparing(ai -> ai.packageName);
+            } else if (this.appInfoField.equals(AppInfoField.PERMISSIONS)) {
+                comparator = comparing(ai -> {
+                    try {
+                        return getPermissions(this.packageManager, ai).length;
+                    } catch (PackageManager.NameNotFoundException e) {
+                        return 0;
+                    }
+                });
+            } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
+                comparator = comparing(ai -> ai.targetSdkVersion);
+            } else if (this.appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
+                comparator = comparing(ai -> Formatter.formatShortFileSize(this.context, getStorageUsage(this.context, ai).getTotalBytes()));
+            } else if (this.appInfoField.equals(AppInfoField.VERSION)) {
+                comparator = comparing(ai -> {
+                    try {
+                        return getVersionText(this.packageManager, ai);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        return "";
+                    }
+                });
+            } else {
+                comparator = comparing(ai -> String.valueOf(ai.loadLabel(packageManager)));
+                sortedByPackageLabel = true;
+            }
+            if (!sortedByPackageLabel) {
+                comparator = comparator.thenComparing(ai -> String.valueOf(ai.loadLabel(packageManager)));
+            }
+            installedApplications.sort(comparator);
             appList = checkForLaunchIntent(installedApplications);
             listAdaptor = new ApplicationAdapter(context, R.layout.snippet_list_row, appList, this.appInfoField);
 
@@ -134,5 +210,11 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemSele
 
     private boolean isUserInstalledApp(ApplicationInfo appInfo) {
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1;
+    }
+
+    private boolean hasUsageStatsPermission(Context context) {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow("android:get_usage_stats", android.os.Process.myUid(), context.getPackageName());
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
 }

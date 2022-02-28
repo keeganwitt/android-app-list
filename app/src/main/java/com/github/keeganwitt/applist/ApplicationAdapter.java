@@ -73,41 +73,41 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
             appNameView.setText(applicationInfo.loadLabel(this.packageManager));
 
             try {
-                if (this.appInfoField.equals(AppInfoField.PACKAGE_NAME)) {
-                    appInfoView.setText(applicationInfo.packageName);
-                } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
-                    appInfoView.setText(getPackageInstallerName(getPackageInstaller(this.packageManager, applicationInfo)));
-                } else if (this.appInfoField.equals(AppInfoField.ENABLED)) {
-                    appInfoView.setText(getEnabledText(applicationInfo));
-                } else if (this.appInfoField.equals(AppInfoField.MIN_SDK)) {
-                    appInfoView.setText(applicationInfo.minSdkVersion);
-                } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
-                    appInfoView.setText(applicationInfo.targetSdkVersion);
-                } else if (this.appInfoField.equals(AppInfoField.APK_SIZE)) {
-                    appInfoView.setText("APK size " + getApkSizeText(this.context, applicationInfo));
+                if (this.appInfoField.equals(AppInfoField.APK_SIZE)) {
+                    appInfoView.setText(getApkSizeText(this.context, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.APP_SIZE)) {
                     ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText("App bytes " + Formatter.formatShortFileSize(this.context, storageUsage.getAppBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getAppBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.CACHE_SIZE)) {
                     ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText("Cache bytes " + Formatter.formatShortFileSize(this.context, storageUsage.getCacheBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getCacheBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.DATA_SIZE)) {
                     ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText("Data bytes " + Formatter.formatShortFileSize(this.context, storageUsage.getDataBytes()));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getDataBytes()));
+                } else if (this.appInfoField.equals(AppInfoField.ENABLED)) {
+                    appInfoView.setText(getEnabledText(applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
                     ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText("External cache bytes " + Formatter.formatShortFileSize(this.context, storageUsage.getExternalCacheBytes()));
-                } else if (this.appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
-                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
-                    appInfoView.setText("Total bytes " + Formatter.formatShortFileSize(this.context, storageUsage.getTotalBytes()));
-                } else if (this.appInfoField.equals(AppInfoField.VERSION)) {
-                    appInfoView.setText(getVersionText(this.packageManager, applicationInfo));
-                } else if (this.appInfoField.equals(AppInfoField.PERMISSIONS)) {
-                    appInfoView.setText(getPermissionsText(this.packageManager, applicationInfo));
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getExternalCacheBytes()));
                 } else if (this.appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
                     appInfoView.setText(getFirstInstalledText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.LAST_UPDATED)) {
                     appInfoView.setText(getLastUpdatedText(this.packageManager, applicationInfo));
+                } else if (this.appInfoField.equals(AppInfoField.MIN_SDK)) {
+                    appInfoView.setText(applicationInfo.minSdkVersion);
+                } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
+                    appInfoView.setText(getPackageInstallerName(getPackageInstaller(this.packageManager, applicationInfo)));
+                } else if (this.appInfoField.equals(AppInfoField.PACKAGE_NAME)) {
+                    appInfoView.setText(applicationInfo.packageName);
+                } else if (this.appInfoField.equals(AppInfoField.PERMISSIONS)) {
+                    appInfoView.setText(getPermissionsText(this.packageManager, applicationInfo));
+                } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
+                    appInfoView.setText(applicationInfo.targetSdkVersion);
+                } else if (this.appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
+                    ApplicationInfoUtils.StorageUsage storageUsage = getStorageUsage(this.context, applicationInfo);
+                    appInfoView.setText(Formatter.formatShortFileSize(this.context, storageUsage.getTotalBytes()));
+                } else if (this.appInfoField.equals(AppInfoField.VERSION)) {
+                    appInfoView.setText(getVersionText(this.packageManager, applicationInfo));
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 if (convertView != null) {

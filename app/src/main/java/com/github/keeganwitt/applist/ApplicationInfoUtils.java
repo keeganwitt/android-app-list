@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.icu.text.DateFormat;
 import android.os.Build;
 import android.os.Environment;
@@ -68,32 +69,46 @@ public class ApplicationInfoUtils {
         return applicationInfo.enabled ? "Enabled" : "Disabled";
     }
 
+    public static Date getFirstInstalled(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
+        return new Date(getPackageInfo(packageManager, applicationInfo).firstInstallTime);
+    }
+
     public static String getFirstInstalledText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
-        return getDateFormat().format(new Date(getPackageInfo(packageManager, applicationInfo).firstInstallTime));
+        return getDateFormat().format(getFirstInstalled(packageManager, applicationInfo));
+    }
+
+    public static Date getLastUpdated(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
+        return new Date(getPackageInfo(packageManager, applicationInfo).lastUpdateTime);
     }
 
     public static String getLastUpdatedText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
-        return getDateFormat().format(new Date(getPackageInfo(packageManager, applicationInfo).lastUpdateTime));
+        return getDateFormat().format(getLastUpdated(packageManager, applicationInfo));
     }
 
     public static String getVersionText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
         return getPackageInfo(packageManager, applicationInfo).versionName;
     }
 
+    public static PermissionInfo[] getPermissions(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
+        return getPackageInfo(packageManager, applicationInfo).permissions;
+    }
+
     public static String getPermissionsText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
         return Arrays.toString(getPackageInfo(packageManager, applicationInfo).permissions);
     }
 
+    public static long getApkSize(Context context, ApplicationInfo applicationInfo) {
+        return new File(applicationInfo.publicSourceDir).length();
+    }
+
     public static String getApkSizeText(Context context, ApplicationInfo applicationInfo) {
-        File file = new File(applicationInfo.publicSourceDir);
-        long size = file.length();
-        return Formatter.formatShortFileSize(context, size);
+        return Formatter.formatShortFileSize(context, getApkSize(context, applicationInfo));
     }
 
     public static StorageUsage getStorageUsage(Context context, ApplicationInfo applicationInfo) {
         StorageUsage storageUsage = new StorageUsage();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            Log.i(TAG, "Unable to calculate storage useage (requires API " + Build.VERSION_CODES.O + ")");
+            Log.i(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")");
             return storageUsage;
         }
         final StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
