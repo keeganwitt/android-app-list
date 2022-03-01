@@ -50,6 +50,8 @@ public class ApplicationInfoUtils {
             return "Huawei App Galary";
         } else if ("com.xiaomi.market".equals(installerPackageName)) {
             return "Mi Store";
+        } else if ("com.oneplus.backuprestore".equals(installerPackageName)) {
+            return "OnePlus Clone Phone";
         } else if ("com.sec.android.easyMover".equals(installerPackageName)) {
             return "Samsung Smart Switch";
         } else if ("com.slideme.sam.manager".equals(installerPackageName)) {
