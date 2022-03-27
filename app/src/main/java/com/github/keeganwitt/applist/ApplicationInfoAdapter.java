@@ -8,10 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -25,51 +26,39 @@ import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissionsT
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
 
-public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
-    private static final String TAG = ApplicationAdapter.class.getSimpleName();
-    private final List<ApplicationInfo> appsList;
+public class ApplicationInfoAdapter extends RecyclerView.Adapter<ApplicationInfoAdapter.ApplicationInfoViewHolder>  {
+    private static final String TAG = ApplicationInfoAdapter.class.getSimpleName();
     private final Context context;
+    private final OnClickListener onClickListener;
     private final PackageManager packageManager;
-    private final AppInfoField appInfoField;
+    private  AppInfoField appInfoField;
+    private List<ApplicationInfo> appsList;
 
-    public ApplicationAdapter(Context context, int textViewResourceId, List<ApplicationInfo> appsList, AppInfoField appInfoField) {
-        super(context, textViewResourceId, appsList);
+    public ApplicationInfoAdapter(Context context, OnClickListener onClickListener) {
         this.context = context;
-        this.appsList = appsList;
-        this.appInfoField = appInfoField;
+        this.onClickListener = onClickListener;
         this.packageManager = context.getPackageManager();
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return ((null != this.appsList) ? this.appsList.size() : 0);
+    public ApplicationInfoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(R.layout.snippet_list_row, parent, false);
+        return new ApplicationInfoViewHolder(view);
     }
 
     @Override
-    public ApplicationInfo getItem(int position) {
-        return ((null != this.appsList) ? this.appsList.get(position) : null);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (null == view) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = layoutInflater.inflate(R.layout.snippet_list_row, null);
-        }
-
+    public void onBindViewHolder(@NonNull ApplicationInfoViewHolder holder, int position) {
         ApplicationInfo applicationInfo = this.appsList.get(position);
         if (null != applicationInfo) {
-            ImageView iconView = view.findViewById(R.id.app_icon);
-            TextView appNameView = view.findViewById(R.id.app_name);
-            TextView appInfoView = view.findViewById(R.id.app_info);
+            ImageView iconView = holder.iconView;
+            TextView appNameView = holder.appNameView;
+            TextView appInfoView = holder.appInfoView;
+            TextView packageNameView = holder.packageNameView;
 
             iconView.setImageDrawable(applicationInfo.loadIcon(this.packageManager));
+            packageNameView.setText(applicationInfo.packageName);
             appNameView.setText(applicationInfo.loadLabel(this.packageManager));
 
             try {
@@ -93,8 +82,6 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
                     appInfoView.setText(String.valueOf(applicationInfo.minSdkVersion));
                 } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
                     appInfoView.setText(getPackageInstallerName(getPackageInstaller(this.packageManager, applicationInfo)));
-                } else if (this.appInfoField.equals(AppInfoField.PACKAGE_NAME)) {
-                    appInfoView.setText(applicationInfo.packageName);
                 } else if (this.appInfoField.equals(AppInfoField.PERMISSIONS)) {
                     appInfoView.setText(getPermissionsText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
@@ -105,14 +92,48 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
                     appInfoView.setText(getVersionText(this.packageManager, applicationInfo));
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                if (convertView != null) {
-                    Toast.makeText(convertView.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                if (this.context != null) {
+                    Toast.makeText(holder.iconView.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 } else {
                     Log.e(TAG, "Unable to set requested text", e);
                 }
             }
         }
+    }
 
-        return view;
+    @Override
+    public int getItemCount () {
+        return ((null != this.appsList) ? this.appsList.size() : 0);
+    }
+
+    public void populateAppsList(List<ApplicationInfo> appsList, AppInfoField appInfoField) {
+        this.appsList = appsList;
+        this.appInfoField = appInfoField;
+    }
+
+    public interface OnClickListener {
+        void onClick(int position);
+    }
+
+    public class ApplicationInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView iconView;
+        TextView appNameView;
+        TextView packageNameView;
+        TextView appInfoView;
+
+        public ApplicationInfoViewHolder(@NonNull View itemView) {
+            super(itemView);
+            iconView = itemView.findViewById(R.id.app_icon);
+            appNameView = itemView.findViewById(R.id.app_name);
+            packageNameView = itemView.findViewById(R.id.package_name);
+            appInfoView = itemView.findViewById(R.id.app_info);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getBindingAdapterPosition();
+            onClickListener.onClick(position);
+        }
     }
 }

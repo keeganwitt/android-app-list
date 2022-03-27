@@ -30,7 +30,16 @@ public class ApplicationInfoUtils {
     private ApplicationInfoUtils() {}
 
     public static String getPackageInstaller(PackageManager packageManager, ApplicationInfo applicationInfo) {
-        return packageManager.getInstallerPackageName(applicationInfo.packageName);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                return packageManager.getInstallSourceInfo(applicationInfo.packageName).getInstallingPackageName();
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Unable to determine package installer for " + applicationInfo.packageName, e);
+                return null;
+            }
+        } else {
+            return packageManager.getInstallerPackageName(applicationInfo.packageName);
+        }
     }
 
     public static String getPackageInstallerName(String installerPackageName) {
@@ -110,7 +119,7 @@ public class ApplicationInfoUtils {
     public static StorageUsage getStorageUsage(Context context, ApplicationInfo applicationInfo) {
         StorageUsage storageUsage = new StorageUsage();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            Log.i(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")");
+            Log.w(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")");
             return storageUsage;
         }
         final StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);

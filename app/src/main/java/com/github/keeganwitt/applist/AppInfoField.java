@@ -11,7 +11,6 @@ public enum AppInfoField {
     LAST_UPDATED("Last Updated"),
     MIN_SDK("Min SDK"),
     PACKAGE_MANAGER("Package Manager"),
-    PACKAGE_NAME("Package Name"),
     PERMISSIONS("Permissions"),
     TARGET_SDK("Target SDK"),
     TOTAL_SIZE("Total Size"),
