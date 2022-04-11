@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist;
 
+import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -42,13 +43,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
     private ApplicationInfoAdapter applicationInfoAdapter;
+    private Spinner spinner;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         if (!hasUsageStatsPermission()) {
             Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
@@ -57,28 +59,30 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             startActivity(intent);
         }
 
+        setContentView(R.layout.activity_main);
+
         this.appInfoFields = Arrays.asList(AppInfoField.values());
         this.packageManager = getPackageManager();
 
-        Spinner spin = findViewById(R.id.spinner);
-        spin.setOnItemSelectedListener(this);
+        this.spinner = findViewById(R.id.spinner);
+        this.spinner.setOnItemSelectedListener(this);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
                 this.appInfoFields.stream().map(AppInfoField::getDisplayName).toArray(String[]::new));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spin.setAdapter(arrayAdapter);
+        this.spinner.setAdapter(arrayAdapter);
 
         this.progressBar = findViewById(R.id.progress_bar);
 
         this.recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
-        recyclerView.setLayoutManager(layoutManager);
+        this.recyclerView.setLayoutManager(layoutManager);
         this.applicationInfoAdapter = new ApplicationInfoAdapter(MainActivity.this, this);
-        recyclerView.setAdapter(this.applicationInfoAdapter);
+        this.recyclerView.setAdapter(this.applicationInfoAdapter);
 
-        final SwipeRefreshLayout swipeRefreshLayout= findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            loadApplications(this.selectedAppInfoField);
-            swipeRefreshLayout.setRefreshing(false);
+        this.swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        this.swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadApplications(this.selectedAppInfoField, true);
+            this.swipeRefreshLayout.setRefreshing(false);
         });
     }
 
@@ -88,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onClick(int position) {
-        ApplicationInfo app = appList.get(position);
+        ApplicationInfo app = this.appList.get(position);
         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + app.packageName));
         startActivity(intent);
@@ -96,14 +100,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        this.recyclerView.setVisibility(View.GONE);
+        this.progressBar.setVisibility(View.VISIBLE);
         this.selectedAppInfoField = this.appInfoFields.get(position);
-        loadApplications(this.selectedAppInfoField);
+        loadApplications(this.selectedAppInfoField, false);
+        this.recyclerView.setVisibility(View.VISIBLE);
+        this.progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+        this.recyclerView.setVisibility(View.GONE);
+        this.progressBar.setVisibility(View.VISIBLE);
         this.selectedAppInfoField = this.appInfoFields.get(0);
-        loadApplications(this.selectedAppInfoField);
+        loadApplications(this.selectedAppInfoField, false);
+        this.recyclerView.setVisibility(View.VISIBLE);
+        this.progressBar.setVisibility(View.GONE);
     }
 
     private List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
@@ -122,15 +134,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return appList;
     }
 
-    private void loadApplications(AppInfoField appInfoField) {
-        recyclerView.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-        this.appList = checkForLaunchIntent(this.packageManager.getInstalledApplications(PackageManager.GET_META_DATA));;
+    @SuppressLint("NotifyDataSetChanged")
+    private void loadApplications(AppInfoField appInfoField, boolean reload) {
+        if (this.appList == null || this.appList.isEmpty() || reload) {
+            this.appList = checkForLaunchIntent(this.packageManager.getInstalledApplications(PackageManager.GET_META_DATA));
+        }
         this.appList.sort(determineComparator(this.packageManager, appInfoField));
         this.applicationInfoAdapter.populateAppsList(this.appList, appInfoField);
-        recyclerView.setAdapter(this.applicationInfoAdapter);
-        recyclerView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
+        this.applicationInfoAdapter.notifyDataSetChanged();
     }
 
     private boolean isUserInstalledApp(ApplicationInfo appInfo) {
@@ -149,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private Comparator<ApplicationInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
-        Comparator<ApplicationInfo> comparator = comparing(ai -> String.valueOf(ai.loadLabel(packageManager)));
+        Comparator<ApplicationInfo> comparator = comparing(ai -> String.valueOf(ai.loadLabel(this.packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
             comparator = comparing(ai -> -getApkSize(MainActivity.this, ai));
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
@@ -165,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
             comparator = comparing(ai -> {
                 try {
-                    return getFirstInstalled(packageManager, ai).getTime();
+                    return getFirstInstalled(this.packageManager, ai).getTime();
                 } catch (PackageManager.NameNotFoundException e) {
                     return 0L;
                 }
@@ -173,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.LAST_UPDATED)) {
             comparator = comparing(ai -> {
                 try {
-                    return getLastUpdated(packageManager, ai).getTime();
+                    return getLastUpdated(this.packageManager, ai).getTime();
                 } catch (PackageManager.NameNotFoundException e) {
                     return 0L;
                 }
@@ -181,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.MIN_SDK)) {
             comparator = comparing(ai -> ai.minSdkVersion);
         } else if (appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
-            comparator = comparing(ai -> getPackageInstallerName(getPackageInstaller(packageManager, ai)));
+            comparator = comparing(ai -> getPackageInstallerName(getPackageInstaller(this.packageManager, ai)));
         } else if (appInfoField.equals(AppInfoField.PERMISSIONS)) {
             comparator = comparing(ai -> {
                 try {
@@ -197,13 +208,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.VERSION)) {
             comparator = comparing(ai -> {
                 try {
-                    return getVersionText(packageManager, ai);
+                    return getVersionText(this.packageManager, ai);
                 } catch (PackageManager.NameNotFoundException e) {
                     return "";
                 }
             });
         }
-        comparator = comparator.thenComparing(ai -> String.valueOf(ai.loadLabel(packageManager)));
+        comparator = comparator.thenComparing(ai -> String.valueOf(ai.loadLabel(this.packageManager)));
         return comparator;
     }
 }
