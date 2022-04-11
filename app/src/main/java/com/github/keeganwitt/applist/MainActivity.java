@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             comparator = comparing(ai -> {
                 try {
                     return getPermissions(packageManager, ai).length;
-                } catch (PackageManager.NameNotFoundException e) {
+                } catch (NullPointerException | PackageManager.NameNotFoundException e) {
                     return 0;
                 }
             });
