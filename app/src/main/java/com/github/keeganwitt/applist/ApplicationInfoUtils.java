@@ -152,7 +152,7 @@ public class ApplicationInfoUtils {
     }
 
     private static PackageInfo getPackageInfo(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
-        return packageManager.getPackageInfo(applicationInfo.packageName, 0);
+        return packageManager.getPackageInfo(applicationInfo.packageName, PackageManager.GET_PERMISSIONS);
     }
 
     private static DateFormat getDateFormat() {
