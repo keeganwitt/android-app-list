@@ -18,11 +18,9 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -129,12 +127,12 @@ public class ApplicationInfoUtils {
                 .collect(Collectors.joining(", "));
     }
 
-    public static long getApkSize(Context context, ApplicationInfo applicationInfo) {
+    public static long getApkSize(ApplicationInfo applicationInfo) {
         return new File(applicationInfo.publicSourceDir).length();
     }
 
     public static String getApkSizeText(Context context, ApplicationInfo applicationInfo) {
-        return Formatter.formatShortFileSize(context, getApkSize(context, applicationInfo));
+        return Formatter.formatShortFileSize(context, getApkSize(applicationInfo));
     }
 
     public static StorageUsage getStorageUsage(Context context, ApplicationInfo applicationInfo) {

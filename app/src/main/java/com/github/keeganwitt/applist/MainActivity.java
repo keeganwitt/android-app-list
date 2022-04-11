@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Comparator<ApplicationInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
         Comparator<ApplicationInfo> comparator = comparing(ai -> String.valueOf(ai.loadLabel(this.packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
-            comparator = comparing(ai -> -getApkSize(MainActivity.this, ai));
+            comparator = comparing(ai -> -getApkSize(ai));
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai).getAppBytes());
         } else if (appInfoField.equals(AppInfoField.CACHE_SIZE)) {
