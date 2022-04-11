@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Spinner spinner;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,8 +68,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 this.appInfoFields.stream().map(AppInfoField::getDisplayName).toArray(String[]::new));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spinner.setAdapter(arrayAdapter);
-
-        this.progressBar = findViewById(R.id.progress_bar);
 
         this.recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
@@ -100,22 +96,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        this.recyclerView.setVisibility(View.GONE);
-        this.progressBar.setVisibility(View.VISIBLE);
+        this.swipeRefreshLayout.setRefreshing(true);
         this.selectedAppInfoField = this.appInfoFields.get(position);
         loadApplications(this.selectedAppInfoField, false);
-        this.recyclerView.setVisibility(View.VISIBLE);
-        this.progressBar.setVisibility(View.GONE);
+        this.swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        this.recyclerView.setVisibility(View.GONE);
-        this.progressBar.setVisibility(View.VISIBLE);
+        this.swipeRefreshLayout.setRefreshing(true);
         this.selectedAppInfoField = this.appInfoFields.get(0);
         loadApplications(this.selectedAppInfoField, false);
-        this.recyclerView.setVisibility(View.VISIBLE);
-        this.progressBar.setVisibility(View.GONE);
+        this.swipeRefreshLayout.setRefreshing(false);
     }
 
     private List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
