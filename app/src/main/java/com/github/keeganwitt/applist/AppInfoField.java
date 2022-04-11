@@ -8,10 +8,11 @@ public enum AppInfoField {
     ENABLED("Enabled"),
     EXTERNAL_CACHE_SIZE("External Cache Size"),
     FIRST_INSTALLED("First Installed"),
+    GRANTED_PERMISSIONS("Granted Permissions"),
     LAST_UPDATED("Last Updated"),
     MIN_SDK("Min SDK"),
     PACKAGE_MANAGER("Package Manager"),
-    PERMISSIONS("Permissions"),
+    REQUESTED_PERMISSIONS("Requested Permissions"),
     TARGET_SDK("Target SDK"),
     TOTAL_SIZE("Total Size"),
     VERSION("Version");

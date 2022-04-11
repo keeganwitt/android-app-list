@@ -185,10 +185,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             comparator = comparing(ai -> ai.minSdkVersion);
         } else if (appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
             comparator = comparing(ai -> getPackageInstallerName(getPackageInstaller(this.packageManager, ai)));
-        } else if (appInfoField.equals(AppInfoField.PERMISSIONS)) {
+        } else if (appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS) || appInfoField.equals(AppInfoField.REQUESTED_PERMISSIONS)) {
             comparator = comparing(ai -> {
                 try {
-                    return getPermissions(packageManager, ai).length;
+                    return getPermissions(packageManager, ai, appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)).size();
                 } catch (NullPointerException | PackageManager.NameNotFoundException e) {
                     return 0;
                 }
