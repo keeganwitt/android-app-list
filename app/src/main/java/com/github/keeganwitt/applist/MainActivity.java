@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,13 +51,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!hasUsageStatsPermission()) {
-            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-            Uri uri = Uri.fromParts("package", getPackageName(), null);
-            intent.setData(uri);
-            startActivity(intent);
-        }
-
         setContentView(R.layout.activity_main);
 
         this.appInfoFields = Arrays.asList(AppInfoField.values());
@@ -82,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
     }
 
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
 
@@ -98,6 +92,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         this.swipeRefreshLayout.setRefreshing(true);
         this.selectedAppInfoField = this.appInfoFields.get(position);
+        if ((this.selectedAppInfoField.equals(AppInfoField.CACHE_SIZE)
+                || this.selectedAppInfoField.equals(AppInfoField.DATA_SIZE)
+                || this.selectedAppInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)
+                || this.selectedAppInfoField.equals(AppInfoField.TOTAL_SIZE))
+        && !hasUsageStatsPermission()) {
+            requestUsageStatsPermission();
+        }
         loadApplications(this.selectedAppInfoField, false);
         this.swipeRefreshLayout.setRefreshing(false);
     }
@@ -144,11 +145,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         AppOpsManager appOps = (AppOpsManager) MainActivity.this.getSystemService(Context.APP_OPS_SERVICE);
         int mode;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            mode = appOps.unsafeCheckOpNoThrow("android:get_usage_stats", android.os.Process.myUid(), MainActivity.this.getPackageName());
+            mode = appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), MainActivity.this.getPackageName());
         } else {
-            mode = appOps.checkOpNoThrow("android:get_usage_stats", android.os.Process.myUid(), MainActivity.this.getPackageName());
+            mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), MainActivity.this.getPackageName());
         }
         return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private void requestUsageStatsPermission() {
+        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 
     private Comparator<ApplicationInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
