@@ -51,7 +51,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
 
         if (!hasUsageStatsPermission()) {
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
         }
 
         this.appInfoFields = Arrays.asList(AppInfoField.values());
