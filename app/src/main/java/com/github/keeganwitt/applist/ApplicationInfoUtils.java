@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
 import android.icu.text.DateFormat;
 import android.os.Build;
 import android.os.Environment;
@@ -22,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static android.os.Process.myUserHandle;
 
@@ -102,12 +100,12 @@ public class ApplicationInfoUtils {
         return getPackageInfo(packageManager, applicationInfo).versionName;
     }
 
-    public static List<PermissionInfo> getPermissions(PackageManager packageManager, ApplicationInfo applicationInfo, boolean grantedPermissionsOnly) throws PackageManager.NameNotFoundException {
-        List<PermissionInfo> permissionInfos = new ArrayList<>();
+    public static List<String> getPermissions(PackageManager packageManager, ApplicationInfo applicationInfo, boolean grantedPermissionsOnly) throws PackageManager.NameNotFoundException {
+        List<String> permissions = new ArrayList<>();
         PackageInfo packageInfo = getPackageInfo(packageManager, applicationInfo);
         String[] requestedPermissions = packageInfo.requestedPermissions;
         if (requestedPermissions == null) {
-            return permissionInfos;
+            return permissions;
         }
         for (int i = 0; i < requestedPermissions.length; i++) {
             String requestedPermission = requestedPermissions[i];
@@ -115,16 +113,9 @@ public class ApplicationInfoUtils {
             if (grantedPermissionsOnly && !granted) {
                 continue;
             }
-            PermissionInfo permissionInfo = packageManager.getPermissionInfo(requestedPermission, 0);
-            permissionInfos.add(permissionInfo);
+            permissions.add(requestedPermission);
         }
-        return permissionInfos;
-    }
-
-    public static String getPermissionsText(List<PermissionInfo> permissionInfos) throws PackageManager.NameNotFoundException {
-        return permissionInfos.stream()
-                .map(permissionInfo -> permissionInfo.name)
-                .collect(Collectors.joining(", "));
+        return permissions;
     }
 
     public static long getApkSize(ApplicationInfo applicationInfo) {

@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSizeText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getEnabledText;
@@ -22,7 +23,6 @@ import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdatedT
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissionsText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
 
@@ -77,7 +77,7 @@ public class ApplicationInfoAdapter extends RecyclerView.Adapter<ApplicationInfo
                 } else if (this.appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
                     appInfoView.setText(getFirstInstalledText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)) {
-                    appInfoView.setText(getPermissionsText(getPermissions(this.packageManager, applicationInfo, true)));
+                    appInfoView.setText(getPermissions(this.packageManager, applicationInfo, true).stream().collect(Collectors.joining(", ")));
                 } else if (this.appInfoField.equals(AppInfoField.LAST_UPDATED)) {
                     appInfoView.setText(getLastUpdatedText(this.packageManager, applicationInfo));
                 } else if (this.appInfoField.equals(AppInfoField.MIN_SDK)) {
@@ -85,7 +85,7 @@ public class ApplicationInfoAdapter extends RecyclerView.Adapter<ApplicationInfo
                 } else if (this.appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
                     appInfoView.setText(getPackageInstallerName(getPackageInstaller(this.packageManager, applicationInfo)));
                 } else if (this.appInfoField.equals(AppInfoField.REQUESTED_PERMISSIONS)) {
-                    appInfoView.setText(getPermissionsText(getPermissions(this.packageManager, applicationInfo, false)));
+                    appInfoView.setText(getPermissions(this.packageManager, applicationInfo, false).stream().collect(Collectors.joining(", ")));
                 } else if (this.appInfoField.equals(AppInfoField.TARGET_SDK)) {
                     appInfoView.setText(String.valueOf(applicationInfo.targetSdkVersion));
                 } else if (this.appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
