@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -95,11 +94,7 @@ public class ApplicationInfoAdapter extends RecyclerView.Adapter<ApplicationInfo
                     appInfoView.setText(getVersionText(this.packageManager, applicationInfo));
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                if (this.context != null) {
-                    Toast.makeText(holder.iconView.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                } else {
-                    Log.e(TAG, "Unable to set requested text", e);
-                }
+                Log.e(TAG, "Unable to set requested text for " + this.appInfoField + " for app " + applicationInfo.packageName, e);
             }
         }
     }
