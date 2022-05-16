@@ -247,7 +247,7 @@ public class ApplicationInfoUtils {
         }
 
         private void recalculateTotal() {
-            this.totalBytes = this.appBytes + this.cacheBytes + this.dataBytes + this.externalCacheBytes;
+            totalBytes = appBytes + cacheBytes + dataBytes + externalCacheBytes;
         }
     }
 }
