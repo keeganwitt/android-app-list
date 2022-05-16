@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSize;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final String TAG = MainActivity.class.getSimpleName();
     private PackageManager packageManager;
     private final ExecutorService appListLoader = Executors.newSingleThreadExecutor();
+    private Future<?> loaderTask;
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
     private AppInfoAdapter appInfoAdapter;
@@ -142,7 +144,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             recyclerView.setVisibility(View.GONE);
             progressBar.setVisibility(View.VISIBLE);
         });
-        appListLoader.submit(() -> {
+        if (loaderTask != null) {
+            loaderTask.cancel(true);
+        }
+        loaderTask = appListLoader.submit(() -> {
             List<AppInfo> appList;
             if (appInfoAdapter.getCurrentList().isEmpty() || reload) {
                 appList = MainActivity.this.filterNonUserInstalledApplicationInfo(packageManager.getInstalledApplications(PackageManager.GET_META_DATA), appInfoField).stream()
