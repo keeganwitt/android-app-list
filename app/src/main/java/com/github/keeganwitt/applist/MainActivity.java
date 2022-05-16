@@ -140,10 +140,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadApplications(AppInfoField appInfoField, boolean reload) {
-        MainActivity.this.runOnUiThread(() -> {
-            recyclerView.setVisibility(View.GONE);
-            progressBar.setVisibility(View.VISIBLE);
-        });
+        recyclerView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
         if (loaderTask != null) {
             loaderTask.cancel(true);
         }
