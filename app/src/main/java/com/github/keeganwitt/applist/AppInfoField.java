@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist;
 
 public enum AppInfoField {
+    APP_NAME("App Name"),
     APK_SIZE("APK Size"),
     APP_SIZE("App Size"),
     CACHE_SIZE("Cache Size"),

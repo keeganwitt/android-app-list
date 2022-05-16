@@ -42,7 +42,7 @@ import static java.util.Comparator.comparing;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private PackageManager packageManager = null;
+    private PackageManager packageManager;
     private final ExecutorService appListLoader = Executors.newSingleThreadExecutor();
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         packageManager = getPackageManager();
 
         spinner = findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(this);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
                 appInfoFields.stream().map(AppInfoField::getDisplayName).toArray(String[]::new));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
+        spinner.setOnItemSelectedListener(this);
 
         progressBar = findViewById(R.id.progress_bar);
 
@@ -189,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Comparator<AppInfo> comparator = comparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
             comparator = comparing(ai -> -getApkSize(ai.getApplicationInfo()));
+        } else if (appInfoField.equals(AppInfoField.APP_NAME)) {
+            // do nothing, will be sorted by name at the bottom of this method
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getAppBytes());
         } else if (appInfoField.equals(AppInfoField.CACHE_SIZE)) {

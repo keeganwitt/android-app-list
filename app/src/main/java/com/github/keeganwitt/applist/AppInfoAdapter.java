@@ -62,6 +62,12 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
             appNameView.setText(appInfo.getApplicationInfo().loadLabel(packageManager));
 
             try {
+                if (appInfo.getAppInfoField().equals(AppInfoField.APP_NAME)) {
+                    appInfoView.setVisibility(View.INVISIBLE);
+                } else {
+                    appInfoView.setVisibility(View.VISIBLE);
+                }
+
                 if (appInfo.getAppInfoField().equals(AppInfoField.APK_SIZE)) {
                     appInfoView.setText(getApkSizeText(context, appInfo.getApplicationInfo()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.APP_SIZE)) {
