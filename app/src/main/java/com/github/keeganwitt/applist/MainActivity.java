@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.format.Formatter;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -232,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.TARGET_SDK)) {
             comparator = comparing(ai -> ai.getApplicationInfo().targetSdkVersion);
         } else if (appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
-            comparator = comparing(ai -> Formatter.formatShortFileSize(MainActivity.this, getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getTotalBytes()));
+            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getTotalBytes());
         } else if (appInfoField.equals(AppInfoField.VERSION)) {
             comparator = comparing(ai -> {
                 try {
