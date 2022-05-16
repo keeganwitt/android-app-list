@@ -29,6 +29,7 @@ public class ApplicationInfoUtils {
 
     private ApplicationInfoUtils() {}
 
+    @SuppressWarnings("deprecation")
     public static String getPackageInstaller(PackageManager packageManager, ApplicationInfo applicationInfo) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
