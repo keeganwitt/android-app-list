@@ -11,6 +11,7 @@ public enum AppInfoField {
     FIRST_INSTALLED("First Installed"),
     GRANTED_PERMISSIONS("Granted Permissions"),
     LAST_UPDATED("Last Updated"),
+    LAST_USED("Last Used"),
     MIN_SDK("Min SDK"),
     PACKAGE_MANAGER("Package Manager"),
     REQUESTED_PERMISSIONS("Requested Permissions"),

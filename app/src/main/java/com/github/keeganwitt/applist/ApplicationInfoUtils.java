@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist;
 
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -17,15 +18,20 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static android.os.Process.myUserHandle;
 
 public class ApplicationInfoUtils {
     private static final String TAG = ApplicationInfoUtils.class.getSimpleName();
+
+    private static Map<String, Long> lastUsedEpochsCache;
 
     private ApplicationInfoUtils() {}
 
@@ -95,6 +101,34 @@ public class ApplicationInfoUtils {
 
     public static String getLastUpdatedText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
         return getDateFormat().format(getLastUpdated(packageManager, applicationInfo));
+    }
+
+    public static Date getLastUsed(UsageStatsManager usageStatsManager, ApplicationInfo applicationInfo, boolean reload) {
+        Map<String, Long> lastUsedEpochs = getLastUsedEpochs(usageStatsManager, reload);
+        Long epoch = lastUsedEpochs.getOrDefault(applicationInfo.packageName, 0L);
+        return new Date(epoch == null ? 0L : epoch);
+    }
+
+    public static String getLastUsedText(UsageStatsManager usageStatsManager, ApplicationInfo applicationInfo, boolean reload) {
+        Date lastUsed = getLastUsed(usageStatsManager, applicationInfo, reload);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -2);
+        if (lastUsed.before(calendar.getTime())) {
+            return "Unknown";
+        }
+        return getDateFormat().format(lastUsed);
+    }
+
+    private static Map<String, Long> getLastUsedEpochs(UsageStatsManager usageStatsManager, boolean reload) {
+        if (lastUsedEpochsCache == null || reload) {
+            Calendar calendar = Calendar.getInstance();
+            long endTime = calendar.getTimeInMillis();
+            calendar.add(Calendar.YEAR, -2);
+            long startTime = calendar.getTimeInMillis();
+            lastUsedEpochsCache = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime).entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getLastTimeUsed()));
+        }
+        return lastUsedEpochsCache;
     }
 
     public static String getVersionText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {

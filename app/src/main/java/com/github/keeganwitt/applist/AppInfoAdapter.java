@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist;
 
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.format.Formatter;
@@ -21,6 +22,7 @@ import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSizeText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getEnabledText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalledText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdatedText;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsedText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
@@ -32,12 +34,14 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
     private final Context context;
     private final OnClickListener onClickListener;
     private final PackageManager packageManager;
+    private final UsageStatsManager usageStatsManager;
 
-    public AppInfoAdapter(Context context, OnClickListener onClickListener) {
+    public AppInfoAdapter(Context context, UsageStatsManager usageStatsManager, OnClickListener onClickListener) {
         super(new AsyncDifferConfig.Builder<>(new DiffCallback()).build());
         this.context = context;
         this.onClickListener = onClickListener;
         this.packageManager = context.getPackageManager();
+        this.usageStatsManager = usageStatsManager;
     }
 
     @NonNull
@@ -86,6 +90,8 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
                     appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), true).stream().collect(Collectors.joining(", ")));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_UPDATED)) {
                     appInfoView.setText(getLastUpdatedText(packageManager, appInfo.getApplicationInfo()));
+                } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_USED)) {
+                    appInfoView.setText(getLastUsedText(usageStatsManager, appInfo.getApplicationInfo(), false));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.MIN_SDK)) {
                     appInfoView.setText(String.valueOf(appInfo.getApplicationInfo().minSdkVersion));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.PACKAGE_MANAGER)) {

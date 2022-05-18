@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist;
 
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSize;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalled;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdated;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsed;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
@@ -41,6 +43,7 @@ import static java.util.Comparator.comparing;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private PackageManager packageManager;
+    private UsageStatsManager usageStatsManager;
     private final ExecutorService appListLoader = Executors.newSingleThreadExecutor();
     private Future<?> loaderTask;
     private List<AppInfoField> appInfoFields;
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         appInfoFields = Arrays.asList(AppInfoField.values());
         packageManager = getPackageManager();
+        usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         spinner = findViewById(R.id.spinner);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(layoutManager);
-        appInfoAdapter = new AppInfoAdapter(MainActivity.this, this);
+        appInfoAdapter = new AppInfoAdapter(MainActivity.this, usageStatsManager, this);
         recyclerView.setAdapter(appInfoAdapter);
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -143,10 +147,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             List<AppInfo> appList;
             if (appInfoAdapter.getCurrentList().isEmpty() || reload) {
                 appList = MainActivity.this.filterNonUserInstalledApplicationInfo(packageManager.getInstalledApplications(PackageManager.GET_META_DATA), appInfoField).stream()
+                        .peek(it -> {
+                            if (appInfoField.equals(AppInfoField.LAST_USED)) {
+                                it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), reload));
+                            }
+                        })
                         .sorted(determineComparator(packageManager, appInfoField))
                         .collect(Collectors.toList());
             } else {
                 appList = MainActivity.this.filterNonUserInstalledAppInfo(appInfoAdapter.getCurrentList(), appInfoField).stream()
+                        .peek(it -> {
+                            if (appInfoField.equals(AppInfoField.LAST_USED)) {
+                                it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), false));
+                            }
+                        })
                         .sorted(determineComparator(packageManager, appInfoField))
                         .collect(Collectors.toList());
             }
@@ -213,6 +227,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     return 0L;
                 }
             });
+        } else if (appInfoField.equals(AppInfoField.LAST_USED)) {
+            comparator = comparing(ai -> -getLastUsed(usageStatsManager, ai.getApplicationInfo(), false).getTime());
         } else if (appInfoField.equals(AppInfoField.MIN_SDK)) {
             comparator = comparing(ai -> ai.getApplicationInfo().minSdkVersion);
         } else if (appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
