@@ -4,17 +4,14 @@ plugins {
 
 android {
     compileSdk 31
-
     defaultConfig {
         applicationId "com.github.keeganwitt.applist"
         minSdk 24
         targetSdk 30
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -24,6 +21,17 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    signingConfigs {
+        sign_platform {
+            keyPassword 'android'
+            storeFile file('platform.keystore')
+            storePassword 'android'
+            keyAlias 'platform'
+        }
+    }
+    defaultConfig {
+        signingConfig signingConfigs.sign_platform
     }
 }
 

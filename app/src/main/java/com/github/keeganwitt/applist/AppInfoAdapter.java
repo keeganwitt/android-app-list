@@ -27,6 +27,7 @@ import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInsta
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getUnusedAppRestrictionsStatusText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
 
 public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoViewHolder> {
@@ -102,6 +103,8 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
                     appInfoView.setText(String.valueOf(appInfo.getApplicationInfo().targetSdkVersion));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.TOTAL_SIZE)) {
                     appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getTotalBytes()));
+                } else if (appInfo.getAppInfoField().equals(AppInfoField.UNUSED_APP_RESTRICTIONS_STATUS)) {
+                    appInfoView.setText(getUnusedAppRestrictionsStatusText(packageManager, appInfo.getApplicationInfo()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.VERSION)) {
                     appInfoView.setText(getVersionText(packageManager, appInfo.getApplicationInfo()));
                 }

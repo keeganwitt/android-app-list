@@ -109,14 +109,12 @@ public class ApplicationInfoUtils {
         return new Date(epoch == null ? 0L : epoch);
     }
 
-    public static String getLastUsedText(UsageStatsManager usageStatsManager, ApplicationInfo applicationInfo, boolean reload) {
-        Date lastUsed = getLastUsed(usageStatsManager, applicationInfo, reload);
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.YEAR, -2);
-        if (lastUsed.before(calendar.getTime())) {
-            return "Unknown";
-        }
-        return getDateFormat().format(lastUsed);
+    public static long getApkSize(ApplicationInfo applicationInfo) {
+        return new File(applicationInfo.publicSourceDir).length();
+    }
+
+    public static String getApkSizeText(Context context, ApplicationInfo applicationInfo) {
+        return Formatter.formatShortFileSize(context, getApkSize(applicationInfo));
     }
 
     private static Map<String, Long> getLastUsedEpochs(UsageStatsManager usageStatsManager, boolean reload) {
@@ -131,8 +129,14 @@ public class ApplicationInfoUtils {
         return lastUsedEpochsCache;
     }
 
-    public static String getVersionText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
-        return getPackageInfo(packageManager, applicationInfo).versionName;
+    public static String getLastUsedText(UsageStatsManager usageStatsManager, ApplicationInfo applicationInfo, boolean reload) {
+        Date lastUsed = getLastUsed(usageStatsManager, applicationInfo, reload);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -2);
+        if (lastUsed.before(calendar.getTime())) {
+            return "Unknown";
+        }
+        return getDateFormat().format(lastUsed);
     }
 
     public static List<String> getPermissions(PackageManager packageManager, ApplicationInfo applicationInfo, boolean grantedPermissionsOnly) throws PackageManager.NameNotFoundException {
@@ -151,14 +155,6 @@ public class ApplicationInfoUtils {
             permissions.add(requestedPermission);
         }
         return permissions;
-    }
-
-    public static long getApkSize(ApplicationInfo applicationInfo) {
-        return new File(applicationInfo.publicSourceDir).length();
-    }
-
-    public static String getApkSizeText(Context context, ApplicationInfo applicationInfo) {
-        return Formatter.formatShortFileSize(context, getApkSize(applicationInfo));
     }
 
     public static StorageUsage getStorageUsage(Context context, ApplicationInfo applicationInfo) {
@@ -196,12 +192,24 @@ public class ApplicationInfoUtils {
         return storageUsage;
     }
 
-    private static PackageInfo getPackageInfo(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
-        return packageManager.getPackageInfo(applicationInfo.packageName, PackageManager.GET_PERMISSIONS);
+    public static String getUnusedAppRestrictionsStatusText(PackageManager packageManager, ApplicationInfo applicationInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return packageManager.isAutoRevokeWhitelisted (applicationInfo.packageName) ? "Enabled" : "Disabled";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static String getVersionText(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
+        return getPackageInfo(packageManager, applicationInfo).versionName;
     }
 
     private static DateFormat getDateFormat() {
         return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
+    }
+
+    private static PackageInfo getPackageInfo(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
+        return packageManager.getPackageInfo(applicationInfo.packageName, PackageManager.GET_PERMISSIONS);
     }
 
     public static class StorageUsage {

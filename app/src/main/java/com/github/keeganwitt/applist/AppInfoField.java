@@ -18,6 +18,7 @@ public enum AppInfoField {
     REQUESTED_PERMISSIONS("Requested Permissions"),
     TARGET_SDK("Target SDK"),
     TOTAL_SIZE("Total Size"),
+    UNUSED_APP_RESTRICTIONS_STATUS("Unused app restrictions status"),
     VERSION("Version");
 
     private final String displayName;

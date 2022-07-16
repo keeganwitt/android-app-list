@@ -10,6 +10,9 @@
   <uses-permission
     android:name="android.permission.PACKAGE_USAGE_STATS"
     tools:ignore="ProtectedPermissions" />
+  <permission
+    android:name="android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS"
+    android:protectionLevel="signature" />
 
   <application
     android:allowBackup="true"

@@ -246,6 +246,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             comparator = comparing(ai -> ai.getApplicationInfo().targetSdkVersion);
         } else if (appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getTotalBytes());
+        } else if (appInfoField.equals(AppInfoField.UNUSED_APP_RESTRICTIONS_STATUS)) {
+            comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.VERSION)) {
             comparator = comparing(ai -> {
                 try {
