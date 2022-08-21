@@ -105,6 +105,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         loadSelection(0);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // reload true in case application was uninstalled from application info
+        // TODO: reload only selected item instead of entire list
+        loadApplications(selectedAppInfoField, true);
+    }
+
     private void loadSelection(int position) {
         selectedAppInfoField = appInfoFields.get(position);
         if ((selectedAppInfoField.equals(AppInfoField.CACHE_SIZE)
