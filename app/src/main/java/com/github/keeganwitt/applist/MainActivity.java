@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onResume() {
         super.onResume();
-        // reload true in case application was uninstalled from application info
+        // reload true in case application was changed (permission changed, enabled, uninstalled, etc) from application info
         // TODO: reload only selected item instead of entire list
         loadApplications(selectedAppInfoField, true);
     }
