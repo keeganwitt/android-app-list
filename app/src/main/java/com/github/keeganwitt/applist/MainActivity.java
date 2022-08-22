@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onClick(int position) {
         AppInfo app = appInfoAdapter.getCurrentList().get(position);
         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setData(Uri.parse("package:" + app.getApplicationInfo().packageName));
         startActivity(intent);
         // TODO: reload selected app when user comes back to main activity
