@@ -144,6 +144,9 @@ public class ApplicationInfoUtils {
         }
         for (int i = 0; i < requestedPermissions.length; i++) {
             String requestedPermission = requestedPermissions[i];
+            if (!requestedPermission.startsWith("android.permission")) {
+                continue;
+            }
             boolean granted = (packageInfo.requestedPermissionsFlags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0;
             if (grantedPermissionsOnly && !granted) {
                 continue;
