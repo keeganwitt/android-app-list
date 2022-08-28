@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS) || appInfoField.equals(AppInfoField.REQUESTED_PERMISSIONS)) {
             comparator = comparing(ai -> {
                 try {
-                    return getPermissions(packageManager, ai.getApplicationInfo(), appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)).size();
+                    return -getPermissions(packageManager, ai.getApplicationInfo(), appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)).size();
                 } catch (NullPointerException | PackageManager.NameNotFoundException e) {
                     return 0;
                 }
