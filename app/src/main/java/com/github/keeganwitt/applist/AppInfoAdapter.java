@@ -87,7 +87,8 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.FIRST_INSTALLED)) {
                     appInfoView.setText(getFirstInstalledText(packageManager, appInfo.getApplicationInfo()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.GRANTED_PERMISSIONS)) {
-                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), true).stream().collect(Collectors.joining(", ")));
+//                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), true).stream().collect(Collectors.joining(", ")));
+                    appInfoView.setText(String.valueOf(getPermissions(packageManager, appInfo.getApplicationInfo(), true).size()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_UPDATED)) {
                     appInfoView.setText(getLastUpdatedText(packageManager, appInfo.getApplicationInfo()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_USED)) {
@@ -97,7 +98,8 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.PACKAGE_MANAGER)) {
                     appInfoView.setText(getPackageInstallerName(getPackageInstaller(packageManager, appInfo.getApplicationInfo())));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.REQUESTED_PERMISSIONS)) {
-                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), false).stream().collect(Collectors.joining(", ")));
+//                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), false).stream().collect(Collectors.joining(", ")));
+                    appInfoView.setText(String.valueOf(getPermissions(packageManager, appInfo.getApplicationInfo(), false).size()));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.TARGET_SDK)) {
                     appInfoView.setText(String.valueOf(appInfo.getApplicationInfo().targetSdkVersion));
                 } else if (appInfo.getAppInfoField().equals(AppInfoField.TOTAL_SIZE)) {
