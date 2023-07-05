@@ -1,23 +1,5 @@
 package com.github.keeganwitt.applist;
 
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.text.format.Formatter;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.AsyncDifferConfig;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.stream.Collectors;
-
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSizeText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getEnabledText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalledText;
@@ -28,6 +10,23 @@ import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInsta
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
+
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.text.format.Formatter;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.AsyncDifferConfig;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoViewHolder> {
     private static final String TAG = AppInfoAdapter.class.getSimpleName();
@@ -117,7 +116,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
         void onClick(int position);
     }
 
-    public class AppInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class AppInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iconView;
         TextView appNameView;
         TextView packageNameView;
@@ -139,7 +138,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
         }
     }
 
-    public static class DiffCallback extends DiffUtil.ItemCallback<AppInfo> {
+    private static class DiffCallback extends DiffUtil.ItemCallback<AppInfo> {
         @Override
         public boolean areItemsTheSame(@NonNull AppInfo oldItem, @NonNull AppInfo newItem) {
             return oldItem.getApplicationInfo().packageName.equals(newItem.getApplicationInfo().packageName);

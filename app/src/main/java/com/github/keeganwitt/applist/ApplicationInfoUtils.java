@@ -1,5 +1,7 @@
 package com.github.keeganwitt.applist;
 
+import static android.os.Process.myUserHandle;
+
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
@@ -25,8 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static android.os.Process.myUserHandle;
 
 public class ApplicationInfoUtils {
     private static final String TAG = ApplicationInfoUtils.class.getSimpleName();
@@ -207,7 +207,7 @@ public class ApplicationInfoUtils {
         return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
     }
 
-    public static class StorageUsage {
+    protected static class StorageUsage {
         private long appBytes;
         private long cacheBytes;
         private long dataBytes;
