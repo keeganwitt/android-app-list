@@ -216,6 +216,7 @@ public class ApplicationInfoUtils {
 
         public StorageUsage() {}
 
+        @SuppressWarnings("unused")
         public StorageUsage(long appBytes, long cacheBytes, long dataBytes, long externalCacheBytes) {
             this.appBytes = appBytes;
             this.cacheBytes = cacheBytes;
@@ -228,11 +229,13 @@ public class ApplicationInfoUtils {
             return appBytes;
         }
 
+        @SuppressWarnings("unused")
         public void setAppBytes(long appBytes) {
             this.appBytes = appBytes;
             recalculateTotal();
         }
 
+        @SuppressWarnings("unused")
         public void incrementAppBytes(long appBytes) {
             this.appBytes += appBytes;
             recalculateTotal();
@@ -242,11 +245,13 @@ public class ApplicationInfoUtils {
             return cacheBytes;
         }
 
+        @SuppressWarnings("unused")
         public void setCacheBytes(long cacheBytes) {
             this.cacheBytes = cacheBytes;
             recalculateTotal();
         }
 
+        @SuppressWarnings("unused")
         public void incrementCacheBytes(long cacheBytes) {
             this.cacheBytes += cacheBytes;
             recalculateTotal();
@@ -256,6 +261,7 @@ public class ApplicationInfoUtils {
             return dataBytes;
         }
 
+        @SuppressWarnings("unused")
         public void setDataBytes(long dataBytes) {
             this.dataBytes = dataBytes;
             recalculateTotal();
@@ -270,6 +276,7 @@ public class ApplicationInfoUtils {
             return externalCacheBytes;
         }
 
+        @SuppressWarnings("unused")
         public void setExternalCacheBytes(long externalCacheBytes) {
             this.externalCacheBytes = externalCacheBytes;
             recalculateTotal();

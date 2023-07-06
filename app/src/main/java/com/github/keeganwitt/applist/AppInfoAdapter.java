@@ -116,10 +116,15 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
         void onClick(int position);
     }
 
+    @SuppressWarnings("RedundantSuppression")
     protected class AppInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
         ImageView iconView;
+        @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
         TextView appNameView;
+        @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
         TextView packageNameView;
+        @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
         TextView appInfoView;
 
         public AppInfoViewHolder(@NonNull View itemView) {
@@ -146,8 +151,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
 
         @Override
         public boolean areContentsTheSame(@NonNull AppInfo oldItem, @NonNull AppInfo newItem) {
-            return oldItem.getApplicationInfo().packageName.equals(newItem.getApplicationInfo().packageName)
-                    && oldItem.getAppInfoField().equals(newItem.getAppInfoField());
+            return oldItem.getAppInfoField().equals(newItem.getAppInfoField());
         }
     }
 }

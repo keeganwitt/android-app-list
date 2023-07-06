@@ -1,6 +1,16 @@
 package com.github.keeganwitt.applist;
 
-import android.annotation.SuppressLint;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSize;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalled;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdated;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsed;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
+import static java.util.Comparator.comparing;
+
 import android.app.AppOpsManager;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -15,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,18 +40,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSize;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalled;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdated;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsed;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
-import static java.util.Comparator.comparing;
-
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
+    @SuppressWarnings("unused")
     private static final String TAG = MainActivity.class.getSimpleName();
     private PackageManager packageManager;
     private UsageStatsManager usageStatsManager;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
     private AppInfoAdapter appInfoAdapter;
+    @SuppressWarnings("FieldCanBeLocal")
     private Spinner spinner;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -126,17 +128,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         loadApplications(selectedAppInfoField, false);
     }
 
-    private List<AppInfo> filterNonUserInstalledAppInfo(List<AppInfo> list, AppInfoField appInfoField) {
-        return filterNonUserInstalledApplicationInfo(list.stream().map(AppInfo::getApplicationInfo).collect(Collectors.toList()), appInfoField);
-    }
-
-    private List<AppInfo> filterNonUserInstalledApplicationInfo(List<ApplicationInfo> list, AppInfoField appInfoField) {
+    private List<AppInfo> filterNonUserInstalledAppInfo(List<AppInfo> list) {
         ArrayList<AppInfo> appList = new ArrayList<>();
-        for (ApplicationInfo info : list) {
+        for (AppInfo info : list) {
             try {
                 // TODO: let user choose between system and user apps
-                if (packageManager.getLaunchIntentForPackage(info.packageName) != null && isUserInstalledApp(info)) {
-                    appList.add(new AppInfo(info, appInfoField));
+                if (packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null && isUserInstalledApp(info.getApplicationInfo())) {
+                    appList.add(info);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return appList;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void loadApplications(AppInfoField appInfoField, boolean reload) {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
@@ -155,25 +152,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         loaderTask = appListLoader.submit(() -> {
             List<AppInfo> appList;
-            if (appInfoAdapter.getCurrentList().isEmpty() || reload) {
-                appList = MainActivity.this.filterNonUserInstalledApplicationInfo(packageManager.getInstalledApplications(PackageManager.GET_META_DATA), appInfoField).stream()
-                        .peek(it -> {
-                            if (appInfoField.equals(AppInfoField.LAST_USED)) {
-                                it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), reload));
-                            }
-                        })
-                        .sorted(determineComparator(packageManager, appInfoField))
-                        .collect(Collectors.toList());
-            } else {
-                appList = MainActivity.this.filterNonUserInstalledAppInfo(appInfoAdapter.getCurrentList(), appInfoField).stream()
-                        .peek(it -> {
-                            if (appInfoField.equals(AppInfoField.LAST_USED)) {
-                                it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), false));
-                            }
-                        })
-                        .sorted(determineComparator(packageManager, appInfoField))
-                        .collect(Collectors.toList());
-            }
+            appList = MainActivity.this.filterNonUserInstalledAppInfo(packageManager.getInstalledApplications(PackageManager.GET_META_DATA).stream()
+                            .map(it -> new AppInfo(it, appInfoField))
+                            .collect(Collectors.toList())).stream()
+                    .peek(it -> {
+                        if (appInfoField.equals(AppInfoField.LAST_USED)) {
+                            it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), reload));
+                        }
+                    })
+                    .sorted(determineComparator(packageManager, appInfoField))
+                    .collect(Collectors.toList());
+
             MainActivity.this.runOnUiThread(() -> {
                 appInfoAdapter.submitList(appList);
                 progressBar.setVisibility(View.GONE);
@@ -186,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1;
     }
 
-    @SuppressWarnings("deprecation")
     private boolean hasUsageStatsPermission() {
         AppOpsManager appOps = (AppOpsManager) MainActivity.this.getSystemService(Context.APP_OPS_SERVICE);
         int mode;
@@ -205,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         startActivity(intent);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     private Comparator<AppInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
         Comparator<AppInfo> comparator = comparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {

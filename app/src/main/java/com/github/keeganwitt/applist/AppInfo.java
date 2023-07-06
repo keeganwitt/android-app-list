@@ -5,13 +5,10 @@ import android.content.pm.ApplicationInfo;
 import java.util.Date;
 
 public class AppInfo {
+    @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
     private ApplicationInfo applicationInfo;
     private AppInfoField appInfoField;
     private Date lastUsed;
-
-    public AppInfo(ApplicationInfo applicationInfo) {
-        this.applicationInfo = applicationInfo;
-    }
 
     public AppInfo(ApplicationInfo applicationInfo, AppInfoField appInfoField) {
         this.applicationInfo = applicationInfo;
@@ -26,10 +23,7 @@ public class AppInfo {
         return appInfoField;
     }
 
-    public void setAppInfoField(AppInfoField appInfoField) {
-        this.appInfoField = appInfoField;
-    }
-
+    @SuppressWarnings("unused")
     public Date getLastUsed() {
         return lastUsed;
     }
