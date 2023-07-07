@@ -4,6 +4,14 @@
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
+  <item
+      android:id="@+id/systemAppToggleTitle"
+      app:showAsAction="always"
+      android:title="@string/systemAppToggle" />
+  <item android:id="@+id/systemAppToggle"
+      android:title="@string/systemAppToggle"
+      app:actionViewClass="com.google.android.material.switchmaterial.SwitchMaterial"
+      app:showAsAction="ifRoom" />
   <item android:id="@+id/search"
     android:title="@string/search"
     android:icon="@drawable/ic_search"

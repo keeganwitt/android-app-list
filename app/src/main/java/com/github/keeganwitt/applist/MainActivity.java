@@ -36,6 +36,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.switchmaterial.SwitchMaterial;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
+    private boolean showSystemApps = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,8 +100,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.app_menu, menu);
-        MenuItem menuItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) menuItem.getActionView();
+
+        MenuItem systemAppToggleItem = menu.findItem(R.id.systemAppToggle);
+        SwitchMaterial switchMaterial = (SwitchMaterial) systemAppToggleItem.getActionView();
+        switchMaterial.setOnClickListener(v -> {
+            showSystemApps = !showSystemApps;
+            loadApplications(selectedAppInfoField, true);
+        });
+
+        MenuItem searchItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -111,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 return true;
             }
         });
+
         return true;
     }
 
@@ -121,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setData(Uri.parse("package:" + app.getApplicationInfo().packageName));
         startActivity(intent);
-        // TODO: reload selected app when user comes back to main activity
     }
 
     @Override
@@ -154,12 +165,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         loadApplications(selectedAppInfoField, false);
     }
 
-    private List<AppInfo> filterNonUserInstalledAppInfo(List<AppInfo> list) {
+    private List<AppInfo> filterUserOrSystemApps(List<AppInfo> list) {
         ArrayList<AppInfo> appList = new ArrayList<>();
         for (AppInfo info : list) {
             try {
-                // TODO: let user choose between system and user apps
-                if (packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null && isUserInstalledApp(info.getApplicationInfo())) {
+                if (packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null
+                        && ((!showSystemApps && isUserInstalledApp(info.getApplicationInfo()))
+                        || (showSystemApps && !isUserInstalledApp(info.getApplicationInfo())))) {
                     appList.add(info);
                 }
             } catch (Exception e) {
@@ -178,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         loaderTask = appListLoader.submit(() -> {
             List<AppInfo> appList;
-            appList = MainActivity.this.filterNonUserInstalledAppInfo(packageManager.getInstalledApplications(PackageManager.GET_META_DATA).stream()
+            appList = MainActivity.this.filterUserOrSystemApps(packageManager.getInstalledApplications(PackageManager.GET_META_DATA).stream()
                             .map(it -> new AppInfo(it, appInfoField))
                             .collect(Collectors.toList())).stream()
                     .peek(it -> {
