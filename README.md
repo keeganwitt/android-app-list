@@ -1,4 +1,4 @@
-# AppList
+# App List
 
 The intent of this app is to list a certain piece of application info across all apps, to see that information at a glance.
 Some of the useful things that can be displayed are
