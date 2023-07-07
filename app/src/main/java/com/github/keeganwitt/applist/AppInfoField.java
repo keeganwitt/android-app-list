@@ -1,7 +1,7 @@
 package com.github.keeganwitt.applist;
 
 public enum AppInfoField {
-    // TODO: how to have APP_NAME as default without having to be first in the enum?
+    // APP_NAME is first so it is the default
     APP_NAME("App Name"),
     APK_SIZE("APK Size"),
     APP_SIZE("App Size"),
