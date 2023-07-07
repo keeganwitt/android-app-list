@@ -20,13 +20,18 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -86,6 +91,27 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             loadApplications(selectedAppInfoField, true);
             swipeRefreshLayout.setRefreshing(false);
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.app_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                appInfoAdapter.getFilter().filter(query);
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String query) {
+                appInfoAdapter.getFilter().filter(query);
+                return true;
+            }
+        });
+        return true;
     }
 
     @Override
@@ -162,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     })
                     .sorted(determineComparator(packageManager, appInfoField))
                     .collect(Collectors.toList());
-
+            appInfoAdapter.setUnfilteredList(appList);
             MainActivity.this.runOnUiThread(() -> {
                 appInfoAdapter.submitList(appList);
                 progressBar.setVisibility(View.GONE);

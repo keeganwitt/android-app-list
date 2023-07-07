@@ -1,24 +1,14 @@
 package com.github.keeganwitt.applist;
 
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSizeText;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getEnabledText;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalledText;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdatedText;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsedText;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstaller;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPackageInstallerName;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getPermissions;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getStorageUsage;
-import static com.github.keeganwitt.applist.ApplicationInfoUtils.getVersionText;
-
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,12 +18,17 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoViewHolder> {
+import java.util.ArrayList;
+import java.util.List;
+
+public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoViewHolder> implements Filterable {
     private static final String TAG = AppInfoAdapter.class.getSimpleName();
     private final Context context;
     private final OnClickListener onClickListener;
     private final PackageManager packageManager;
     private final UsageStatsManager usageStatsManager;
+    private final ApplicationInfoFilter applicationInfoFilter;
+    private List<AppInfo> unfilteredList;
 
     public AppInfoAdapter(Context context, UsageStatsManager usageStatsManager, OnClickListener onClickListener) {
         super(new AsyncDifferConfig.Builder<>(new DiffCallback()).build());
@@ -41,6 +36,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
         this.onClickListener = onClickListener;
         this.packageManager = context.getPackageManager();
         this.usageStatsManager = usageStatsManager;
+        this.applicationInfoFilter = new ApplicationInfoFilter();
     }
 
     @NonNull
@@ -65,51 +61,20 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
             appNameView.setText(appInfo.getApplicationInfo().loadLabel(packageManager));
 
             try {
-                if (appInfo.getAppInfoField().equals(AppInfoField.APP_NAME)) {
-                    appInfoView.setVisibility(View.INVISIBLE);
-                } else {
-                    appInfoView.setVisibility(View.VISIBLE);
-                }
-
-                if (appInfo.getAppInfoField().equals(AppInfoField.APK_SIZE)) {
-                    appInfoView.setText(getApkSizeText(context, appInfo.getApplicationInfo()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.APP_SIZE)) {
-                    appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getAppBytes()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.CACHE_SIZE)) {
-                    appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getCacheBytes()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.DATA_SIZE)) {
-                    appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getDataBytes()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.ENABLED)) {
-                    appInfoView.setText(getEnabledText(appInfo.getApplicationInfo()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
-                    appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getExternalCacheBytes()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.FIRST_INSTALLED)) {
-                    appInfoView.setText(getFirstInstalledText(packageManager, appInfo.getApplicationInfo()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.GRANTED_PERMISSIONS)) {
-//                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), true).stream().collect(Collectors.joining(", ")));
-                    appInfoView.setText(String.valueOf(getPermissions(packageManager, appInfo.getApplicationInfo(), true).size()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_UPDATED)) {
-                    appInfoView.setText(getLastUpdatedText(packageManager, appInfo.getApplicationInfo()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.LAST_USED)) {
-                    appInfoView.setText(getLastUsedText(usageStatsManager, appInfo.getApplicationInfo(), false));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.MIN_SDK)) {
-                    appInfoView.setText(String.valueOf(appInfo.getApplicationInfo().minSdkVersion));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.PACKAGE_MANAGER)) {
-                    appInfoView.setText(getPackageInstallerName(getPackageInstaller(packageManager, appInfo.getApplicationInfo())));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.REQUESTED_PERMISSIONS)) {
-//                    appInfoView.setText(getPermissions(packageManager, appInfo.getApplicationInfo(), false).stream().collect(Collectors.joining(", ")));
-                    appInfoView.setText(String.valueOf(getPermissions(packageManager, appInfo.getApplicationInfo(), false).size()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.TARGET_SDK)) {
-                    appInfoView.setText(String.valueOf(appInfo.getApplicationInfo().targetSdkVersion));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.TOTAL_SIZE)) {
-                    appInfoView.setText(Formatter.formatShortFileSize(context, getStorageUsage(context, appInfo.getApplicationInfo()).getTotalBytes()));
-                } else if (appInfo.getAppInfoField().equals(AppInfoField.VERSION)) {
-                    appInfoView.setText(getVersionText(packageManager, appInfo.getApplicationInfo()));
-                }
+                appInfoView.setText(appInfo.getTextValue(context, packageManager, usageStatsManager));
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Unable to set requested text for " + appInfo.getAppInfoField() + " for app " + appInfo.getApplicationInfo().packageName, e);
             }
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return applicationInfoFilter;
+    }
+
+    public void setUnfilteredList(List<AppInfo> appList) {
+        this.unfilteredList = appList;
     }
 
     public interface OnClickListener {
@@ -152,6 +117,41 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
         @Override
         public boolean areContentsTheSame(@NonNull AppInfo oldItem, @NonNull AppInfo newItem) {
             return oldItem.getAppInfoField().equals(newItem.getAppInfoField());
+        }
+    }
+
+    class ApplicationInfoFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<AppInfo> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(unfilteredList);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (AppInfo item : AppInfoAdapter.this.getCurrentList()) {
+                    String packageName = String.valueOf(item.getApplicationInfo().loadLabel(packageManager)).toLowerCase();
+                    String textValue;
+                    try {
+                        textValue = item.getTextValue(context, packageManager, usageStatsManager);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(TAG, "Unable to calculate text value for search", e);
+                        textValue = "";
+                    }
+                    if (packageName.contains(filterPattern) || textValue.toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.count = filteredList.size();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            submitList((List<AppInfo>) results.values);
         }
     }
 }
