@@ -8,5 +8,5 @@ Some of the useful things that can be displayed are
 * The number of requested/granted permissions
 * Whether the app is enabled
 
-<img src="screenshot-1.png" alt="Screenshot 1" width="300"/>
-<img src="screenshot-2.png" alt="Screenshot 2" width="300"/>
+<img src="images/screenshot-1.png" alt="Screenshot 1" width="300"/>
+<img src="images/screenshot-2.png" alt="Screenshot 2" width="300"/>
