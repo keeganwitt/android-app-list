@@ -2,11 +2,11 @@
 /local.properties
 /.idea/
 .DS_Store
-/build
+/build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
 /.vscode/
-/app/release/app-release.aab
+/app/release/
 /store-listing.txt
