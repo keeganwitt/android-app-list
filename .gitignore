@@ -8,3 +8,5 @@
 .cxx
 local.properties
 /.vscode/
+/app/release/app-release.aab
+/store-listing.txt
