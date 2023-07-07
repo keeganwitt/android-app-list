@@ -52,6 +52,9 @@ public class ApplicationInfoUtils {
     public static String getPackageInstallerName(String installerPackageName) {
         if ("com.amazon.venezia".equals(installerPackageName)) {
             return "Amazon Appstore";
+        } else if ("com.google.android.packageinstaller".equals(installerPackageName)) {
+            // note: F-Droid also currently shows this package manager
+            return "APK";
         } else if ("cm.aptoide.pt".equals(installerPackageName)) {
             return "Aptoide";
         } else if ("net.rim.bb.appworld".equals(installerPackageName)) {
