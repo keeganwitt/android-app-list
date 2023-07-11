@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">एप्लिकेशन चिह्न</string>
+  <string name="search">खोज</string>
+  <string name="systemAppToggle">सिस्टम अनुप्रयोग</string>
+  <string name="appInfoField_appName">आवेदन का नाम</string>
+  <string name="appInfoField_apkSize">एपीके आकार</string>
+  <string name="appInfoField_appSize">आवेदन का आकार</string>
+  <string name="appInfoField_cacheSize">कैचे आकार</string>
+  <string name="appInfoField_dataSize">डेटा का आकार</string>
+  <string name="appInfoField_enabled">सक्रिय</string>
+  <string name="appInfoField_externalCacheSize">बाहरी कैश आकार</string>
+  <string name="appInfoField_firstInstalled">प्रथम स्थापित</string>
+  <string name="appInfoField_grantedPermissions">अनुमतियाँ प्रदान की गईं</string>
+  <string name="appInfoField_lastUpdated">आखरी अपडेट</string>
+  <string name="appInfoField_lastUsed">अंतिम समय प्रयोग हुआ</string>
+  <string name="appInfoField_minSdk">न्यूनतम सॉफ़्टवेयर विकास किट संस्करण</string>
+  <string name="appInfoField_packageManager">पैकेज प्रबंधक</string>
+  <string name="appInfoField_requestedPermissions">अनुरोधित अनुमतियाँ</string>
+  <string name="appInfoField_targetSdk">लक्ष्य एसडीके संस्करण</string>
+  <string name="appInfoField_totalSize">कुल आकार</string>
+  <string name="appInfoField_version">संस्करण</string>
+  <string name="enabled">सक्रिय</string>
+  <string name="disabled">अक्षम</string>
+
+</resources>

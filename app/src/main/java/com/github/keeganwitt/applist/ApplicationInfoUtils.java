@@ -86,8 +86,8 @@ public class ApplicationInfoUtils {
         }
     }
 
-    public static String getEnabledText(ApplicationInfo applicationInfo) {
-        return applicationInfo.enabled ? "Enabled" : "Disabled";
+    public static String getEnabledText(Context context, ApplicationInfo applicationInfo) {
+        return applicationInfo.enabled ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
     }
 
     public static Date getFirstInstalled(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {

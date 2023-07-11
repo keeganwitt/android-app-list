@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">أيقونة التطبيق</string>
+  <string name="search">يبحث</string>
+  <string name="systemAppToggle">تطبيقات النظام</string>
+  <string name="appInfoField_appName">اسم التطبيق</string>
+  <string name="appInfoField_apkSize">حجم APK</string>
+  <string name="appInfoField_appSize">حجم التطبيق</string>
+  <string name="appInfoField_cacheSize">حجم ذاكرة التخزين المؤقت</string>
+  <string name="appInfoField_dataSize">حجم البيانات</string>
+  <string name="appInfoField_enabled">ممكن</string>
+  <string name="appInfoField_externalCacheSize">حجم ذاكرة التخزين المؤقت الخارجية</string>
+  <string name="appInfoField_firstInstalled">أول تثبيت</string>
+  <string name="appInfoField_grantedPermissions">الأذونات الممنوحة</string>
+  <string name="appInfoField_lastUpdated">آخر تحديث</string>
+  <string name="appInfoField_lastUsed">آخر أستخدام</string>
+  <string name="appInfoField_minSdk">الحد الأدنى من إصدار مجموعة تطوير البرامج</string>
+  <string name="appInfoField_packageManager">مدير مجموعة</string>
+  <string name="appInfoField_requestedPermissions">الأذونات المطلوبة</string>
+  <string name="appInfoField_targetSdk">إصدار مجموعة أدوات تطوير البرامج الهدف</string>
+  <string name="appInfoField_totalSize">الحجم الإجمالي</string>
+  <string name="appInfoField_version">إصدار</string>
+  <string name="enabled">ممكن</string>
+  <string name="disabled">عاجز</string>
+
+</resources>

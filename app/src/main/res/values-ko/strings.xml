@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">애플리케이션 아이콘</string>
+  <string name="search">찾다</string>
+  <string name="systemAppToggle">시스템 애플리케이션</string>
+  <string name="appInfoField_appName">애플리케이션 이름</string>
+  <string name="appInfoField_apkSize">APK 크기</string>
+  <string name="appInfoField_appSize">신청 규모</string>
+  <string name="appInfoField_cacheSize">캐시 크기</string>
+  <string name="appInfoField_dataSize">데이터 크기</string>
+  <string name="appInfoField_enabled">사용</string>
+  <string name="appInfoField_externalCacheSize">외부 캐시 크기</string>
+  <string name="appInfoField_firstInstalled">처음 설치됨</string>
+  <string name="appInfoField_grantedPermissions">부여된 권한</string>
+  <string name="appInfoField_lastUpdated">마지막 업데이트</string>
+  <string name="appInfoField_lastUsed">마지막 사용</string>
+  <string name="appInfoField_minSdk">최소 소프트웨어 개발 키트 버전</string>
+  <string name="appInfoField_packageManager">패키지 관리자</string>
+  <string name="appInfoField_requestedPermissions">요청된 권한</string>
+  <string name="appInfoField_targetSdk">대상 소프트웨어 개발 키트 버전</string>
+  <string name="appInfoField_totalSize">총합 크기</string>
+  <string name="appInfoField_version">버전</string>
+  <string name="enabled">사용</string>
+  <string name="disabled">장애가 있는</string>
+
+</resources>

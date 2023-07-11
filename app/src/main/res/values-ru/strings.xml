@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">значок приложения</string>
+  <string name="search">значок приложения</string>
+  <string name="systemAppToggle">системные приложения</string>
+  <string name="appInfoField_appName">Имя приложения</string>
+  <string name="appInfoField_apkSize">Размер APK</string>
+  <string name="appInfoField_appSize">размер приложения</string>
+  <string name="appInfoField_cacheSize">размер кэша</string>
+  <string name="appInfoField_dataSize">размер данных</string>
+  <string name="appInfoField_enabled">включено</string>
+  <string name="appInfoField_externalCacheSize">размер внешнего кэша</string>
+  <string name="appInfoField_firstInstalled">первый установленный</string>
+  <string name="appInfoField_grantedPermissions">предоставленные разрешения</string>
+  <string name="appInfoField_lastUpdated">последнее обновление</string>
+  <string name="appInfoField_lastUsed">последний используемый</string>
+  <string name="appInfoField_minSdk">минимальный SDK</string>
+  <string name="appInfoField_packageManager">менеджер пакетов</string>
+  <string name="appInfoField_requestedPermissions">запрошенные разрешения</string>
+  <string name="appInfoField_targetSdk">целевой SDK</string>
+  <string name="appInfoField_totalSize">общий размер</string>
+  <string name="appInfoField_version">версия</string>
+  <string name="enabled">Включено</string>
+  <string name="disabled">Неполноценный</string>
+
+</resources>

@@ -75,8 +75,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         spinner = findViewById(R.id.spinner);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                appInfoFields.stream().map(AppInfoField::getDisplayName).toArray(String[]::new));
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{
+                getString(R.string.appInfoField_appName),
+                getString(R.string.appInfoField_apkSize),
+                getString(R.string.appInfoField_appSize),
+                getString(R.string.appInfoField_cacheSize),
+                getString(R.string.appInfoField_dataSize),
+                getString(R.string.appInfoField_enabled),
+                getString(R.string.appInfoField_externalCacheSize),
+                getString(R.string.appInfoField_firstInstalled),
+                getString(R.string.appInfoField_grantedPermissions),
+                getString(R.string.appInfoField_lastUpdated),
+                getString(R.string.appInfoField_lastUsed),
+                getString(R.string.appInfoField_minSdk),
+                getString(R.string.appInfoField_packageManager),
+                getString(R.string.appInfoField_requestedPermissions),
+                getString(R.string.appInfoField_targetSdk),
+                getString(R.string.appInfoField_totalSize),
+                getString(R.string.appInfoField_version),
+        });
+
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(this);
@@ -245,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.DATA_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
-            comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(ai.getApplicationInfo()));
+            comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(MainActivity.this, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getExternalCacheBytes());
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {

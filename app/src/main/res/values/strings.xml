@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">App List</string>
+  <string name="app_name" translatable="false">App List</string>
   <string name="app_icon_description">App icon</string>
   <string name="search">Search</string>
   <string name="systemAppToggle">System apps</string>
+  <string name="appInfoField_appName">App Name</string>
+  <string name="appInfoField_apkSize">APK Size</string>
+  <string name="appInfoField_appSize">App Size</string>
+  <string name="appInfoField_cacheSize">Cache Size</string>
+  <string name="appInfoField_dataSize">Data Size</string>
+  <string name="appInfoField_enabled">Enabled</string>
+  <string name="appInfoField_externalCacheSize">External Cache Size</string>
+  <string name="appInfoField_firstInstalled">First Installed</string>
+  <string name="appInfoField_grantedPermissions">Granted Permissions</string>
+  <string name="appInfoField_lastUpdated">Last Updated</string>
+  <string name="appInfoField_lastUsed">Last Used</string>
+  <string name="appInfoField_minSdk">Min SDK</string>
+  <string name="appInfoField_packageManager">Package Manager</string>
+  <string name="appInfoField_requestedPermissions">Requested Permissions</string>
+  <string name="appInfoField_targetSdk">Target SDK</string>
+  <string name="appInfoField_totalSize">Total Size</string>
+  <string name="appInfoField_version">Version</string>
+  <string name="enabled">Enabled</string>
+  <string name="disabled">Disabled</string>
 
 </resources>

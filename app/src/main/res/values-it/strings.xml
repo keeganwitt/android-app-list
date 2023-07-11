@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">Icona dell\'applicazione</string>
+  <string name="search">Ricerca</string>
+  <string name="systemAppToggle">Applicazioni di sistema</string>
+  <string name="appInfoField_appName">Nome dell\'applicazione</string>
+  <string name="appInfoField_apkSize">Dimensione dell\'APK</string>
+  <string name="appInfoField_appSize">Dimensione dell\'applicazione</string>
+  <string name="appInfoField_cacheSize">Dimensione della cache</string>
+  <string name="appInfoField_dataSize">Dimensione dei dati</string>
+  <string name="appInfoField_enabled">Abilitato</string>
+  <string name="appInfoField_externalCacheSize">Dimensione cache esterna</string>
+  <string name="appInfoField_firstInstalled">Primo installato</string>
+  <string name="appInfoField_grantedPermissions">Autorizzazioni concesse</string>
+  <string name="appInfoField_lastUpdated">Ultimo aggiornamento</string>
+  <string name="appInfoField_lastUsed">Ultimo uso</string>
+  <string name="appInfoField_minSdk">SDK minimo</string>
+  <string name="appInfoField_packageManager">Gestore dei pacchetti</string>
+  <string name="appInfoField_requestedPermissions">Autorizzazioni richieste</string>
+  <string name="appInfoField_targetSdk">Versione dell\'SDK di destinazione</string>
+  <string name="appInfoField_totalSize">Dimensione totale</string>
+  <string name="appInfoField_version">Versione</string>
+  <string name="enabled">Abilitato</string>
+  <string name="disabled">Disabilitato</string>
+
+</resources>

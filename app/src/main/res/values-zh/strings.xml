@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">應用程序圖標</string>
+  <string name="search">搜索</string>
+  <string name="systemAppToggle">系統應用</string>
+  <string name="appInfoField_appName">應用名稱</string>
+  <string name="appInfoField_apkSize">APK大小</string>
+  <string name="appInfoField_appSize">應用尺寸</string>
+  <string name="appInfoField_cacheSize">緩存大小</string>
+  <string name="appInfoField_dataSize">數據大小</string>
+  <string name="appInfoField_enabled">啟用</string>
+  <string name="appInfoField_externalCacheSize">外部緩存大小</string>
+  <string name="appInfoField_firstInstalled">首次安裝</string>
+  <string name="appInfoField_grantedPermissions">授予的權限</string>
+  <string name="appInfoField_lastUpdated">最近更新時間</string>
+  <string name="appInfoField_lastUsed">最後使用</string>
+  <string name="appInfoField_minSdk">最低軟件開發套件版本</string>
+  <string name="appInfoField_packageManager">包管理器</string>
+  <string name="appInfoField_requestedPermissions">請求的權限</string>
+  <string name="appInfoField_targetSdk">目標軟件開發套件版本</string>
+  <string name="appInfoField_totalSize">總尺寸</string>
+  <string name="appInfoField_version">版本</string>
+  <string name="enabled">啟用</string>
+  <string name="disabled">殘疾人</string>
+
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">アプリケーションアイコン</string>
+  <string name="search">検索</string>
+  <string name="systemAppToggle">システムアプリケーション</string>
+  <string name="appInfoField_appName">アプリケーション名</string>
+  <string name="appInfoField_apkSize">APKのサイズ</string>
+  <string name="appInfoField_appSize">アプリケーションサイズ</string>
+  <string name="appInfoField_cacheSize">キャッシュサイズ</string>
+  <string name="appInfoField_dataSize">データサイズ</string>
+  <string name="appInfoField_enabled">有効</string>
+  <string name="appInfoField_externalCacheSize">外部キャッシュサイズ</string>
+  <string name="appInfoField_firstInstalled">最初にインストールされた</string>
+  <string name="appInfoField_grantedPermissions">付与された権限</string>
+  <string name="appInfoField_lastUpdated">最終更新</string>
+  <string name="appInfoField_lastUsed">最後に使用した</string>
+  <string name="appInfoField_minSdk">ソフトウェア開発キットの最小バージョン</string>
+  <string name="appInfoField_packageManager">パッケージマネージャー</string>
+  <string name="appInfoField_requestedPermissions">要求された権限</string>
+  <string name="appInfoField_targetSdk">ターゲット ソフトウェア開発キットのバージョン</string>
+  <string name="appInfoField_totalSize">全体の大きさ</string>
+  <string name="appInfoField_version">バージョン</string>
+  <string name="enabled">有効</string>
+  <string name="disabled">無効</string>
+
+</resources>

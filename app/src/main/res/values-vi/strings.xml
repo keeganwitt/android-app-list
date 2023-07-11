@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">Biểu tượng ứng dụng</string>
+  <string name="search">Tìm kiếm</string>
+  <string name="systemAppToggle">Ứng dụng hệ thống</string>
+  <string name="appInfoField_appName">Tên ứng dụng</string>
+  <string name="appInfoField_apkSize">Kích thước APK</string>
+  <string name="appInfoField_appSize">Kích thước ứng dụng</string>
+  <string name="appInfoField_cacheSize">Kích thước bộ nhớ cache</string>
+  <string name="appInfoField_dataSize">Kích thước dữ liệu</string>
+  <string name="appInfoField_enabled">Đã bật</string>
+  <string name="appInfoField_externalCacheSize">Kích thước bộ đệm ngoài</string>
+  <string name="appInfoField_firstInstalled">Cài đặt lần đầu</string>
+  <string name="appInfoField_grantedPermissions">Quyền được cấp</string>
+  <string name="appInfoField_lastUpdated">Cập nhật mới nhất</string>
+  <string name="appInfoField_lastUsed">Sử dụng lần cuối</string>
+  <string name="appInfoField_minSdk">Phiên bản Bộ công cụ phát triển phần mềm tối thiểu</string>
+  <string name="appInfoField_packageManager">Trình quản lý gói</string>
+  <string name="appInfoField_requestedPermissions">Quyền được yêu cầu</string>
+  <string name="appInfoField_targetSdk">Phiên bản phát triển phần mềm mục tiêu</string>
+  <string name="appInfoField_totalSize">tổng kích thước</string>
+  <string name="appInfoField_version">Phiên bản</string>
+  <string name="enabled">Đã bật</string>
+  <string name="disabled">Tàn tật</string>
+
+</resources>

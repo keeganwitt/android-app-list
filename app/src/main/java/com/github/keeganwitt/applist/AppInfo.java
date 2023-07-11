@@ -60,7 +60,7 @@ public class AppInfo {
         } else if (appInfoField.equals(AppInfoField.DATA_SIZE)) {
             return Formatter.formatShortFileSize(context, getStorageUsage(context, applicationInfo).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
-            return getEnabledText(applicationInfo);
+            return getEnabledText(context, applicationInfo);
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
             return Formatter.formatShortFileSize(context, getStorageUsage(context, applicationInfo).getExternalCacheBytes());
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
