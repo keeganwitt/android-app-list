@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">גודל המטמון</string>
   <string name="appInfoField_dataSize">גודל נתונים</string>
   <string name="appInfoField_enabled">מופעל</string>
+  <string name="appInfoField_exists_in_app_store">קיים בחנות האפליקציות</string>
   <string name="appInfoField_externalCacheSize">גודל מטמון חיצוני</string>
   <string name="appInfoField_firstInstalled">מותקן לראשונה</string>
   <string name="appInfoField_grantedPermissions">הרשאות מוענקות</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">גִרְסָה</string>
   <string name="enabled">מופעל</string>
   <string name="disabled">נָכֶה</string>
+  <string name="boolean_true">נָכוֹן</string>
+  <string name="boolean_false">שֶׁקֶר</string>
+  <string name="unknown">לא ידוע</string>
 
 </resources>

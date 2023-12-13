@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">緩存大小</string>
   <string name="appInfoField_dataSize">數據大小</string>
   <string name="appInfoField_enabled">啟用</string>
+  <string name="appInfoField_exists_in_app_store">存在於應用程式商店</string>
   <string name="appInfoField_externalCacheSize">外部緩存大小</string>
   <string name="appInfoField_firstInstalled">首次安裝</string>
   <string name="appInfoField_grantedPermissions">授予的權限</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">版本</string>
   <string name="enabled">啟用</string>
   <string name="disabled">殘疾人</string>
+  <string name="boolean_true">真的</string>
+  <string name="boolean_false">錯誤的</string>
+  <string name="unknown">未知</string>
 
 </resources>

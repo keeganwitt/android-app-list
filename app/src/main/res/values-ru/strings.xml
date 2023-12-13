@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">размер кэша</string>
   <string name="appInfoField_dataSize">размер данных</string>
   <string name="appInfoField_enabled">включено</string>
+  <string name="appInfoField_exists_in_app_store">Существует в магазине приложений</string>
   <string name="appInfoField_externalCacheSize">размер внешнего кэша</string>
   <string name="appInfoField_firstInstalled">первый установленный</string>
   <string name="appInfoField_grantedPermissions">предоставленные разрешения</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">версия</string>
   <string name="enabled">Включено</string>
   <string name="disabled">Неполноценный</string>
+  <string name="boolean_true">Истинный</string>
+  <string name="boolean_false">ЛОЖЬ</string>
+  <string name="unknown">Неизвестный</string>
 
 </resources>

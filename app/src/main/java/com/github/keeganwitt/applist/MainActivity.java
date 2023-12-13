@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 getString(R.string.appInfoField_cacheSize),
                 getString(R.string.appInfoField_dataSize),
                 getString(R.string.appInfoField_enabled),
+                getString(R.string.appInfoField_exists_in_app_store),
                 getString(R.string.appInfoField_externalCacheSize),
                 getString(R.string.appInfoField_firstInstalled),
                 getString(R.string.appInfoField_grantedPermissions),
@@ -264,6 +265,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
             comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(MainActivity.this, ai.getApplicationInfo()));
+        } else if (appInfoField.equals(AppInfoField.EXISTS_IN_APP_STORE)) {
+            comparator = comparing(ai -> ApplicationInfoUtils.getExistsInAppStoreText(MainActivity.this, packageManager, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
             comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getExternalCacheBytes());
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {

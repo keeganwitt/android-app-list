@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">Kích thước bộ nhớ cache</string>
   <string name="appInfoField_dataSize">Kích thước dữ liệu</string>
   <string name="appInfoField_enabled">Đã bật</string>
+  <string name="appInfoField_exists_in_app_store">Tồn tại trong cửa hàng ứng dụng</string>
   <string name="appInfoField_externalCacheSize">Kích thước bộ đệm ngoài</string>
   <string name="appInfoField_firstInstalled">Cài đặt lần đầu</string>
   <string name="appInfoField_grantedPermissions">Quyền được cấp</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">Phiên bản</string>
   <string name="enabled">Đã bật</string>
   <string name="disabled">Tàn tật</string>
+  <string name="boolean_true">ĐÚNG VẬY</string>
+  <string name="boolean_false">SAI</string>
+  <string name="unknown">không xác định</string>
 
 </resources>

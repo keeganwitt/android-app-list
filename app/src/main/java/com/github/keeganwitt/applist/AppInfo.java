@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist;
 
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getApkSizeText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getEnabledText;
+import static com.github.keeganwitt.applist.ApplicationInfoUtils.getExistsInAppStoreText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getFirstInstalledText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUpdatedText;
 import static com.github.keeganwitt.applist.ApplicationInfoUtils.getLastUsedText;
@@ -61,6 +62,8 @@ public class AppInfo {
             return Formatter.formatShortFileSize(context, getStorageUsage(context, applicationInfo).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
             return getEnabledText(context, applicationInfo);
+        } else if (appInfoField.equals(AppInfoField.EXISTS_IN_APP_STORE)) {
+            return getExistsInAppStoreText(context, packageManager, applicationInfo);
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
             return Formatter.formatShortFileSize(context, getStorageUsage(context, applicationInfo).getExternalCacheBytes());
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {

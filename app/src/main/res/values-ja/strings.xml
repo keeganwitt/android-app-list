@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">キャッシュサイズ</string>
   <string name="appInfoField_dataSize">データサイズ</string>
   <string name="appInfoField_enabled">有効</string>
+  <string name="appInfoField_exists_in_app_store">アプリストアに存在する</string>
   <string name="appInfoField_externalCacheSize">外部キャッシュサイズ</string>
   <string name="appInfoField_firstInstalled">最初にインストールされた</string>
   <string name="appInfoField_grantedPermissions">付与された権限</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">バージョン</string>
   <string name="enabled">有効</string>
   <string name="disabled">無効</string>
+  <string name="boolean_true">真実</string>
+  <string name="boolean_false">間違い</string>
+  <string name="unknown">未知</string>
 
 </resources>

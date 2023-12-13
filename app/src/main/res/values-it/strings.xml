@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">Dimensione della cache</string>
   <string name="appInfoField_dataSize">Dimensione dei dati</string>
   <string name="appInfoField_enabled">Abilitato</string>
+  <string name="appInfoField_exists_in_app_store">Esiste nell\'app store</string>
   <string name="appInfoField_externalCacheSize">Dimensione cache esterna</string>
   <string name="appInfoField_firstInstalled">Primo installato</string>
   <string name="appInfoField_grantedPermissions">Autorizzazioni concesse</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">Versione</string>
   <string name="enabled">Abilitato</string>
   <string name="disabled">Disabilitato</string>
+  <string name="boolean_true">Vera</string>
+  <string name="boolean_false">Falso</string>
+  <string name="unknown">Sconosciuta</string>
 
 </resources>

@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">캐시 크기</string>
   <string name="appInfoField_dataSize">데이터 크기</string>
   <string name="appInfoField_enabled">사용</string>
+  <string name="appInfoField_exists_in_app_store">앱스토어에 존재함</string>
   <string name="appInfoField_externalCacheSize">외부 캐시 크기</string>
   <string name="appInfoField_firstInstalled">처음 설치됨</string>
   <string name="appInfoField_grantedPermissions">부여된 권한</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">버전</string>
   <string name="enabled">사용</string>
   <string name="disabled">장애가 있는</string>
+  <string name="boolean_true">진실</string>
+  <string name="boolean_false">거짓</string>
+  <string name="unknown">알려지지 않은</string>
 
 </resources>

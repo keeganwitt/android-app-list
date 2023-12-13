@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">حجم ذاكرة التخزين المؤقت</string>
   <string name="appInfoField_dataSize">حجم البيانات</string>
   <string name="appInfoField_enabled">ممكن</string>
+  <string name="appInfoField_exists_in_app_store">موجود في متجر التطبيقات</string>
   <string name="appInfoField_externalCacheSize">حجم ذاكرة التخزين المؤقت الخارجية</string>
   <string name="appInfoField_firstInstalled">أول تثبيت</string>
   <string name="appInfoField_grantedPermissions">الأذونات الممنوحة</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">إصدار</string>
   <string name="enabled">ممكن</string>
   <string name="disabled">عاجز</string>
+  <string name="boolean_true">حقيقي</string>
+  <string name="boolean_false">خطأ شنيع</string>
+  <string name="unknown">مجهول</string>
 
 </resources>

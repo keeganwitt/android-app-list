@@ -22,16 +22,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class ApplicationInfoUtils {
     private static final String TAG = ApplicationInfoUtils.class.getSimpleName();
 
     private static Map<String, Long> lastUsedEpochsCache;
+
+    private static Map<String, Boolean> existsInAppStore = new HashMap<>();
+
+    private static OkHttpClient httpClient = new OkHttpClient();
+
 
     private ApplicationInfoUtils() {}
 
@@ -88,6 +98,14 @@ public class ApplicationInfoUtils {
 
     public static String getEnabledText(Context context, ApplicationInfo applicationInfo) {
         return applicationInfo.enabled ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
+    }
+
+    public static String getExistsInAppStoreText(Context context, PackageManager packageManager, ApplicationInfo applicationInfo) {
+        Boolean exists = existsInAppStore(packageManager, applicationInfo);
+        if (exists == null) {
+            return context.getString(R.string.unknown);
+        }
+        return exists ? context.getString(R.string.boolean_true) : context.getString(R.string.boolean_false);
     }
 
     public static Date getFirstInstalled(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {
@@ -200,6 +218,35 @@ public class ApplicationInfoUtils {
         }
 
         return storageUsage;
+    }
+
+    public static Boolean existsInAppStore(PackageManager packageManager, ApplicationInfo applicationInfo) {
+        String id = applicationInfo.packageName;
+
+        if (existsInAppStore.containsKey(id)) {
+            return existsInAppStore.get(id);
+        }
+
+        if (!"Google Play".equals(getPackageInstallerName(getPackageInstaller(packageManager, applicationInfo)))) {
+            return null;
+        }
+
+        String url = "https://play.google.com/store/apps/details?id=" + id;
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        Log.d(TAG, "Querying " + url);
+        try (Response response = httpClient.newCall(request).execute()) {
+            int code = response.code();
+            boolean exists = code >= 200 && code < 300;
+            existsInAppStore.put(id, exists);
+            return exists;
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to make HTTP request to " + url, e);
+            boolean exists = false;
+            existsInAppStore.put(id, false);
+            return exists;
+        }
     }
 
     private static PackageInfo getPackageInfo(PackageManager packageManager, ApplicationInfo applicationInfo) throws PackageManager.NameNotFoundException {

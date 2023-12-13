@@ -10,6 +10,7 @@
   <string name="appInfoField_cacheSize">Tamaño del Caché</string>
   <string name="appInfoField_dataSize">Tamaño de Datos</string>
   <string name="appInfoField_enabled">Activado</string>
+  <string name="appInfoField_exists_in_app_store">Existe en la tienda de aplicaciones.</string>
   <string name="appInfoField_externalCacheSize">Tamaño de Caché Externo</string>
   <string name="appInfoField_firstInstalled">Instalado por Primera Vez</string>
   <string name="appInfoField_grantedPermissions">Solicitudes Concedidas</string>
@@ -23,5 +24,8 @@
   <string name="appInfoField_version">Versión</string>
   <string name="enabled">Activado</string>
   <string name="disabled">Desactivado</string>
+  <string name="boolean_true">Verdadero</string>
+  <string name="boolean_false">Falsa</string>
+  <string name="unknown">Desconocida</string>
 
 </resources>

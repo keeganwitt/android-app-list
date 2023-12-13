@@ -2,7 +2,7 @@
 <resources>
 
   <string name="app_name" translatable="false">App List</string>
-  <string name="app_icon_description">App icon</string>
+  <string name="app_icon_description">App Icon</string>
   <string name="search">Search</string>
   <string name="systemAppToggle">System apps</string>
   <string name="appInfoField_appName">App Name</string>
@@ -11,6 +11,7 @@
   <string name="appInfoField_cacheSize">Cache Size</string>
   <string name="appInfoField_dataSize">Data Size</string>
   <string name="appInfoField_enabled">Enabled</string>
+  <string name="appInfoField_exists_in_app_store">Exists in App Store</string>
   <string name="appInfoField_externalCacheSize">External Cache Size</string>
   <string name="appInfoField_firstInstalled">First Installed</string>
   <string name="appInfoField_grantedPermissions">Granted Permissions</string>
@@ -24,5 +25,8 @@
   <string name="appInfoField_version">Version</string>
   <string name="enabled">Enabled</string>
   <string name="disabled">Disabled</string>
+  <string name="boolean_true">True</string>
+  <string name="boolean_false">False</string>
+  <string name="unknown">Unknown</string>
 
 </resources>
