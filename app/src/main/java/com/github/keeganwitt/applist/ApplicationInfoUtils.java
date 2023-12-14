@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
@@ -36,12 +37,13 @@ import okhttp3.Response;
 public class ApplicationInfoUtils {
     private static final String TAG = ApplicationInfoUtils.class.getSimpleName();
 
+    private static final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build();
+
     private static Map<String, Long> lastUsedEpochsCache;
 
     private static Map<String, Boolean> existsInAppStore = new HashMap<>();
-
-    private static OkHttpClient httpClient = new OkHttpClient();
-
 
     private ApplicationInfoUtils() {}
 
@@ -239,13 +241,14 @@ public class ApplicationInfoUtils {
         try (Response response = httpClient.newCall(request).execute()) {
             int code = response.code();
             boolean exists = code >= 200 && code < 300;
+            if (!exists) {
+                Log.d(TAG, "HTTP response code for " + url + " was " + code);
+            }
             existsInAppStore.put(id, exists);
             return exists;
         } catch (IOException e) {
             Log.e(TAG, "Unable to make HTTP request to " + url, e);
-            boolean exists = false;
-            existsInAppStore.put(id, false);
-            return exists;
+            return null;
         }
     }
 
