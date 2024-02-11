@@ -26,8 +26,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +43,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -56,9 +60,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Future<?> loaderTask;
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
+    private boolean descendingSortOrder;
     private AppInfoAdapter appInfoAdapter;
     @SuppressWarnings("FieldCanBeLocal")
     private Spinner spinner;
+    private ToggleButton toggleButton;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
@@ -99,6 +105,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(this);
+
+        toggleButton = findViewById(R.id.toggleButton);
+        toggleButton.setOnCheckedChangeListener((compoundButton, b) -> {
+            descendingSortOrder = !descendingSortOrder;
+            loadApplications(selectedAppInfoField, false);
+        });
 
         progressBar = findViewById(R.id.progress_bar);
 
@@ -219,6 +231,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     })
                     .sorted(determineComparator(packageManager, appInfoField))
                     .collect(Collectors.toList());
+            if (descendingSortOrder) {
+                Collections.reverse(appList);
+            }
             appInfoAdapter.setUnfilteredList(appList);
             MainActivity.this.runOnUiThread(() -> {
                 appInfoAdapter.submitList(appList);
@@ -254,21 +269,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Comparator<AppInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
         Comparator<AppInfo> comparator = comparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
-            comparator = comparing(ai -> -getApkSize(ai.getApplicationInfo()));
+            comparator = comparing(ai -> getApkSize(ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.APP_NAME)) {
             // do nothing, will be sorted by name at the bottom of this method
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
-            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getAppBytes());
+            comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getAppBytes());
         } else if (appInfoField.equals(AppInfoField.CACHE_SIZE)) {
-            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getCacheBytes());
+            comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getCacheBytes());
         } else if (appInfoField.equals(AppInfoField.DATA_SIZE)) {
-            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getDataBytes());
+            comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
             comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(MainActivity.this, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXISTS_IN_APP_STORE)) {
             comparator = comparing(ai -> ApplicationInfoUtils.getExistsInAppStoreText(MainActivity.this, packageManager, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {
-            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getExternalCacheBytes());
+            comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getExternalCacheBytes());
         } else if (appInfoField.equals(AppInfoField.FIRST_INSTALLED)) {
             comparator = comparing(ai -> {
                 try {
@@ -286,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             });
         } else if (appInfoField.equals(AppInfoField.LAST_USED)) {
-            comparator = comparing(ai -> -getLastUsed(usageStatsManager, ai.getApplicationInfo(), false).getTime());
+            comparator = comparing(ai -> getLastUsed(usageStatsManager, ai.getApplicationInfo(), false).getTime());
         } else if (appInfoField.equals(AppInfoField.MIN_SDK)) {
             comparator = comparing(ai -> ai.getApplicationInfo().minSdkVersion);
         } else if (appInfoField.equals(AppInfoField.PACKAGE_MANAGER)) {
@@ -294,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS) || appInfoField.equals(AppInfoField.REQUESTED_PERMISSIONS)) {
             comparator = comparing(ai -> {
                 try {
-                    return -getPermissions(packageManager, ai.getApplicationInfo(), appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)).size();
+                    return getPermissions(packageManager, ai.getApplicationInfo(), appInfoField.equals(AppInfoField.GRANTED_PERMISSIONS)).size();
                 } catch (NullPointerException | PackageManager.NameNotFoundException e) {
                     return 0;
                 }
@@ -302,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (appInfoField.equals(AppInfoField.TARGET_SDK)) {
             comparator = comparing(ai -> ai.getApplicationInfo().targetSdkVersion);
         } else if (appInfoField.equals(AppInfoField.TOTAL_SIZE)) {
-            comparator = comparing(ai -> -getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getTotalBytes());
+            comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getTotalBytes());
         } else if (appInfoField.equals(AppInfoField.VERSION)) {
             comparator = comparing(ai -> {
                 try {
