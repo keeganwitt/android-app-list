@@ -43,7 +43,7 @@ public class ApplicationInfoUtils {
 
     private static Map<String, Long> lastUsedEpochsCache;
 
-    private static Map<String, Boolean> existsInAppStore = new HashMap<>();
+    private static final Map<String, Boolean> existsInAppStoreCache = new HashMap<>();
 
     private ApplicationInfoUtils() {}
 
@@ -225,8 +225,8 @@ public class ApplicationInfoUtils {
     public static Boolean existsInAppStore(PackageManager packageManager, ApplicationInfo applicationInfo) {
         String id = applicationInfo.packageName;
 
-        if (existsInAppStore.containsKey(id)) {
-            return existsInAppStore.get(id);
+        if (existsInAppStoreCache.containsKey(id)) {
+            return existsInAppStoreCache.get(id);
         }
 
         if (!"Google Play".equals(getPackageInstallerName(getPackageInstaller(packageManager, applicationInfo)))) {
@@ -244,7 +244,7 @@ public class ApplicationInfoUtils {
             if (!exists) {
                 Log.d(TAG, "HTTP response code for " + url + " was " + code);
             }
-            existsInAppStore.put(id, exists);
+            existsInAppStoreCache.put(id, exists);
             return exists;
         } catch (IOException e) {
             Log.e(TAG, "Unable to make HTTP request to " + url, e);
