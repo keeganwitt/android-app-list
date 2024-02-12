@@ -17,17 +17,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
@@ -115,8 +117,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         progressBar = findViewById(R.id.progress_bar);
 
         recyclerView = findViewById(R.id.recycler_view);
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
+        WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point point = new Point();
+        display.getSize(point);
+        int screenWidth = point.x;
+        int photoWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 120, this.getResources().getDisplayMetrics());
+        int columnsCount = screenWidth / photoWidth;
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, columnsCount);
         recyclerView.setLayoutManager(layoutManager);
+
         appInfoAdapter = new AppInfoAdapter(MainActivity.this, usageStatsManager, this);
         recyclerView.setAdapter(appInfoAdapter);
 
