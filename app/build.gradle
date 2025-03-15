@@ -5,7 +5,7 @@ plugins {
 android {
     namespace 'com.github.keeganwitt.applist'
 
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.github.keeganwitt.applist"
