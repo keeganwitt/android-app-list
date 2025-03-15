@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -132,14 +133,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         MenuItem systemAppToggleItem = menu.findItem(R.id.systemAppToggle);
         SwitchMaterial switchMaterial = (SwitchMaterial) systemAppToggleItem.getActionView();
-        switchMaterial.setOnClickListener(v -> {
+        Objects.requireNonNull(switchMaterial).setOnClickListener(v -> {
             showSystemApps = !showSystemApps;
             loadApplications(selectedAppInfoField, true);
         });
 
         MenuItem searchItem = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        Objects.requireNonNull(searchView).setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 appInfoAdapter.getFilter().filter(query);

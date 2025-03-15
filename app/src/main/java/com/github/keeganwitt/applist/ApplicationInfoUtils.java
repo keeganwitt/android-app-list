@@ -167,7 +167,8 @@ public class ApplicationInfoUtils {
         }
         for (int i = 0; i < requestedPermissions.length; i++) {
             String requestedPermission = requestedPermissions[i];
-            if (!requestedPermission.startsWith("android.permission")) {
+            if (!requestedPermission.startsWith("android.permission") ||
+                    packageInfo.requestedPermissionsFlags == null) {
                 continue;
             }
             boolean granted = (packageInfo.requestedPermissionsFlags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0;
@@ -260,7 +261,7 @@ public class ApplicationInfoUtils {
         return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
     }
 
-    protected static class StorageUsage {
+    public static class StorageUsage {
         private long appBytes;
         private long cacheBytes;
         private long dataBytes;

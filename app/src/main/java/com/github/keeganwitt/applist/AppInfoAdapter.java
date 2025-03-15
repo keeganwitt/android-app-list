@@ -82,7 +82,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
     }
 
     @SuppressWarnings("RedundantSuppression")
-    protected class AppInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class AppInfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
         ImageView iconView;
         @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
