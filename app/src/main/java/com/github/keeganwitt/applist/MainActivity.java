@@ -20,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     appList.add(info);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Unable to filter by user/system", e);
             }
         }
 
