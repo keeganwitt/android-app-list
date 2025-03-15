@@ -14,7 +14,7 @@
   <string name="appInfoField_externalCacheSize">Tamanho do Cache Externo</string>
   <string name="appInfoField_firstInstalled">Primeiro Instalado</string>
   <string name="appInfoField_grantedPermissions">Permissões concedidas</string>
-  <string name="appInfoField_lastUpdated">Ultima atualização</string>
+  <string name="appInfoField_lastUpdated">Última atualização</string>
   <string name="appInfoField_lastUsed">Usado por último</string>
   <string name="appInfoField_minSdk">Versão Mínima do Kit de Desenvolvimento de Software</string>
   <string name="appInfoField_packageManager">Gerenciador de pacotes</string>
