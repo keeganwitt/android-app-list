@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoViewHolder> implements Filterable {
     private static final String TAG = AppInfoAdapter.class.getSimpleName();
@@ -127,9 +128,9 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
             if (constraint == null || constraint.length() == 0) {
                 filteredList.addAll(unfilteredList);
             } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
+                String filterPattern = constraint.toString().toLowerCase(Locale.getDefault()).trim();
                 for (AppInfo item : AppInfoAdapter.this.getCurrentList()) {
-                    String packageName = String.valueOf(item.getApplicationInfo().loadLabel(packageManager)).toLowerCase();
+                    String packageName = String.valueOf(item.getApplicationInfo().loadLabel(packageManager)).toLowerCase(Locale.getDefault());
                     String textValue;
                     try {
                         textValue = item.getTextValue(context, packageManager, usageStatsManager);
@@ -137,7 +138,7 @@ public class AppInfoAdapter extends ListAdapter<AppInfo, AppInfoAdapter.AppInfoV
                         Log.e(TAG, "Unable to calculate text value for search", e);
                         textValue = "";
                     }
-                    if (packageName.contains(filterPattern) || textValue.toLowerCase().contains(filterPattern)) {
+                    if (packageName.contains(filterPattern) || textValue.toLowerCase(Locale.getDefault()).contains(filterPattern)) {
                         filteredList.add(item);
                     }
                 }
