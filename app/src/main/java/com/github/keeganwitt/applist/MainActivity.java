@@ -87,8 +87,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         spinner = findViewById(R.id.spinner);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{
-                getString(R.string.appInfoField_appName),
+        String[] appInfoFieldStrings = new String[]{
                 getString(R.string.appInfoField_apkSize),
                 getString(R.string.appInfoField_appSize),
                 getString(R.string.appInfoField_cacheSize),
@@ -106,10 +105,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 getString(R.string.appInfoField_targetSdk),
                 getString(R.string.appInfoField_totalSize),
                 getString(R.string.appInfoField_version),
-        });
-
+        };
+        Arrays.sort(appInfoFieldStrings);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appInfoFieldStrings);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
+
+        // Set initial selection to "Version"
+        int versionIndex = -1;
+        for (int i = 0; i < appInfoFieldStrings.length; i++) {
+            if (appInfoFieldStrings[i].equals(getString(R.string.appInfoField_version))) {
+                versionIndex = i;
+                break;
+            }
+        }
+        if (versionIndex != -1) {
+            spinner.setSelection(versionIndex);
+        }
         spinner.setOnItemSelectedListener(this);
 
         toggleButton = findViewById(R.id.toggleButton);
@@ -179,7 +191,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        loadSelection(0);
+        // Find the index of "Version" in the spinner's adapter
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinner.getAdapter();
+        int versionIndex = -1;
+        String versionText = getString(R.string.appInfoField_version);
+        for (int i = 0; i < adapter.getCount(); i++) {
+            if (adapter.getItem(i).equals(versionText)) {
+                versionIndex = i;
+                break;
+            }
+        }
+        if (versionIndex != -1) {
+            spinner.setSelection(versionIndex);
+            loadSelection(versionIndex);
+        }
     }
 
     @Override
@@ -276,8 +301,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Comparator<AppInfo> comparator = comparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
             comparator = comparing(ai -> getApkSize(ai.getApplicationInfo()));
-        } else if (appInfoField.equals(AppInfoField.APP_NAME)) {
-            // do nothing, will be sorted by name at the bottom of this method
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
             comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getAppBytes());
         } else if (appInfoField.equals(AppInfoField.CACHE_SIZE)) {

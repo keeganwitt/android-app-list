@@ -4,8 +4,7 @@
   <string name="app_icon_description">סמל יישום</string>
   <string name="search">לחפש</string>
   <string name="systemAppToggle">יישומי מערכת</string>
-  <string name="appInfoField_appName">שם אפליקציה</string>
-  <string name="appInfoField_apkSize">גודל APK</string>
+    <string name="appInfoField_apkSize">גודל APK</string>
   <string name="appInfoField_appSize">גודל יישום</string>
   <string name="appInfoField_cacheSize">גודל המטמון</string>
   <string name="appInfoField_dataSize">גודל נתונים</string>

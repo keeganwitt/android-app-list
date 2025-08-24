@@ -50,9 +50,7 @@ public class AppInfo {
     }
 
     public String getTextValue(Context context, PackageManager packageManager, UsageStatsManager usageStatsManager) throws PackageManager.NameNotFoundException {
-        if (appInfoField.equals(AppInfoField.APP_NAME)) {
-            return applicationInfo.packageName;
-        } else if (appInfoField.equals(AppInfoField.APK_SIZE)) {
+        if (appInfoField.equals(AppInfoField.APK_SIZE)) {
             return getApkSizeText(context, applicationInfo);
         } else if (appInfoField.equals(AppInfoField.APP_SIZE)) {
             return Formatter.formatShortFileSize(context, getStorageUsage(context, applicationInfo).getAppBytes());

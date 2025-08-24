@@ -4,8 +4,7 @@
   <string name="app_icon_description">एप्लिकेशन चिह्न</string>
   <string name="search">खोज</string>
   <string name="systemAppToggle">सिस्टम अनुप्रयोग</string>
-  <string name="appInfoField_appName">आवेदन का नाम</string>
-  <string name="appInfoField_apkSize">एपीके आकार</string>
+    <string name="appInfoField_apkSize">एपीके आकार</string>
   <string name="appInfoField_appSize">आवेदन का आकार</string>
   <string name="appInfoField_cacheSize">कैचे आकार</string>
   <string name="appInfoField_dataSize">डेटा का आकार</string>

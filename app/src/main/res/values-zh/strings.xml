@@ -4,8 +4,7 @@
   <string name="app_icon_description">應用程序圖標</string>
   <string name="search">搜索</string>
   <string name="systemAppToggle">系統應用</string>
-  <string name="appInfoField_appName">應用名稱</string>
-  <string name="appInfoField_apkSize">APK大小</string>
+    <string name="appInfoField_apkSize">APK大小</string>
   <string name="appInfoField_appSize">應用尺寸</string>
   <string name="appInfoField_cacheSize">緩存大小</string>
   <string name="appInfoField_dataSize">數據大小</string>

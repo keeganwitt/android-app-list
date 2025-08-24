@@ -4,8 +4,7 @@
   <string name="app_icon_description">ícone do aplicativo</string>
   <string name="search">Procurar</string>
   <string name="systemAppToggle">Aplicativos do sistema</string>
-  <string name="appInfoField_appName">Nome da Aplicação</string>
-  <string name="appInfoField_apkSize">Tamanho do APK</string>
+    <string name="appInfoField_apkSize">Tamanho do APK</string>
   <string name="appInfoField_appSize">Tamanho do aplicativo</string>
   <string name="appInfoField_cacheSize">Tamanho da memória cache</string>
   <string name="appInfoField_dataSize">Tamanho dos dados</string>
