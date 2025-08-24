@@ -40,6 +40,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private boolean showSystemApps = false;
+    private Collator collator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,7 +108,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 getString(R.string.appInfoField_totalSize),
                 getString(R.string.appInfoField_version),
         };
-        Arrays.sort(appInfoFieldStrings);
+        this.collator = Collator.getInstance();
+        Arrays.sort(appInfoFieldStrings, this.collator::compare);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, appInfoFieldStrings);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
@@ -356,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             });
         }
-        comparator = comparator.thenComparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
+        comparator = comparator.thenComparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)), this.collator);
         return comparator;
     }
 }
