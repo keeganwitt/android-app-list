@@ -4,8 +4,7 @@
   <string name="app_icon_description">애플리케이션 아이콘</string>
   <string name="search">찾다</string>
   <string name="systemAppToggle">시스템 애플리케이션</string>
-  <string name="appInfoField_appName">애플리케이션 이름</string>
-  <string name="appInfoField_apkSize">APK 크기</string>
+    <string name="appInfoField_apkSize">APK 크기</string>
   <string name="appInfoField_appSize">신청 규모</string>
   <string name="appInfoField_cacheSize">캐시 크기</string>
   <string name="appInfoField_dataSize">데이터 크기</string>

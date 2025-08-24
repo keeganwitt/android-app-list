@@ -5,7 +5,6 @@
   <string name="app_icon_description">App Icon</string>
   <string name="search">Search</string>
   <string name="systemAppToggle">System apps</string>
-  <string name="appInfoField_appName">App Name</string>
   <string name="appInfoField_apkSize">APK Size</string>
   <string name="appInfoField_appSize">App Size</string>
   <string name="appInfoField_cacheSize">Cache Size</string>

@@ -4,7 +4,6 @@
   <string name="app_icon_description">أيقونة التطبيق</string>
   <string name="search">يبحث</string>
   <string name="systemAppToggle">تطبيقات النظام</string>
-  <string name="appInfoField_appName">اسم التطبيق</string>
   <string name="appInfoField_apkSize">حجم APK</string>
   <string name="appInfoField_appSize">حجم التطبيق</string>
   <string name="appInfoField_cacheSize">حجم ذاكرة التخزين المؤقت</string>

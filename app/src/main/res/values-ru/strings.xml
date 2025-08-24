@@ -4,8 +4,7 @@
   <string name="app_icon_description">значок приложения</string>
   <string name="search">значок приложения</string>
   <string name="systemAppToggle">системные приложения</string>
-  <string name="appInfoField_appName">Имя приложения</string>
-  <string name="appInfoField_apkSize">Размер APK</string>
+    <string name="appInfoField_apkSize">Размер APK</string>
   <string name="appInfoField_appSize">размер приложения</string>
   <string name="appInfoField_cacheSize">размер кэша</string>
   <string name="appInfoField_dataSize">размер данных</string>
