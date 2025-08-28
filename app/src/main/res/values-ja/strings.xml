@@ -23,6 +23,9 @@
   <string name="appInfoField_version">バージョン</string>
   <string name="enabled">有効</string>
   <string name="disabled">無効</string>
+  <string name="installed">インストール済み</string>
+  <string name="archived">アーカイブ済み</string>
+  <string name="appInfoField_archived">アーカイブ済み</string>
   <string name="boolean_true">真実</string>
   <string name="boolean_false">間違い</string>
   <string name="unknown">未知</string>

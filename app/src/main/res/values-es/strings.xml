@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_icon_description">Icono de la Aplicación</string>
+  <string name="app_icon_description">Icono de la aplicación</string>
   <string name="search">Buscar</string>
-  <string name="systemAppToggle">Aplicaciones del Sistema</string>
-    <string name="appInfoField_apkSize">Tamaño de la APK</string>
-  <string name="appInfoField_appSize">Tamaño de la Aplicación</string>
-  <string name="appInfoField_cacheSize">Tamaño del Caché</string>
-  <string name="appInfoField_dataSize">Tamaño de Datos</string>
+  <string name="systemAppToggle">Aplicaciones del sistema</string>
+  <string name="appInfoField_apkSize">Tamaño de APK</string>
+  <string name="appInfoField_appSize">Tamaño de la aplicación</string>
+  <string name="appInfoField_cacheSize">Tamaño de caché</string>
+  <string name="appInfoField_dataSize">Tamaño de los datos</string>
   <string name="appInfoField_enabled">Activado</string>
-  <string name="appInfoField_exists_in_app_store">Existe en la tienda de aplicaciones.</string>
-  <string name="appInfoField_externalCacheSize">Tamaño de Caché Externo</string>
-  <string name="appInfoField_firstInstalled">Instalado por Primera Vez</string>
-  <string name="appInfoField_grantedPermissions">Solicitudes Concedidas</string>
-  <string name="appInfoField_lastUpdated">Última Actualización</string>
-  <string name="appInfoField_lastUsed">Último Utilizado</string>
-  <string name="appInfoField_minSdk">Versión mínima de SDK</string>
-  <string name="appInfoField_packageManager">Administradora de Paquetes</string>
-  <string name="appInfoField_requestedPermissions">Permisos Solicitados</string>
-  <string name="appInfoField_targetSdk">SDK de Destino</string>
-  <string name="appInfoField_totalSize">Tamaño Total</string>
+  <string name="appInfoField_exists_in_app_store">Existe en la tienda de aplicaciones</string>
+  <string name="appInfoField_externalCacheSize">Tamaño de caché externa</string>
+  <string name="appInfoField_firstInstalled">Primera instalación</string>
+  <string name="appInfoField_grantedPermissions">Permisos concedidos</string>
+  <string name="appInfoField_lastUpdated">Última actualización</string>
+  <string name="appInfoField_lastUsed">Último uso</string>
+  <string name="appInfoField_minSdk">SDK mínimo</string>
+  <string name="appInfoField_packageManager">Gerente de empaquetado</string>
+  <string name="appInfoField_requestedPermissions">Permisos solicitados</string>
+  <string name="appInfoField_targetSdk">SDK objetivo</string>
+  <string name="appInfoField_totalSize">Tamaño total</string>
   <string name="appInfoField_version">Versión</string>
   <string name="enabled">Activado</string>
   <string name="disabled">Desactivado</string>
+  <string name="installed">instalado</string>
+  <string name="archived">archivado</string>
+  <string name="appInfoField_archived">Archivado</string>
   <string name="boolean_true">Verdadero</string>
-  <string name="boolean_false">Falsa</string>
-  <string name="unknown">Desconocida</string>
+  <string name="boolean_false">Falso</string>
+  <string name="unknown">Desconocido</string>
 
 </resources>

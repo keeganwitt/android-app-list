@@ -102,6 +102,22 @@ public class ApplicationInfoUtils {
         return applicationInfo.enabled ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
     }
 
+    public static Boolean isAppArchived(ApplicationInfo applicationInfo) {
+        Boolean archived = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            archived = applicationInfo.isArchived;
+        }
+        return archived;
+    }
+
+    public static String getAppIsArchivedText(Context context, ApplicationInfo applicationInfo) {
+        Boolean archived = isAppArchived(applicationInfo);
+        if (archived == null) {
+            return context.getString(R.string.unknown);
+        }
+        return archived ? context.getString(R.string.archived) : context.getString(R.string.installed);
+    }
+
     public static String getExistsInAppStoreText(Context context, PackageManager packageManager, ApplicationInfo applicationInfo) {
         Boolean exists = existsInAppStore(packageManager, applicationInfo);
         if (exists == null) {

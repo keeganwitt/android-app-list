@@ -23,6 +23,9 @@
   <string name="appInfoField_version">버전</string>
   <string name="enabled">사용</string>
   <string name="disabled">장애가 있는</string>
+  <string name="installed">설치됨</string>
+  <string name="archived">보관됨</string>
+  <string name="appInfoField_archived">보관됨</string>
   <string name="boolean_true">진실</string>
   <string name="boolean_false">거짓</string>
   <string name="unknown">알려지지 않은</string>

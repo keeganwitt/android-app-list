@@ -23,6 +23,9 @@
   <string name="appInfoField_version">версия</string>
   <string name="enabled">Включено</string>
   <string name="disabled">Неполноценный</string>
+  <string name="installed">установлено</string>
+  <string name="archived">заархивировано</string>
+  <string name="appInfoField_archived">Архивировано</string>
   <string name="boolean_true">Истинный</string>
   <string name="boolean_false">ЛОЖЬ</string>
   <string name="unknown">Неизвестный</string>

@@ -23,6 +23,9 @@
   <string name="appInfoField_version">Phiên bản</string>
   <string name="enabled">Đã bật</string>
   <string name="disabled">Tàn tật</string>
+  <string name="installed">đã cài đặt</string>
+  <string name="archived">đã lưu trữ</string>
+  <string name="appInfoField_archived">Đã lưu trữ</string>
   <string name="boolean_true">ĐÚNG VẬY</string>
   <string name="boolean_false">SAI</string>
   <string name="unknown">không xác định</string>
