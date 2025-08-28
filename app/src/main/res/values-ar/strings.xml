@@ -6,6 +6,7 @@
   <string name="systemAppToggle">تطبيقات النظام</string>
   <string name="appInfoField_apkSize">حجم APK</string>
   <string name="appInfoField_appSize">حجم التطبيق</string>
+  <string name="appInfoField_archived">مؤرشف</string>
   <string name="appInfoField_cacheSize">حجم ذاكرة التخزين المؤقت</string>
   <string name="appInfoField_dataSize">حجم البيانات</string>
   <string name="appInfoField_enabled">ممكن</string>
@@ -23,6 +24,8 @@
   <string name="appInfoField_version">إصدار</string>
   <string name="enabled">ممكن</string>
   <string name="disabled">عاجز</string>
+  <string name="installed">مثبت</string>
+  <string name="archived">مؤرشف</string>
   <string name="boolean_true">حقيقي</string>
   <string name="boolean_false">خطأ شنيع</string>
   <string name="unknown">مجهول</string>

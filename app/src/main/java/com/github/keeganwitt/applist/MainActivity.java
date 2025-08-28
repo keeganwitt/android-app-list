@@ -19,6 +19,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         String[] appInfoFieldStrings = new String[]{
                 getString(R.string.appInfoField_apkSize),
                 getString(R.string.appInfoField_appSize),
+                getString(R.string.appInfoField_archived),
                 getString(R.string.appInfoField_cacheSize),
                 getString(R.string.appInfoField_dataSize),
                 getString(R.string.appInfoField_enabled),
@@ -234,11 +236,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayList<AppInfo> appList = new ArrayList<>();
         for (AppInfo info : list) {
             try {
-                if (packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null
-                        && ((!showSystemApps && isUserInstalledApp(info.getApplicationInfo()))
-                        || (showSystemApps && !isUserInstalledApp(info.getApplicationInfo())))) {
-                    appList.add(info);
-                }
+                boolean userApp = isUserInstalledApp(info.getApplicationInfo());
+                boolean matchesSystemToggle = (!showSystemApps && userApp) || (showSystemApps && !userApp);
+
+                boolean isArchived = ApplicationInfoUtils.isAppArchived(info.getApplicationInfo());
+                boolean hasLaunchIntent = packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null;
+
+                if (matchesSystemToggle && (isArchived || hasLaunchIntent)) {
+                     appList.add(info);
+                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to filter by user/system", e);
             }
@@ -254,8 +260,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             loaderTask.cancel(true);
         }
         loaderTask = appListLoader.submit(() -> {
+            List<ApplicationInfo> allInstalledApps;
+                int flags = PackageManager.GET_META_DATA | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+                allInstalledApps = packageManager.getInstalledApplications(flags);
             List<AppInfo> appList;
-            appList = MainActivity.this.filterUserOrSystemApps(packageManager.getInstalledApplications(PackageManager.GET_META_DATA).stream()
+            appList = MainActivity.this.filterUserOrSystemApps(allInstalledApps.stream()
                             .map(it -> new AppInfo(it, appInfoField))
                             .collect(Collectors.toList())).stream()
                     .peek(it -> {
@@ -312,6 +321,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             comparator = comparing(ai -> getStorageUsage(MainActivity.this, ai.getApplicationInfo()).getDataBytes());
         } else if (appInfoField.equals(AppInfoField.ENABLED)) {
             comparator = comparing(ai -> ApplicationInfoUtils.getEnabledText(MainActivity.this, ai.getApplicationInfo()));
+        } else if (appInfoField.equals(AppInfoField.ARCHIVED)) {
+            comparator = comparing(ai -> ApplicationInfoUtils.getAppIsArchivedText(MainActivity.this, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXISTS_IN_APP_STORE)) {
             comparator = comparing(ai -> ApplicationInfoUtils.getExistsInAppStoreText(MainActivity.this, packageManager, ai.getApplicationInfo()));
         } else if (appInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)) {

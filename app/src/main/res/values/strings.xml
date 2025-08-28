@@ -7,6 +7,7 @@
   <string name="systemAppToggle">System apps</string>
   <string name="appInfoField_apkSize">APK Size</string>
   <string name="appInfoField_appSize">App Size</string>
+  <string name="appInfoField_archived">Archived</string>
   <string name="appInfoField_cacheSize">Cache Size</string>
   <string name="appInfoField_dataSize">Data Size</string>
   <string name="appInfoField_enabled">Enabled</string>
@@ -24,6 +25,8 @@
   <string name="appInfoField_version">Version</string>
   <string name="enabled">Enabled</string>
   <string name="disabled">Disabled</string>
+  <string name="installed">Installed</string>
+  <string name="archived">Archived</string>
   <string name="boolean_true">True</string>
   <string name="boolean_false">False</string>
   <string name="unknown">Unknown</string>

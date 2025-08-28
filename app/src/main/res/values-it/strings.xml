@@ -23,6 +23,9 @@
   <string name="appInfoField_version">Versione</string>
   <string name="enabled">Abilitato</string>
   <string name="disabled">Disabilitato</string>
+  <string name="installed">installato</string>
+  <string name="archived">archiviato</string>
+  <string name="appInfoField_archived">Archiviato</string>
   <string name="boolean_true">Vera</string>
   <string name="boolean_false">Falso</string>
   <string name="unknown">Sconosciuta</string>
