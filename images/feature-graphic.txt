@@ -1,0 +1,10 @@
+List all apps (including system ones) with selected info
+• APK Size                • App Size
+• Archived                • Cache Size
+• Data Size               • Enabled
+• Exists in App Store     • External Cache Size
+• First Installed         • Granted Permissions
+• Last Updated            • Last Used
+• Min SDK                 • Package Manager
+• Requested Permissions   • Target SDK
+• Total Size              • Version
