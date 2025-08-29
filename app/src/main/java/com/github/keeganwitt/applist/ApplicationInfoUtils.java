@@ -65,10 +65,11 @@ public class ApplicationInfoUtils {
         if ("com.amazon.venezia".equals(installerPackageName)) {
             return "Amazon Appstore";
         } else if ("com.google.android.packageinstaller".equals(installerPackageName)) {
-            // note: F-Droid also currently shows this package manager
             return "APK";
         } else if ("cm.aptoide.pt".equals(installerPackageName)) {
             return "Aptoide";
+        } else if ("org.fdroid.fdroid".equals(installerPackageName)) {
+            return "F-Droid";
         } else if ("net.rim.bb.appworld".equals(installerPackageName)) {
             return "Blackberry World";
         } else if ("com.farsitel.bazaar".equals(installerPackageName)) {
