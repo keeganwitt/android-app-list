@@ -1,4 +1,4 @@
-List all apps (including system ones) with selected info
+List all apps (including system ones) with
 • APK Size                • App Size
 • Archived                • Cache Size
 • Data Size               • Enabled
