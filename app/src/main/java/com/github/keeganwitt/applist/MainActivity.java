@@ -225,7 +225,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if ((selectedAppInfoField.equals(AppInfoField.CACHE_SIZE)
                 || selectedAppInfoField.equals(AppInfoField.DATA_SIZE)
                 || selectedAppInfoField.equals(AppInfoField.EXTERNAL_CACHE_SIZE)
-                || selectedAppInfoField.equals(AppInfoField.TOTAL_SIZE))
+                || selectedAppInfoField.equals(AppInfoField.TOTAL_SIZE)
+                || selectedAppInfoField.equals(AppInfoField.LAST_USED))
                 && !hasUsageStatsPermission()) {
             requestUsageStatsPermission();
         }
