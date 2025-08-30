@@ -8,3 +8,6 @@ List all apps (including system ones) with selected info
 • Min SDK                 • Package Manager
 • Requested Permissions   • Target SDK
 • Total Size              • Version
+
+# 61 220 132
+# 3DDC84
