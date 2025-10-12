@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private AppInfoField selectedAppInfoField;
     private boolean descendingSortOrder;
     private AppInfoAdapter appInfoAdapter;
-    @SuppressWarnings("FieldCanBeLocal")
     private Spinner spinner;
     private ToggleButton toggleButton;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -196,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // Find the index of "Version" in the spinner's adapter
+        //noinspection unchecked
         ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinner.getAdapter();
         int versionIndex = -1;
         String versionText = getString(R.string.appInfoField_version);
@@ -308,7 +308,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         startActivity(intent);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     private Comparator<AppInfo> determineComparator(PackageManager packageManager, AppInfoField appInfoField) {
         Comparator<AppInfo> comparator = comparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)));
         if (appInfoField.equals(AppInfoField.APK_SIZE)) {
