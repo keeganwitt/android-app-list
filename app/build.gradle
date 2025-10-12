@@ -3,30 +3,30 @@ plugins {
 }
 
 android {
-    namespace 'com.github.keeganwitt.applist'
+    namespace = 'com.github.keeganwitt.applist'
 
-    compileSdk 35
+    compileSdkVersion = 36
 
     defaultConfig {
-        applicationId "com.github.keeganwitt.applist"
-        minSdk 24
-        targetSdk 35
-        versionCode 8
-        versionName "1.1.1"
+        applicationId = "com.github.keeganwitt.applist"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 8
+        versionName = "1.1.1"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled = false
+            proguardFiles = [getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro']
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
