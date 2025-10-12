@@ -29,5 +29,6 @@
   <string name="boolean_true">Verdadeira</string>
   <string name="boolean_false">Falsa</string>
   <string name="unknown">Desconhecida</string>
+  <string name="export">Exportar</string>
 
 </resources>

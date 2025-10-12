@@ -29,5 +29,6 @@
   <string name="boolean_true">Vrai</string>
   <string name="boolean_false">Faux</string>
   <string name="unknown">Inconnue</string>
+  <string name="export">Exporter</string>
 
 </resources>

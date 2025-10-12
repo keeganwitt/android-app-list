@@ -29,5 +29,6 @@
   <string name="boolean_true">真的</string>
   <string name="boolean_false">錯誤的</string>
   <string name="unknown">未知</string>
+  <string name="export">出口</string>
 
 </resources>

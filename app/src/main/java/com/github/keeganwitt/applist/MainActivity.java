@@ -30,15 +30,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import org.xmlpull.v1.XmlSerializer;
+import android.util.Xml;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -154,11 +157,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         inflater.inflate(R.menu.app_menu, menu);
 
         MenuItem systemAppToggleItem = menu.findItem(R.id.systemAppToggle);
-        SwitchMaterial switchMaterial = (SwitchMaterial) systemAppToggleItem.getActionView();
-        Objects.requireNonNull(switchMaterial).setOnClickListener(v -> {
-            showSystemApps = !showSystemApps;
-            loadApplications(selectedAppInfoField, true);
-        });
+        systemAppToggleItem.setChecked(showSystemApps);
 
         MenuItem searchItem = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) searchItem.getActionView();
@@ -218,6 +217,123 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // TODO: reload only selected item instead of entire list
         loadApplications(selectedAppInfoField, true);
     }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.export) {
+            exportAppListToXml();
+            return true;
+        } else if (itemId == R.id.systemAppToggle) {
+            boolean isChecked = !item.isChecked();
+            showSystemApps = isChecked;
+            item.setChecked(isChecked);
+            updateSystemAppToggleIcon(item);
+            loadApplications(selectedAppInfoField, true);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
+    private void updateSystemAppToggleIcon(MenuItem item) {
+        if (item.isChecked()) {
+            item.setIcon(R.drawable.ic_system_apps_on);
+        } else {
+            item.setIcon(R.drawable.ic_system_apps_off);
+        }
+    }
+
+    private final ActivityResultLauncher<Intent> createFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        writeXmlToFile(uri);
+                    }
+                }
+            });
+            
+    private void exportAppListToXml() {
+        if (appInfoAdapter == null || appInfoAdapter.getItemCount() == 0) {
+            Toast.makeText(this, "No apps to export", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String timestamp = new java.text.SimpleDateFormat("yyyyMMddHHmmss", java.util.Locale.US)
+                .format(new java.util.Date());
+        String appInfoType = selectedAppInfoField.name().toLowerCase();
+        String fileName = "apps_" + appInfoType + "_" + timestamp + ".xml";
+        
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/xml");
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        
+        createFileLauncher.launch(intent);
+    }
+    
+    private void writeXmlToFile(Uri uri) {
+        try {
+            java.io.OutputStream outputStream = getContentResolver().openOutputStream(uri);
+            if (outputStream != null) {
+                XmlSerializer serializer = Xml.newSerializer();
+                serializer.setOutput(outputStream, "UTF-8");
+                serializer.startDocument("UTF-8", true);
+                serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                
+                // Start root element
+                serializer.startTag("", "apps");
+                
+                for (int i = 0; i < appInfoAdapter.getItemCount(); i++) {
+                    AppInfo app = appInfoAdapter.getCurrentList().get(i);
+                    String appName = app.getApplicationInfo().loadLabel(packageManager).toString();
+                    String packageName = app.getApplicationInfo().packageName;
+                    String infoType = selectedAppInfoField.name();
+                    String infoValue = "";
+                    
+                    try {
+                        infoValue = app.getTextValue(this, packageManager, usageStatsManager);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Leave infoValue empty
+                    }
+                    
+                    // Write app element
+                    serializer.startTag("", "app");
+                    
+                    // Write app details
+                    serializer.startTag("", "appName");
+                    serializer.text(appName);
+                    serializer.endTag("", "appName");
+                    
+                    serializer.startTag("", "appPackage");
+                    serializer.text(packageName != null ? packageName : "");
+                    serializer.endTag("", "appPackage");
+                    
+                    serializer.startTag("", "appInfoType");
+                    serializer.text(infoType);
+                    serializer.endTag("", "appInfoType");
+                    
+                    serializer.startTag("", "appInfoValue");
+                    serializer.text(infoValue != null ? infoValue : "");
+                    serializer.endTag("", "appInfoValue");
+                    
+                    // End app element
+                    serializer.endTag("", "app");
+                }
+                
+                // End root element
+                serializer.endTag("", "apps");
+                serializer.endDocument();
+                outputStream.close();
+                
+                Toast.makeText(this, "Export successful", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error exporting XML", e);
+            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private void loadSelection(int position) {
         selectedAppInfoField = appInfoFields.get(position);
@@ -236,13 +352,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayList<AppInfo> appList = new ArrayList<>();
         for (AppInfo info : list) {
             try {
-                boolean userApp = isUserInstalledApp(info.getApplicationInfo());
-                boolean matchesSystemToggle = (!showSystemApps && userApp) || (showSystemApps && !userApp);
+                // Determine if we should include this app based on system app toggle
+                boolean include = showSystemApps || isUserInstalledApp(info.getApplicationInfo());
 
                 boolean isArchived = ApplicationInfoUtils.isAppArchived(info.getApplicationInfo());
                 boolean hasLaunchIntent = packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null;
 
-                if (matchesSystemToggle && (isArchived || hasLaunchIntent)) {
+                if (include && (isArchived || hasLaunchIntent)) {
                      appList.add(info);
                  }
             } catch (Exception e) {

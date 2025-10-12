@@ -29,5 +29,6 @@
   <string name="boolean_true">حقيقي</string>
   <string name="boolean_false">خطأ شنيع</string>
   <string name="unknown">مجهول</string>
+  <string name="export">تصدير</string>
 
 </resources>
