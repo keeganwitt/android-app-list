@@ -1,0 +1,5 @@
+App List
+
+Lists a piece of application info across all apps
+
+This app lists a selected piece of application info across all apps, to see that information at a glance. For example, you can view the package manager that installed all your apps, the target SDK of all your apps, the number of requested/granted permissions for all your apps, or what apps are enabled/disabled.

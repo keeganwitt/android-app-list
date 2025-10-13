@@ -9,4 +9,4 @@
 local.properties
 /.vscode/
 /app/release/
-/store-listing.txt
+/release/
