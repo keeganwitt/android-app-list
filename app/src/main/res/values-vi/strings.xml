@@ -29,5 +29,6 @@
   <string name="boolean_true">ĐÚNG VẬY</string>
   <string name="boolean_false">SAI</string>
   <string name="unknown">không xác định</string>
+  <string name="export">Xuất</string>
 
 </resources>

@@ -29,5 +29,6 @@
   <string name="boolean_true">진실</string>
   <string name="boolean_false">거짓</string>
   <string name="unknown">알려지지 않은</string>
+  <string name="export">내보내기</string>
 
 </resources>

@@ -13,11 +13,11 @@
   <string name="appInfoField_externalCacheSize">גודל מטמון חיצוני</string>
   <string name="appInfoField_firstInstalled">מותקן לראשונה</string>
   <string name="appInfoField_grantedPermissions">הרשאות מוענקות</string>
-  <string name="appInfoField_lastUpdated">Last Updated</string>
-  <string name="appInfoField_lastUsed">Last Used</string>
-  <string name="appInfoField_minSdk">Min SDK</string>
-  <string name="appInfoField_packageManager">Package Manager</string>
-  <string name="appInfoField_requestedPermissions">Requested Permissions</string>
+  <string name="appInfoField_lastUpdated">עודכן לאחרונה</string>
+  <string name="appInfoField_lastUsed">שימוש אחרון</string>
+  <string name="appInfoField_minSdk">SDK מינימלי</string>
+  <string name="appInfoField_packageManager">מנהל חבילות</string>
+  <string name="appInfoField_requestedPermissions">הרשאות מבוקשות</string>
   <string name="appInfoField_targetSdk">גרסת ערכת פיתוח תוכנה יעד</string>
   <string name="appInfoField_totalSize">גודל כולל</string>
   <string name="appInfoField_version">גִרְסָה</string>
@@ -29,5 +29,6 @@
   <string name="boolean_true">נָכוֹן</string>
   <string name="boolean_false">שֶׁקֶר</string>
   <string name="unknown">לא ידוע</string>
+  <string name="export">יְצוּא</string>
 
 </resources>

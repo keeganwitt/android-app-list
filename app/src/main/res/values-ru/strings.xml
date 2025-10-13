@@ -29,5 +29,6 @@
   <string name="boolean_true">Истинный</string>
   <string name="boolean_false">ЛОЖЬ</string>
   <string name="unknown">Неизвестный</string>
+  <string name="export">экспорт</string>
 
 </resources>

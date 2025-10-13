@@ -4,17 +4,19 @@
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
-  <item
-      android:id="@+id/systemAppToggleTitle"
-      app:showAsAction="always"
-      android:title="@string/systemAppToggle" />
-  <item android:id="@+id/systemAppToggle"
-      android:title="@string/systemAppToggle"
-      app:actionViewClass="com.google.android.material.switchmaterial.SwitchMaterial"
-      app:showAsAction="ifRoom" />
   <item android:id="@+id/search"
-    android:title="@string/search"
-    android:icon="@drawable/ic_search"
-    app:actionViewClass="androidx.appcompat.widget.SearchView"
-    app:showAsAction="always" />
+      android:title="@string/search"
+      android:icon="@drawable/ic_search"
+      app:actionViewClass="androidx.appcompat.widget.SearchView"
+      app:showAsAction="ifRoom|collapseActionView" />
+  <item
+      android:id="@+id/systemAppToggle"
+      android:title="@string/systemAppToggle"
+      android:icon="@drawable/system_apps_toggle_selector"
+      android:checkable="true"
+      app:showAsAction="ifRoom" />
+  <item android:id="@+id/export"
+    android:title="@string/export"
+    android:icon="@android:drawable/ic_menu_save"
+    app:showAsAction="ifRoom" />
 </menu>

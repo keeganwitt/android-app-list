@@ -29,5 +29,6 @@
   <string name="boolean_true">真実</string>
   <string name="boolean_false">間違い</string>
   <string name="unknown">未知</string>
+  <string name="export">輸出</string>
 
 </resources>
