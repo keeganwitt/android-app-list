@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 android {
     namespace = 'com.github.keeganwitt.applist'
 
