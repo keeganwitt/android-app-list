@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">App-pictogram</string>
+  <string name="search">Zoeken</string>
+  <string name="systemAppToggle">Systeem-apps</string>
+  <string name="appInfoField_apkSize">APK-grootte</string>
+  <string name="appInfoField_appSize">App-grootte</string>
+  <string name="appInfoField_archived">Gearchiveerd</string>
+  <string name="appInfoField_cacheSize">Cachegrootte</string>
+  <string name="appInfoField_dataSize">Gegevensgrootte</string>
+  <string name="appInfoField_enabled">Ingeschakeld</string>
+  <string name="appInfoField_exists_in_app_store">Bestaat in de App Store</string>
+  <string name="appInfoField_externalCacheSize">Externe cachegrootte</string>
+  <string name="appInfoField_firstInstalled">Voor het eerst geïnstalleerd</string>
+  <string name="appInfoField_grantedPermissions">Toegestane machtigingen</string>
+  <string name="appInfoField_lastUpdated">Laatst bijgewerkt</string>
+  <string name="appInfoField_lastUsed">Laatst gebruikt</string>
+  <string name="appInfoField_minSdk">Min SDK</string>
+  <string name="appInfoField_packageManager">Pakketbeheer</string>
+  <string name="appInfoField_requestedPermissions">Gevraagde machtigingen</string>
+  <string name="appInfoField_targetSdk">Doel-SDK</string>
+  <string name="appInfoField_totalSize">Totale grootte</string>
+  <string name="appInfoField_version">Versie</string>
+  <string name="enabled">Ingeschakeld</string>
+  <string name="disabled">Uitgeschakeld</string>
+  <string name="installed">Geïnstalleerd</string>
+  <string name="archived">Gearchiveerd</string>
+  <string name="boolean_true">Waar</string>
+  <string name="boolean_false">Onwaar</string>
+  <string name="unknown">Onbekend</string>
+  <string name="export">Exporteren</string>
+  <string name="export_as">Exporteren als</string>
+  <string name="export_no_apps">Geen apps om te exporteren</string>
+  <string name="export_successful">Exporteren gelukt</string>
+  <string name="export_failed">Exporteren mislukt:</string>
+
+</resources>

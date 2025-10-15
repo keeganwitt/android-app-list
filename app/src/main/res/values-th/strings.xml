@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">ไอคอนแอป</string>
+  <string name="search">ค้นหา</string>
+  <string name="systemAppToggle">แอปของระบบ</string>
+  <string name="appInfoField_apkSize">ขนาด APK</string>
+  <string name="appInfoField_appSize">ขนาดแอป</string>
+  <string name="appInfoField_archived">เก็บถาวร</string>
+  <string name="appInfoField_cacheSize">ขนาดแคช</string>
+  <string name="appInfoField_dataSize">ขนาดข้อมูล</string>
+  <string name="appInfoField_enabled">เปิดใช้งาน</string>
+  <string name="appInfoField_exists_in_app_store">มีอยู่ใน App Store</string>
+  <string name="appInfoField_externalCacheSize">ขนาดแคชภายนอก</string>
+  <string name="appInfoField_firstInstalled">ติดตั้งครั้งแรก</string>
+  <string name="appInfoField_grantedPermissions">การอนุญาตที่ได้รับ</string>
+  <string name="appInfoField_lastUpdated">อัปเดตล่าสุด</string>
+  <string name="appInfoField_lastUsed">ใช้ล่าสุด</string>
+  <string name="appInfoField_minSdk">SDK ขั้นต่ำ</string>
+  <string name="appInfoField_packageManager">ตัวจัดการแพ็คเกจ</string>
+  <string name="appInfoField_requestedPermissions">การอนุญาตที่ร้องขอ</string>
+  <string name="appInfoField_targetSdk">SDK เป้าหมาย</string>
+  <string name="appInfoField_totalSize">ขนาดทั้งหมด</string>
+  <string name="appInfoField_version">เวอร์ชัน</string>
+  <string name="enabled">เปิดใช้งาน</string>
+  <string name="disabled">ปิดใช้งาน</string>
+  <string name="installed">ติดตั้งแล้ว</string>
+  <string name="archived">เก็บถาวร</string>
+  <string name="boolean_true">จริง</string>
+  <string name="boolean_false">เท็จ</string>
+  <string name="unknown">ไม่ทราบ</string>
+  <string name="export">ส่งออก</string>
+  <string name="export_as">ส่งออกเป็น</string>
+  <string name="export_no_apps">ไม่มีแอปที่จะส่งออก</string>
+  <string name="export_successful">ส่งออกสำเร็จ</string>
+  <string name="export_failed">การส่งออกล้มเหลว:</string>
+
+</resources>

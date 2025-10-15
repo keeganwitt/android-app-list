@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">Ikon Aplikasi</string>
+  <string name="search">Cari</string>
+  <string name="systemAppToggle">Aplikasi sistem</string>
+  <string name="appInfoField_apkSize">Ukuran APK</string>
+  <string name="appInfoField_appSize">Ukuran Aplikasi</string>
+  <string name="appInfoField_archived">Diarsipkan</string>
+  <string name="appInfoField_cacheSize">Ukuran Cache</string>
+  <string name="appInfoField_dataSize">Ukuran Data</string>
+  <string name="appInfoField_enabled">Diaktifkan</string>
+  <string name="appInfoField_exists_in_app_store">Ada di App Store</string>
+  <string name="appInfoField_externalCacheSize">Ukuran Cache Eksternal</string>
+  <string name="appInfoField_firstInstalled">Pertama Diinstal</string>
+  <string name="appInfoField_grantedPermissions">Izin yang Diberikan</string>
+  <string name="appInfoField_lastUpdated">Terakhir Diperbarui</string>
+  <string name="appInfoField_lastUsed">Terakhir Digunakan</string>
+  <string name="appInfoField_minSdk">SDK Min</string>
+  <string name="appInfoField_packageManager">Manajer Paket</string>
+  <string name="appInfoField_requestedPermissions">Izin yang Diminta</string>
+  <string name="appInfoField_targetSdk">SDK Target</string>
+  <string name="appInfoField_totalSize">Ukuran Total</string>
+  <string name="appInfoField_version">Versi</string>
+  <string name="enabled">Diaktifkan</string>
+  <string name="disabled">Dinonaktifkan</string>
+  <string name="installed">Terpasang</string>
+  <string name="archived">Diarsipkan</string>
+  <string name="boolean_true">Benar</string>
+  <string name="boolean_false">Salah</string>
+  <string name="unknown">Tidak diketahui</string>
+  <string name="export">Ekspor</string>
+  <string name="export_as">Ekspor sebagai</string>
+  <string name="export_no_apps">Tidak ada aplikasi untuk diekspor</string>
+  <string name="export_successful">Ekspor berhasil</string>
+  <string name="export_failed">Ekspor gagal:</string>
+
+</resources>
