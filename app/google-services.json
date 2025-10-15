@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "752490783623",
+    "project_id": "app-list-2e40d",
+    "storage_bucket": "app-list-2e40d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752490783623:android:0e85b0f4713304a15e2922",
+        "android_client_info": {
+          "package_name": "com.github.keeganwitt.applist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJcEro5rilJyFLCg2L6pvF9gsT7mKzbAk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
