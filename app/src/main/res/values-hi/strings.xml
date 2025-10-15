@@ -30,5 +30,9 @@
   <string name="boolean_false">असत्य</string>
   <string name="unknown">अज्ञात</string>
   <string name="export">निर्यात</string>
+  <string name="export_as">के रूप में निर्यात करें</string>
+  <string name="export_no_apps">निर्यात करने के लिए कोई एप्लिकेशन नहीं</string>
+  <string name="export_successful">निर्यात सफल</string>
+  <string name="export_failed">निर्यात विफल:</string>
 
 </resources>

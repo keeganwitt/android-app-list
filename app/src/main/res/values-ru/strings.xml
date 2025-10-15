@@ -30,5 +30,9 @@
   <string name="boolean_false">ЛОЖЬ</string>
   <string name="unknown">Неизвестный</string>
   <string name="export">экспорт</string>
+  <string name="export_as">экспортировать как</string>
+  <string name="export_no_apps">Нет приложений для экспорта</string>
+  <string name="export_successful">Экспорт успешен</string>
+  <string name="export_failed">Ошибка экспорта:</string>
 
 </resources>

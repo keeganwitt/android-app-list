@@ -30,5 +30,9 @@
   <string name="boolean_false">Falso</string>
   <string name="unknown">Sconosciuta</string>
   <string name="export">Esportare</string>
+  <string name="export_as">Esporta come</string>
+  <string name="export_no_apps">Nessuna app da esportare</string>
+  <string name="export_successful">Esportazione riuscita</string>
+  <string name="export_failed">Esportazione fallita:</string>
 
 </resources>

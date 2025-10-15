@@ -30,5 +30,9 @@
   <string name="boolean_false">錯誤的</string>
   <string name="unknown">未知</string>
   <string name="export">出口</string>
+  <string name="export_as">導出為</string>
+  <string name="export_no_apps">沒有要導出的應用</string>
+  <string name="export_successful">導出成功</string>
+  <string name="export_failed">導出失敗：</string>
 
 </resources>

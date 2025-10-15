@@ -30,5 +30,9 @@
   <string name="boolean_false">거짓</string>
   <string name="unknown">알려지지 않은</string>
   <string name="export">내보내기</string>
+  <string name="export_as">다음으로 내보내기</string>
+  <string name="export_no_apps">내보낼 앱이 없습니다</string>
+  <string name="export_successful">내보내기 성공</string>
+  <string name="export_failed">내보내기 실패:</string>
 
 </resources>

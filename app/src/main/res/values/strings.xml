@@ -31,5 +31,11 @@
   <string name="boolean_false">False</string>
   <string name="unknown">Unknown</string>
   <string name="export">Export</string>
+  <string name="export_as">Export as</string>
+  <string name="export_xml" translatable="false">XML</string>
+  <string name="export_html" translatable="false">HTML</string>
+  <string name="export_no_apps">No apps to export</string>
+  <string name="export_successful">Export successful</string>
+  <string name="export_failed">Export failed:</string>
 
 </resources>
