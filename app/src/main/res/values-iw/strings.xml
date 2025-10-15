@@ -30,5 +30,9 @@
   <string name="boolean_false">שֶׁקֶר</string>
   <string name="unknown">לא ידוע</string>
   <string name="export">יְצוּא</string>
+  <string name="export_as">ייצא כ</string>
+  <string name="export_no_apps">אין אפליקציות לייצא</string>
+  <string name="export_successful">היצוא נכשל</string>
+  <string name="export_failed">היצוא נכשל:</string>
 
 </resources>

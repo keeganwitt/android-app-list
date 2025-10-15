@@ -30,5 +30,9 @@
   <string name="boolean_false">SAI</string>
   <string name="unknown">không xác định</string>
   <string name="export">Xuất</string>
+  <string name="export_as">Xuất dưới dạng</string>
+  <string name="export_no_apps">Không có ứng dụng nào để xuất</string>
+  <string name="export_successful">Xuất thành công</string>
+  <string name="export_failed">Xuất không thành công:</string>
 
 </resources>
