@@ -21,50 +21,40 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public class AppListLoader {
-    private static final String TAG = AppListLoader.class.getSimpleName();
+public class AppInfoRepository {
+    private static final String TAG = AppInfoRepository.class.getSimpleName();
 
     private final Context context;
     private final PackageManager packageManager;
     private final android.app.usage.UsageStatsManager usageStatsManager;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private Future<?> future;
 
-    public AppListLoader(Context context, PackageManager packageManager, android.app.usage.UsageStatsManager usageStatsManager) {
-        this.context = context;
-        this.packageManager = packageManager;
-        this.usageStatsManager = usageStatsManager;
+    public AppInfoRepository(Context context) {
+        this.context = context.getApplicationContext();
+        this.packageManager = context.getPackageManager();
+        this.usageStatsManager = (android.app.usage.UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
     }
 
-    public void load(AppInfoField appInfoField, boolean showSystemApps, boolean descendingSortOrder, boolean reload, Callback callback) {
-        if (future != null) {
-            future.cancel(true);
+    public List<AppInfo> getAppList(AppInfoField appInfoField, boolean showSystemApps, boolean descendingSortOrder, boolean reload) {
+        int flags = PackageManager.GET_META_DATA | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+        List<ApplicationInfo> allInstalledApps = packageManager.getInstalledApplications(flags);
+
+        List<AppInfo> appList = filterUserOrSystemApps(allInstalledApps.stream()
+                .map(it -> new AppInfo(it, appInfoField))
+                .collect(Collectors.toList()), showSystemApps).stream()
+                .peek(it -> {
+                    if (appInfoField.equals(AppInfoField.LAST_USED)) {
+                        it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), reload));
+                    }
+                })
+                .sorted(determineComparator(packageManager, appInfoField))
+                .collect(Collectors.toList());
+
+        if (descendingSortOrder) {
+            Collections.reverse(appList);
         }
-        future = executor.submit(() -> {
-            List<ApplicationInfo> allInstalledApps;
-            int flags = PackageManager.GET_META_DATA | PackageManager.MATCH_UNINSTALLED_PACKAGES;
-            allInstalledApps = packageManager.getInstalledApplications(flags);
-            List<AppInfo> appList;
-            appList = filterUserOrSystemApps(allInstalledApps.stream()
-                    .map(it -> new AppInfo(it, appInfoField))
-                    .collect(Collectors.toList()), showSystemApps).stream()
-                    .peek(it -> {
-                        if (appInfoField.equals(AppInfoField.LAST_USED)) {
-                            it.setLastUsed(getLastUsed(usageStatsManager, it.getApplicationInfo(), reload));
-                        }
-                    })
-                    .sorted(determineComparator(packageManager, appInfoField))
-                    .collect(Collectors.toList());
-            if (descendingSortOrder) {
-                Collections.reverse(appList);
-            }
-            callback.onLoaded(appList);
-        });
+        return appList;
     }
 
     private List<AppInfo> filterUserOrSystemApps(List<AppInfo> list, boolean showSystemApps) {
@@ -72,7 +62,6 @@ public class AppListLoader {
         for (AppInfo info : list) {
             try {
                 boolean include = showSystemApps || isUserInstalledApp(info.getApplicationInfo());
-
                 boolean isArchived = ApplicationInfoUtils.isAppArchived(info.getApplicationInfo());
                 boolean hasLaunchIntent = packageManager.getLaunchIntentForPackage(info.getApplicationInfo().packageName) != null;
 
@@ -83,7 +72,6 @@ public class AppListLoader {
                 Log.e(TAG, "Unable to filter by user/system", e);
             }
         }
-
         return appList;
     }
 
@@ -155,9 +143,5 @@ public class AppListLoader {
         }
         comparator = comparator.thenComparing(ai -> String.valueOf(ai.getApplicationInfo().loadLabel(packageManager)), collator);
         return comparator;
-    }
-
-    public interface Callback {
-        void onLoaded(List<AppInfo> appList);
     }
 }

@@ -1,7 +1,6 @@
 package com.github.keeganwitt.applist;
 
 import android.app.AppOpsManager;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +21,7 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -30,9 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener, AppListLoader.Callback {
-    private PackageManager packageManager;
-    private UsageStatsManager usageStatsManager;
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
     private List<AppInfoField> appInfoFields;
     private AppInfoField selectedAppInfoField;
     private boolean descendingSortOrder;
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private ProgressBar progressBar;
     private boolean showSystemApps = false;
     private AppExporter appExporter;
-    private AppListLoader appListLoader;
+    private AppListViewModel appListViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         appInfoFields = Arrays.asList(AppInfoField.values());
-        packageManager = getPackageManager();
-        usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         progressBar = findViewById(R.id.progress_bar);
         recyclerView = findViewById(R.id.recycler_view);
@@ -68,13 +64,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         toggleButton = findViewById(R.id.toggleButton);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
-        appInfoAdapter = new AppInfoAdapter(MainActivity.this, usageStatsManager, this);
+        appInfoAdapter = new AppInfoAdapter(this, (android.app.usage.UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE), this);
         RecyclerView.LayoutManager layoutManager = new GridAutofitLayoutManager(this, 450);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(appInfoAdapter);
 
-        appExporter = new AppExporter(this, appInfoAdapter, packageManager, usageStatsManager);
-        appListLoader = new AppListLoader(this, packageManager, usageStatsManager);
+        appExporter = new AppExporter(this, appInfoAdapter, getPackageManager(), (android.app.usage.UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE));
+
+        appListViewModel = new ViewModelProvider(this).get(AppListViewModel.class);
+        observeViewModel();
 
         String[] appInfoFieldStrings = new String[]{
                 getString(R.string.appInfoField_apkSize),
@@ -117,12 +115,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         toggleButton.setOnCheckedChangeListener((compoundButton, b) -> {
             descendingSortOrder = !descendingSortOrder;
-            loadApplications(selectedAppInfoField, false);
+            loadApplications(false);
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            loadApplications(selectedAppInfoField, true);
+            loadApplications(true);
             swipeRefreshLayout.setRefreshing(false);
+        });
+    }
+
+    private void observeViewModel() {
+        appListViewModel.getAppList().observe(this, appList -> {
+            appInfoAdapter.setUnfilteredList(appList);
+            appInfoAdapter.submitList(appList);
+        });
+
+        appListViewModel.getIsLoading().observe(this, isLoading -> {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            recyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
         });
     }
 
@@ -188,9 +198,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onResume() {
         super.onResume();
-        // reload true in case application was changed (permission changed, enabled, uninstalled, etc) from application info
-        // TODO: reload only selected item instead of entire list
-        loadApplications(selectedAppInfoField, true);
+        loadApplications(true);
     }
 
     @Override
@@ -204,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             showSystemApps = isChecked;
             item.setChecked(isChecked);
             updateSystemAppToggleIcon(item);
-            loadApplications(selectedAppInfoField, true);
+            loadApplications(true);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -228,13 +236,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 && !hasUsageStatsPermission()) {
             requestUsageStatsPermission();
         }
-        loadApplications(selectedAppInfoField, false);
+        loadApplications(false);
     }
 
-    private void loadApplications(AppInfoField appInfoField, boolean reload) {
-        recyclerView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
-        appListLoader.load(appInfoField, showSystemApps, descendingSortOrder, reload, this);
+    private void loadApplications(boolean reload) {
+        if (selectedAppInfoField != null) {
+            appListViewModel.loadApps(selectedAppInfoField, showSystemApps, descendingSortOrder, reload);
+        }
     }
 
     private boolean hasUsageStatsPermission() {
@@ -253,15 +261,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
         startActivity(intent);
-    }
-
-    @Override
-    public void onLoaded(List<AppInfo> appList) {
-        runOnUiThread(() -> {
-            appInfoAdapter.setUnfilteredList(appList);
-            appInfoAdapter.submitList(appList);
-            progressBar.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-        });
     }
 }
