@@ -109,7 +109,6 @@ class AppInfo(@JvmField val applicationInfo: ApplicationInfo, @JvmField val appI
             AppInfoField.VERSION -> {
                 return ApplicationInfoUtils.getVersionText(packageManager, applicationInfo)
             }
-            else -> return ""
         }
     }
 }
