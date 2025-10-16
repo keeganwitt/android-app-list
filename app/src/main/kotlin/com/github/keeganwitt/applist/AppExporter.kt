@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.core.graphics.createBitmap
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 class AppExporter(
     private val activity: AppCompatActivity,
@@ -160,7 +161,10 @@ class AppExporter(
                 ).show()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error exporting XML", e)
+            val message = "Error exporting XML"
+            Log.e(TAG, message, e)
+            FirebaseCrashlytics.getInstance().log(message)
+            FirebaseCrashlytics.getInstance().recordException(e)
             Toast.makeText(
                 activity,
                 activity.getString(R.string.export_failed) + " " + e.message,
@@ -246,7 +250,10 @@ class AppExporter(
                 ).show()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error exporting HTML", e)
+            val message = "Error exporting HTML"
+            Log.e(TAG, message, e)
+            FirebaseCrashlytics.getInstance().log(message)
+            FirebaseCrashlytics.getInstance().recordException(e)
             Toast.makeText(
                 activity,
                 activity.getString(R.string.export_failed) + " " + e.message,

@@ -12,6 +12,7 @@ import android.os.Process
 import android.os.storage.StorageManager
 import android.text.format.Formatter
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -37,7 +38,10 @@ object ApplicationInfoUtils {
             try {
                 packageManager.getInstallSourceInfo(applicationInfo.packageName).installingPackageName
             } catch (e: PackageManager.NameNotFoundException) {
-                Log.e(TAG, "Could not get package installer for " + applicationInfo.packageName, e)
+                val message = "Could not get package installer for " + applicationInfo.packageName
+                Log.e(TAG, message, e)
+                FirebaseCrashlytics.getInstance().log(message)
+                FirebaseCrashlytics.getInstance().recordException(e)
                 null
             }
         } else {
@@ -199,7 +203,10 @@ object ApplicationInfoUtils {
     fun getStorageUsage(context: Context, applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            Log.w(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")")
+            val message =
+                "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")"
+            Log.w(TAG, message)
+            FirebaseCrashlytics.getInstance().log(message)
             return storageUsage
         }
 
@@ -211,8 +218,11 @@ object ApplicationInfoUtils {
                 val uuidStr = storageVolume.uuid
                 val uuid: UUID = try {
                     if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
-                } catch (_: IllegalArgumentException) {
-                    Log.w(TAG, "Could not parse UUID $uuidStr for calculating storage usage")
+                } catch (e: IllegalArgumentException) {
+                    val message = "Could not parse UUID $uuidStr for calculating storage usage"
+                    Log.w(TAG, message)
+                    FirebaseCrashlytics.getInstance().log(message)
+                    FirebaseCrashlytics.getInstance().recordException(e)
                     return@forEach
                 }
 
@@ -225,7 +235,11 @@ object ApplicationInfoUtils {
                         storageUsage.increaseExternalCacheBytes(storageStats.externalCacheBytes)
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Unable to process storage usage for ${applicationInfo.packageName} on $uuid", e)
+                    val message =
+                        "Unable to process storage usage for ${applicationInfo.packageName} on $uuid"
+                    Log.e(TAG, message, e)
+                    FirebaseCrashlytics.getInstance().log(message)
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
             }
         }
@@ -258,7 +272,10 @@ object ApplicationInfoUtils {
                 exists
             }
         } catch (e: IOException) {
-            Log.e(TAG, "Unable to make HTTP request to $url", e)
+            val message = "Unable to make HTTP request to $url"
+            Log.e(TAG, message, e)
+            FirebaseCrashlytics.getInstance().log(message)
+            FirebaseCrashlytics.getInstance().recordException(e)
             null
         }
     }

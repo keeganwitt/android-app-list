@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.AppInfoAdapter.AppInfoViewHolder
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.util.Locale
 
 class AppInfoAdapter(
@@ -57,11 +58,14 @@ class AppInfoAdapter(
                 usageStatsManager
             )
         } catch (e: PackageManager.NameNotFoundException) {
+            val message = "Unable to set requested text for " + appInfo.appInfoField + " for app " + appInfo.applicationInfo.packageName
             Log.e(
                 TAG,
-                "Unable to set requested text for " + appInfo.appInfoField + " for app " + appInfo.applicationInfo.packageName,
+                message,
                 e
             )
+            FirebaseCrashlytics.getInstance().log(message)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
 
     }
@@ -120,7 +124,10 @@ class AppInfoAdapter(
                     try {
                         textValue = item.getTextValue(context, packageManager, usageStatsManager)
                     } catch (e: PackageManager.NameNotFoundException) {
-                        Log.e(TAG, "Unable to calculate text value for search", e)
+                        val message = "Unable to calculate text value for search"
+                        Log.e(TAG, message, e)
+                        FirebaseCrashlytics.getInstance().log(message)
+                        FirebaseCrashlytics.getInstance().recordException(e)
                         textValue = ""
                     }
                     if (packageName.contains(filterPattern) || textValue!!.lowercase(Locale.getDefault())

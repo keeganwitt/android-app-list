@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import com.github.keeganwitt.applist.ApplicationInfoUtils.isAppArchived
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.text.Collator
 import java.util.Comparator
 
@@ -36,7 +37,10 @@ class AppInfoRepository(context: Context) {
                     null
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Unable to filter by user/system", e)
+                val message = "Unable to filter by user/system"
+                Log.e(TAG, message, e)
+                FirebaseCrashlytics.getInstance().log(message)
+                FirebaseCrashlytics.getInstance().recordException(e)
                 null
             }
         }.onEach { appInfo ->
