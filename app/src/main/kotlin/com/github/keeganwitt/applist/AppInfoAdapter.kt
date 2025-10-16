@@ -20,18 +20,16 @@ import java.util.Locale
 
 class AppInfoAdapter(
     private val context: Context,
-    usageStatsManager: UsageStatsManager,
+    private val usageStatsManager: UsageStatsManager,
     private val onClickListener: OnClickListener
 ) : ListAdapter<AppInfo, AppInfoViewHolder>(
     AsyncDifferConfig.Builder(DiffCallback()).build()
 ), Filterable {
     private val packageManager: PackageManager = context.packageManager
-    private val usageStatsManager: UsageStatsManager
     private val applicationInfoFilter: ApplicationInfoFilter
     private var unfilteredList: List<AppInfo>? = null
 
     init {
-        this.usageStatsManager = usageStatsManager
         this.applicationInfoFilter = ApplicationInfoFilter()
     }
 
@@ -84,11 +82,10 @@ class AppInfoAdapter(
         View.OnClickListener {
         var iconView: ImageView = itemView.findViewById(R.id.app_icon)
         var appNameView: TextView = itemView.findViewById(R.id.app_name)
-        var packageNameView: TextView = itemView.findViewById<TextView>(R.id.package_name)
-        var appInfoView: TextView
+        var packageNameView: TextView = itemView.findViewById(R.id.package_name)
+        var appInfoView: TextView = itemView.findViewById<TextView>(R.id.app_info)
 
         init {
-            appInfoView = itemView.findViewById<TextView>(R.id.app_info)
             itemView.setOnClickListener(this)
         }
 
