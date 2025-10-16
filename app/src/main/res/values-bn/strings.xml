@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">অ্যাপ আইকন</string>
+  <string name="search">অনুসন্ধান করুন</string>
+  <string name="systemAppToggle">সিস্টেম অ্যাপস</string>
+  <string name="appInfoField_apkSize">এপিকে সাইজ</string>
+  <string name="appInfoField_appSize">অ্যাপ সাইজ</string>
+  <string name="appInfoField_archived">আর্কাইভ করা হয়েছে</string>
+  <string name="appInfoField_cacheSize">ক্যাশে সাইজ</string>
+  <string name="appInfoField_dataSize">ডেটা সাইজ</string>
+  <string name="appInfoField_enabled">সক্ষম করা হয়েছে</string>
+  <string name="appInfoField_exists_in_app_store">অ্যাপ স্টোরে বিদ্যমান</string>
+  <string name="appInfoField_externalCacheSize">এক্সটার্নাল ক্যাশে সাইজ</string>
+  <string name="appInfoField_firstInstalled">প্রথম ইনস্টল করা হয়েছে</string>
+  <string name="appInfoField_grantedPermissions">অনুমোদিত অনুমতি</string>
+  <string name="appInfoField_lastUpdated">শেষ আপডেট করা হয়েছে</string>
+  <string name="appInfoField_lastUsed">শেষ ব্যবহার করা হয়েছে</string>
+  <string name="appInfoField_minSdk">ন্যূনতম এসডিকে</string>
+  <string name="appInfoField_packageManager">প্যাকেজ ম্যানেজার</string>
+  <string name="appInfoField_requestedPermissions">অনুরোধ করা অনুমতি</string>
+  <string name="appInfoField_targetSdk">টার্গেট এসডিকে</string>
+  <string name="appInfoField_totalSize">মোট সাইজ</string>
+  <string name="appInfoField_version">সংস্করণ</string>
+  <string name="enabled">সক্ষম করা হয়েছে</string>
+  <string name="disabled">নিষ্ক্রিয় করা হয়েছে</string>
+  <string name="installed">ইনস্টল করা হয়েছে</string>
+  <string name="archived">আর্কাইভ করা হয়েছে</string>
+  <string name="boolean_true">সত্য</string>
+  <string name="boolean_false">মিথ্যা</string>
+  <string name="unknown">অজানা</string>
+  <string name="export">রপ্তানি করুন</string>
+  <string name="export_as">হিসাবে রপ্তানি করুন</string>
+  <string name="export_no_apps">রপ্তানি করার জন্য কোন অ্যাপ নেই</string>
+  <string name="export_successful">রপ্তানি সফল হয়েছে</string>
+  <string name="export_failed">রপ্তানি ব্যর্থ হয়েছে:</string>
+
+</resources>

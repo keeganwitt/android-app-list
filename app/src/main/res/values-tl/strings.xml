@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_icon_description">Icon ng App</string>
+  <string name="search">Maghanap</string>
+  <string name="systemAppToggle">Mga system app</string>
+  <string name="appInfoField_apkSize">Laki ng APK</string>
+  <string name="appInfoField_appSize">Laki ng App</string>
+  <string name="appInfoField_archived">Naka-archive</string>
+  <string name="appInfoField_cacheSize">Laki ng Cache</string>
+  <string name="appInfoField_dataSize">Laki ng Data</string>
+  <string name="appInfoField_enabled">Pinagana</string>
+  <string name="appInfoField_exists_in_app_store">Umiiral sa App Store</string>
+  <string name="appInfoField_externalCacheSize">Laki ng Panlabas na Cache</string>
+  <string name="appInfoField_firstInstalled">Unang Naka-install</string>
+  <string name="appInfoField_grantedPermissions">Mga Pinagkaloob na Pahintulot</string>
+  <string name="appInfoField_lastUpdated">Huling Na-update</string>
+  <string name="appInfoField_lastUsed">Huling Ginamit</string>
+  <string name="appInfoField_minSdk">Min SDK</string>
+  <string name="appInfoField_packageManager">Manager ng Package</string>
+  <string name="appInfoField_requestedPermissions">Mga Hiniling na Pahintulot</string>
+  <string name="appInfoField_targetSdk">Target na SDK</string>
+  <string name="appInfoField_totalSize">Kabuuang Laki</string>
+  <string name="appInfoField_version">Bersyon</string>
+  <string name="enabled">Pinagana</string>
+  <string name="disabled">Hindi pinagana</string>
+  <string name="installed">Naka-install</string>
+  <string name="archived">Naka-archive</string>
+  <string name="boolean_true">Totoo</string>
+  <string name="boolean_false">Mali</string>
+  <string name="unknown">Hindi alam</string>
+  <string name="export">I-export</string>
+  <string name="export_as">I-export bilang</string>
+  <string name="export_no_apps">Walang mga app na i-export</string>
+  <string name="export_successful">Matagumpay ang pag-export</string>
+  <string name="export_failed">Nabigo ang pag-export:</string>
+
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_icon_description">Іконка програми</string>
+  <string name="search">Пошук</string>
+  <string name="systemAppToggle">Системні програми</string>
+  <string name="appInfoField_apkSize">Розмір APK</string>
+  <string name="appInfoField_appSize">Розмір програми</string>
+  <string name="appInfoField_archived">Архівовано</string>
+  <string name="appInfoField_cacheSize">Розмір кешу</string>
+  <string name="appInfoField_dataSize">Розмір даних</string>
+  <string name="appInfoField_enabled">Увімкнено</string>
+  <string name="appInfoField_exists_in_app_store">Існує в App Store</string>
+  <string name="appInfoField_externalCacheSize">Розмір зовнішнього кешу</string>
+  <string name="appInfoField_firstInstalled">Вперше встановлено</string>
+  <string name="appInfoField_grantedPermissions">Надані дозволи</string>
+  <string name="appInfoField_lastUpdated">Востаннє оновлено</string>
+  <string name="appInfoField_lastUsed">Востаннє використано</string>
+  <string name="appInfoField_minSdk">Мінімальний SDK</string>
+  <string name="appInfoField_packageManager">Менеджер пакунків</string>
+  <string name="appInfoField_requestedPermissions">Запитані дозволи</string>
+  <string name="appInfoField_targetSdk">Цільовий SDK</string>
+  <string name="appInfoField_totalSize">Загальний розмір</string>
+  <string name="appInfoField_version">Версія</string>
+  <string name="enabled">Увімкнено</string>
+  <string name="disabled">Вимкнено</string>
+  <string name="installed">Встановлено</string>
+  <string name="archived">Архівовано</string>
+  <string name="boolean_true">Правда</string>
+  <string name="boolean_false">Неправда</string>
+  <string name="unknown">Невідомо</string>
+  <string name="export">Експорт</string>
+  <string name="export_as">Експортувати як</string>
+  <string name="export_no_apps">Немає програм для експорту</string>
+  <string name="export_successful">Експорт успішний</string>
+  <string name="export_failed">Помилка експорту:</string>
+
+</resources>
