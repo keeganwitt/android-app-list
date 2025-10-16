@@ -36,14 +36,14 @@ class AppExporter(
     private var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: String? = null
 
-    private val createFileLauncher: ActivityResultLauncher<Intent?>
+    private val createFileLauncher: ActivityResultLauncher<Intent>
 
     init {
-        this.createFileLauncher = activity.registerForActivityResult<Intent?, ActivityResult?>(
+        this.createFileLauncher = activity.registerForActivityResult(
             StartActivityForResult()
-        ) { result: ActivityResult? ->
-            if (result!!.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
-                val uri = result.data!!.data
+        ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
+                val uri = result.data?.data
                 if (uri != null) {
                     if ("xml" == currentExportType) {
                         writeXmlToFile(uri)
@@ -123,7 +123,7 @@ class AppExporter(
 
                 for (i in 0..<appInfoAdapter!!.itemCount) {
                     val app = appInfoAdapter.currentList[i]
-                    val appName = app.applicationInfo.loadLabel(packageManager!!).toString()
+                    val appName = app.applicationInfo.loadLabel(packageManager).toString()
                     val packageName = app.applicationInfo.packageName
                     val infoType = selectedAppInfoField!!.name
                     var infoValue: String? = ""
@@ -201,7 +201,7 @@ class AppExporter(
                 for (i in 0..<appInfoAdapter!!.itemCount) {
                     val app = appInfoAdapter.currentList[i]
                     val appName = Html.escapeHtml(
-                        app.applicationInfo.loadLabel(packageManager!!).toString()
+                        app.applicationInfo.loadLabel(packageManager).toString()
                     )
                     val packageName = Html.escapeHtml(app.applicationInfo.packageName)
 
