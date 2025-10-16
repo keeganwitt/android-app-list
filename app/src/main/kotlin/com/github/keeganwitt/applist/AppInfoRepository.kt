@@ -77,15 +77,15 @@ class AppInfoRepository(context: Context) {
             AppInfoField.ARCHIVED -> Comparator.comparing { ApplicationInfoUtils.getAppIsArchivedText(context, it.applicationInfo) }
             AppInfoField.EXISTS_IN_APP_STORE -> Comparator.comparing { ApplicationInfoUtils.getExistsInAppStoreText(context, packageManager, it.applicationInfo) }
             AppInfoField.EXTERNAL_CACHE_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).externalCacheBytes }
-            AppInfoField.FIRST_INSTALLED -> Comparator.comparingLong { try { ApplicationInfoUtils.getFirstInstalled(packageManager, it.applicationInfo).time } catch (e: PackageManager.NameNotFoundException) { 0L } }
-            AppInfoField.LAST_UPDATED -> Comparator.comparingLong { try { ApplicationInfoUtils.getLastUpdated(packageManager, it.applicationInfo).time } catch (e: PackageManager.NameNotFoundException) { 0L } }
+            AppInfoField.FIRST_INSTALLED -> Comparator.comparingLong { try { ApplicationInfoUtils.getFirstInstalled(packageManager, it.applicationInfo).time } catch (_: PackageManager.NameNotFoundException) { 0L } }
+            AppInfoField.LAST_UPDATED -> Comparator.comparingLong { try { ApplicationInfoUtils.getLastUpdated(packageManager, it.applicationInfo).time } catch (_: PackageManager.NameNotFoundException) { 0L } }
             AppInfoField.LAST_USED -> Comparator.comparingLong { ApplicationInfoUtils.getLastUsed(usageStatsManager, it.applicationInfo, false).time }
             AppInfoField.MIN_SDK -> Comparator.comparingInt { it.applicationInfo.minSdkVersion }
             AppInfoField.PACKAGE_MANAGER -> Comparator.comparing { ApplicationInfoUtils.getPackageInstallerName(ApplicationInfoUtils.getPackageInstaller(packageManager, it.applicationInfo)) }
-            AppInfoField.GRANTED_PERMISSIONS, AppInfoField.REQUESTED_PERMISSIONS -> Comparator.comparingInt { try { ApplicationInfoUtils.getPermissions(packageManager, it.applicationInfo, appInfoField == AppInfoField.GRANTED_PERMISSIONS).size } catch (e: Exception) { 0 } }
+            AppInfoField.GRANTED_PERMISSIONS, AppInfoField.REQUESTED_PERMISSIONS -> Comparator.comparingInt { try { ApplicationInfoUtils.getPermissions(packageManager, it.applicationInfo, appInfoField == AppInfoField.GRANTED_PERMISSIONS).size } catch (_: Exception) { 0 } }
             AppInfoField.TARGET_SDK -> Comparator.comparingInt { it.applicationInfo.targetSdkVersion }
             AppInfoField.TOTAL_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).totalBytes }
-            AppInfoField.VERSION -> Comparator.comparing { (try { ApplicationInfoUtils.getVersionText(packageManager, it.applicationInfo) } catch (e: PackageManager.NameNotFoundException) { "" }) ?: "" }
+            AppInfoField.VERSION -> Comparator.comparing { (try { ApplicationInfoUtils.getVersionText(packageManager, it.applicationInfo) } catch (_: PackageManager.NameNotFoundException) { "" }) ?: "" }
         }
 
         return primaryComparator.thenComparing(nameComparator)

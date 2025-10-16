@@ -211,7 +211,7 @@ object ApplicationInfoUtils {
                 val uuidStr = storageVolume.uuid
                 val uuid: UUID = try {
                     if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     Log.w(TAG, "Could not parse UUID $uuidStr for calculating storage usage")
                     return@forEach
                 }
@@ -265,7 +265,11 @@ object ApplicationInfoUtils {
 
     @Throws(PackageManager.NameNotFoundException::class)
     private fun getPackageInfo(packageManager: PackageManager, applicationInfo: ApplicationInfo): PackageInfo {
-        val flags = PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNING_CERTIFICATES
+        } else {
+            PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES
+        }
         return packageManager.getPackageInfo(applicationInfo.packageName, flags)
     }
 }

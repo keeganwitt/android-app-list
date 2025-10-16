@@ -2,7 +2,6 @@ package com.github.keeganwitt.applist
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -12,14 +11,6 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     val appList = MutableLiveData<List<AppInfo>>()
     val isLoading = MutableLiveData<Boolean>()
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
-    fun getAppList(): LiveData<List<AppInfo>> {
-        return appList
-    }
-
-    fun getIsLoading(): LiveData<Boolean> {
-        return isLoading
-    }
 
     fun loadApps(field: AppInfoField, showSystem: Boolean, descending: Boolean, reload: Boolean) {
         isLoading.value = true

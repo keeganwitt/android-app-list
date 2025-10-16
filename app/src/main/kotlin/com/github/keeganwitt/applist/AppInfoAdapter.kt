@@ -83,7 +83,7 @@ class AppInfoAdapter(
         var iconView: ImageView = itemView.findViewById(R.id.app_icon)
         var appNameView: TextView = itemView.findViewById(R.id.app_name)
         var packageNameView: TextView = itemView.findViewById(R.id.package_name)
-        var appInfoView: TextView = itemView.findViewById<TextView>(R.id.app_info)
+        var appInfoView: TextView = itemView.findViewById(R.id.app_info)
 
         init {
             itemView.setOnClickListener(this)
