@@ -20,11 +20,13 @@ import android.widget.ToggleButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.text.Collator
-import androidx.core.net.toUri
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
     private lateinit var appInfoFields: List<AppInfoField>
@@ -45,11 +47,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-            window.decorView.systemUiVisibility = 0
-        } else {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        val isLightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES
+        windowInsetsController.isAppearanceLightStatusBars = isLightMode
 
         appInfoFields = AppInfoField.entries
 
@@ -200,12 +200,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
 
     private fun hasUsageStatsPermission(): Boolean {
         val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
-        } else {
-            @Suppress("DEPRECATION")
-            appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
-        }
+        val mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
         return mode == AppOpsManager.MODE_ALLOWED
     }
 

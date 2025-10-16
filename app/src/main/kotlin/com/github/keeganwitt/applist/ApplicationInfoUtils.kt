@@ -285,6 +285,7 @@ object ApplicationInfoUtils {
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNING_CERTIFICATES
         } else {
+            @Suppress("DEPRECATION")
             PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES
         }
         return packageManager.getPackageInfo(applicationInfo.packageName, flags)
