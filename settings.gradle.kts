@@ -1,12 +1,11 @@
 pluginManagement {
-    pluginManagement {
-        repositories {
-            google()
-            mavenCentral()
-            gradlePluginPortal()
-        }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -14,5 +13,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
 rootProject.name = "App List"
-include ':app'
+include(":app")
