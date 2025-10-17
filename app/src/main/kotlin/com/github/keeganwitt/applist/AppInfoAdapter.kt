@@ -3,6 +3,7 @@ package com.github.keeganwitt.applist
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -50,6 +51,7 @@ class AppInfoAdapter(
         iconView.setImageDrawable(appInfo.applicationInfo.loadIcon(packageManager))
         packageNameView.text = appInfo.applicationInfo.packageName
         appNameView.text = appInfo.applicationInfo.loadLabel(packageManager)
+        appInfoView.movementMethod = LinkMovementMethod.getInstance()
 
         try {
             appInfoView.text = appInfo.getTextValue(
@@ -67,7 +69,6 @@ class AppInfoAdapter(
             FirebaseCrashlytics.getInstance().log(message)
             FirebaseCrashlytics.getInstance().recordException(e)
         }
-
     }
 
     override fun getFilter(): Filter {
@@ -122,7 +123,7 @@ class AppInfoAdapter(
                         .lowercase(Locale.getDefault())
                     var textValue: String?
                     try {
-                        textValue = item.getTextValue(context, packageManager, usageStatsManager)
+                        textValue = item.getTextValue(context, packageManager, usageStatsManager).toString()
                     } catch (e: PackageManager.NameNotFoundException) {
                         val message = "Unable to calculate text value for search"
                         Log.e(TAG, message, e)
@@ -130,7 +131,7 @@ class AppInfoAdapter(
                         FirebaseCrashlytics.getInstance().recordException(e)
                         textValue = ""
                     }
-                    if (packageName.contains(filterPattern) || textValue!!.lowercase(Locale.getDefault())
+                    if (packageName.contains(filterPattern) || textValue.lowercase(Locale.getDefault())
                             .contains(filterPattern)
                     ) {
                         filteredList.add(item)

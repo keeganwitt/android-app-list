@@ -4,6 +4,8 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.text.Html
+import android.text.Spanned
 import android.text.format.Formatter
 import java.util.Date
 
@@ -16,72 +18,72 @@ class AppInfo(@JvmField val applicationInfo: ApplicationInfo, @JvmField val appI
         context: Context,
         packageManager: PackageManager,
         usageStatsManager: UsageStatsManager
-    ): String? {
-        when (appInfoField) {
+    ): Spanned? {
+        val text = when (appInfoField) {
             AppInfoField.APK_SIZE -> {
-                return ApplicationInfoUtils.getApkSizeText(context, applicationInfo)
+                ApplicationInfoUtils.getApkSizeText(context, applicationInfo)
             }
             AppInfoField.APP_SIZE -> {
-                return Formatter.formatShortFileSize(
+                Formatter.formatShortFileSize(
                     context,
                     ApplicationInfoUtils.getStorageUsage(context, applicationInfo).appBytes
                 )
             }
             AppInfoField.CACHE_SIZE -> {
-                return Formatter.formatShortFileSize(
+                Formatter.formatShortFileSize(
                     context,
                     ApplicationInfoUtils.getStorageUsage(context, applicationInfo).cacheBytes
                 )
             }
             AppInfoField.DATA_SIZE -> {
-                return Formatter.formatShortFileSize(
+                Formatter.formatShortFileSize(
                     context,
                     ApplicationInfoUtils.getStorageUsage(context, applicationInfo).dataBytes
                 )
             }
             AppInfoField.ENABLED -> {
-                return ApplicationInfoUtils.getEnabledText(context, applicationInfo)
+                ApplicationInfoUtils.getEnabledText(context, applicationInfo)
             }
             AppInfoField.ARCHIVED -> {
-                return ApplicationInfoUtils.getAppIsArchivedText(context, applicationInfo)
+                ApplicationInfoUtils.getAppIsArchivedText(context, applicationInfo)
             }
             AppInfoField.EXISTS_IN_APP_STORE -> {
-                return ApplicationInfoUtils.getExistsInAppStoreText(
+                ApplicationInfoUtils.getExistsInAppStoreText(
                     context,
                     packageManager,
                     applicationInfo
                 )
             }
             AppInfoField.EXTERNAL_CACHE_SIZE -> {
-                return Formatter.formatShortFileSize(
+                Formatter.formatShortFileSize(
                     context,
                     ApplicationInfoUtils.getStorageUsage(context, applicationInfo)
                         .externalCacheBytes
                 )
             }
             AppInfoField.FIRST_INSTALLED -> {
-                return ApplicationInfoUtils.getFirstInstalledText(packageManager, applicationInfo)
+                ApplicationInfoUtils.getFirstInstalledText(packageManager, applicationInfo)
             }
             AppInfoField.GRANTED_PERMISSIONS -> {
                 // commented out the list display, because it was too wordy, doing a count instead
-    //            return String.join(", ", getPermissions(packageManager, applicationInfo, true)));
-                return ApplicationInfoUtils.getPermissions(
+    //            String.join(", ", getPermissions(packageManager, applicationInfo, true)));
+                ApplicationInfoUtils.getPermissions(
                     packageManager,
                     applicationInfo,
                     true
                 ).size.toString()
             }
             AppInfoField.LAST_UPDATED -> {
-                return ApplicationInfoUtils.getLastUpdatedText(packageManager, applicationInfo)
+                ApplicationInfoUtils.getLastUpdatedText(packageManager, applicationInfo)
             }
             AppInfoField.LAST_USED -> {
-                return ApplicationInfoUtils.getLastUsedText(usageStatsManager, applicationInfo, false)
+                ApplicationInfoUtils.getLastUsedText(usageStatsManager, applicationInfo, false)
             }
             AppInfoField.MIN_SDK -> {
-                return applicationInfo.minSdkVersion.toString()
+                applicationInfo.minSdkVersion.toString()
             }
             AppInfoField.PACKAGE_MANAGER -> {
-                return ApplicationInfoUtils.getPackageInstallerName(
+                ApplicationInfoUtils.getPackageInstallerName(
                     ApplicationInfoUtils.getPackageInstaller(
                         packageManager,
                         applicationInfo
@@ -90,25 +92,26 @@ class AppInfo(@JvmField val applicationInfo: ApplicationInfo, @JvmField val appI
             }
             AppInfoField.REQUESTED_PERMISSIONS -> {
                 // commented out the list display, because it was too wordy, doing a count instead
-    //            return String.join(", ", getPermissions(packageManager, applicationInfo, false));
-                return ApplicationInfoUtils.getPermissions(
+    //            String.join(", ", getPermissions(packageManager, applicationInfo, false));
+                ApplicationInfoUtils.getPermissions(
                     packageManager,
                     applicationInfo,
                     false
                 ).size.toString()
             }
             AppInfoField.TARGET_SDK -> {
-                return applicationInfo.targetSdkVersion.toString()
+                applicationInfo.targetSdkVersion.toString()
             }
             AppInfoField.TOTAL_SIZE -> {
-                return Formatter.formatShortFileSize(
+                Formatter.formatShortFileSize(
                     context,
                     ApplicationInfoUtils.getStorageUsage(context, applicationInfo).totalBytes
                 )
             }
             AppInfoField.VERSION -> {
-                return ApplicationInfoUtils.getVersionText(packageManager, applicationInfo)
+                ApplicationInfoUtils.getVersionText(packageManager, applicationInfo)
             }
         }
+        return Html.fromHtml(text ?: "", Html.FROM_HTML_MODE_COMPACT)
     }
 }

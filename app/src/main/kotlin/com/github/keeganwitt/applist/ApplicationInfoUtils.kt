@@ -107,7 +107,10 @@ object ApplicationInfoUtils {
         val exists = existsInAppStore(packageManager, applicationInfo)
         return when (exists) {
             null -> context.getString(R.string.unknown)
-            true -> context.getString(R.string.boolean_true)
+            true -> {
+                val link = getAppStoreLink(applicationInfo)
+                "<a href=\"$link\">${context.getString(R.string.boolean_true)}</a>"
+            }
             false -> context.getString(R.string.boolean_false)
         }
     }
@@ -257,8 +260,8 @@ object ApplicationInfoUtils {
             return null
         }
 
-        val url = "https://play.google.com/store/apps/details?id=$id"
-        val request = Request.Builder().url(url).build()
+        val url = getAppStoreLink(applicationInfo)
+        val request = Request.Builder().url(url!!).build()
         Log.d(TAG, "Querying $url")
 
         return try {
@@ -278,6 +281,10 @@ object ApplicationInfoUtils {
             FirebaseCrashlytics.getInstance().recordException(e)
             null
         }
+    }
+
+    fun getAppStoreLink(applicationInfo: ApplicationInfo): String? {
+        return "https://play.google.com/store/apps/details?id=${applicationInfo.packageName}"
     }
 
     @Throws(PackageManager.NameNotFoundException::class)

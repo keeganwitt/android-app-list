@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.text.Html
 import android.util.Base64
 import android.util.Log
@@ -18,14 +19,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.createBitmap
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.io.ByteArrayOutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.graphics.createBitmap
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 class AppExporter(
     private val activity: AppCompatActivity,
@@ -110,10 +111,9 @@ class AppExporter(
         createFileLauncher.launch(intent)
     }
 
-    private fun writeXmlToFile(uri: Uri?) {
+    private fun writeXmlToFile(uri: Uri) {
         try {
-            val outputStream = activity.contentResolver.openOutputStream(uri!!)
-            if (outputStream != null) {
+            activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 val serializer = Xml.newSerializer()
                 serializer.setOutput(outputStream, "UTF-8")
                 serializer.startDocument("UTF-8", true)
@@ -126,12 +126,10 @@ class AppExporter(
                     val appName = app.applicationInfo.loadLabel(packageManager).toString()
                     val packageName = app.applicationInfo.packageName
                     val infoType = selectedAppInfoField!!.name
-                    var infoValue: String? = ""
-
-                    try {
-                        infoValue = app.getTextValue(activity, packageManager, usageStatsManager)
+                    val infoValue = try {
+                        app.getTextValue(activity, packageManager, usageStatsManager)?.toString() ?: ""
                     } catch (e: PackageManager.NameNotFoundException) {
-                        // Leave infoValue empty
+                        ""
                     }
 
                     serializer.startTag("", "app")
@@ -145,21 +143,19 @@ class AppExporter(
                     serializer.text(infoType)
                     serializer.endTag("", "appInfoType")
                     serializer.startTag("", "appInfoValue")
-                    serializer.text(infoValue ?: "")
+                    serializer.text(infoValue)
                     serializer.endTag("", "appInfoValue")
                     serializer.endTag("", "app")
                 }
 
                 serializer.endTag("", "apps")
                 serializer.endDocument()
-                outputStream.close()
-
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.export_successful),
-                    Toast.LENGTH_SHORT
-                ).show()
             }
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.export_successful),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
             val message = "Error exporting XML"
             Log.e(TAG, message, e)
@@ -173,10 +169,9 @@ class AppExporter(
         }
     }
 
-    private fun writeHtmlToFile(uri: Uri?) {
+    private fun writeHtmlToFile(uri: Uri) {
         try {
-            val outputStream = activity.contentResolver.openOutputStream(uri!!)
-            if (outputStream != null) {
+            activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 val writer = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
                 val htmlBuilder = StringBuilder()
                 htmlBuilder.append("<!DOCTYPE html>\n")
@@ -209,14 +204,22 @@ class AppExporter(
                     val packageName = Html.escapeHtml(app.applicationInfo.packageName)
 
                     val infoValue = try {
-                        Html.escapeHtml(
-                            app.getTextValue(
-                                activity,
-                                packageManager,
-                                usageStatsManager
-                            )
+                        val spanned = app.getTextValue(
+                            activity,
+                            packageManager,
+                            usageStatsManager
                         )
-                    } catch (e: PackageManager.NameNotFoundException) {
+                        if (spanned != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                Html.toHtml(spanned, Html.TO_HTML_PARAGRAPH_LINES_CONSECUTIVE)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                Html.toHtml(spanned)
+                            }
+                        } else {
+                            ""
+                        }
+                    } catch (_: PackageManager.NameNotFoundException) {
                         ""
                     }
 
@@ -240,15 +243,13 @@ class AppExporter(
                 htmlBuilder.append("</html>\n")
 
                 writer.write(htmlBuilder.toString())
-                writer.close()
-                outputStream.close()
-
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.export_successful),
-                    Toast.LENGTH_SHORT
-                ).show()
+                writer.flush()
             }
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.export_successful),
+                Toast.LENGTH_SHORT
+            ).show()
         } catch (e: Exception) {
             val message = "Error exporting HTML"
             Log.e(TAG, message, e)
@@ -262,7 +263,7 @@ class AppExporter(
         }
     }
 
-    private fun drawableToBase64(drawable: Drawable?): String? {
+    private fun drawableToBase64(drawable: Drawable?): String {
         if (drawable == null) {
             return ""
         }
@@ -277,6 +278,6 @@ class AppExporter(
     }
 
     companion object {
-        private val TAG: String = AppExporter::class.java.getSimpleName()
+        private val TAG = AppExporter::class.java.simpleName
     }
 }
