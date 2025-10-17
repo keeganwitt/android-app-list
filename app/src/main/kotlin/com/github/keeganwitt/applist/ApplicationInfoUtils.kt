@@ -206,10 +206,7 @@ object ApplicationInfoUtils {
     fun getStorageUsage(context: Context, applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            val message =
-                "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")"
-            Log.w(TAG, message)
-            FirebaseCrashlytics.getInstance().log(message)
+            Log.w(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")")
             return storageUsage
         }
 
@@ -223,7 +220,7 @@ object ApplicationInfoUtils {
                     if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
                 } catch (e: IllegalArgumentException) {
                     val message = "Could not parse UUID $uuidStr for calculating storage usage"
-                    Log.w(TAG, message)
+                    Log.e(TAG, message)
                     FirebaseCrashlytics.getInstance().log(message)
                     FirebaseCrashlytics.getInstance().recordException(e)
                     return@forEach
