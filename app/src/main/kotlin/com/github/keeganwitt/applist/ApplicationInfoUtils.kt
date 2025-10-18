@@ -38,8 +38,8 @@ object ApplicationInfoUtils {
             try {
                 packageManager.getInstallSourceInfo(applicationInfo.packageName).installingPackageName
             } catch (e: PackageManager.NameNotFoundException) {
-                val message = "Could not get package installer for " + applicationInfo.packageName
-                Log.e(TAG, message, e)
+                val message = "Could not get package installer"
+                Log.e(TAG, message + " for " + applicationInfo.packageName, e)
                 FirebaseCrashlytics.getInstance().log(message)
                 FirebaseCrashlytics.getInstance().recordException(e)
                 null
@@ -206,7 +206,8 @@ object ApplicationInfoUtils {
     fun getStorageUsage(context: Context, applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            Log.w(TAG, "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")")
+            val message = "Unable to calculate storage usage (requires API " + Build.VERSION_CODES.O + ")"
+            Log.w(TAG, message)
             return storageUsage
         }
 
@@ -218,11 +219,9 @@ object ApplicationInfoUtils {
                 val uuidStr = storageVolume.uuid
                 val uuid: UUID = try {
                     if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
-                } catch (e: IllegalArgumentException) {
-                    val message = "Could not parse UUID $uuidStr for calculating storage usage"
-                    Log.e(TAG, message)
-                    FirebaseCrashlytics.getInstance().log(message)
-                    FirebaseCrashlytics.getInstance().recordException(e)
+                } catch (_: IllegalArgumentException) {
+                    val message = "Could not parse UUID $uuidStr for calculating storage usage. This is a known issue on some devices/storage volumes."
+                    Log.w(TAG, message)
                     return@forEach
                 }
 
@@ -234,10 +233,14 @@ object ApplicationInfoUtils {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         storageUsage.increaseExternalCacheBytes(storageStats.externalCacheBytes)
                     }
-                } catch (e: Exception) {
-                    val message =
-                        "Unable to process storage usage for ${applicationInfo.packageName} on $uuid"
+                } catch (e: SecurityException) {
+                    val message = "Missing storage permission"
                     Log.e(TAG, message, e)
+                    FirebaseCrashlytics.getInstance().log(message)
+                    FirebaseCrashlytics.getInstance().recordException(e)
+                } catch (e: Exception) {
+                    val message = "Unable to process storage usage"
+                    Log.e(TAG, message + " for ${applicationInfo.packageName} on $uuid", e)
                     FirebaseCrashlytics.getInstance().log(message)
                     FirebaseCrashlytics.getInstance().recordException(e)
                 }

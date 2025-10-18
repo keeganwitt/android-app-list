@@ -60,10 +60,10 @@ class AppInfoAdapter(
                 usageStatsManager
             )
         } catch (e: PackageManager.NameNotFoundException) {
-            val message = "Unable to set requested text for " + appInfo.appInfoField + " for app " + appInfo.applicationInfo.packageName
+            val message = "Unable to set requested text for " + appInfo.appInfoField
             Log.e(
                 TAG,
-                message,
+                message + " for app " + appInfo.applicationInfo.packageName,
                 e
             )
             FirebaseCrashlytics.getInstance().log(message)

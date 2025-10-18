@@ -126,11 +126,7 @@ class AppExporter(
                     val appName = app.applicationInfo.loadLabel(packageManager).toString()
                     val packageName = app.applicationInfo.packageName
                     val infoType = selectedAppInfoField!!.name
-                    val infoValue = try {
-                        app.getTextValue(activity, packageManager, usageStatsManager)?.toString() ?: ""
-                    } catch (e: PackageManager.NameNotFoundException) {
-                        ""
-                    }
+                    val infoValue = app.getTextValue(activity, packageManager, usageStatsManager)?.toString() ?: ""
 
                     serializer.startTag("", "app")
                     serializer.startTag("", "appName")
@@ -203,7 +199,7 @@ class AppExporter(
                     )
                     val packageName = Html.escapeHtml(app.applicationInfo.packageName)
 
-                    val infoValue = try {
+                    val infoValue = {
                         val spanned = app.getTextValue(
                             activity,
                             packageManager,
@@ -219,8 +215,6 @@ class AppExporter(
                         } else {
                             ""
                         }
-                    } catch (_: PackageManager.NameNotFoundException) {
-                        ""
                     }
 
                     val iconBase64 =

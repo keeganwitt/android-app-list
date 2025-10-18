@@ -24,12 +24,10 @@ class AppInfoRepository(context: Context) {
         val allInstalledApps = packageManager.getInstalledApplications(flags)
 
         val appList = allInstalledApps.mapNotNull { appInfo ->
-            // Filter out apps that don't meet the criteria
             try {
                 val include = showSystemApps || isUserInstalledApp(appInfo)
                 val isArchived = isAppArchived(appInfo) ?: false
-                val hasLaunchIntent =
-                    packageManager.getLaunchIntentForPackage(appInfo.packageName) != null
+                val hasLaunchIntent = packageManager.getLaunchIntentForPackage(appInfo.packageName) != null
 
                 if (include && (isArchived || hasLaunchIntent)) {
                     AppInfo(appInfo, appInfoField)
@@ -43,56 +41,58 @@ class AppInfoRepository(context: Context) {
                 FirebaseCrashlytics.getInstance().recordException(e)
                 null
             }
-        }.onEach { appInfo ->
-            // Populate last used time if needed
-            if (appInfoField == AppInfoField.LAST_USED) {
-                appInfo.lastUsed = ApplicationInfoUtils.getLastUsed(usageStatsManager, appInfo.applicationInfo, reload)
+        }
+
+        val appListWithSortKey = appList.mapNotNull { appInfo ->
+            try {
+                val key = getSortKey(appInfo, appInfoField, reload)
+                Pair(appInfo, key)
+            } catch (_: PackageManager.NameNotFoundException) {
+                Log.w(TAG, "App ${appInfo.applicationInfo.packageName} uninstalled during processing, removing from list.")
+                null
             }
         }
 
-        val sortedList = if (descendingSortOrder) {
-            appList.sortedWith(determineComparator(appInfoField).reversed())
-        } else {
-            appList.sortedWith(determineComparator(appInfoField))
+        val collator = Collator.getInstance()
+        val nameComparator = compareBy(collator) { pair: Pair<AppInfo, Comparable<*>?> ->
+            pair.first.applicationInfo.loadLabel(packageManager).toString()
         }
 
-        return sortedList
+        val primaryComparator = compareBy<Pair<AppInfo, Comparable<*>?>> { it.second }
+
+        var finalComparator = primaryComparator.then(nameComparator)
+        if (descendingSortOrder) {
+            finalComparator = finalComparator.reversed()
+        }
+
+        return appListWithSortKey.sortedWith(finalComparator).map { it.first }
     }
 
     private fun isUserInstalledApp(appInfo: ApplicationInfo): Boolean {
-        // A user-installed app has the system flag bit UNSET
         return (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
     }
 
-    private fun determineComparator(appInfoField: AppInfoField): Comparator<AppInfo> {
-        val collator = Collator.getInstance()
-        val nameComparator = Comparator<AppInfo> { a, b ->
-            val aName = a.applicationInfo.loadLabel(packageManager).toString()
-            val bName = b.applicationInfo.loadLabel(packageManager).toString()
-            collator.compare(aName, bName)
+    @Throws(PackageManager.NameNotFoundException::class)
+    private fun getSortKey(appInfo: AppInfo, appInfoField: AppInfoField, reload: Boolean): Comparable<*>? {
+        return when (appInfoField) {
+            AppInfoField.APK_SIZE -> ApplicationInfoUtils.getApkSize(appInfo.applicationInfo)
+            AppInfoField.APP_SIZE -> ApplicationInfoUtils.getStorageUsage(context, appInfo.applicationInfo).appBytes
+            AppInfoField.CACHE_SIZE -> ApplicationInfoUtils.getStorageUsage(context, appInfo.applicationInfo).cacheBytes
+            AppInfoField.DATA_SIZE -> ApplicationInfoUtils.getStorageUsage(context, appInfo.applicationInfo).dataBytes
+            AppInfoField.ENABLED -> ApplicationInfoUtils.getEnabledText(context, appInfo.applicationInfo)
+            AppInfoField.ARCHIVED -> ApplicationInfoUtils.getAppIsArchivedText(context, appInfo.applicationInfo)
+            AppInfoField.EXISTS_IN_APP_STORE -> ApplicationInfoUtils.getExistsInAppStoreText(context, packageManager, appInfo.applicationInfo)
+            AppInfoField.EXTERNAL_CACHE_SIZE -> ApplicationInfoUtils.getStorageUsage(context, appInfo.applicationInfo).externalCacheBytes
+            AppInfoField.FIRST_INSTALLED -> ApplicationInfoUtils.getFirstInstalled(packageManager, appInfo.applicationInfo).time
+            AppInfoField.LAST_UPDATED -> ApplicationInfoUtils.getLastUpdated(packageManager, appInfo.applicationInfo).time
+            AppInfoField.LAST_USED -> ApplicationInfoUtils.getLastUsed(usageStatsManager, appInfo.applicationInfo, reload).time
+            AppInfoField.MIN_SDK -> appInfo.applicationInfo.minSdkVersion
+            AppInfoField.PACKAGE_MANAGER -> ApplicationInfoUtils.getPackageInstallerName(ApplicationInfoUtils.getPackageInstaller(packageManager, appInfo.applicationInfo))
+            AppInfoField.GRANTED_PERMISSIONS, AppInfoField.REQUESTED_PERMISSIONS -> ApplicationInfoUtils.getPermissions(packageManager, appInfo.applicationInfo, appInfoField == AppInfoField.GRANTED_PERMISSIONS).size
+            AppInfoField.TARGET_SDK -> appInfo.applicationInfo.targetSdkVersion
+            AppInfoField.TOTAL_SIZE -> ApplicationInfoUtils.getStorageUsage(context, appInfo.applicationInfo).totalBytes
+            AppInfoField.VERSION -> ApplicationInfoUtils.getVersionText(packageManager, appInfo.applicationInfo)
         }
-
-        val primaryComparator: Comparator<AppInfo> = when (appInfoField) {
-            AppInfoField.APK_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getApkSize(it.applicationInfo) }
-            AppInfoField.APP_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).appBytes }
-            AppInfoField.CACHE_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).cacheBytes }
-            AppInfoField.DATA_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).dataBytes }
-            AppInfoField.ENABLED -> Comparator.comparing { ApplicationInfoUtils.getEnabledText(context, it.applicationInfo) }
-            AppInfoField.ARCHIVED -> Comparator.comparing { ApplicationInfoUtils.getAppIsArchivedText(context, it.applicationInfo) }
-            AppInfoField.EXISTS_IN_APP_STORE -> Comparator.comparing { ApplicationInfoUtils.getExistsInAppStoreText(context, packageManager, it.applicationInfo) }
-            AppInfoField.EXTERNAL_CACHE_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).externalCacheBytes }
-            AppInfoField.FIRST_INSTALLED -> Comparator.comparingLong { try { ApplicationInfoUtils.getFirstInstalled(packageManager, it.applicationInfo).time } catch (_: PackageManager.NameNotFoundException) { 0L } }
-            AppInfoField.LAST_UPDATED -> Comparator.comparingLong { try { ApplicationInfoUtils.getLastUpdated(packageManager, it.applicationInfo).time } catch (_: PackageManager.NameNotFoundException) { 0L } }
-            AppInfoField.LAST_USED -> Comparator.comparingLong { ApplicationInfoUtils.getLastUsed(usageStatsManager, it.applicationInfo, false).time }
-            AppInfoField.MIN_SDK -> Comparator.comparingInt { it.applicationInfo.minSdkVersion }
-            AppInfoField.PACKAGE_MANAGER -> Comparator.comparing { ApplicationInfoUtils.getPackageInstallerName(ApplicationInfoUtils.getPackageInstaller(packageManager, it.applicationInfo)) }
-            AppInfoField.GRANTED_PERMISSIONS, AppInfoField.REQUESTED_PERMISSIONS -> Comparator.comparingInt { try { ApplicationInfoUtils.getPermissions(packageManager, it.applicationInfo, appInfoField == AppInfoField.GRANTED_PERMISSIONS).size } catch (_: Exception) { 0 } }
-            AppInfoField.TARGET_SDK -> Comparator.comparingInt { it.applicationInfo.targetSdkVersion }
-            AppInfoField.TOTAL_SIZE -> Comparator.comparingLong { ApplicationInfoUtils.getStorageUsage(context, it.applicationInfo).totalBytes }
-            AppInfoField.VERSION -> Comparator.comparing { (try { ApplicationInfoUtils.getVersionText(packageManager, it.applicationInfo) } catch (_: PackageManager.NameNotFoundException) { "" }) ?: "" }
-        }
-
-        return primaryComparator.thenComparing(nameComparator)
     }
 
     companion object {
