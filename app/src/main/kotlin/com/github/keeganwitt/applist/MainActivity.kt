@@ -41,6 +41,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     private var showSystemApps = false
     private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
+    private lateinit var labelToFieldMap: Map<String, AppInfoField>
+    private lateinit var fieldToLabelMap: Map<AppInfoField, String>
+
+    companion object {
+        private const val PREFS_NAME = "applist_prefs"
+        private const val KEY_SELECTED_FIELD = "selected_app_info_field"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,18 +75,43 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         appListViewModel = ViewModelProvider(this)[AppListViewModel::class.java]
         observeViewModel()
 
-        val appInfoFieldStrings = AppInfoField.entries.map { getString(it.titleResId) }.toTypedArray()
+        fieldToLabelMap = AppInfoField.entries.associateWith { getString(it.titleResId) }
+        labelToFieldMap = fieldToLabelMap.entries.associate { (k, v) -> v to k }
+
+        val appInfoFieldStrings = fieldToLabelMap.values.toTypedArray()
         val collator = Collator.getInstance()
         appInfoFieldStrings.sortWith(collator::compare)
+
         val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, appInfoFieldStrings)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = arrayAdapter
 
-        val versionIndex = appInfoFieldStrings.indexOf(getString(R.string.appInfoField_version))
-        if (versionIndex != -1) {
-            spinner.setSelection(versionIndex)
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val savedName = prefs.getString(KEY_SELECTED_FIELD, null)
+        var initialField = savedName?.let {
+            try {
+                AppInfoField.valueOf(it)
+            } catch (_: IllegalArgumentException) {
+                null
+            }
         }
+
+        if (initialField == null) {
+            // Invalid or missing pref; default to VERSION and clear any bad value
+            initialField = AppInfoField.VERSION
+            if (savedName != null) {
+                prefs.edit().remove(KEY_SELECTED_FIELD).apply()
+            }
+        }
+
+        // Apply selection in spinner
+        val initialLabel = fieldToLabelMap[initialField] ?: getString(R.string.appInfoField_version)
+        val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
+        spinner.setSelection(initialIndex, false)
+
+        // Listener and initial load
         spinner.onItemSelectedListener = this
+        loadSelection(initialField)
 
         toggleButton.setOnCheckedChangeListener { _, _ ->
             descendingSortOrder = !descendingSortOrder
@@ -135,7 +167,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-        loadSelection(position)
+        val label = parent.getItemAtPosition(position) as String
+        val field = labelToFieldMap[label] ?: AppInfoField.VERSION
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putString(KEY_SELECTED_FIELD, field.name)
+            .apply()
+        loadSelection(field)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -144,8 +182,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         val versionIndex = (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
         if (versionIndex != null) {
             spinner.setSelection(versionIndex)
-            loadSelection(versionIndex)
         }
+        loadSelection(AppInfoField.VERSION)
     }
 
     override fun onResume() {
@@ -178,10 +216,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         }
     }
 
-    private fun loadSelection(position: Int) {
-        selectedAppInfoField = appInfoFields[position]
-        val field = selectedAppInfoField
-        if (field != null && (field == AppInfoField.CACHE_SIZE ||
+    private fun loadSelection(field: AppInfoField) {
+        selectedAppInfoField = field
+        if ((field == AppInfoField.CACHE_SIZE ||
                     field == AppInfoField.DATA_SIZE ||
                     field == AppInfoField.EXTERNAL_CACHE_SIZE ||
                     field == AppInfoField.TOTAL_SIZE ||
