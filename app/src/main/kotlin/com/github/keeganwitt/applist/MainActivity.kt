@@ -1,11 +1,9 @@
 package com.github.keeganwitt.applist
 
 import android.app.AppOpsManager
-import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
@@ -22,17 +20,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.github.keeganwitt.applist.services.AndroidPackageService
+import com.github.keeganwitt.applist.services.AndroidStorageService
+import com.github.keeganwitt.applist.services.AndroidUsageStatsService
+import com.github.keeganwitt.applist.services.PlayStoreService
 import java.text.Collator
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, AppInfoAdapter.OnClickListener {
+class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, AppAdapter.OnClickListener {
     private lateinit var appInfoFields: List<AppInfoField>
-    private var selectedAppInfoField: AppInfoField? = null
     private var descendingSortOrder = false
-    private lateinit var appInfoAdapter: AppInfoAdapter
+    private lateinit var appAdapter: AppAdapter
     private lateinit var spinner: Spinner
     private lateinit var toggleButton: ToggleButton
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -43,10 +49,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     private lateinit var appListViewModel: AppListViewModel
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
+    private var latestState: UiState = UiState()
 
     companion object {
-        private const val PREFS_NAME = "applist_prefs"
-        private const val KEY_SELECTED_FIELD = "selected_app_info_field"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,13 +71,25 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         toggleButton = findViewById(R.id.toggleButton)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
-        appInfoAdapter = AppInfoAdapter(this, getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager, this)
+        appAdapter = AppAdapter(this)
         recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
-        recyclerView.adapter = appInfoAdapter
+        recyclerView.adapter = appAdapter
 
-        appExporter = AppExporter(this, appInfoAdapter, packageManager, getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager)
+        val crashReporter = FirebaseCrashReporter()
+        appExporter = AppExporter(this, itemsProvider = { appAdapter.currentList }, formatter = ExportFormatter(), crashReporter = crashReporter)
 
-        appListViewModel = ViewModelProvider(this)[AppListViewModel::class.java]
+        appListViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val pkg = AndroidPackageService(applicationContext)
+                val usage = AndroidUsageStatsService(applicationContext)
+                val storage = AndroidStorageService(applicationContext)
+                val store = PlayStoreService()
+                val repo = AndroidAppRepository(pkg, usage, storage, store, crashReporter)
+                val vm = AppListViewModel(repo, DefaultDispatcherProvider(), pkg)
+                @Suppress("UNCHECKED_CAST")
+                return vm as T
+            }
+        })[AppListViewModel::class.java]
         observeViewModel()
 
         fieldToLabelMap = AppInfoField.entries.associateWith { getString(it.titleResId) }
@@ -86,53 +103,33 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = arrayAdapter
 
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val savedName = prefs.getString(KEY_SELECTED_FIELD, null)
-        var initialField = savedName?.let {
-            try {
-                AppInfoField.valueOf(it)
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-        }
-
-        if (initialField == null) {
-            // Invalid or missing pref; default to VERSION and clear any bad value
-            initialField = AppInfoField.VERSION
-            if (savedName != null) {
-                prefs.edit().remove(KEY_SELECTED_FIELD).apply()
-            }
-        }
-
-        // Apply selection in spinner
-        val initialLabel = fieldToLabelMap[initialField] ?: getString(R.string.appInfoField_version)
+        // initial selection to VERSION
+        val initialLabel = fieldToLabelMap[AppInfoField.VERSION] ?: getString(R.string.appInfoField_version)
         val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
         spinner.setSelection(initialIndex, false)
-
-        // Listener and initial load
         spinner.onItemSelectedListener = this
-        loadSelection(initialField)
+        appListViewModel.init(AppInfoField.VERSION)
 
         toggleButton.setOnCheckedChangeListener { _, _ ->
-            descendingSortOrder = !descendingSortOrder
-            loadApplications(false)
+            appListViewModel.toggleDescending()
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            loadApplications(true)
+            appListViewModel.refresh()
             swipeRefreshLayout.isRefreshing = false
         }
     }
 
     private fun observeViewModel() {
-        appListViewModel.appList.observe(this) { appList ->
-            appInfoAdapter.setUnfilteredList(appList)
-            appInfoAdapter.submitList(appList)
-        }
-
-        appListViewModel.isLoading.observe(this) { isLoading ->
-            progressBar.visibility = if (isLoading == true) View.VISIBLE else View.GONE
-            recyclerView.visibility = if (isLoading == true) View.GONE else View.VISIBLE
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                appListViewModel.uiState.collectLatest { state ->
+                    latestState = state
+                    appAdapter.submitList(state.items)
+                    progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                    recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
+                }
+            }
         }
     }
 
@@ -144,12 +141,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         val searchItem = menu.findItem(R.id.search)
         (searchItem.actionView as? SearchView)?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                appInfoAdapter.filter.filter(query)
+                appListViewModel.setQuery(query ?: "")
                 return true
             }
 
             override fun onQueryTextChange(query: String?): Boolean {
-                appInfoAdapter.filter.filter(query)
+                appListViewModel.setQuery(query ?: "")
                 return true
             }
         })
@@ -158,10 +155,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     }
 
     override fun onClick(position: Int) {
-        val app = appInfoAdapter.currentList[position]
+        val app = appAdapter.currentList[position]
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             addCategory(Intent.CATEGORY_DEFAULT)
-            data = ("package:" + app.applicationInfo.packageName).toUri()
+            data = ("package:" + app.packageName).toUri()
         }
         startActivity(intent)
     }
@@ -169,11 +166,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
         val label = parent.getItemAtPosition(position) as String
         val field = labelToFieldMap[label] ?: AppInfoField.VERSION
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            .edit()
-            .putString(KEY_SELECTED_FIELD, field.name)
-            .apply()
-        loadSelection(field)
+        appListViewModel.updateSelectedField(field)
+        maybeRequestUsagePermission(field)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -183,25 +177,25 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         if (versionIndex != null) {
             spinner.setSelection(versionIndex)
         }
-        loadSelection(AppInfoField.VERSION)
+        appListViewModel.updateSelectedField(AppInfoField.VERSION)
     }
 
     override fun onResume() {
         super.onResume()
-        loadApplications(true)
+        appListViewModel.refresh()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                selectedAppInfoField?.let { appExporter.export(it) }
+                appExporter.export(latestState.selectedField)
                 return true
             }
             R.id.systemAppToggle -> {
                 item.isChecked = !item.isChecked
                 showSystemApps = item.isChecked
                 updateSystemAppToggleIcon(item)
-                loadApplications(true)
+                appListViewModel.setShowSystem(showSystemApps)
                 return true
             }
         }
@@ -216,8 +210,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         }
     }
 
-    private fun loadSelection(field: AppInfoField) {
-        selectedAppInfoField = field
+    private fun maybeRequestUsagePermission(field: AppInfoField) {
         if ((field == AppInfoField.CACHE_SIZE ||
                     field == AppInfoField.DATA_SIZE ||
                     field == AppInfoField.EXTERNAL_CACHE_SIZE ||
@@ -225,13 +218,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
                     field == AppInfoField.LAST_USED) && !hasUsageStatsPermission()
         ) {
             requestUsageStatsPermission()
-        }
-        loadApplications(false)
-    }
-
-    private fun loadApplications(reload: Boolean) {
-        selectedAppInfoField?.let {
-            appListViewModel.loadApps(it, showSystemApps, descendingSortOrder, reload)
         }
     }
 
