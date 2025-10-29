@@ -62,11 +62,8 @@ class AndroidAppRepository(
             val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
             val flagsArr = pkgInfo.requestedPermissionsFlags
             val grantedCount =
-                if (flagsArr != null) {
-                    flagsArr.count { flags -> (flags and PackageInfo_REQUESTED_PERMISSION_GRANTED) != 0 }
-                } else {
-                    0
-                }
+                flagsArr?.count { flags -> (flags and PACKAGEINFO_REQUESTED_PERMISSION_GRANTED) != 0 }
+                    ?: 0
             val requestedCount = pkgInfo.requestedPermissions?.size ?: 0
 
             App(
@@ -109,7 +106,7 @@ class AndroidAppRepository(
     private fun isUserInstalledApp(appInfo: ApplicationInfo): Boolean = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
 
     private fun isArchived(applicationInfo: ApplicationInfo): Boolean? =
-        if (Build.VERSION.SDK_INT >= 35 /* VANILLA_ICE_CREAM */) {
+        if (Build.VERSION.SDK_INT >= 35) {
             applicationInfo.isArchived
         } else {
             null
@@ -142,6 +139,6 @@ class AndroidAppRepository(
 
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
-        const val PackageInfo_REQUESTED_PERMISSION_GRANTED: Int = 2
+        const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
     }
 }
