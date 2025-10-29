@@ -22,24 +22,25 @@ class AppExporter(
     private val formatter: ExportFormatter,
     private val crashReporter: CrashReporter? = null,
 ) {
-    private var selectedAppInfoField: AppInfoField? = null
+    internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: String? = null
 
     private val createFileLauncher: ActivityResultLauncher<Intent>
 
     init {
-        this.createFileLauncher =
-            activity.registerForActivityResult(
+        // Register the result launcher directly with the ActivityResultRegistry so we can
+        // safely register at any point in the Activity lifecycle (including after RESUMED),
+        // which is especially useful for unit tests that use a fully-started Activity.
+        createFileLauncher =
+            activity.activityResultRegistry.register(
+                "app_exporter_${System.identityHashCode(this)}",
                 StartActivityForResult(),
             ) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
-                    val uri = result.data?.data
-                    if (uri != null) {
-                        if ("xml" == currentExportType) {
-                            writeXmlToFile(uri)
-                        } else if ("html" == currentExportType) {
-                            writeHtmlToFile(uri)
-                        }
+                    val uri = result.data?.data ?: return@register
+                    when (currentExportType) {
+                        "xml" -> writeXmlToFile(uri)
+                        "html" -> writeHtmlToFile(uri)
                     }
                 }
             }
@@ -76,7 +77,7 @@ class AppExporter(
         dialog.show()
     }
 
-    private fun initiateExport(type: String) {
+    internal fun initiateExport(type: String) {
         val items = itemsProvider()
         if (items.isEmpty()) {
             Toast
@@ -103,7 +104,7 @@ class AppExporter(
         createFileLauncher.launch(intent)
     }
 
-    private fun writeXmlToFile(uri: Uri) {
+    internal fun writeXmlToFile(uri: Uri) {
         try {
             activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 val items = itemsProvider()
@@ -129,7 +130,7 @@ class AppExporter(
         }
     }
 
-    private fun writeHtmlToFile(uri: Uri) {
+    internal fun writeHtmlToFile(uri: Uri) {
         try {
             activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 val writer = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)

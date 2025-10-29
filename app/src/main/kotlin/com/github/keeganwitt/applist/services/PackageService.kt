@@ -25,7 +25,7 @@ interface PackageService {
 }
 
 class AndroidPackageService(
-    private val context: Context,
+    context: Context,
 ) : PackageService {
     private val pm: PackageManager = context.packageManager
 

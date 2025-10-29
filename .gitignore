@@ -1,3 +1,4 @@
+*.hprof
 .gradle
 /local.properties
 /.idea/
@@ -10,3 +11,4 @@ local.properties
 /.vscode/
 /app/release/
 /release/
+/.kotlin/
