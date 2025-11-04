@@ -40,7 +40,6 @@ class MainActivity :
     AdapterView.OnItemSelectedListener,
     AppAdapter.OnClickListener {
     private lateinit var appInfoFields: List<AppInfoField>
-    private var descendingSortOrder = false
     private lateinit var appAdapter: AppAdapter
     private lateinit var spinner: Spinner
     private lateinit var toggleButton: ToggleButton
@@ -53,9 +52,6 @@ class MainActivity :
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private var latestState: UiState = UiState()
-
-    companion object {
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
