@@ -9,7 +9,9 @@ interface UsageStatsService {
     fun getLastUsedEpochs(reload: Boolean): Map<String, Long>
 }
 
-class AndroidUsageStatsService(context: Context) : UsageStatsService {
+class AndroidUsageStatsService(
+    context: Context,
+) : UsageStatsService {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     private var cache: Map<String, Long>? = null
 

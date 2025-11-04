@@ -6,5 +6,5 @@ data class UiState(
     val descending: Boolean = false,
     val query: String = "",
     val isLoading: Boolean = false,
-    val items: List<AppItemUiModel> = emptyList()
+    val items: List<AppItemUiModel> = emptyList(),
 )

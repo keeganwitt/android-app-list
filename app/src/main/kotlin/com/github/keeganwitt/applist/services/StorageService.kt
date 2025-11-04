@@ -14,7 +14,9 @@ interface StorageService {
     fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage
 }
 
-class AndroidStorageService(private val context: Context) : StorageService {
+class AndroidStorageService(
+    private val context: Context,
+) : StorageService {
     override fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -25,11 +27,12 @@ class AndroidStorageService(private val context: Context) : StorageService {
         storageManager.storageVolumes.forEach { storageVolume ->
             if (Environment.MEDIA_MOUNTED == storageVolume.state) {
                 val uuidStr = storageVolume.uuid
-                val uuid: UUID = try {
-                    if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
-                } catch (_: IllegalArgumentException) {
-                    return@forEach
-                }
+                val uuid: UUID =
+                    try {
+                        if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
+                    } catch (_: IllegalArgumentException) {
+                        return@forEach
+                    }
                 try {
                     val storageStats = storageStatsManager.queryStatsForPackage(uuid, applicationInfo.packageName, Process.myUserHandle())
                     storageUsage.increaseAppBytes(storageStats.appBytes)

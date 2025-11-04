@@ -15,5 +15,5 @@ data class App(
     val existsInStore: Boolean?,
     val grantedPermissionsCount: Int?,
     val requestedPermissionsCount: Int?,
-    val enabled: Boolean
+    val enabled: Boolean,
 )

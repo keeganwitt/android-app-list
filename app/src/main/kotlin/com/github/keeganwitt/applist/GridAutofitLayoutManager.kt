@@ -17,13 +17,18 @@ class GridAutofitLayoutManager : GridLayoutManager {
         setColumnWidth(checkedColumnWidth(context, columnWidth))
     }
 
-    private fun checkedColumnWidth(context: Context, columnWidth: Int): Int {
+    private fun checkedColumnWidth(
+        context: Context,
+        columnWidth: Int,
+    ): Int {
         if (columnWidth <= 0) {
             setColumnWidth(
-                TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP, 48f,
-                    context.resources.displayMetrics
-                ).toInt()
+                TypedValue
+                    .applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        48f,
+                        context.resources.displayMetrics,
+                    ).toInt(),
             )
         }
         return columnWidth
@@ -38,16 +43,17 @@ class GridAutofitLayoutManager : GridLayoutManager {
 
     override fun onLayoutChildren(
         recycler: Recycler,
-        state: RecyclerView.State
+        state: RecyclerView.State,
     ) {
         val width = getWidth()
         val height = getHeight()
         if (columnWidth > 0 && width > 0 && height > 0 && (isColumnWidthChanged || lastWidth != width || lastHeight != height)) {
-            val totalSpace: Int = if (orientation == VERTICAL) {
-                width - paddingRight - paddingLeft
-            } else {
-                height - paddingTop - paddingBottom
-            }
+            val totalSpace: Int =
+                if (orientation == VERTICAL) {
+                    width - paddingRight - paddingLeft
+                } else {
+                    height - paddingTop - paddingBottom
+                }
             val spanCount = max(1, totalSpace / columnWidth)
             setSpanCount(spanCount)
             isColumnWidthChanged = false

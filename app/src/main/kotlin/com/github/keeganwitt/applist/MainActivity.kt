@@ -20,22 +20,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
-import java.text.Collator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.Collator
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, AppAdapter.OnClickListener {
+class MainActivity :
+    AppCompatActivity(),
+    AdapterView.OnItemSelectedListener,
+    AppAdapter.OnClickListener {
     private lateinit var appInfoFields: List<AppInfoField>
     private var descendingSortOrder = false
     private lateinit var appAdapter: AppAdapter
@@ -76,20 +79,25 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         recyclerView.adapter = appAdapter
 
         val crashReporter = FirebaseCrashReporter()
-        appExporter = AppExporter(this, itemsProvider = { appAdapter.currentList }, formatter = ExportFormatter(), crashReporter = crashReporter)
+        appExporter =
+            AppExporter(this, itemsProvider = { appAdapter.currentList }, formatter = ExportFormatter(), crashReporter = crashReporter)
 
-        appListViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val pkg = AndroidPackageService(applicationContext)
-                val usage = AndroidUsageStatsService(applicationContext)
-                val storage = AndroidStorageService(applicationContext)
-                val store = PlayStoreService()
-                val repo = AndroidAppRepository(pkg, usage, storage, store, crashReporter)
-                val vm = AppListViewModel(repo, DefaultDispatcherProvider(), pkg)
-                @Suppress("UNCHECKED_CAST")
-                return vm as T
-            }
-        })[AppListViewModel::class.java]
+        appListViewModel =
+            ViewModelProvider(
+                this,
+                object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        val pkg = AndroidPackageService(applicationContext)
+                        val usage = AndroidUsageStatsService(applicationContext)
+                        val storage = AndroidStorageService(applicationContext)
+                        val store = PlayStoreService()
+                        val repo = AndroidAppRepository(pkg, usage, storage, store, crashReporter)
+                        val vm = AppListViewModel(repo, DefaultDispatcherProvider(), pkg)
+                        @Suppress("UNCHECKED_CAST")
+                        return vm as T
+                    }
+                },
+            )[AppListViewModel::class.java]
         observeViewModel()
 
         fieldToLabelMap = AppInfoField.entries.associateWith { getString(it.titleResId) }
@@ -139,31 +147,39 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
         menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
 
         val searchItem = menu.findItem(R.id.search)
-        (searchItem.actionView as? SearchView)?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                appListViewModel.setQuery(query ?: "")
-                return true
-            }
+        (searchItem.actionView as? SearchView)?.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    appListViewModel.setQuery(query ?: "")
+                    return true
+                }
 
-            override fun onQueryTextChange(query: String?): Boolean {
-                appListViewModel.setQuery(query ?: "")
-                return true
-            }
-        })
+                override fun onQueryTextChange(query: String?): Boolean {
+                    appListViewModel.setQuery(query ?: "")
+                    return true
+                }
+            },
+        )
 
         return true
     }
 
     override fun onClick(position: Int) {
         val app = appAdapter.currentList[position]
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            addCategory(Intent.CATEGORY_DEFAULT)
-            data = ("package:" + app.packageName).toUri()
-        }
+        val intent =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                data = ("package:" + app.packageName).toUri()
+            }
         startActivity(intent)
     }
 
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+    override fun onItemSelected(
+        parent: AdapterView<*>,
+        view: View?,
+        position: Int,
+        id: Long,
+    ) {
         val label = parent.getItemAtPosition(position) as String
         val field = labelToFieldMap[label] ?: AppInfoField.VERSION
         appListViewModel.updateSelectedField(field)
@@ -211,11 +227,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if ((field == AppInfoField.CACHE_SIZE ||
+        if ((
+                field == AppInfoField.CACHE_SIZE ||
                     field == AppInfoField.DATA_SIZE ||
                     field == AppInfoField.EXTERNAL_CACHE_SIZE ||
                     field == AppInfoField.TOTAL_SIZE ||
-                    field == AppInfoField.LAST_USED) && !hasUsageStatsPermission()
+                    field == AppInfoField.LAST_USED
+            ) && !hasUsageStatsPermission()
         ) {
             requestUsageStatsPermission()
         }
@@ -228,9 +246,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, Ap
     }
 
     private fun requestUsageStatsPermission() {
-        val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
-        }
+        val intent =
+            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            }
         startActivity(intent)
     }
 }

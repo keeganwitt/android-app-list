@@ -20,7 +20,7 @@ class AppExporter(
     private val activity: AppCompatActivity,
     private val itemsProvider: () -> List<AppItemUiModel>,
     private val formatter: ExportFormatter,
-    private val crashReporter: CrashReporter? = null
+    private val crashReporter: CrashReporter? = null,
 ) {
     private var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: String? = null
@@ -28,20 +28,21 @@ class AppExporter(
     private val createFileLauncher: ActivityResultLauncher<Intent>
 
     init {
-        this.createFileLauncher = activity.registerForActivityResult(
-            StartActivityForResult()
-        ) { result ->
-        if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
-                val uri = result.data?.data
-                if (uri != null) {
-                    if ("xml" == currentExportType) {
-                        writeXmlToFile(uri)
-                    } else if ("html" == currentExportType) {
-                        writeHtmlToFile(uri)
+        this.createFileLauncher =
+            activity.registerForActivityResult(
+                StartActivityForResult(),
+            ) { result ->
+                if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
+                    val uri = result.data?.data
+                    if (uri != null) {
+                        if ("xml" == currentExportType) {
+                            writeXmlToFile(uri)
+                        } else if ("html" == currentExportType) {
+                            writeHtmlToFile(uri)
+                        }
                     }
                 }
             }
-        }
     }
 
     fun export(selectedAppInfoField: AppInfoField) {
@@ -58,7 +59,7 @@ class AppExporter(
         val radioGroup = dialogView.findViewById<RadioGroup>(R.id.export_radio_group)
 
         builder.setPositiveButton(
-            R.string.export
+            R.string.export,
         ) { dialog: DialogInterface?, which: Int ->
             val selectedId = radioGroup.checkedRadioButtonId
             if (selectedId == R.id.radio_xml) {
@@ -68,7 +69,7 @@ class AppExporter(
             }
         }
         builder.setNegativeButton(
-            android.R.string.cancel
+            android.R.string.cancel,
         ) { dialog: DialogInterface?, which: Int -> dialog!!.dismiss() }
 
         val dialog = builder.create()
@@ -78,17 +79,19 @@ class AppExporter(
     private fun initiateExport(type: String) {
         val items = itemsProvider()
         if (items.isEmpty()) {
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.export_no_apps),
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_no_apps),
+                    Toast.LENGTH_SHORT,
+                ).show()
             return
         }
 
         currentExportType = type
-        val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
-            .format(Date())
+        val timestamp =
+            SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
+                .format(Date())
         val appInfoType = selectedAppInfoField!!.name.lowercase(Locale.getDefault())
         val fileName = "apps_" + appInfoType + "_" + timestamp + "." + type
 
@@ -107,20 +110,22 @@ class AppExporter(
                 val xml = formatter.toXml(items, selectedAppInfoField!!)
                 outputStream.write(xml.toByteArray(Charsets.UTF_8))
             }
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.export_successful),
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_successful),
+                    Toast.LENGTH_SHORT,
+                ).show()
         } catch (e: Exception) {
             val message = "Error exporting XML"
             Log.e(TAG, message, e)
             crashReporter?.record(e, message)
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.export_failed) + " " + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_failed) + " " + e.message,
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
     }
 
@@ -133,20 +138,22 @@ class AppExporter(
                 writer.write(html)
                 writer.flush()
             }
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.export_successful),
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_successful),
+                    Toast.LENGTH_SHORT,
+                ).show()
         } catch (e: Exception) {
             val message = "Error exporting HTML"
             Log.e(TAG, message, e)
             crashReporter?.record(e, message)
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.export_failed) + " " + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_failed) + " " + e.message,
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
     }
 

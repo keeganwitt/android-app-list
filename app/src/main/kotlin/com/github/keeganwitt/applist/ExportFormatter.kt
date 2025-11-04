@@ -4,7 +4,10 @@ import android.text.Html
 import java.lang.StringBuilder
 
 class ExportFormatter {
-    fun toXml(items: List<AppItemUiModel>, selectedField: AppInfoField): String {
+    fun toXml(
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ): String {
         val sb = StringBuilder()
         sb.append("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n""")
         sb.append("<apps>\n")
@@ -22,7 +25,8 @@ class ExportFormatter {
 
     fun toHtml(items: List<AppItemUiModel>): String {
         val sb = StringBuilder()
-        sb.append("""
+        sb.append(
+            """
             <!DOCTYPE html>
             <html>
             <head>
@@ -42,7 +46,8 @@ class ExportFormatter {
             <body>
               <h1>App List</h1>
               <div class="app-grid">
-        """.trimIndent())
+            """.trimIndent(),
+        )
         items.forEach { item ->
             sb.append("<div class=\"app-item\">\n")
             sb.append("<div class=\"app-name\">").append(escapeHtml(item.appName)).append("</div>\n")
@@ -50,16 +55,23 @@ class ExportFormatter {
             sb.append("<div class=\"app-info\">").append(escapeHtml(item.infoText)).append("</div>\n")
             sb.append("</div>\n")
         }
-        sb.append("""
+        sb.append(
+            """
               </div>
             </body>
             </html>
-        """.trimIndent())
+            """.trimIndent(),
+        )
         return sb.toString()
     }
 
     private fun escapeXml(s: String): String =
-        s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")
+        s
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
 
     private fun escapeHtml(s: String): String = Html.escapeHtml(s).toString()
 }

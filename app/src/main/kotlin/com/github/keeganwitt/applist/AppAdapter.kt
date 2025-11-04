@@ -13,18 +13,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.AppAdapter.AppInfoViewHolder
 
 class AppAdapter(
-    private val onClickListener: OnClickListener
+    private val onClickListener: OnClickListener,
 ) : ListAdapter<AppItemUiModel, AppInfoViewHolder>(
-    AsyncDifferConfig.Builder(DiffCallback()).build()
-) {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppInfoViewHolder {
+        AsyncDifferConfig.Builder(DiffCallback()).build(),
+    ) {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): AppInfoViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.snippet_list_row, parent, false)
         return AppInfoViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: AppInfoViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: AppInfoViewHolder,
+        position: Int,
+    ) {
         val item = currentList[position]
         val iconView = holder.iconView
         val appNameView = holder.appNameView
@@ -42,7 +47,9 @@ class AppAdapter(
         fun onClick(position: Int)
     }
 
-    inner class AppInfoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+    inner class AppInfoViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
         var iconView: ImageView = itemView.findViewById(R.id.app_icon)
         var appNameView: TextView = itemView.findViewById(R.id.app_name)
@@ -60,13 +67,14 @@ class AppAdapter(
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<AppItemUiModel>() {
-        override fun areItemsTheSame(oldItem: AppItemUiModel, newItem: AppItemUiModel): Boolean {
-            return oldItem.packageName == newItem.packageName
-        }
+        override fun areItemsTheSame(
+            oldItem: AppItemUiModel,
+            newItem: AppItemUiModel,
+        ): Boolean = oldItem.packageName == newItem.packageName
 
-        override fun areContentsTheSame(oldItem: AppItemUiModel, newItem: AppItemUiModel): Boolean {
-            return oldItem == newItem
-        }
+        override fun areContentsTheSame(
+            oldItem: AppItemUiModel,
+            newItem: AppItemUiModel,
+        ): Boolean = oldItem == newItem
     }
-
 }

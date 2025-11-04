@@ -1,6 +1,8 @@
 package com.github.keeganwitt.applist
 
-enum class AppInfoField(val titleResId: Int) {
+enum class AppInfoField(
+    val titleResId: Int,
+) {
     APK_SIZE(R.string.appInfoField_apkSize),
     APP_SIZE(R.string.appInfoField_appSize),
     ARCHIVED(R.string.appInfoField_archived),
@@ -18,5 +20,5 @@ enum class AppInfoField(val titleResId: Int) {
     REQUESTED_PERMISSIONS(R.string.appInfoField_requestedPermissions),
     TARGET_SDK(R.string.appInfoField_targetSdk),
     TOTAL_SIZE(R.string.appInfoField_totalSize),
-    VERSION(R.string.appInfoField_version)
+    VERSION(R.string.appInfoField_version),
 }
