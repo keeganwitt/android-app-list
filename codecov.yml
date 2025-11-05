@@ -1,0 +1,22 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+ignore:
+  - "app/src/main/kotlin/**/MainActivity.kt"
+  - "app/src/main/kotlin/**/AppAdapter.kt"
+  - "app/src/main/kotlin/**/GridAutofitLayoutManager.kt"
+  - "app/src/main/kotlin/**/AppExporter.kt"
+  - "app/src/test/**"
+  - "app/src/androidTest/**"
+
+comment:
+  behavior: default
+  require_changes: false
