@@ -107,6 +107,10 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
             "**/Manifest*.*",
             "**/*Test*.*",
             "android/**/*.*",
+            "**/MainActivity*.class",
+            "**/AppAdapter*.class",
+            "**/GridAutofitLayoutManager*.class",
+            "**/AppExporter*.class",
         )
 
     val mainSrc = files("${project.projectDir}/src/main/kotlin")
