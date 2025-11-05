@@ -11,8 +11,9 @@ interface UsageStatsService {
 
 class AndroidUsageStatsService(
     context: Context,
+    usageStatsManager: UsageStatsManager? = null,
 ) : UsageStatsService {
-    private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    private val actualUsageStatsManager = usageStatsManager ?: (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager)
     private var cache: Map<String, Long>? = null
 
     override fun getLastUsedEpochs(reload: Boolean): Map<String, Long> {
@@ -21,7 +22,7 @@ class AndroidUsageStatsService(
             val end = calendar.timeInMillis
             calendar.add(Calendar.YEAR, -2)
             val start = calendar.timeInMillis
-            val aggregated: Map<String, UsageStats> = usageStatsManager.queryAndAggregateUsageStats(start, end)
+            val aggregated: Map<String, UsageStats> = actualUsageStatsManager.queryAndAggregateUsageStats(start, end)
             cache = aggregated.mapValues { it.value.lastTimeUsed }
         }
         return cache!!

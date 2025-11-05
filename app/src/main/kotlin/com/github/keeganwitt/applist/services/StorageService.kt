@@ -16,15 +16,18 @@ interface StorageService {
 
 class AndroidStorageService(
     private val context: Context,
+    private val storageManager: StorageManager? = null,
+    private val storageStatsManager: StorageStatsManager? = null,
 ) : StorageService {
     override fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return storageUsage
         }
-        val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-        val storageStatsManager = context.getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager
-        storageManager.storageVolumes.forEach { storageVolume ->
+        val actualStorageManager = storageManager ?: (context.getSystemService(Context.STORAGE_SERVICE) as StorageManager)
+        val actualStorageStatsManager =
+            storageStatsManager ?: (context.getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager)
+        actualStorageManager.storageVolumes.forEach { storageVolume ->
             if (Environment.MEDIA_MOUNTED == storageVolume.state) {
                 val uuidStr = storageVolume.uuid
                 val uuid: UUID =
@@ -34,7 +37,12 @@ class AndroidStorageService(
                         return@forEach
                     }
                 try {
-                    val storageStats = storageStatsManager.queryStatsForPackage(uuid, applicationInfo.packageName, Process.myUserHandle())
+                    val storageStats =
+                        actualStorageStatsManager.queryStatsForPackage(
+                            uuid,
+                            applicationInfo.packageName,
+                            Process.myUserHandle(),
+                        )
                     storageUsage.increaseAppBytes(storageStats.appBytes)
                     storageUsage.increaseCacheBytes(storageStats.cacheBytes)
                     storageUsage.increaseDataBytes(storageStats.dataBytes)
