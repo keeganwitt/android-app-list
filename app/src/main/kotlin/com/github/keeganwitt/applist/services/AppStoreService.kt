@@ -1,5 +1,7 @@
 package com.github.keeganwitt.applist.services
 
+import android.util.Log
+import com.github.keeganwitt.applist.MainActivity
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -51,7 +53,9 @@ class PlayStoreService(
                 httpClient.newCall(request).execute().use { response ->
                     response.isSuccessful
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                val message = "Unable to make HTTP request to $url"
+                Log.w(TAG, message, e)
                 null
             }
         cache[packageName] = result
@@ -59,4 +63,8 @@ class PlayStoreService(
     }
 
     override fun appStoreLink(packageName: String): String = "https://play.google.com/store/apps/details?id=$packageName"
+
+    companion object {
+        private val TAG = AppStoreService::class.java.simpleName
+    }
 }
