@@ -12,8 +12,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 
+@RunWith(RobolectricTestRunner::class)
 class AppStoreServiceTest {
     private lateinit var httpClient: OkHttpClient
     private lateinit var service: PlayStoreService
