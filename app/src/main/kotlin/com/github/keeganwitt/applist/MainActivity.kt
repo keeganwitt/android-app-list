@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import android.widget.Spinner
+import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -246,6 +248,26 @@ class MainActivity :
             Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
                 data = Uri.fromParts("package", packageName, null)
             }
-        startActivity(intent)
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            val fallbackIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            if (fallbackIntent.resolveActivity(packageManager) != null) {
+                startActivity(fallbackIntent)
+            } else {
+                Log.w(TAG, "No Activity found to handle USAGE_ACCESS_SETTINGS intent.")
+                Toast
+                    .makeText(
+                        this,
+                        "Please enable Usage Access permission manually in Settings",
+                        Toast.LENGTH_LONG,
+                    ).show()
+            }
+        }
+    }
+
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
     }
 }
