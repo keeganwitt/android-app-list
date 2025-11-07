@@ -5,7 +5,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 interface CrashReporter {
     fun log(message: String)
 
-    fun record(
+    fun recordException(
         throwable: Throwable,
         message: String? = null,
     )
@@ -18,7 +18,7 @@ class FirebaseCrashReporter : CrashReporter {
         crashlytics.log(message)
     }
 
-    override fun record(
+    override fun recordException(
         throwable: Throwable,
         message: String?,
     ) {

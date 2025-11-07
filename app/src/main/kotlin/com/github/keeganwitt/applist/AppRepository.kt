@@ -84,7 +84,7 @@ class AndroidAppRepository(
                 enabled = ai.enabled,
             )
         } catch (e: Exception) {
-            crashReporter?.record(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
+            crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
             null
         }
 

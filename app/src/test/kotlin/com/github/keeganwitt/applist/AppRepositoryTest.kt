@@ -12,7 +12,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -202,7 +201,7 @@ class AppRepositoryTest {
                 )
 
             assertTrue(result.isEmpty())
-            verify { crashReporter.record(any(), any()) }
+            verify { crashReporter.recordException(any(), any()) }
         }
 
     @Test

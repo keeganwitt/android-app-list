@@ -120,7 +120,7 @@ class AppExporter(
         } catch (e: Exception) {
             val message = "Error exporting XML"
             Log.e(TAG, message, e)
-            crashReporter?.record(e, message)
+            crashReporter?.recordException(e, message)
             Toast
                 .makeText(
                     activity,
@@ -148,7 +148,7 @@ class AppExporter(
         } catch (e: Exception) {
             val message = "Error exporting HTML"
             Log.e(TAG, message, e)
-            crashReporter?.record(e, message)
+            crashReporter?.recordException(e, message)
             Toast
                 .makeText(
                     activity,

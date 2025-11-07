@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Environment
 import android.os.Process
 import android.os.storage.StorageManager
+import android.util.Log
 import com.github.keeganwitt.applist.StorageUsage
 import java.util.UUID
 
@@ -49,11 +50,19 @@ class AndroidStorageService(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         storageUsage.increaseExternalCacheBytes(storageStats.externalCacheBytes)
                     }
-                } catch (_: Exception) {
-                    // ignore; return whatever we have
+                } catch (e: SecurityException) {
+                    val message = "Missing storage permission"
+                    Log.w(TAG, message, e)
+                } catch (e: Exception) {
+                    val message = "Unable to process storage usage"
+                    Log.w(TAG, message + " for ${applicationInfo.packageName} on $uuid", e)
                 }
             }
         }
         return storageUsage
+    }
+
+    companion object {
+        private val TAG = StorageService::class.java.simpleName
     }
 }

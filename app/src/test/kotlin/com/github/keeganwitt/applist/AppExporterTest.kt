@@ -1,11 +1,9 @@
 package com.github.keeganwitt.applist
 
-import android.content.ContentResolver
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
@@ -15,7 +13,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowToast
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
@@ -84,7 +81,7 @@ class AppExporterTest {
         exporter.writeXmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { crashReporter.record(any(), "Error exporting XML") }
+        verify { crashReporter.recordException(any(), "Error exporting XML") }
         val toast = ShadowToast.getTextOfLatestToast()
         assert(toast.toString().startsWith(activity.getString(R.string.export_failed)))
     }
@@ -118,7 +115,7 @@ class AppExporterTest {
         exporter.writeHtmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { crashReporter.record(any(), "Error exporting HTML") }
+        verify { crashReporter.recordException(any(), "Error exporting HTML") }
         val toast = ShadowToast.getTextOfLatestToast()
         assert(toast.toString().startsWith(activity.getString(R.string.export_failed)))
     }

@@ -33,7 +33,7 @@ class CrashReporterTest {
     fun `given throwable without message, when record called, then crashlytics records exception`() {
         val throwable = RuntimeException("Test exception")
 
-        crashReporter.record(throwable)
+        crashReporter.recordException(throwable)
 
         verify { crashlytics.recordException(throwable) }
     }
@@ -43,7 +43,7 @@ class CrashReporterTest {
         val throwable = RuntimeException("Test exception")
         val message = "Error occurred"
 
-        crashReporter.record(throwable, message)
+        crashReporter.recordException(throwable, message)
 
         verify { crashlytics.log(message) }
         verify { crashlytics.recordException(throwable) }
@@ -63,8 +63,8 @@ class CrashReporterTest {
         val exception1 = RuntimeException("Exception 1")
         val exception2 = IllegalStateException("Exception 2")
 
-        crashReporter.record(exception1)
-        crashReporter.record(exception2)
+        crashReporter.recordException(exception1)
+        crashReporter.recordException(exception2)
 
         verify { crashlytics.recordException(exception1) }
         verify { crashlytics.recordException(exception2) }
