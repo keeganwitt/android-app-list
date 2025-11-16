@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">애플리케이션 아이콘</string>
   <string name="search">찾다</string>
   <string name="systemAppToggle">시스템 애플리케이션</string>
-    <string name="appInfoField_apkSize">APK 크기</string>
+  <string name="appInfoField_apkSize">APK 크기</string>
   <string name="appInfoField_appSize">신청 규모</string>
   <string name="appInfoField_cacheSize">캐시 크기</string>
   <string name="appInfoField_dataSize">데이터 크기</string>
@@ -33,6 +32,5 @@
   <string name="export_as">다음으로 내보내기</string>
   <string name="export_no_apps">내보낼 앱이 없습니다</string>
   <string name="export_successful">내보내기 성공</string>
-  <string name="export_failed">내보내기 실패:</string>
-
+  <string name="export_failed">내보내기 실패: %1$s</string>
 </resources>

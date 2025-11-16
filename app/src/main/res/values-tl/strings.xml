@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_icon_description">Icon ng App</string>
+  <string name="app_icon_description">Icon ng App</string>
   <string name="search">Maghanap</string>
   <string name="systemAppToggle">Mga system app</string>
   <string name="appInfoField_apkSize">Laki ng APK</string>
@@ -33,6 +32,5 @@
   <string name="export_as">I-export bilang</string>
   <string name="export_no_apps">Walang mga app na i-export</string>
   <string name="export_successful">Matagumpay ang pag-export</string>
-  <string name="export_failed">Nabigo ang pag-export:</string>
-
+  <string name="export_failed">Nabigo ang pag-export: %1$s</string>
 </resources>

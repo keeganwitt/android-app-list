@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">應用程序圖標</string>
   <string name="search">搜索</string>
   <string name="systemAppToggle">系統應用</string>
-    <string name="appInfoField_apkSize">APK大小</string>
+  <string name="appInfoField_apkSize">APK大小</string>
   <string name="appInfoField_appSize">應用尺寸</string>
   <string name="appInfoField_cacheSize">緩存大小</string>
   <string name="appInfoField_dataSize">數據大小</string>
@@ -33,6 +32,5 @@
   <string name="export_as">導出為</string>
   <string name="export_no_apps">沒有要導出的應用</string>
   <string name="export_successful">導出成功</string>
-  <string name="export_failed">導出失敗：</string>
-
+  <string name="export_failed">导出失败: %1$s</string>
 </resources>

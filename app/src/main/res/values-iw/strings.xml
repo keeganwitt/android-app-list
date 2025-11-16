@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">סמל יישום</string>
   <string name="search">לחפש</string>
   <string name="systemAppToggle">יישומי מערכת</string>
-    <string name="appInfoField_apkSize">גודל APK</string>
+  <string name="appInfoField_apkSize">גודל APK</string>
   <string name="appInfoField_appSize">גודל יישום</string>
   <string name="appInfoField_cacheSize">גודל המטמון</string>
   <string name="appInfoField_dataSize">גודל נתונים</string>
@@ -33,6 +32,5 @@
   <string name="export_as">ייצא כ</string>
   <string name="export_no_apps">אין אפליקציות לייצא</string>
   <string name="export_successful">היצוא נכשל</string>
-  <string name="export_failed">היצוא נכשל:</string>
-
+  <string name="export_failed">הייצוא נכשל: %1$s</string>
 </resources>

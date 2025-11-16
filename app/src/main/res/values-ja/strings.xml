@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">アプリケーションアイコン</string>
   <string name="search">検索</string>
   <string name="systemAppToggle">システムアプリケーション</string>
-    <string name="appInfoField_apkSize">APKのサイズ</string>
+  <string name="appInfoField_apkSize">APKのサイズ</string>
   <string name="appInfoField_appSize">アプリケーションサイズ</string>
   <string name="appInfoField_cacheSize">キャッシュサイズ</string>
   <string name="appInfoField_dataSize">データサイズ</string>
@@ -33,6 +32,5 @@
   <string name="export_as">としてエクスポート</string>
   <string name="export_no_apps">エクスポートするアプリがありません</string>
   <string name="export_successful">エクスポートに成功しました</string>
-  <string name="export_failed">エクスポートに失敗しました:</string>
-
+  <string name="export_failed">エクスポートに失敗しました: %1$s</string>
 </resources>

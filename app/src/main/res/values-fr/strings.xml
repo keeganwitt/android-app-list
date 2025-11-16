@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">Icône de l\'application</string>
   <string name="search">Recherche</string>
   <string name="systemAppToggle">Applications Système</string>
-    <string name="appInfoField_apkSize">Taille de l\'APK</string>
+  <string name="appInfoField_apkSize">Taille de l\'APK</string>
   <string name="appInfoField_appSize">Taille de l\'application</string>
   <string name="appInfoField_cacheSize">Taille du cache</string>
   <string name="appInfoField_dataSize">Taille des données</string>
@@ -33,6 +32,5 @@
   <string name="export_as">Exporter en tant que</string>
   <string name="export_no_apps">Aucune application à exporter</string>
   <string name="export_successful">Exportation réussie</string>
-  <string name="export_failed">Échec de l\'exportation :</string>
-
+  <string name="export_failed">Échec de l\'exportation: %1$s</string>
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_icon_description">نماد برنامه</string>
+  <string name="app_icon_description">نماد برنامه</string>
   <string name="search">جستجو</string>
   <string name="systemAppToggle">برنامه های سیستمی</string>
   <string name="appInfoField_apkSize">اندازه APK</string>
@@ -33,6 +32,5 @@
   <string name="export_as">صادرات به عنوان</string>
   <string name="export_no_apps">هیچ برنامه ای برای صادرات وجود ندارد</string>
   <string name="export_successful">صادرات موفقیت آمیز بود</string>
-  <string name="export_failed">صادرات ناموفق بود:</string>
-
+  <string name="export_failed">صادر کردن ناموفق بود: %1$s</string>
 </resources>

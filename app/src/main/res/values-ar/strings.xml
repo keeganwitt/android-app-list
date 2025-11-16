@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">أيقونة التطبيق</string>
   <string name="search">يبحث</string>
   <string name="systemAppToggle">تطبيقات النظام</string>
@@ -33,6 +32,5 @@
   <string name="export_as">تصدير ك</string>
   <string name="export_no_apps">لا توجد تطبيقات للتصدير</string>
   <string name="export_successful">نجح التصدير</string>
-  <string name="export_failed">فشل التصدير:</string>
-
+  <string name="export_failed">فشل التصدير: %1$s</string>
 </resources>

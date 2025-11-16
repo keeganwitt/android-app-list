@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">Biểu tượng ứng dụng</string>
   <string name="search">Tìm kiếm</string>
   <string name="systemAppToggle">Ứng dụng hệ thống</string>
-    <string name="appInfoField_apkSize">Kích thước APK</string>
+  <string name="appInfoField_apkSize">Kích thước APK</string>
   <string name="appInfoField_appSize">Kích thước ứng dụng</string>
   <string name="appInfoField_cacheSize">Kích thước bộ nhớ cache</string>
   <string name="appInfoField_dataSize">Kích thước dữ liệu</string>
@@ -33,6 +32,5 @@
   <string name="export_as">Xuất dưới dạng</string>
   <string name="export_no_apps">Không có ứng dụng nào để xuất</string>
   <string name="export_successful">Xuất thành công</string>
-  <string name="export_failed">Xuất không thành công:</string>
-
+  <string name="export_failed">Xuất không thành công: %1$s</string>
 </resources>

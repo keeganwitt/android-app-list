@@ -124,7 +124,7 @@ class AppExporter(
             Toast
                 .makeText(
                     activity,
-                    activity.getString(R.string.export_failed) + " " + e.message,
+                    activity.getString(R.string.export_failed, e.message),
                     Toast.LENGTH_SHORT,
                 ).show()
         }
@@ -152,7 +152,7 @@ class AppExporter(
             Toast
                 .makeText(
                     activity,
-                    activity.getString(R.string.export_failed) + " " + e.message,
+                    activity.getString(R.string.export_failed, e.message),
                     Toast.LENGTH_SHORT,
                 ).show()
         }

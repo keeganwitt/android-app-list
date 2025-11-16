@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">অ্যাপ আইকন</string>
   <string name="search">অনুসন্ধান করুন</string>
   <string name="systemAppToggle">সিস্টেম অ্যাপস</string>
@@ -33,6 +32,5 @@
   <string name="export_as">হিসাবে রপ্তানি করুন</string>
   <string name="export_no_apps">রপ্তানি করার জন্য কোন অ্যাপ নেই</string>
   <string name="export_successful">রপ্তানি সফল হয়েছে</string>
-  <string name="export_failed">রপ্তানি ব্যর্থ হয়েছে:</string>
-
+  <string name="export_failed">রপ্তানি ব্যর্থ: %1$s</string>
 </resources>
