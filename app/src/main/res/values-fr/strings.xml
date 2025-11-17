@@ -8,7 +8,7 @@
   <string name="appInfoField_cacheSize">Taille du cache</string>
   <string name="appInfoField_dataSize">Taille des données</string>
   <string name="appInfoField_enabled">Activé</string>
-  <string name="appInfoField_exists_in_app_store">Disponible sur la boutique d'applications</string>
+  <string name="appInfoField_exists_in_app_store">Disponible sur la boutique d\'applications</string>
   <string name="appInfoField_externalCacheSize">Taille du cache externe</string>
   <string name="appInfoField_firstInstalled">Date de première installation</string>
   <string name="appInfoField_grantedPermissions">Autorisations accordées</string>
