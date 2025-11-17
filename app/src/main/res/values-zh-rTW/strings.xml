@@ -9,9 +9,9 @@
   <string name="appInfoField_cacheSize">快取大小</string>
   <string name="appInfoField_dataSize">資料大小</string>
   <string name="appInfoField_enabled">已啟用</string>
-  <string name="appInfoField_exists_in_app_store">存在於應用程式商店</string>
+  <string name="appInfoField_exists_in_app_store">可於應用程式商店取得</string>
   <string name="appInfoField_externalCacheSize">外部快取大小</string>
-  <string name="appInfoField_firstInstalled">首次安裝</string>
+  <string name="appInfoField_firstInstalled">首次安裝日期</string>
   <string name="appInfoField_grantedPermissions">授予的權限</string>
   <string name="appInfoField_lastUpdated">上次更新</string>
   <string name="appInfoField_lastUsed">上次使用</string>
