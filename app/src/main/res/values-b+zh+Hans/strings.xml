@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_icon_description">应用图标</string>
+  <string name="search">搜索</string>
+  <string name="systemAppToggle">系统应用</string>
+  <string name="appInfoField_apkSize">APK 大小</string>
+  <string name="appInfoField_appSize">应用大小</string>
+  <string name="appInfoField_cacheSize">缓存大小</string>
+  <string name="appInfoField_dataSize">数据大小</string>
+  <string name="appInfoField_enabled">启用</string>
+  <string name="appInfoField_exists_in_app_store">在应用商店可用</string>
+  <string name="appInfoField_externalCacheSize">外部缓存大小</string>
+  <string name="appInfoField_firstInstalled">首次安装日期</string>
+  <string name="appInfoField_grantedPermissions">授予的权限</string>
+  <string name="appInfoField_lastUpdated">最近更新</string>
+  <string name="appInfoField_lastUsed">上次使用</string>
+  <string name="appInfoField_minSdk">最低 SDK</string>
+  <string name="appInfoField_packageManager">包管理器</string>
+  <string name="appInfoField_requestedPermissions">请求的权限</string>
+  <string name="appInfoField_targetSdk">目标 SDK</string>
+  <string name="appInfoField_totalSize">总大小</string>
+  <string name="appInfoField_version">版本</string>
+  <string name="enabled">启用</string>
+  <string name="disabled">已禁用</string>
+  <string name="installed">已安装</string>
+  <string name="archived">已归档</string>
+  <string name="appInfoField_archived">已归档</string>
+  <string name="boolean_true">真</string>
+  <string name="boolean_false">假</string>
+  <string name="unknown">未知</string>
+  <string name="export">导出</string>
+  <string name="export_as">导出为</string>
+  <string name="export_no_apps">没有可导出的应用</string>
+  <string name="export_successful">导出成功</string>
+  <string name="export_failed">导出失败: %1$s</string>
+</resources>

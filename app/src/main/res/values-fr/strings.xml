@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">Icône de l\'application</string>
-  <string name="search">Recherche</string>
-  <string name="systemAppToggle">Applications Système</string>
-    <string name="appInfoField_apkSize">Taille de l\'APK</string>
+  <string name="search">Rechercher</string>
+  <string name="systemAppToggle">Applications système</string>
+  <string name="appInfoField_apkSize">Taille de l\'APK</string>
   <string name="appInfoField_appSize">Taille de l\'application</string>
   <string name="appInfoField_cacheSize">Taille du cache</string>
   <string name="appInfoField_dataSize">Taille des données</string>
   <string name="appInfoField_enabled">Activé</string>
-  <string name="appInfoField_exists_in_app_store">Existe dans l\'App Store</string>
+  <string name="appInfoField_exists_in_app_store">Disponible sur la boutique d\'applications</string>
   <string name="appInfoField_externalCacheSize">Taille du cache externe</string>
-  <string name="appInfoField_firstInstalled">Première installation</string>
+  <string name="appInfoField_firstInstalled">Date de première installation</string>
   <string name="appInfoField_grantedPermissions">Autorisations accordées</string>
   <string name="appInfoField_lastUpdated">Dernière mise à jour</string>
   <string name="appInfoField_lastUsed">Dernière utilisation</string>
-  <string name="appInfoField_minSdk">Kit de développement logiciel minimal</string>
-  <string name="appInfoField_packageManager">Directeur chargé d\'emballage</string>
+  <string name="appInfoField_minSdk">SDK minimal</string>
+  <string name="appInfoField_packageManager">Gestionnaire de paquets</string>
   <string name="appInfoField_requestedPermissions">Autorisations demandées</string>
-  <string name="appInfoField_targetSdk">Kit de développement logiciel cible</string>
+  <string name="appInfoField_targetSdk">SDK cible</string>
   <string name="appInfoField_totalSize">Taille totale</string>
   <string name="appInfoField_version">Version</string>
   <string name="enabled">Activé</string>
   <string name="disabled">Désactivé</string>
-  <string name="installed">installé</string>
-  <string name="archived">archivé</string>
+  <string name="installed">Installé</string>
+  <string name="archived">Archivé</string>
   <string name="appInfoField_archived">Archivé</string>
   <string name="boolean_true">Vrai</string>
   <string name="boolean_false">Faux</string>
-  <string name="unknown">Inconnue</string>
+  <string name="unknown">Inconnu</string>
   <string name="export">Exporter</string>
-  <string name="export_as">Exporter en tant que</string>
+  <string name="export_as">Exporter au format</string>
   <string name="export_no_apps">Aucune application à exporter</string>
   <string name="export_successful">Exportation réussie</string>
-  <string name="export_failed">Échec de l\'exportation :</string>
-
+  <string name="export_failed">Échec de l\'exportation: %1$s</string>
 </resources>

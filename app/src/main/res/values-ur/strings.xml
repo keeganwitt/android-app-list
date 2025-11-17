@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">ایپ کا آئیکن</string>
-  <string name="search">تلاش کریں</string>
+  <string name="search">تلاش</string>
   <string name="systemAppToggle">سسٹم ایپس</string>
   <string name="appInfoField_apkSize">APK کا سائز</string>
   <string name="appInfoField_appSize">ایپ کا سائز</string>
@@ -10,12 +9,12 @@
   <string name="appInfoField_cacheSize">کیشے کا سائز</string>
   <string name="appInfoField_dataSize">ڈیٹا کا سائز</string>
   <string name="appInfoField_enabled">فعال</string>
-  <string name="appInfoField_exists_in_app_store">ایپ اسٹور میں موجود ہے</string>
+  <string name="appInfoField_exists_in_app_store">ایپ اسٹور میں دستیاب</string>
   <string name="appInfoField_externalCacheSize">بیرونی کیشے کا سائز</string>
-  <string name="appInfoField_firstInstalled">پہلی بار انسٹال ہوا</string>
+  <string name="appInfoField_firstInstalled">پہلی تنصیب کی تاریخ</string>
   <string name="appInfoField_grantedPermissions">دی گئی اجازتیں</string>
-  <string name="appInfoField_lastUpdated">آخری بار اپ ڈیٹ ہوا</string>
-  <string name="appInfoField_lastUsed">آخری بار استعمال ہوا</string>
+  <string name="appInfoField_lastUpdated">آخری تازہ کاری</string>
+  <string name="appInfoField_lastUsed">آخری استعمال</string>
   <string name="appInfoField_minSdk">کم از کم SDK</string>
   <string name="appInfoField_packageManager">پیکیج مینیجر</string>
   <string name="appInfoField_requestedPermissions">درخواست کردہ اجازتیں</string>
@@ -26,13 +25,12 @@
   <string name="disabled">غیر فعال</string>
   <string name="installed">انسٹال شدہ</string>
   <string name="archived">آرکائیو شدہ</string>
-  <string name="boolean_true">سچ</string>
-  <string name="boolean_false">جھوٹ</string>
+  <string name="boolean_true">درست</string>
+  <string name="boolean_false">غلط</string>
   <string name="unknown">نامعلوم</string>
-  <string name="export">برآمد کریں</string>
+  <string name="export">برآمد</string>
   <string name="export_as">بطور برآمد کریں</string>
-  <string name="export_no_apps">برآمد کرنے کے لئے کوئی ایپس نہیں ہیں</string>
-  <string name="export_successful">برآمد کامیاب</string>
-  <string name="export_failed">برآمد ناکام:</string>
-
+  <string name="export_no_apps">برآمد کرنے کے لیے کوئی ایپس نہیں ہیں</string>
+  <string name="export_successful">برآمد کامیابی سے مکمل ہوا</string>
+  <string name="export_failed">برآمد ناکام: %1$s</string>
 </resources>

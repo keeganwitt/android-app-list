@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-  <string name="app_icon_description">значок приложения</string>
-  <string name="search">значок приложения</string>
+  <string name="app_icon_description">Значок приложения</string>
+  <string name="search">Поиск</string>
   <string name="systemAppToggle">системные приложения</string>
-    <string name="appInfoField_apkSize">Размер APK</string>
+  <string name="appInfoField_apkSize">Размер APK</string>
   <string name="appInfoField_appSize">размер приложения</string>
   <string name="appInfoField_cacheSize">размер кэша</string>
   <string name="appInfoField_dataSize">размер данных</string>
   <string name="appInfoField_enabled">включено</string>
-  <string name="appInfoField_exists_in_app_store">Существует в магазине приложений</string>
+  <string name="appInfoField_exists_in_app_store">Доступно в магазине приложений</string>
   <string name="appInfoField_externalCacheSize">размер внешнего кэша</string>
-  <string name="appInfoField_firstInstalled">первый установленный</string>
+  <string name="appInfoField_firstInstalled">Дата первой установки</string>
   <string name="appInfoField_grantedPermissions">предоставленные разрешения</string>
   <string name="appInfoField_lastUpdated">последнее обновление</string>
-  <string name="appInfoField_lastUsed">последний используемый</string>
-  <string name="appInfoField_minSdk">минимальный SDK</string>
+  <string name="appInfoField_lastUsed">Последнее использование</string>
+  <string name="appInfoField_minSdk">Минимальный SDK</string>
   <string name="appInfoField_packageManager">менеджер пакетов</string>
   <string name="appInfoField_requestedPermissions">запрошенные разрешения</string>
   <string name="appInfoField_targetSdk">целевой SDK</string>
   <string name="appInfoField_totalSize">общий размер</string>
-  <string name="appInfoField_version">версия</string>
+  <string name="appInfoField_version">Версия</string>
   <string name="enabled">Включено</string>
-  <string name="disabled">Неполноценный</string>
-  <string name="installed">установлено</string>
-  <string name="archived">заархивировано</string>
+  <string name="disabled">Отключено</string>
+  <string name="installed">Установлено</string>
+  <string name="archived">Заархивировано</string>
   <string name="appInfoField_archived">Архивировано</string>
-  <string name="boolean_true">Истинный</string>
-  <string name="boolean_false">ЛОЖЬ</string>
-  <string name="unknown">Неизвестный</string>
-  <string name="export">экспорт</string>
-  <string name="export_as">экспортировать как</string>
+  <string name="boolean_true">Истина</string>
+  <string name="boolean_false">Ложь</string>
+  <string name="unknown">Неизвестно</string>
+  <string name="export">Экспорт</string>
+  <string name="export_as">Экспортировать как</string>
   <string name="export_no_apps">Нет приложений для экспорта</string>
-  <string name="export_successful">Экспорт успешен</string>
-  <string name="export_failed">Ошибка экспорта:</string>
-
+  <string name="export_successful">Экспорт выполнен успешно</string>
+  <string name="export_failed">Экспорт не удался: %1$s</string>
 </resources>

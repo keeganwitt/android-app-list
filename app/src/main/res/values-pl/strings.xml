@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_icon_description">Ikona aplikacji</string>
   <string name="search">Szukaj</string>
   <string name="systemAppToggle">Aplikacje systemowe</string>
@@ -10,16 +9,16 @@
   <string name="appInfoField_cacheSize">Rozmiar pamięci podręcznej</string>
   <string name="appInfoField_dataSize">Rozmiar danych</string>
   <string name="appInfoField_enabled">Włączone</string>
-  <string name="appInfoField_exists_in_app_store">Istnieje w App Store</string>
+  <string name="appInfoField_exists_in_app_store">Dostępna w sklepie z aplikacjami</string>
   <string name="appInfoField_externalCacheSize">Rozmiar pamięci podręcznej zewnętrznej</string>
-  <string name="appInfoField_firstInstalled">Pierwsza instalacja</string>
+  <string name="appInfoField_firstInstalled">Data pierwszej instalacji</string>
   <string name="appInfoField_grantedPermissions">Przyznane uprawnienia</string>
   <string name="appInfoField_lastUpdated">Ostatnia aktualizacja</string>
-  <string name="appInfoField_lastUsed">Ostatnio używane</string>
-  <string name="appInfoField_minSdk">Min. SDK</string>
+  <string name="appInfoField_lastUsed">Ostatnie użycie</string>
+  <string name="appInfoField_minSdk">Minimalne SDK</string>
   <string name="appInfoField_packageManager">Menedżer pakietów</string>
   <string name="appInfoField_requestedPermissions">Żądane uprawnienia</string>
-  <string name="appInfoField_targetSdk">Docelowy pakiet SDK</string>
+  <string name="appInfoField_targetSdk">Docelowe SDK</string>
   <string name="appInfoField_totalSize">Całkowity rozmiar</string>
   <string name="appInfoField_version">Wersja</string>
   <string name="enabled">Włączone</string>
@@ -28,11 +27,10 @@
   <string name="archived">Zarchiwizowane</string>
   <string name="boolean_true">Prawda</string>
   <string name="boolean_false">Fałsz</string>
-  <string name="unknown">Nieznany</string>
-  <string name="export">Eksport</string>
+  <string name="unknown">Nieznane</string>
+  <string name="export">Eksportuj</string>
   <string name="export_as">Eksportuj jako</string>
   <string name="export_no_apps">Brak aplikacji do wyeksportowania</string>
   <string name="export_successful">Eksport zakończony sukcesem</string>
-  <string name="export_failed">Eksport nie powiódł się:</string>
-
+  <string name="export_failed">Eksport nieudany: %1$s</string>
 </resources>

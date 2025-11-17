@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-  <string name="app_icon_description">애플리케이션 아이콘</string>
-  <string name="search">찾다</string>
-  <string name="systemAppToggle">시스템 애플리케이션</string>
-    <string name="appInfoField_apkSize">APK 크기</string>
-  <string name="appInfoField_appSize">신청 규모</string>
+  <string name="app_icon_description">앱 아이콘</string>
+  <string name="search">검색</string>
+  <string name="systemAppToggle">시스템 앱</string>
+  <string name="appInfoField_apkSize">APK 크기</string>
+  <string name="appInfoField_appSize">앱 크기</string>
   <string name="appInfoField_cacheSize">캐시 크기</string>
   <string name="appInfoField_dataSize">데이터 크기</string>
-  <string name="appInfoField_enabled">사용</string>
-  <string name="appInfoField_exists_in_app_store">앱스토어에 존재함</string>
+  <string name="appInfoField_enabled">사용함</string>
+  <string name="appInfoField_exists_in_app_store">앱 스토어에서 이용 가능</string>
   <string name="appInfoField_externalCacheSize">외부 캐시 크기</string>
-  <string name="appInfoField_firstInstalled">처음 설치됨</string>
+  <string name="appInfoField_firstInstalled">최초 설치일</string>
   <string name="appInfoField_grantedPermissions">부여된 권한</string>
   <string name="appInfoField_lastUpdated">마지막 업데이트</string>
   <string name="appInfoField_lastUsed">마지막 사용</string>
-  <string name="appInfoField_minSdk">최소 소프트웨어 개발 키트 버전</string>
+  <string name="appInfoField_minSdk">최소 SDK</string>
   <string name="appInfoField_packageManager">패키지 관리자</string>
   <string name="appInfoField_requestedPermissions">요청된 권한</string>
-  <string name="appInfoField_targetSdk">대상 소프트웨어 개발 키트 버전</string>
-  <string name="appInfoField_totalSize">총합 크기</string>
+  <string name="appInfoField_targetSdk">대상 SDK</string>
+  <string name="appInfoField_totalSize">총 크기</string>
   <string name="appInfoField_version">버전</string>
-  <string name="enabled">사용</string>
-  <string name="disabled">장애가 있는</string>
+  <string name="enabled">사용함</string>
+  <string name="disabled">사용 안 함</string>
   <string name="installed">설치됨</string>
   <string name="archived">보관됨</string>
   <string name="appInfoField_archived">보관됨</string>
-  <string name="boolean_true">진실</string>
+  <string name="boolean_true">참</string>
   <string name="boolean_false">거짓</string>
-  <string name="unknown">알려지지 않은</string>
+  <string name="unknown">알 수 없음</string>
   <string name="export">내보내기</string>
-  <string name="export_as">다음으로 내보내기</string>
+  <string name="export_as">형식으로 내보내기</string>
   <string name="export_no_apps">내보낼 앱이 없습니다</string>
   <string name="export_successful">내보내기 성공</string>
-  <string name="export_failed">내보내기 실패:</string>
-
+  <string name="export_failed">내보내기 실패: %1$s</string>
 </resources>

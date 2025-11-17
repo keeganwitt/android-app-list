@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +48,7 @@ class AppExporterTest {
         }
 
         val text = ShadowToast.getTextOfLatestToast()
-        assert(text.toString() == activity.getString(R.string.export_no_apps).toString())
+        assertTrue(text.toString() == activity.getString(R.string.export_no_apps).toString())
     }
 
     @Test
@@ -66,13 +67,14 @@ class AppExporterTest {
 
         verify { formatter.toXml(items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
-        assert(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }
 
     @Test
     fun writeXmlToFile_onError_reportsCrash_andShowsFailToast() {
+        val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toXml(any(), any()) } throws RuntimeException("boom")
+        every { failingFormatter.toXml(any(), any()) } throws RuntimeException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter)
         exporter.selectedAppInfoField = AppInfoField.VERSION
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
@@ -83,7 +85,8 @@ class AppExporterTest {
 
         verify { crashReporter.recordException(any(), "Error exporting XML") }
         val toast = ShadowToast.getTextOfLatestToast()
-        assert(toast.toString().startsWith(activity.getString(R.string.export_failed)))
+        val expected = activity.getString(R.string.export_failed, exceptionMessage)
+        assertTrue(toast.toString() == expected)
     }
 
     @Test
@@ -101,13 +104,14 @@ class AppExporterTest {
 
         verify { formatter.toHtml(items) }
         val toast = ShadowToast.getTextOfLatestToast()
-        assert(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }
 
     @Test
     fun writeHtmlToFile_onError_reportsCrash_andShowsFailToast() {
+        val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toHtml(any()) } throws RuntimeException("boom")
+        every { failingFormatter.toHtml(any()) } throws RuntimeException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter)
         val file = File.createTempFile("apps", ".html").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
@@ -117,6 +121,7 @@ class AppExporterTest {
 
         verify { crashReporter.recordException(any(), "Error exporting HTML") }
         val toast = ShadowToast.getTextOfLatestToast()
-        assert(toast.toString().startsWith(activity.getString(R.string.export_failed)))
+        val expected = activity.getString(R.string.export_failed, exceptionMessage)
+        assertTrue(toast.toString() == expected)
     }
 }
