@@ -23,6 +23,7 @@ class MainActivityTest {
     @Before
     fun setup() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        Thread.sleep(3000)
     }
 
     @After
@@ -32,7 +33,6 @@ class MainActivityTest {
 
     @Test
     fun mainActivity_whenLaunched_thenRecyclerViewIsDisplayed() {
-        Thread.sleep(1000)
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
     }
 

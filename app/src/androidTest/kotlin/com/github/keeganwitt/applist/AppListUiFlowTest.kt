@@ -41,7 +41,7 @@ class AppListUiFlowTest {
     fun appList_whenToggleSortOrder_thenListReorders() {
         onView(withId(R.id.toggleButton)).check(matches(isDisplayed()))
         onView(withId(R.id.toggleButton)).perform(click())
-        Thread.sleep(500)
+        Thread.sleep(1000)
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
     }
 
