@@ -70,7 +70,7 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
 
     // Other dependencies
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
     // Unit test dependencies
     testImplementation("junit:junit:4.13.2")
@@ -88,7 +88,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.7.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.3.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
 }
 
 tasks.register("jacocoTestReport", JacocoReport::class) {
