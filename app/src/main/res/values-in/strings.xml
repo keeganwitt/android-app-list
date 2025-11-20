@@ -33,4 +33,7 @@
   <string name="export_no_apps">Tidak ada aplikasi untuk diekspor</string>
   <string name="export_successful">Ekspor berhasil</string>
   <string name="export_failed">Ekspor gagal: %1$s</string>
+  <string name="settings">Pengaturan</string>
+  <string name="crash_reporting_title">Bagikan laporan kerusakan</string>
+  <string name="crash_reporting_summary">Izinkan pengiriman laporan kerusakan anonim untuk membantu meningkatkan aplikasi</string>
 </resources>

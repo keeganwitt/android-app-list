@@ -33,4 +33,7 @@
   <string name="export_no_apps">אין אפליקציות לייצא</string>
   <string name="export_successful">הייצוא הצליח</string>
   <string name="export_failed">הייצוא נכשל: %1$s</string>
+  <string name="settings">הגדרות</string>
+  <string name="crash_reporting_title">שיתוף דוחות קריסה</string>
+  <string name="crash_reporting_summary">אפשרו שליחת דוחות קריסה אנונימיים כדי לסייע בשיפור האפליקציה</string>
 </resources>

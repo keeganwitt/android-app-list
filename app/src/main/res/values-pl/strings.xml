@@ -33,4 +33,7 @@
   <string name="export_no_apps">Brak aplikacji do wyeksportowania</string>
   <string name="export_successful">Eksport zakończony sukcesem</string>
   <string name="export_failed">Eksport nieudany: %1$s</string>
+  <string name="settings">Ustawienia</string>
+  <string name="crash_reporting_title">Udostępniaj raporty o awariach</string>
+  <string name="crash_reporting_summary">Zezwalaj na wysyłanie anonimowych raportów o awariach, aby ulepszać aplikację</string>
 </resources>

@@ -37,6 +37,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     testCoverage {
         jacocoVersion = "0.8.12"
     }
@@ -60,6 +64,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.google.android.material:material:1.13.0")
@@ -108,6 +113,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
             "**/*Test*.*",
             "android/**/*.*",
             "**/MainActivity*.class",
+            "**/SettingsActivity*.class",
             "**/AppAdapter*.class",
             "**/GridAutofitLayoutManager*.class",
             "**/AppExporter*.class",

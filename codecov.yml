@@ -11,6 +11,7 @@ coverage:
 
 ignore:
   - "app/src/main/kotlin/**/MainActivity.kt"
+  - "app/src/main/kotlin/**/SettingsActivity.kt"
   - "app/src/main/kotlin/**/AppAdapter.kt"
   - "app/src/main/kotlin/**/GridAutofitLayoutManager.kt"
   - "app/src/main/kotlin/**/AppExporter.kt"

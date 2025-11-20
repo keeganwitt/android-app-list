@@ -33,4 +33,7 @@
   <string name="export_no_apps">Dışa aktarılacak uygulama yok</string>
   <string name="export_successful">Dışa aktarma başarılı</string>
   <string name="export_failed">Dışa aktarma başarısız: %1$s</string>
+  <string name="settings">Ayarlar</string>
+  <string name="crash_reporting_title">Çökme raporlarını paylaş</string>
+  <string name="crash_reporting_summary">Uygulamayı geliştirmeye yardımcı olmak için anonim çökme raporlarının gönderilmesine izin ver</string>
 </resources>

@@ -33,4 +33,7 @@
   <string name="export_no_apps">エクスポートするアプリがありません</string>
   <string name="export_successful">エクスポートに成功しました</string>
   <string name="export_failed">エクスポートに失敗しました: %1$s</string>
+  <string name="settings">設定</string>
+  <string name="crash_reporting_title">クラッシュレポートを共有する</string>
+  <string name="crash_reporting_summary">アプリ改善のために匿名のクラッシュレポート送信を許可します</string>
 </resources>

@@ -33,4 +33,7 @@
   <string name="export_no_apps">Geen apps om te exporteren</string>
   <string name="export_successful">Exporteren gelukt</string>
   <string name="export_failed">Exporteren mislukt: %1$s</string>
+  <string name="settings">Instellingen</string>
+  <string name="crash_reporting_title">Crashrapporten delen</string>
+  <string name="crash_reporting_summary">Sta toe dat anonieme crashrapporten worden verzonden om de app te verbeteren</string>
 </resources>

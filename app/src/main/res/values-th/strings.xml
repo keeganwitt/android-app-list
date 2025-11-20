@@ -33,4 +33,7 @@
   <string name="export_no_apps">ไม่มีแอปที่จะส่งออก</string>
   <string name="export_successful">ส่งออกสำเร็จ</string>
   <string name="export_failed">การส่งออกล้มเหลว: %1$s</string>
+  <string name="settings">การตั้งค่า</string>
+  <string name="crash_reporting_title">แชร์รายงานการขัดข้อง</string>
+  <string name="crash_reporting_summary">อนุญาตให้ส่งรายงานการขัดข้องแบบไม่ระบุตัวตนเพื่อช่วยพัฒนาแอป</string>
 </resources>

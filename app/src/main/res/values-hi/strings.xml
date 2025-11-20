@@ -34,4 +34,7 @@
   <string name="export_no_apps">निर्यात करने के लिए कोई एप्लिकेशन नहीं</string>
   <string name="export_successful">निर्यात सफल</string>
   <string name="export_failed">निर्यात विफल: %1$s</string>
+  <string name="settings">सेटिंग्स</string>
+  <string name="crash_reporting_title">क्रैश रिपोर्ट साझा करें</string>
+  <string name="crash_reporting_summary">ऐप में सुधार करने में मदद के लिए गुमनाम क्रैश रिपोर्ट भेजने की अनुमति दें</string>
 </resources>

@@ -33,4 +33,7 @@
   <string name="export_no_apps">Nessuna app da esportare</string>
   <string name="export_successful">Esportazione riuscita</string>
   <string name="export_failed">Esportazione non riuscita: %1$s</string>
+  <string name="settings">Impostazioni</string>
+  <string name="crash_reporting_title">Condividi i report sugli arresti anomali</string>
+  <string name="crash_reporting_summary">Consenti l\'invio di report sugli arresti anomali anonimi per contribuire a migliorare l\'app</string>
 </resources>

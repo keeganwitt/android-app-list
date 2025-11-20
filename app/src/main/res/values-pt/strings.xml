@@ -33,4 +33,7 @@
   <string name="export_no_apps">Nenhum aplicativo para exportar</string>
   <string name="export_successful">Exportação bem-sucedida</string>
   <string name="export_failed">Falha na exportação: %1$s</string>
+  <string name="settings">Configurações</string>
+  <string name="crash_reporting_title">Compartilhar relatórios de falhas</string>
+  <string name="crash_reporting_summary">Permitir o envio de relatórios de falhas anônimos para ajudar a melhorar o app</string>
 </resources>

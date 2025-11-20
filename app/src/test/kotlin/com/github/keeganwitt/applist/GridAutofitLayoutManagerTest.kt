@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
+@Config(application = TestAppListApplication::class)
 class GridAutofitLayoutManagerTest {
     private lateinit var context: Context
     private lateinit var layoutManager: GridAutofitLayoutManager

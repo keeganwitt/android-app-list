@@ -33,4 +33,7 @@
   <string name="export_no_apps">沒有要匯出的應用程式</string>
   <string name="export_successful">匯出成功</string>
   <string name="export_failed">匯出失敗: %1$s</string>
+  <string name="settings">設定</string>
+  <string name="crash_reporting_title">分享當機報告</string>
+  <string name="crash_reporting_summary">允許傳送匿名當機報告以協助改進應用程式</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.github.keeganwitt.applist.services
 
 import android.util.Log
-import com.github.keeganwitt.applist.MainActivity
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
