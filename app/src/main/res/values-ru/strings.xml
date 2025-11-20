@@ -33,4 +33,7 @@
   <string name="export_no_apps">Нет приложений для экспорта</string>
   <string name="export_successful">Экспорт выполнен успешно</string>
   <string name="export_failed">Экспорт не удался: %1$s</string>
+  <string name="settings">Настройки</string>
+  <string name="crash_reporting_title">Делиться отчётами о сбоях</string>
+  <string name="crash_reporting_summary">Разрешить отправку анонимных отчётов о сбоях, чтобы помочь улучшить приложение</string>
 </resources>

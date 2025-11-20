@@ -91,8 +91,7 @@ class AppTest {
 
     @Test
     fun `given two App instances with same data, when compared, then they are equal`() {
-        val storage1 = StorageUsage().apply { increaseAppBytes(1000L) }
-        val storage2 = StorageUsage().apply { increaseAppBytes(1000L) }
+        val storage = StorageUsage().apply { increaseAppBytes(1000L) }
 
         val app1 =
             App(
@@ -105,7 +104,7 @@ class AppTest {
                 firstInstalled = 1000000L,
                 lastUpdated = 2000000L,
                 lastUsed = 3000000L,
-                sizes = storage1,
+                sizes = storage,
                 installerName = "Google Play",
                 existsInStore = true,
                 grantedPermissionsCount = 5,

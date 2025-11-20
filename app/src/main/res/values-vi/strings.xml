@@ -33,4 +33,7 @@
   <string name="export_no_apps">Không có ứng dụng nào để xuất</string>
   <string name="export_successful">Xuất thành công</string>
   <string name="export_failed">Xuất không thành công: %1$s</string>
+  <string name="settings">Cài đặt</string>
+  <string name="crash_reporting_title">Chia sẻ báo cáo sự cố</string>
+  <string name="crash_reporting_summary">Cho phép gửi báo cáo sự cố ẩn danh để giúp cải thiện ứng dụng</string>
 </resources>

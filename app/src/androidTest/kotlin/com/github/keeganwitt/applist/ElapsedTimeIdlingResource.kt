@@ -3,13 +3,13 @@ package com.github.keeganwitt.applist
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.IdlingResource.ResourceCallback
 
-class ElapsedTimeIdlingResource(private val waitingTime: Long) : IdlingResource {
+class ElapsedTimeIdlingResource(
+    private val waitingTime: Long,
+) : IdlingResource {
     private val startTime: Long = System.currentTimeMillis()
     private var resourceCallback: ResourceCallback? = null
 
-    override fun getName(): String {
-        return ElapsedTimeIdlingResource::class.java.name + waitingTime
-    }
+    override fun getName(): String = ElapsedTimeIdlingResource::class.java.name + waitingTime
 
     override fun isIdleNow(): Boolean {
         val elapsed = System.currentTimeMillis() - startTime

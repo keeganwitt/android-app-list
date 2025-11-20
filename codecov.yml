@@ -10,12 +10,15 @@ coverage:
         threshold: 1%
 
 ignore:
-  - "app/src/main/kotlin/**/MainActivity.kt"
-  - "app/src/main/kotlin/**/AppAdapter.kt"
-  - "app/src/main/kotlin/**/GridAutofitLayoutManager.kt"
-  - "app/src/main/kotlin/**/AppExporter.kt"
   - "app/src/main/kotlin/**/AndroidStorageService.kt"
   - "app/src/main/kotlin/**/AndroidUsageStatsService.kt"
+  - "app/src/main/kotlin/**/AppAdapter.kt"
+  - "app/src/main/kotlin/**/AppExporter.kt"
+  - "app/src/main/kotlin/**/AppListApplication.kt"
+  - "app/src/main/kotlin/**/AppSettings.kt"
+  - "app/src/main/kotlin/**/GridAutofitLayoutManager.kt"
+  - "app/src/main/kotlin/**/MainActivity.kt"
+  - "app/src/main/kotlin/**/SettingsActivity.kt"
   - "app/src/test/**"
   - "app/src/androidTest/**"
 

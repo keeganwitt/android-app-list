@@ -7,7 +7,14 @@ fun waitFor(delay: Long) {
     val idlingResource = ElapsedTimeIdlingResource(delay)
     try {
         IdlingRegistry.getInstance().register(idlingResource)
-        Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(android.R.id.content)).perform(androidx.test.espresso.action.ViewActions.swipeUp())
+        Espresso
+            .onView(
+                androidx.test.espresso.matcher.ViewMatchers
+                    .withId(android.R.id.content),
+            ).perform(
+                androidx.test.espresso.action.ViewActions
+                    .swipeUp(),
+            )
     } finally {
         IdlingRegistry.getInstance().unregister(idlingResource)
     }

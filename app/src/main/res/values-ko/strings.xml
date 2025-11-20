@@ -33,4 +33,7 @@
   <string name="export_no_apps">내보낼 앱이 없습니다</string>
   <string name="export_successful">내보내기 성공</string>
   <string name="export_failed">내보내기 실패: %1$s</string>
+  <string name="settings">설정</string>
+  <string name="crash_reporting_title">충돌 보고서 공유</string>
+  <string name="crash_reporting_summary">앱 개선을 돕기 위해 익명 충돌 보고서 전송을 허용합니다</string>
 </resources>
