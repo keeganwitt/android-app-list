@@ -23,7 +23,7 @@ class MainActivityTest {
     @Before
     fun setup() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
-        Thread.sleep(3000)
+        waitFor(3000)
     }
 
     @After
@@ -53,9 +53,9 @@ class MainActivityTest {
 
     @Test
     fun mainActivity_whenToggleButtonClicked_thenSortOrderChanges() {
-        Thread.sleep(1000)
+        waitFor(1000)
         onView(withId(R.id.toggleButton)).perform(click())
-        Thread.sleep(500)
+        waitFor(500)
         onView(withId(R.id.toggleButton)).check(matches(isDisplayed()))
     }
 }

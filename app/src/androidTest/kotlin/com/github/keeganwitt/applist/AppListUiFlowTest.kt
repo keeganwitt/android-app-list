@@ -22,7 +22,7 @@ class AppListUiFlowTest {
     @Before
     fun setup() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
-        Thread.sleep(2000)
+        waitFor(2000)
     }
 
     @After
@@ -33,7 +33,7 @@ class AppListUiFlowTest {
     @Test
     fun appList_whenSwipeRefresh_thenListRefreshes() {
         onView(withId(R.id.swipeRefreshLayout)).perform(swipeDown())
-        Thread.sleep(1000)
+        waitFor(1000)
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
     }
 
@@ -41,7 +41,7 @@ class AppListUiFlowTest {
     fun appList_whenToggleSortOrder_thenListReorders() {
         onView(withId(R.id.toggleButton)).check(matches(isDisplayed()))
         onView(withId(R.id.toggleButton)).perform(click())
-        Thread.sleep(1000)
+        waitFor(1000)
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
     }
 
