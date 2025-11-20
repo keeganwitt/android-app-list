@@ -27,7 +27,6 @@ class SettingsActivityTest {
         appSettings = SharedPreferencesAppSettings(context)
         appSettings.setCrashReportingEnabled(true)
         scenario = ActivityScenario.launch(SettingsActivity::class.java)
-        Thread.sleep(1000)
     }
 
     @After
@@ -54,7 +53,6 @@ class SettingsActivityTest {
     fun settingsActivity_whenCrashReportingEnabled_thenSwitchIsChecked() {
         appSettings.setCrashReportingEnabled(true)
         scenario.recreate()
-        Thread.sleep(500)
         onView(withText(R.string.crash_reporting_title)).check(matches(isDisplayed()))
     }
 
@@ -62,7 +60,6 @@ class SettingsActivityTest {
     fun settingsActivity_whenCrashReportingDisabled_thenSwitchIsUnchecked() {
         appSettings.setCrashReportingEnabled(false)
         scenario.recreate()
-        Thread.sleep(500)
         onView(withText(R.string.crash_reporting_title)).check(matches(isDisplayed()))
     }
 
@@ -70,9 +67,7 @@ class SettingsActivityTest {
     fun settingsActivity_whenSwitchToggled_thenPreferenceIsUpdated() {
         appSettings.setCrashReportingEnabled(true)
         scenario.recreate()
-        Thread.sleep(500)
         onView(withText(R.string.crash_reporting_title)).perform(click())
-        Thread.sleep(500)
         assert(!appSettings.isCrashReportingEnabled())
     }
 
@@ -80,11 +75,8 @@ class SettingsActivityTest {
     fun settingsActivity_whenSwitchToggledTwice_thenPreferenceReturnsToOriginalState() {
         appSettings.setCrashReportingEnabled(true)
         scenario.recreate()
-        Thread.sleep(500)
         onView(withText(R.string.crash_reporting_title)).perform(click())
-        Thread.sleep(500)
         onView(withText(R.string.crash_reporting_title)).perform(click())
-        Thread.sleep(500)
         assert(appSettings.isCrashReportingEnabled())
     }
 }
