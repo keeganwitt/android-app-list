@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("jacoco")
