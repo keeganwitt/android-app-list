@@ -33,4 +33,7 @@
   <string name="export_no_apps">没有可导出的应用</string>
   <string name="export_successful">导出成功</string>
   <string name="export_failed">导出失败: %1$s</string>
+  <string name="settings">设置</string>
+  <string name="crash_reporting_title">共享崩溃报告</string>
+  <string name="crash_reporting_summary">允许发送匿名崩溃报告以帮助改进应用</string>
 </resources>

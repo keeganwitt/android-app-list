@@ -38,6 +38,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     testCoverage {
         jacocoVersion = "0.8.12"
     }
@@ -61,6 +65,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.google.android.material:material:1.13.0")
@@ -108,12 +113,15 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
             "**/Manifest*.*",
             "**/*Test*.*",
             "android/**/*.*",
-            "**/MainActivity*.class",
-            "**/AppAdapter*.class",
-            "**/GridAutofitLayoutManager*.class",
-            "**/AppExporter*.class",
             "**/AndroidStorageService*.class",
             "**/AndroidUsageStatsService*.class",
+            "**/AppAdapter*.class",
+            "**/AppListApplication.class",
+            "**/AppSettings.class",
+            "**/AppExporter*.class",
+            "**/GridAutofitLayoutManager*.class",
+            "**/MainActivity*.class",
+            "**/SettingsActivity*.class",
         )
 
     val mainSrc = files("${project.projectDir}/src/main/kotlin")

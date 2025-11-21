@@ -33,4 +33,7 @@
   <string name="export_no_apps">রপ্তানি করার মতো কোনো অ্যাপ নেই</string>
   <string name="export_successful">রপ্তানি সফল হয়েছে</string>
   <string name="export_failed">রপ্তানি ব্যর্থ হয়েছে: %1$s</string>
+  <string name="settings">সেটিংস</string>
+  <string name="crash_reporting_title">ক্র্যাশ রিপোর্ট শেয়ার করুন</string>
+  <string name="crash_reporting_summary">অ্যাপ উন্নত করতে সহায়তার জন্য বেনামে ক্র্যাশ রিপোর্ট পাঠানোর অনুমতি দিন</string>
 </resources>

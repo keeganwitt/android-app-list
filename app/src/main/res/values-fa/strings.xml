@@ -33,4 +33,7 @@
   <string name="export_no_apps">برنامه‌ای برای خروجی وجود ندارد</string>
   <string name="export_successful">خروجی با موفقیت انجام شد</string>
   <string name="export_failed">خروجی ناموفق بود: %1$s</string>
+  <string name="settings">تنظیمات</string>
+  <string name="crash_reporting_title">اشتراک‌گذاری گزارش‌های خطا</string>
+  <string name="crash_reporting_summary">برای کمک به بهبود برنامه اجازه دهید گزارش‌های خطای ناشناس ارسال شوند</string>
 </resources>

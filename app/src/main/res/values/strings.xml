@@ -37,5 +37,8 @@
   <string name="export_no_apps">No apps to export</string>
   <string name="export_successful">Export successful</string>
   <string name="export_failed">Export failed: %1$s</string>
+  <string name="settings">Settings</string>
+  <string name="crash_reporting_title">Share crash reports</string>
+  <string name="crash_reporting_summary">Allow sending anonymous crash reports to help improve the app</string>
 
 </resources>

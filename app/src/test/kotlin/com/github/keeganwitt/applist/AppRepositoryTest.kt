@@ -44,7 +44,7 @@ class AppRepositoryTest {
     @Test
     fun `given installed apps, when loadApps called, then apps are returned`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
@@ -74,8 +74,8 @@ class AppRepositoryTest {
     @Test
     fun `given system apps, when loadApps called with showSystemApps false, then system apps are filtered out`() =
         runTest {
-            val userApp = createApplicationInfo("com.test.userapp", "User App", isSystemApp = false)
-            val systemApp = createApplicationInfo("com.android.system", "System App", isSystemApp = true)
+            val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
+            val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(userApp, systemApp)
@@ -103,8 +103,8 @@ class AppRepositoryTest {
     @Test
     fun `given system apps, when loadApps called with showSystemApps true, then system apps are included`() =
         runTest {
-            val userApp = createApplicationInfo("com.test.userapp", "User App", isSystemApp = false)
-            val systemApp = createApplicationInfo("com.android.system", "System App", isSystemApp = true)
+            val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
+            val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(userApp, systemApp)
@@ -131,7 +131,7 @@ class AppRepositoryTest {
     @Test
     fun `given apps without launch intent, when loadApps called, then apps are filtered out`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
             every { packageService.getLaunchIntentForPackage(any()) } returns null
@@ -151,9 +151,9 @@ class AppRepositoryTest {
     @Test
     fun `given apps, when loadApps called with descending true, then apps are sorted in descending order`() =
         runTest {
-            val app1 = createApplicationInfo("com.test.app1", "App A")
-            val app2 = createApplicationInfo("com.test.app2", "App B")
-            val app3 = createApplicationInfo("com.test.app3", "App C")
+            val app1 = createApplicationInfo("com.test.app1")
+            val app2 = createApplicationInfo("com.test.app2")
+            val app3 = createApplicationInfo("com.test.app3")
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(app1, app2, app3)
@@ -185,7 +185,7 @@ class AppRepositoryTest {
     @Test
     fun `given app throws exception, when loadApps called, then exception is caught and crash is reported`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
             every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
@@ -207,7 +207,7 @@ class AppRepositoryTest {
     @Test
     fun `given apps with usage stats, when loadApps called, then last used times are populated`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
             val packageInfo = createPackageInfo("1.0.0")
             val lastUsedTime = 1234567890L
 
@@ -236,7 +236,7 @@ class AppRepositoryTest {
     @Test
     fun `given apps with permissions, when loadApps called, then permission counts are populated`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
             val packageInfo =
                 createPackageInfo("1.0.0").apply {
                     requestedPermissions = arrayOf("android.permission.INTERNET", "android.permission.CAMERA")
@@ -269,7 +269,7 @@ class AppRepositoryTest {
     @Test
     fun `given reload true, when loadApps called, then usage stats are reloaded`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.app", "Test App")
+            val appInfo = createApplicationInfo("com.test.app")
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
@@ -294,7 +294,6 @@ class AppRepositoryTest {
 
     private fun createApplicationInfo(
         packageName: String,
-        label: String,
         isSystemApp: Boolean = false,
     ): ApplicationInfo =
         ApplicationInfo().apply {

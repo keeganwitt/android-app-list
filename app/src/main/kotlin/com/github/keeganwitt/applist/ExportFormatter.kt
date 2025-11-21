@@ -1,7 +1,5 @@
 package com.github.keeganwitt.applist
 
-import java.lang.StringBuilder
-
 class ExportFormatter {
     fun toXml(
         items: List<AppItemUiModel>,

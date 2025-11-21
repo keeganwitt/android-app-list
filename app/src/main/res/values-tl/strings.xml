@@ -33,4 +33,7 @@
   <string name="export_no_apps">Walang mga app na i-export</string>
   <string name="export_successful">Matagumpay ang pag-export</string>
   <string name="export_failed">Nabigo ang pag-export: %1$s</string>
+  <string name="settings">Mga Setting</string>
+  <string name="crash_reporting_title">Ibahagi ang mga ulat ng crash</string>
+  <string name="crash_reporting_summary">Payagan ang pagpapadala ng hindi nagpapakilalang ulat ng crash upang makatulong na pagbutihin ang app</string>
 </resources>

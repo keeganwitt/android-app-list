@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="crash_reporting_enabled"
+        android:title="@string/crash_reporting_title"
+        android:summary="@string/crash_reporting_summary"
+        android:defaultValue="true" />
+</PreferenceScreen>

@@ -33,4 +33,7 @@
   <string name="export_no_apps">برآمد کرنے کے لیے کوئی ایپس نہیں ہیں</string>
   <string name="export_successful">برآمد کامیابی سے مکمل ہوا</string>
   <string name="export_failed">برآمد ناکام: %1$s</string>
+  <string name="settings">ترتیبات</string>
+  <string name="crash_reporting_title">کریش رپورٹس شیئر کریں</string>
+  <string name="crash_reporting_summary">ایپ کو بہتر بنانے میں مدد کے لیے گمنام کریش رپورٹس بھیجنے کی اجازت دیں</string>
 </resources>

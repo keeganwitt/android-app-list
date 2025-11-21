@@ -12,11 +12,13 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowToast
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
+@Config(application = TestAppListApplication::class)
 @LooperMode(LooperMode.Mode.PAUSED)
 class AppExporterTest {
     private lateinit var activity: AppCompatActivity
@@ -48,7 +50,7 @@ class AppExporterTest {
         }
 
         val text = ShadowToast.getTextOfLatestToast()
-        assertTrue(text.toString() == activity.getString(R.string.export_no_apps).toString())
+        assertTrue(text.toString() == activity.getString(R.string.export_no_apps))
     }
 
     @Test
