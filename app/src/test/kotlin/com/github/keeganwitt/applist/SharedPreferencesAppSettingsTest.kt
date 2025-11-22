@@ -40,4 +40,19 @@ class SharedPreferencesAppSettingsTest {
         appSettings.setCrashReportingEnabled(true)
         assertTrue(appSettings.isCrashReportingEnabled())
     }
+
+    @Test
+    fun `getLastDisplayedAppInfoField returns VERSION by default`() {
+        val field = appSettings.getLastDisplayedAppInfoField()
+        assertTrue(field == AppInfoField.VERSION)
+    }
+
+    @Test
+    fun `setLastDisplayedAppInfoField correctly updates the value`() {
+        appSettings.setLastDisplayedAppInfoField(AppInfoField.APP_SIZE)
+        assertTrue(appSettings.getLastDisplayedAppInfoField() == AppInfoField.APP_SIZE)
+
+        appSettings.setLastDisplayedAppInfoField(AppInfoField.LAST_USED)
+        assertTrue(appSettings.getLastDisplayedAppInfoField() == AppInfoField.LAST_USED)
+    }
 }

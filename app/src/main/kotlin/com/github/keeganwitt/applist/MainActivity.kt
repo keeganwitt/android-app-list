@@ -53,6 +53,7 @@ class MainActivity :
     private lateinit var appListViewModel: AppListViewModel
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
+    private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,10 +62,13 @@ class MainActivity :
         setContentView(R.layout.activity_main)
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        val isLightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES
+        val isLightMode =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
+                Configuration.UI_MODE_NIGHT_YES
         windowInsetsController.isAppearanceLightStatusBars = isLightMode
 
         appInfoFields = AppInfoField.entries
+        appSettings = SharedPreferencesAppSettings(this)
 
         progressBar = findViewById(R.id.progress_bar)
         recyclerView = findViewById(R.id.recycler_view)
@@ -78,7 +82,12 @@ class MainActivity :
 
         val crashReporter = FirebaseCrashReporter()
         appExporter =
-            AppExporter(this, itemsProvider = { appAdapter.currentList }, formatter = ExportFormatter(), crashReporter = crashReporter)
+            AppExporter(
+                this,
+                itemsProvider = { appAdapter.currentList },
+                formatter = ExportFormatter(),
+                crashReporter = crashReporter,
+            )
 
         appListViewModel =
             ViewModelProvider(
@@ -89,7 +98,14 @@ class MainActivity :
                         val usage = AndroidUsageStatsService(applicationContext)
                         val storage = AndroidStorageService(applicationContext)
                         val store = PlayStoreService()
-                        val repo = AndroidAppRepository(pkg, usage, storage, store, crashReporter)
+                        val repo =
+                            AndroidAppRepository(
+                                pkg,
+                                usage,
+                                storage,
+                                store,
+                                crashReporter,
+                            )
                         val vm = AppListViewModel(repo, DefaultDispatcherProvider(), pkg)
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
@@ -105,20 +121,21 @@ class MainActivity :
         val collator = Collator.getInstance()
         appInfoFieldStrings.sortWith(collator::compare)
 
-        val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, appInfoFieldStrings)
+        val arrayAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, appInfoFieldStrings)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = arrayAdapter
 
         // initial selection to VERSION
-        val initialLabel = fieldToLabelMap[AppInfoField.VERSION] ?: getString(R.string.appInfoField_version)
+        val lastDisplayedField = appSettings.getLastDisplayedAppInfoField()
+        val initialLabel =
+            fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
         val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
         spinner.setSelection(initialIndex, false)
         spinner.onItemSelectedListener = this
-        appListViewModel.init(AppInfoField.VERSION)
+        appListViewModel.init(lastDisplayedField)
 
-        toggleButton.setOnCheckedChangeListener { _, _ ->
-            appListViewModel.toggleDescending()
-        }
+        toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
 
         swipeRefreshLayout.setOnRefreshListener {
             appListViewModel.refresh()
@@ -181,13 +198,15 @@ class MainActivity :
         val label = parent.getItemAtPosition(position) as String
         val field = labelToFieldMap[label] ?: AppInfoField.VERSION
         appListViewModel.updateSelectedField(field)
+        appSettings.setLastDisplayedAppInfoField(field)
         maybeRequestUsagePermission(field)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
         val adapter = spinner.adapter
         val versionText = getString(R.string.appInfoField_version)
-        val versionIndex = (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
+        val versionIndex =
+            (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
         if (versionIndex != null) {
             spinner.setSelection(versionIndex)
         }
@@ -243,7 +262,12 @@ class MainActivity :
 
     private fun hasUsageStatsPermission(): Boolean {
         val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), packageName)
+        val mode =
+            appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                packageName,
+            )
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
