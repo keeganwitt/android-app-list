@@ -36,4 +36,9 @@
   <string name="settings">تنظیمات</string>
   <string name="crash_reporting_title">اشتراک‌گذاری گزارش‌های خطا</string>
   <string name="crash_reporting_summary">برای کمک به بهبود برنامه اجازه دهید گزارش‌های خطای ناشناس ارسال شوند</string>
+  <string name="theme_title">تم</string>
+  <string name="theme_summary">تم برنامه را انتخاب کنید</string>
+  <string name="theme_entry_light">روشن</string>
+  <string name="theme_entry_dark">تیره</string>
+  <string name="theme_entry_system">سیستم</string>
 </resources>

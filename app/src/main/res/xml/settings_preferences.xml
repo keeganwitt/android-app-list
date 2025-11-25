@@ -5,4 +5,12 @@
         android:title="@string/crash_reporting_title"
         android:summary="@string/crash_reporting_summary"
         android:defaultValue="true" />
+
+    <ListPreference
+        android:key="theme_mode"
+        android:title="@string/theme_title"
+        android:summary="@string/theme_summary"
+        android:entries="@array/theme_entries"
+        android:entryValues="@array/theme_values"
+        android:defaultValue="SYSTEM" />
 </PreferenceScreen>

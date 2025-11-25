@@ -36,4 +36,9 @@
   <string name="settings">ترتیبات</string>
   <string name="crash_reporting_title">کریش رپورٹس شیئر کریں</string>
   <string name="crash_reporting_summary">ایپ کو بہتر بنانے میں مدد کے لیے گمنام کریش رپورٹس بھیجنے کی اجازت دیں</string>
+  <string name="theme_title">تھیم</string>
+  <string name="theme_summary">ایپ تھیم کا انتخاب کریں</string>
+  <string name="theme_entry_light">ہلکا</string>
+  <string name="theme_entry_dark">گہرا</string>
+  <string name="theme_entry_system">سسٹم</string>
 </resources>

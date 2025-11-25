@@ -36,4 +36,9 @@
   <string name="settings">Pengaturan</string>
   <string name="crash_reporting_title">Bagikan laporan kerusakan</string>
   <string name="crash_reporting_summary">Izinkan pengiriman laporan kerusakan anonim untuk membantu meningkatkan aplikasi</string>
+  <string name="theme_title">Tema</string>
+  <string name="theme_summary">Pilih tema aplikasi</string>
+  <string name="theme_entry_light">Terang</string>
+  <string name="theme_entry_dark">Gelap</string>
+  <string name="theme_entry_system">Sistem</string>
 </resources>

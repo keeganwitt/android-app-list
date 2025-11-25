@@ -50,6 +50,24 @@ class SettingsActivity : AppCompatActivity() {
                     }
                     true
                 }
+
+            findPreference<androidx.preference.ListPreference>(AppSettings.KEY_THEME_MODE)
+                ?.setOnPreferenceChangeListener { _, newValue ->
+                    val mode = AppSettings.ThemeMode.valueOf(newValue as String)
+                    val nightMode =
+                        when (mode) {
+                            AppSettings.ThemeMode.LIGHT ->
+                                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                            AppSettings.ThemeMode.DARK ->
+                                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                            AppSettings.ThemeMode.SYSTEM ->
+                                androidx.appcompat.app.AppCompatDelegate
+                                    .MODE_NIGHT_FOLLOW_SYSTEM
+                        }
+                    androidx.appcompat.app.AppCompatDelegate
+                        .setDefaultNightMode(nightMode)
+                    true
+                }
         }
     }
 }

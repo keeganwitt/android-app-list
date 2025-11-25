@@ -55,4 +55,19 @@ class SharedPreferencesAppSettingsTest {
         appSettings.setLastDisplayedAppInfoField(AppInfoField.LAST_USED)
         assertTrue(appSettings.getLastDisplayedAppInfoField() == AppInfoField.LAST_USED)
     }
+
+    @Test
+    fun `getThemeMode returns SYSTEM by default`() {
+        val mode = appSettings.getThemeMode()
+        assertTrue(mode == AppSettings.ThemeMode.SYSTEM)
+    }
+
+    @Test
+    fun `setThemeMode correctly updates the value`() {
+        appSettings.setThemeMode(AppSettings.ThemeMode.LIGHT)
+        assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.LIGHT)
+
+        appSettings.setThemeMode(AppSettings.ThemeMode.DARK)
+        assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.DARK)
+    }
 }

@@ -36,4 +36,9 @@
   <string name="settings">Impostazioni</string>
   <string name="crash_reporting_title">Condividi i report sugli arresti anomali</string>
   <string name="crash_reporting_summary">Consenti l\'invio di report sugli arresti anomali anonimi per contribuire a migliorare l\'app</string>
+  <string name="theme_title">Tema</string>
+  <string name="theme_summary">Scegli il tema dell\'app</string>
+  <string name="theme_entry_light">Chiaro</string>
+  <string name="theme_entry_dark">Scuro</string>
+  <string name="theme_entry_system">Sistema</string>
 </resources>

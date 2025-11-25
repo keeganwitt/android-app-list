@@ -36,4 +36,9 @@
   <string name="settings">সেটিংস</string>
   <string name="crash_reporting_title">ক্র্যাশ রিপোর্ট শেয়ার করুন</string>
   <string name="crash_reporting_summary">অ্যাপ উন্নত করতে সহায়তার জন্য বেনামে ক্র্যাশ রিপোর্ট পাঠানোর অনুমতি দিন</string>
+  <string name="theme_title">থিম</string>
+  <string name="theme_summary">অ্যাপ থিম চয়ন করুন</string>
+  <string name="theme_entry_light">হালকা</string>
+  <string name="theme_entry_dark">অন্ধকার</string>
+  <string name="theme_entry_system">সিস্টেম</string>
 </resources>

@@ -14,9 +14,20 @@ interface AppSettings {
 
     fun setLastDisplayedAppInfoField(field: AppInfoField)
 
+    fun getThemeMode(): ThemeMode
+
+    fun setThemeMode(mode: ThemeMode)
+
+    enum class ThemeMode {
+        LIGHT,
+        DARK,
+        SYSTEM,
+    }
+
     companion object {
         const val KEY_CRASH_REPORTING_ENABLED = "crash_reporting_enabled"
         const val KEY_LAST_DISPLAYED_APP_INFO_FIELD = "last_displayed_app_info_field"
+        const val KEY_THEME_MODE = "theme_mode"
     }
 }
 
@@ -47,5 +58,22 @@ class SharedPreferencesAppSettings(
 
     override fun setLastDisplayedAppInfoField(field: AppInfoField) {
         preferences.edit { putString(AppSettings.KEY_LAST_DISPLAYED_APP_INFO_FIELD, field.name) }
+    }
+
+    override fun getThemeMode(): AppSettings.ThemeMode {
+        val mode = preferences.getString(AppSettings.KEY_THEME_MODE, null)
+        return if (mode != null) {
+            try {
+                AppSettings.ThemeMode.valueOf(mode)
+            } catch (e: IllegalArgumentException) {
+                AppSettings.ThemeMode.SYSTEM
+            }
+        } else {
+            AppSettings.ThemeMode.SYSTEM
+        }
+    }
+
+    override fun setThemeMode(mode: AppSettings.ThemeMode) {
+        preferences.edit { putString(AppSettings.KEY_THEME_MODE, mode.name) }
     }
 }
