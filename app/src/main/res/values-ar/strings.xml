@@ -36,4 +36,9 @@
   <string name="settings">الإعدادات</string>
   <string name="crash_reporting_title">مشاركة تقارير الأعطال</string>
   <string name="crash_reporting_summary">السماح بإرسال تقارير أعطال مجهولة للمساعدة في تحسين التطبيق</string>
+  <string name="theme_title">المظهر</string>
+  <string name="theme_summary">اختر مظهر التطبيق</string>
+  <string name="theme_entry_light">فاتح</string>
+  <string name="theme_entry_dark">داكن</string>
+  <string name="theme_entry_system">النظام</string>
 </resources>

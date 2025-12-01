@@ -36,4 +36,9 @@
   <string name="settings">Cài đặt</string>
   <string name="crash_reporting_title">Chia sẻ báo cáo sự cố</string>
   <string name="crash_reporting_summary">Cho phép gửi báo cáo sự cố ẩn danh để giúp cải thiện ứng dụng</string>
+  <string name="theme_title">Chủ đề</string>
+  <string name="theme_summary">Chọn chủ đề ứng dụng</string>
+  <string name="theme_entry_light">Sáng</string>
+  <string name="theme_entry_dark">Tối</string>
+  <string name="theme_entry_system">Hệ thống</string>
 </resources>

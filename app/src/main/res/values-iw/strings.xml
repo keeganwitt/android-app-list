@@ -36,4 +36,9 @@
   <string name="settings">הגדרות</string>
   <string name="crash_reporting_title">שיתוף דוחות קריסה</string>
   <string name="crash_reporting_summary">אפשרו שליחת דוחות קריסה אנונימיים כדי לסייע בשיפור האפליקציה</string>
+  <string name="theme_title">ערכת נושא</string>
+  <string name="theme_summary">בחר את ערכת הנושא של האפליקציה</string>
+  <string name="theme_entry_light">בהיר</string>
+  <string name="theme_entry_dark">כהה</string>
+  <string name="theme_entry_system">מערכת</string>
 </resources>

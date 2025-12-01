@@ -36,4 +36,9 @@
   <string name="settings">Einstellungen</string>
   <string name="crash_reporting_title">Absturzberichte teilen</string>
   <string name="crash_reporting_summary">Das Senden anonymer Absturzberichte erlauben, um die App zu verbessern</string>
+  <string name="theme_title">Thema</string>
+  <string name="theme_summary">Wählen Sie das App-Thema</string>
+  <string name="theme_entry_light">Hell</string>
+  <string name="theme_entry_dark">Dunkel</string>
+  <string name="theme_entry_system">System</string>
 </resources>

@@ -36,4 +36,9 @@
   <string name="settings">Configurações</string>
   <string name="crash_reporting_title">Compartilhar relatórios de falhas</string>
   <string name="crash_reporting_summary">Permitir o envio de relatórios de falhas anônimos para ajudar a melhorar o app</string>
+  <string name="theme_title">Tema</string>
+  <string name="theme_summary">Escolha o tema da aplicação</string>
+  <string name="theme_entry_light">Claro</string>
+  <string name="theme_entry_dark">Escuro</string>
+  <string name="theme_entry_system">Sistema</string>
 </resources>

@@ -70,6 +70,19 @@ class MainActivity :
         appInfoFields = AppInfoField.entries
         appSettings = SharedPreferencesAppSettings(this)
 
+        val themeMode = appSettings.getThemeMode()
+        val nightMode =
+            when (themeMode) {
+                AppSettings.ThemeMode.LIGHT ->
+                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                AppSettings.ThemeMode.DARK ->
+                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                AppSettings.ThemeMode.SYSTEM ->
+                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        androidx.appcompat.app.AppCompatDelegate
+            .setDefaultNightMode(nightMode)
+
         progressBar = findViewById(R.id.progress_bar)
         recyclerView = findViewById(R.id.recycler_view)
         spinner = findViewById(R.id.spinner)

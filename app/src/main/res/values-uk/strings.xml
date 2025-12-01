@@ -36,4 +36,9 @@
   <string name="settings">Налаштування</string>
   <string name="crash_reporting_title">Надсилати звіти про збої</string>
   <string name="crash_reporting_summary">Дозволяйте надсилати анонімні звіти про збої, щоб допомогти покращити застосунок</string>
+  <string name="theme_title">Тема</string>
+  <string name="theme_summary">Виберіть тему програми</string>
+  <string name="theme_entry_light">Світла</string>
+  <string name="theme_entry_dark">Темна</string>
+  <string name="theme_entry_system">Системна</string>
 </resources>
