@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">충돌 보고서 공유</string>
   <string name="crash_reporting_summary">앱 개선을 돕기 위해 익명 충돌 보고서 전송을 허용합니다</string>
   <string name="theme_title">테마</string>
-  <string name="theme_summary">앱 테마 선택</string>
-  <string name="theme_entry_light">밝게</string>
+    <string name="theme_entry_light">밝게</string>
   <string name="theme_entry_dark">어둡게</string>
   <string name="theme_entry_system">시스템</string>
 </resources>

@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Compartir informes de fallos</string>
   <string name="crash_reporting_summary">Permite enviar informes de fallos anónimos para ayudar a mejorar la aplicación</string>
   <string name="theme_title">Tema</string>
-  <string name="theme_summary">Elija el tema de la aplicación</string>
-  <string name="theme_entry_light">Claro</string>
+    <string name="theme_entry_light">Claro</string>
   <string name="theme_entry_dark">Oscuro</string>
   <string name="theme_entry_system">Sistema</string>
 </resources>

@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Partager les rapports d\'incident</string>
   <string name="crash_reporting_summary">Autoriser l\'envoi de rapports d\'incident anonymes pour aider à améliorer l\'application</string>
   <string name="theme_title">Thème</string>
-  <string name="theme_summary">Choisir le thème de l\'application</string>
-  <string name="theme_entry_light">Clair</string>
+    <string name="theme_entry_light">Clair</string>
   <string name="theme_entry_dark">Sombre</string>
   <string name="theme_entry_system">Système</string>
 </resources>

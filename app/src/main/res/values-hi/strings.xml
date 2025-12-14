@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">क्रैश रिपोर्ट साझा करें</string>
   <string name="crash_reporting_summary">ऐप में सुधार करने में मदद के लिए गुमनाम क्रैश रिपोर्ट भेजने की अनुमति दें</string>
   <string name="theme_title">थीम</string>
-  <string name="theme_summary">ऐप थीम चुनें</string>
-  <string name="theme_entry_light">लाइट</string>
+    <string name="theme_entry_light">लाइट</string>
   <string name="theme_entry_dark">डार्क</string>
   <string name="theme_entry_system">सिस्टम</string>
 </resources>

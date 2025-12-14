@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">分享當機報告</string>
   <string name="crash_reporting_summary">允許傳送匿名當機報告以協助改進應用程式</string>
   <string name="theme_title">主題</string>
-  <string name="theme_summary">選擇應用程式主題</string>
-  <string name="theme_entry_light">淺色</string>
+    <string name="theme_entry_light">淺色</string>
   <string name="theme_entry_dark">深色</string>
   <string name="theme_entry_system">系統</string>
 </resources>

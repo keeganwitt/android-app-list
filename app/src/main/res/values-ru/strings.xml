@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Делиться отчётами о сбоях</string>
   <string name="crash_reporting_summary">Разрешить отправку анонимных отчётов о сбоях, чтобы помочь улучшить приложение</string>
   <string name="theme_title">Тема</string>
-  <string name="theme_summary">Выберите тему приложения</string>
-  <string name="theme_entry_light">Светлая</string>
+    <string name="theme_entry_light">Светлая</string>
   <string name="theme_entry_dark">Темная</string>
   <string name="theme_entry_system">Системная</string>
 </resources>

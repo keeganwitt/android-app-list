@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Crashrapporten delen</string>
   <string name="crash_reporting_summary">Sta toe dat anonieme crashrapporten worden verzonden om de app te verbeteren</string>
   <string name="theme_title">Thema</string>
-  <string name="theme_summary">Kies het app-thema</string>
-  <string name="theme_entry_light">Licht</string>
+    <string name="theme_entry_light">Licht</string>
   <string name="theme_entry_dark">Donker</string>
   <string name="theme_entry_system">Systeem</string>
 </resources>

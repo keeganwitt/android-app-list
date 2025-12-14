@@ -56,13 +56,18 @@ class SettingsActivity : AppCompatActivity() {
                     val mode = AppSettings.ThemeMode.valueOf(newValue as String)
                     val nightMode =
                         when (mode) {
-                            AppSettings.ThemeMode.LIGHT ->
+                            AppSettings.ThemeMode.LIGHT -> {
                                 androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                            AppSettings.ThemeMode.DARK ->
+                            }
+
+                            AppSettings.ThemeMode.DARK -> {
                                 androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                            AppSettings.ThemeMode.SYSTEM ->
+                            }
+
+                            AppSettings.ThemeMode.SYSTEM -> {
                                 androidx.appcompat.app.AppCompatDelegate
                                     .MODE_NIGHT_FOLLOW_SYSTEM
+                            }
                         }
                     androidx.appcompat.app.AppCompatDelegate
                         .setDefaultNightMode(nightMode)

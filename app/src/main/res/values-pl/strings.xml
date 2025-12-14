@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Udostępniaj raporty o awariach</string>
   <string name="crash_reporting_summary">Zezwalaj na wysyłanie anonimowych raportów o awariach, aby ulepszać aplikację</string>
   <string name="theme_title">Motyw</string>
-  <string name="theme_summary">Wybierz motyw aplikacji</string>
-  <string name="theme_entry_light">Jasny</string>
+    <string name="theme_entry_light">Jasny</string>
   <string name="theme_entry_dark">Ciemny</string>
   <string name="theme_entry_system">Systemowy</string>
 </resources>
