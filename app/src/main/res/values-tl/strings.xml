@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Ibahagi ang mga ulat ng crash</string>
   <string name="crash_reporting_summary">Payagan ang pagpapadala ng hindi nagpapakilalang ulat ng crash upang makatulong na pagbutihin ang app</string>
   <string name="theme_title">Tema</string>
-  <string name="theme_summary">Piliin ang tema ng app</string>
-  <string name="theme_entry_light">Maliwanag</string>
+    <string name="theme_entry_light">Maliwanag</string>
   <string name="theme_entry_dark">Madilim</string>
   <string name="theme_entry_system">System</string>
 </resources>

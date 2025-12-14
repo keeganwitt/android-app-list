@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">แชร์รายงานการขัดข้อง</string>
   <string name="crash_reporting_summary">อนุญาตให้ส่งรายงานการขัดข้องแบบไม่ระบุตัวตนเพื่อช่วยพัฒนาแอป</string>
   <string name="theme_title">ธีม</string>
-  <string name="theme_summary">เลือกธีมของแอป</string>
-  <string name="theme_entry_light">สว่าง</string>
+    <string name="theme_entry_light">สว่าง</string>
   <string name="theme_entry_dark">มืด</string>
   <string name="theme_entry_system">ระบบ</string>
 </resources>

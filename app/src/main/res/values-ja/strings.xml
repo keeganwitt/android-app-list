@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">クラッシュレポートを共有する</string>
   <string name="crash_reporting_summary">アプリ改善のために匿名のクラッシュレポート送信を許可します</string>
   <string name="theme_title">テーマ</string>
-  <string name="theme_summary">アプリのテーマを選択</string>
-  <string name="theme_entry_light">ライト</string>
+    <string name="theme_entry_light">ライト</string>
   <string name="theme_entry_dark">ダーク</string>
   <string name="theme_entry_system">システム</string>
 </resources>

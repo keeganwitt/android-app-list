@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">Çökme raporlarını paylaş</string>
   <string name="crash_reporting_summary">Uygulamayı geliştirmeye yardımcı olmak için anonim çökme raporlarının gönderilmesine izin ver</string>
   <string name="theme_title">Tema</string>
-  <string name="theme_summary">Uygulama temasını seçin</string>
-  <string name="theme_entry_light">Açık</string>
+    <string name="theme_entry_light">Açık</string>
   <string name="theme_entry_dark">Koyu</string>
   <string name="theme_entry_system">Sistem</string>
 </resources>

@@ -148,6 +148,9 @@ class SettingsActivityTest {
             )
 
         onView(withText(R.string.theme_title)).check(matches(isDisplayed()))
+
+        // Verify default summary "System" is displayed
+        onView(withText(R.string.theme_entry_system)).check(matches(isDisplayed()))
     }
 
     @Test
@@ -160,9 +163,9 @@ class SettingsActivityTest {
                 ),
             )
 
-        waitFor(1000)
+        waitFor(2000)
 
-        onView(withText("Light")).perform(click())
+        onView(withText(R.string.theme_entry_light)).perform(click())
         waitFor(1000)
 
         assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.LIGHT)

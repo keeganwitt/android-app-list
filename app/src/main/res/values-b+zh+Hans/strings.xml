@@ -37,8 +37,7 @@
   <string name="crash_reporting_title">共享崩溃报告</string>
   <string name="crash_reporting_summary">允许发送匿名崩溃报告以帮助改进应用</string>
   <string name="theme_title">主题</string>
-  <string name="theme_summary">选择应用主题</string>
-  <string name="theme_entry_light">浅色</string>
+    <string name="theme_entry_light">浅色</string>
   <string name="theme_entry_dark">深色</string>
   <string name="theme_entry_system">系统</string>
 </resources>

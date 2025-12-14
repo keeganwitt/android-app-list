@@ -73,12 +73,17 @@ class MainActivity :
         val themeMode = appSettings.getThemeMode()
         val nightMode =
             when (themeMode) {
-                AppSettings.ThemeMode.LIGHT ->
+                AppSettings.ThemeMode.LIGHT -> {
                     androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                AppSettings.ThemeMode.DARK ->
+                }
+
+                AppSettings.ThemeMode.DARK -> {
                     androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                AppSettings.ThemeMode.SYSTEM ->
+                }
+
+                AppSettings.ThemeMode.SYSTEM -> {
                     androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                }
             }
         androidx.appcompat.app.AppCompatDelegate
             .setDefaultNightMode(nightMode)
@@ -237,6 +242,7 @@ class MainActivity :
                 appExporter.export(latestState.selectedField)
                 return true
             }
+
             R.id.systemAppToggle -> {
                 item.isChecked = !item.isChecked
                 showSystemApps = item.isChecked
@@ -244,6 +250,7 @@ class MainActivity :
                 appListViewModel.setShowSystem(showSystemApps)
                 return true
             }
+
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true

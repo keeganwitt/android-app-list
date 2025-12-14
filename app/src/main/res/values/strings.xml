@@ -41,7 +41,7 @@
   <string name="crash_reporting_summary">Allow sending anonymous crash reports to help improve the
     app</string>
   <string name="theme_title">Theme</string>
-  <string name="theme_summary">Choose the app theme</string>
+
   <string name="theme_entry_light">Light</string>
   <string name="theme_entry_dark">Dark</string>
   <string name="theme_entry_system">System</string>
