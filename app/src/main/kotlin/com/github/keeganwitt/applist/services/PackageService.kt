@@ -56,7 +56,7 @@ class AndroidPackageService(
         }
 
         if (Build.VERSION.SDK_INT >= 35) {
-            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES.toLong()
+            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
         }
         // Also match disabled/uninstalled just in case
         flags = flags or (PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
@@ -86,7 +86,7 @@ class AndroidPackageService(
         } catch (_: PackageManager.NameNotFoundException) {
             if (Build.VERSION.SDK_INT >= 35) {
                 try {
-                    val flags = PackageManager.MATCH_ARCHIVED_PACKAGES.toLong() or PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong()
+                    val flags = PackageManager.MATCH_ARCHIVED_PACKAGES or PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong()
                     val ai = pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(flags))
                     pm.getApplicationIcon(ai)
                 } catch (_: Exception) {
