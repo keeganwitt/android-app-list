@@ -31,7 +31,12 @@ class AndroidAppRepository(
         descending: Boolean,
         reload: Boolean,
     ): List<App> {
-        val flags = PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES
+        var flags =
+            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                .toLong()
+        if (Build.VERSION.SDK_INT >= 35) {
+            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+        }
         val allInstalled = packageService.getInstalledApplications(flags)
         val filtered = filterApplications(allInstalled, showSystemApps)
         val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
@@ -105,12 +110,12 @@ class AndroidAppRepository(
 
     private fun isUserInstalledApp(appInfo: ApplicationInfo): Boolean = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
 
-    private fun isArchived(applicationInfo: ApplicationInfo): Boolean? =
-        if (Build.VERSION.SDK_INT >= 35) {
-            applicationInfo.isArchived
-        } else {
-            null
+    private fun isArchived(applicationInfo: ApplicationInfo): Boolean? {
+        if (Build.VERSION.SDK_INT >= 35 && applicationInfo.isArchived) {
+            return true
         }
+        return applicationInfo.metaData?.containsKey("com.android.vending.archive")
+    }
 
     private fun sortKey(
         app: App,
