@@ -33,24 +33,6 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given Amazon Appstore installer, when installerDisplayName called, then returns Amazon Appstore`() {
-        val result = service.installerDisplayName("com.amazon.venezia")
-        assertEquals("Amazon Appstore", result)
-    }
-
-    @Test
-    fun `given F-Droid installer, when installerDisplayName called, then returns F-Droid`() {
-        val result = service.installerDisplayName("org.fdroid.fdroid")
-        assertEquals("F-Droid", result)
-    }
-
-    @Test
-    fun `given APK installer, when installerDisplayName called, then returns APK`() {
-        val result = service.installerDisplayName("com.google.android.packageinstaller")
-        assertEquals("APK", result)
-    }
-
-    @Test
     fun `given null installer, when installerDisplayName called, then returns Unknown`() {
         val result = service.installerDisplayName(null)
         assertEquals("Unknown", result)
@@ -60,18 +42,6 @@ class AppStoreServiceTest {
     fun `given unknown installer, when installerDisplayName called, then returns Unknown with package name`() {
         val result = service.installerDisplayName("com.unknown.installer")
         assertEquals("Unknown (com.unknown.installer)", result)
-    }
-
-    @Test
-    fun `given Galaxy Store installer, when installerDisplayName called, then returns Galaxy Store`() {
-        val result = service.installerDisplayName("com.sec.android.app.samsungapps")
-        assertEquals("Galaxy Store", result)
-    }
-
-    @Test
-    fun `given Huawei App Gallery installer, when installerDisplayName called, then returns Huawei App Gallery`() {
-        val result = service.installerDisplayName("com.huawei.appmarket")
-        assertEquals("Huawei App Gallery", result)
     }
 
     @Test
@@ -146,14 +116,25 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given Samsung Smart Switch installer, when installerDisplayName called, then returns Samsung Smart Switch`() {
-        val result = service.installerDisplayName("com.sec.android.easyMover")
-        assertEquals("Samsung Smart Switch", result)
-    }
-
-    @Test
-    fun `given OnePlus Clone Phone installer, when installerDisplayName called, then returns OnePlus Clone Phone`() {
-        val result = service.installerDisplayName("com.oneplus.backuprestore")
-        assertEquals("OnePlus Clone Phone", result)
+    fun `given known installers, when installerDisplayName called, then returns expected name`() {
+        assertEquals("Amazon Appstore", service.installerDisplayName("com.amazon.venezia"))
+        assertEquals("F-Droid", service.installerDisplayName("org.fdroid.fdroid"))
+        assertEquals("APK", service.installerDisplayName("com.google.android.packageinstaller"))
+        assertEquals("Galaxy Store", service.installerDisplayName("com.sec.android.app.samsungapps"))
+        assertEquals("Huawei App Gallery", service.installerDisplayName("com.huawei.appmarket"))
+        assertEquals("Samsung Smart Switch", service.installerDisplayName("com.sec.android.easyMover"))
+        assertEquals("OnePlus Clone Phone", service.installerDisplayName("com.oneplus.backuprestore"))
+        assertEquals("Aurora Store", service.installerDisplayName("com.aurora.store"))
+        assertEquals("QooApp", service.installerDisplayName("com.qooapp"))
+        assertEquals("QooApp", service.installerDisplayName("com.qooapp.qoohelper"))
+        assertEquals("TapTap", service.installerDisplayName("com.taptap"))
+        assertEquals("TapTap", service.installerDisplayName("com.taptap.global"))
+        assertEquals("APKPure", service.installerDisplayName("com.apkpure.aegon"))
+        assertEquals("Uptodown", service.installerDisplayName("com.uptodown.android.marketplace"))
+        assertEquals("HeyTap", service.installerDisplayName("com.heytap.market"))
+        assertEquals("OPPO App Market", service.installerDisplayName("com.oppo.market"))
+        assertEquals("Vivo App Store", service.installerDisplayName("com.vivo.appstore"))
+        assertEquals("Droid-ify", service.installerDisplayName("com.looker.droidify"))
+        assertEquals("Neo Store", service.installerDisplayName("com.machaiv3lli.fdroid"))
     }
 }
