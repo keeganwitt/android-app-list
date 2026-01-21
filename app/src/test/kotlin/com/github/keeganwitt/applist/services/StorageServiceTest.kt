@@ -11,7 +11,9 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -20,6 +22,9 @@ import java.util.UUID
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [26])
 class StorageServiceTest {
+    @get:Rule
+    val tempFolder = TemporaryFolder()
+
     private lateinit var context: Context
     private lateinit var storageManager: StorageManager
     private lateinit var storageStatsManager: StorageStatsManager
@@ -133,8 +138,14 @@ class StorageServiceTest {
 
     @Test
     @Config(sdk = [31])
-    fun `given SDK 31 and mounted volume, when getStorageUsage called, then externalCacheBytes is included`() {
-        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+    fun `given SDK 31 and mounted volume, when getStorageUsage called, then storage stats are included`() {
+        val tempFile = tempFolder.newFile("test.apk")
+        tempFile.writeBytes(ByteArray(1234))
+        val appInfo =
+            ApplicationInfo().apply {
+                packageName = "com.test.app"
+                publicSourceDir = tempFile.absolutePath
+            }
         val storageVolume = mockk<StorageVolume>()
         val storageStats = mockk<StorageStats>()
         val testUuid = UUID.randomUUID()
@@ -154,6 +165,7 @@ class StorageServiceTest {
         assertEquals(2000L, result.cacheBytes)
         assertEquals(3000L, result.dataBytes)
         assertEquals(4000L, result.externalCacheBytes)
+        assertEquals(1234L, result.apkBytes)
     }
 
     @Test

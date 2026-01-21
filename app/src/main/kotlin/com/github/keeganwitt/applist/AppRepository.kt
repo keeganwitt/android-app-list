@@ -122,7 +122,7 @@ class AndroidAppRepository(
         field: AppInfoField,
     ): Comparable<*>? =
         when (field) {
-            AppInfoField.APK_SIZE -> app.sizes.appBytes
+            AppInfoField.APK_SIZE -> app.sizes.apkBytes
             AppInfoField.APP_SIZE -> app.sizes.appBytes
             AppInfoField.CACHE_SIZE -> app.sizes.cacheBytes
             AppInfoField.DATA_SIZE -> app.sizes.dataBytes

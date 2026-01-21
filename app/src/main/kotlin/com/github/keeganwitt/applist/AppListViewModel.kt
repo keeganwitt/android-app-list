@@ -93,7 +93,7 @@ class AppListViewModel(
     ): AppItemUiModel {
         val info =
             when (field) {
-                AppInfoField.APK_SIZE -> app.sizes.appBytes.toString()
+                AppInfoField.APK_SIZE -> app.sizes.apkBytes.toString()
                 AppInfoField.APP_SIZE -> app.sizes.appBytes.toString()
                 AppInfoField.CACHE_SIZE -> app.sizes.cacheBytes.toString()
                 AppInfoField.DATA_SIZE -> app.sizes.dataBytes.toString()
