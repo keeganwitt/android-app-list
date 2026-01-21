@@ -9,6 +9,7 @@ import android.os.Process
 import android.os.storage.StorageManager
 import android.util.Log
 import com.github.keeganwitt.applist.StorageUsage
+import java.io.File
 import java.util.UUID
 
 interface StorageService {
@@ -22,6 +23,12 @@ class AndroidStorageService(
 ) : StorageService {
     override fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage {
         val storageUsage = StorageUsage()
+        try {
+            storageUsage.apkBytes = File(applicationInfo.publicSourceDir).length()
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to get APK size for ${applicationInfo.packageName}", e)
+        }
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return storageUsage
         }

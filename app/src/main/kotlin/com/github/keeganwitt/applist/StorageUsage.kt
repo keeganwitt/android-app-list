@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 class StorageUsage {
+    var apkBytes: Long = 0
     var appBytes: Long = 0
     var cacheBytes: Long = 0
     var dataBytes: Long = 0
