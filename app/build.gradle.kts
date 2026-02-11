@@ -96,44 +96,56 @@ dependencies {
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
 }
 
-tasks.register("jacocoTestReport", JacocoReport::class) {
-    dependsOn("testDebugUnitTest")
+val fileFilter =
+    listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/databinding/*Binding.class",
+        "**/*Binding.class",
+        "**/BR.class",
+        "**/AndroidStorageService*.class",
+        "**/AndroidUsageStatsService*.class",
+        "**/AppAdapter*.class",
+        "**/AppListApplication.class",
+        "**/AppSettings.class",
+        "**/AppExporter*.class",
+        "**/GridAutofitLayoutManager*.class",
+        "**/MainActivity*.class",
+        "**/SettingsActivity*.class",
+    )
 
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.withType<JacocoReport> {
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
 
-    val fileFilter =
-        listOf(
-            "**/R.class",
-            "**/R$*.class",
-            "**/BuildConfig.*",
-            "**/Manifest*.*",
-            "**/*Test*.*",
-            "android/**/*.*",
-            "**/AndroidStorageService*.class",
-            "**/AndroidUsageStatsService*.class",
-            "**/AppAdapter*.class",
-            "**/AppListApplication.class",
-            "**/AppSettings.class",
-            "**/AppExporter*.class",
-            "**/GridAutofitLayoutManager*.class",
-            "**/MainActivity*.class",
-            "**/SettingsActivity*.class",
-        )
-
     val mainSrc = files("${project.projectDir}/src/main/kotlin")
-    val debugTree =
-        fileTree(layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
-            exclude(fileFilter)
-        }
-
     sourceDirectories.setFrom(mainSrc)
-    classDirectories.setFrom(debugTree)
+
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it) {
+                exclude(fileFilter)
+            }
+        },
+    )
+
     executionData.setFrom(
         fileTree(layout.buildDirectory) {
-            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+            include("outputs/unit_test_code_coverage/**/*.exec")
+            include("outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
         },
     )
 }

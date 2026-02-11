@@ -10,23 +10,6 @@ import org.junit.Test
 class AppItemUiModelTest {
     @Test
     fun `given AppItemUiModel, when created with all fields, then all fields are set correctly`() {
-        val icon = mockk<Drawable>()
-        val model =
-            AppItemUiModel(
-                packageName = "com.test.app",
-                appName = "Test App",
-                infoText = "1.0.0",
-                icon = icon,
-            )
-
-        assertEquals("com.test.app", model.packageName)
-        assertEquals("Test App", model.appName)
-        assertEquals("1.0.0", model.infoText)
-        assertNotNull(model.icon)
-    }
-
-    @Test
-    fun `given AppItemUiModel without icon, when created, then icon is null`() {
         val model =
             AppItemUiModel(
                 packageName = "com.test.app",
@@ -37,7 +20,6 @@ class AppItemUiModelTest {
         assertEquals("com.test.app", model.packageName)
         assertEquals("Test App", model.appName)
         assertEquals("1.0.0", model.infoText)
-        assertNull(model.icon)
     }
 
     @Test

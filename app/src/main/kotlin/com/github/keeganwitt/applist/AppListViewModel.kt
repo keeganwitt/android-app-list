@@ -15,7 +15,6 @@ import java.util.Date
 class AppListViewModel(
     private val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
-    private val packageService: PackageService,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -51,23 +50,29 @@ class AppListViewModel(
         loadApps(reload = true)
     }
 
+    private var loadJob: kotlinx.coroutines.Job? = null
+
     private fun loadApps(reload: Boolean) {
+        loadJob?.cancel()
         val state = _uiState.value
         _uiState.update { it.copy(isLoading = true) }
-        viewModelScope.launch(dispatchers.io) {
-            val apps =
-                repository.loadApps(
-                    field = state.selectedField,
-                    showSystemApps = state.showSystem,
-                    descending = state.descending,
-                    reload = reload,
-                )
-            withContext(dispatchers.main) {
-                allApps = apps
-                _uiState.update { it.copy(isLoading = false) }
-                applyFilterAndEmit()
+
+        loadJob =
+            viewModelScope.launch(dispatchers.io) {
+                repository
+                    .loadApps(
+                        field = state.selectedField,
+                        showSystemApps = state.showSystem,
+                        descending = state.descending,
+                        reload = reload,
+                    ).collect { apps ->
+                        withContext(dispatchers.main) {
+                            allApps = apps
+                            _uiState.update { it.copy(isLoading = false) }
+                            applyFilterAndEmit()
+                        }
+                    }
             }
-        }
     }
 
     private fun applyFilterAndEmit() {
@@ -116,7 +121,6 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
-            icon = packageService.getApplicationIcon(app.packageName),
         )
     }
 }
