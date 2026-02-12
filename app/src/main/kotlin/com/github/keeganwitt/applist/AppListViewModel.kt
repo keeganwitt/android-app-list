@@ -20,6 +20,12 @@ class AppListViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var allApps: List<App> = emptyList()
+        set(value) {
+            field = value
+            cachedMappedItems = null
+        }
+    private var cachedMappedItems: List<AppItemUiModel>? = null
+    private var cachedMappedItemsField: AppInfoField? = null
 
     fun init(initialField: AppInfoField) {
         _uiState.update { it.copy(selectedField = initialField) }
@@ -77,7 +83,11 @@ class AppListViewModel(
 
     private fun applyFilterAndEmit() {
         val state = _uiState.value
-        val list = allApps.map { mapToItem(it, state.selectedField) }
+        if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
+            cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
+            cachedMappedItemsField = state.selectedField
+        }
+        val list = cachedMappedItems!!
         val filtered =
             if (state.query.isBlank()) {
                 list
