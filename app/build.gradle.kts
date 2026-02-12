@@ -98,6 +98,7 @@ dependencies {
 
 val fileFilter =
     listOf(
+        // Android classes
         "**/R.class",
         "**/R$*.class",
         "**/BuildConfig.*",
@@ -107,6 +108,7 @@ val fileFilter =
         "**/databinding/*Binding.class",
         "**/*Binding.class",
         "**/BR.class",
+        // application classes
         "**/AndroidStorageService*.class",
         "**/AndroidUsageStatsService*.class",
         "**/AppAdapter*.class",
