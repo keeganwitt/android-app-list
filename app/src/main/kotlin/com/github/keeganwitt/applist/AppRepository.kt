@@ -7,15 +7,20 @@ import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.text.Collator
 
 interface AppRepository {
-    suspend fun loadApps(
+    fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
         descending: Boolean,
         reload: Boolean,
-    ): List<App>
+    ): Flow<List<App>>
 }
 
 class AndroidAppRepository(
@@ -25,37 +30,65 @@ class AndroidAppRepository(
     private val appStoreService: AppStoreService,
     private val crashReporter: CrashReporter? = null,
 ) : AppRepository {
-    override suspend fun loadApps(
+    override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
         descending: Boolean,
         reload: Boolean,
-    ): List<App> {
-        var flags =
-            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                .toLong()
-        if (Build.VERSION.SDK_INT >= 35) {
-            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+    ): Flow<List<App>> =
+        flow {
+            var flags =
+                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                    .toLong()
+            if (Build.VERSION.SDK_INT >= 35) {
+                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+            }
+            val allInstalled = packageService.getInstalledApplications(flags)
+            val filtered = filterApplications(allInstalled, showSystemApps)
+
+            // Phase 1: Emit apps with basic info only (fast)
+            val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
+            val sortedBasicApps = sortApps(basicApps, field, descending)
+            emit(sortedBasicApps)
+
+            // Phase 2: Fetch heavy data and emit updated list
+            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+
+            val detailedApps =
+                coroutineScope {
+                    val appsDeferred =
+                        filtered.map { ai ->
+                            async { mapToAppDetailed(ai, lastUsedEpochs) }
+                        }
+                    appsDeferred.awaitAll().filterNotNull()
+                }
+
+            val sortedDetailedApps = sortApps(detailedApps, field, descending)
+            emit(sortedDetailedApps)
         }
-        val allInstalled = packageService.getInstalledApplications(flags)
-        val filtered = filterApplications(allInstalled, showSystemApps)
-        val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
-        val apps = filtered.mapNotNull { mapToApp(it, lastUsedEpochs) }
-        return sortApps(apps, field, descending)
+
+    private fun mapToAppBasic(ai: ApplicationInfo): App {
+        val packageName = ai.packageName ?: ""
+        return App(
+            packageName = packageName,
+            name = packageService.loadLabel(ai),
+            versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
+            archived = isArchived(ai) ?: false,
+            minSdk = ai.minSdkVersion,
+            targetSdk = ai.targetSdkVersion,
+            firstInstalled = 0,
+            lastUpdated = 0,
+            lastUsed = 0,
+            sizes = StorageUsage(), // Empty for now
+            installerName = "",
+            existsInStore = false,
+            grantedPermissionsCount = 0,
+            requestedPermissionsCount = 0,
+            enabled = ai.enabled,
+        )
     }
 
-    private fun filterApplications(
-        apps: List<ApplicationInfo>,
-        showSystemApps: Boolean,
-    ): List<ApplicationInfo> =
-        apps.filter { ai ->
-            val include = showSystemApps || isUserInstalledApp(ai)
-            val archived = isArchived(ai) ?: false
-            val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
-            include && (archived || hasLaunch)
-        }
-
-    private fun mapToApp(
+    private fun mapToAppDetailed(
         ai: ApplicationInfo,
         lastUsedEpochs: Map<String, Long>,
     ): App? =
@@ -75,7 +108,7 @@ class AndroidAppRepository(
                 packageName = ai.packageName ?: "",
                 name = packageService.loadLabel(ai),
                 versionName = pkgInfo.versionName,
-                archived = isArchived(ai),
+                archived = isArchived(ai) ?: false, // Re-evaluate or reuse
                 minSdk = ai.minSdkVersion,
                 targetSdk = ai.targetSdkVersion,
                 firstInstalled = pkgInfo.firstInstallTime,
@@ -90,7 +123,18 @@ class AndroidAppRepository(
             )
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
-            null
+            mapToAppBasic(ai)
+        }
+
+    private fun filterApplications(
+        apps: List<ApplicationInfo>,
+        showSystemApps: Boolean,
+    ): List<ApplicationInfo> =
+        apps.filter { ai ->
+            val include = showSystemApps || isUserInstalledApp(ai)
+            val archived = isArchived(ai) ?: false
+            val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
+            include && (archived || hasLaunch)
         }
 
     private fun sortApps(

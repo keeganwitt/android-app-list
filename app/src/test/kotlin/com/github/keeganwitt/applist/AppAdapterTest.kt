@@ -1,5 +1,10 @@
 package com.github.keeganwitt.applist
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import com.github.keeganwitt.applist.utils.IconLoader
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -13,11 +18,19 @@ import org.robolectric.annotation.Config
 class AppAdapterTest {
     private lateinit var adapter: AppAdapter
     private lateinit var onClickListener: AppAdapter.OnClickListener
+    private lateinit var iconLoader: IconLoader
 
     @Before
     fun setup() {
         onClickListener = mockk(relaxed = true)
-        adapter = AppAdapter(onClickListener)
+        iconLoader = mockk(relaxed = true)
+
+        val lifecycleOwner = mockk<LifecycleOwner>()
+        val lifecycleRegistry = LifecycleRegistry(lifecycleOwner)
+        every { lifecycleOwner.lifecycle } returns lifecycleRegistry
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        adapter = AppAdapter(lifecycleOwner, onClickListener, iconLoader)
     }
 
     @Test

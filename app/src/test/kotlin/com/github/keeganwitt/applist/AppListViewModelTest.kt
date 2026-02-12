@@ -1,16 +1,17 @@
 package com.github.keeganwitt.applist
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.github.keeganwitt.applist.services.PackageService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -29,21 +30,19 @@ class AppListViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: AppRepository
     private lateinit var dispatcherProvider: DispatcherProvider
-    private lateinit var packageService: PackageService
     private lateinit var viewModel: AppListViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = mockk(relaxed = true)
-        packageService = mockk(relaxed = true)
         dispatcherProvider =
             object : DispatcherProvider {
                 override val io = testDispatcher
                 override val main = testDispatcher
                 override val default = testDispatcher
             }
-        viewModel = AppListViewModel(repository, dispatcherProvider, packageService)
+        viewModel = AppListViewModel(repository, dispatcherProvider)
     }
 
     @After
@@ -59,8 +58,7 @@ class AppListViewModelTest {
                     createTestApp("com.test.app1", "Test App 1"),
                     createTestApp("com.test.app2", "Test App 2"),
                 )
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -76,8 +74,7 @@ class AppListViewModelTest {
     fun `given apps loaded, when updateSelectedField called, then apps are reloaded with new field`() =
         runTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -94,8 +91,7 @@ class AppListViewModelTest {
     fun `given apps loaded, when toggleDescending called, then descending state is toggled`() =
         runTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -117,8 +113,7 @@ class AppListViewModelTest {
                     createTestApp("com.test.app1", "Test App 1"),
                     createTestApp("com.android.system", "System App"),
                 )
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -140,8 +135,7 @@ class AppListViewModelTest {
                     createTestApp("com.other.two", "Another App"),
                     createTestApp("com.example.three", "Example Test"),
                 )
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -165,8 +159,7 @@ class AppListViewModelTest {
                     createTestApp("com.myapp.one", "Test App 1"),
                     createTestApp("com.other.two", "Another App"),
                 )
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -185,8 +178,7 @@ class AppListViewModelTest {
     fun `given apps loaded, when refresh called, then apps are reloaded with reload flag true`() =
         runTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -201,7 +193,7 @@ class AppListViewModelTest {
     @Test
     fun `given no apps, when init called, then empty list is emitted`() =
         runTest {
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns emptyList()
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(emptyList())
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -215,8 +207,7 @@ class AppListViewModelTest {
     fun `given apps with different fields, when mapToItem called, then correct info text is generated`() =
         runTest {
             val app = createTestApp("com.test.app", "Test App", versionName = "1.2.3")
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns listOf(app)
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -233,8 +224,7 @@ class AppListViewModelTest {
                     createTestApp("com.test.myapp", "My Application"),
                     createTestApp("com.example.other", "Other App"),
                 )
-            coEvery { repository.loadApps(any(), any(), any(), any()) } returns mockApps
-            every { packageService.getApplicationIcon(any()) } returns null
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
 
             viewModel.init(AppInfoField.VERSION)
             advanceUntilIdle()
@@ -245,6 +235,31 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertEquals(1, state.items.size)
             assertEquals("com.test.myapp", state.items[0].packageName)
+        }
+
+    @Test
+    fun `given loading apps, when successful, then isLoading updates to false`() =
+        runTest {
+            val mockApps =
+                listOf(createTestApp("com.test.app1", "Test App 1"))
+            // Use MutableSharedFlow to control emission timing
+            val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flow
+
+            viewModel.init(AppInfoField.VERSION)
+            runCurrent()
+
+            // Should be loading initially
+            assertTrue(viewModel.uiState.value.isLoading)
+
+            // Emit apps
+            flow.emit(mockApps)
+            advanceUntilIdle()
+
+            // Should be done loading
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertEquals(1, state.items.size)
         }
 
     private fun createTestApp(
