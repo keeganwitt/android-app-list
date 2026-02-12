@@ -1,9 +1,11 @@
 package com.github.keeganwitt.applist
 
+import android.content.ContentResolver
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -92,6 +94,26 @@ class AppExporterTest {
     }
 
     @Test
+    fun writeXmlToFile_withNullOutputStream_reportsCrash_andShowsFailToast() {
+        val formatter = mockk<ExportFormatter>()
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns null
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any(), "Error exporting XML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        val expected = activity.getString(R.string.export_failed, "Failed to open output stream")
+        assertTrue(toast.toString() == expected)
+    }
+
+    @Test
     fun writeHtmlToFile_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val htmlOutput = "<!DOCTYPE html><html></html>"
@@ -124,6 +146,25 @@ class AppExporterTest {
         verify { crashReporter.recordException(any(), "Error exporting HTML") }
         val toast = ShadowToast.getTextOfLatestToast()
         val expected = activity.getString(R.string.export_failed, exceptionMessage)
+        assertTrue(toast.toString() == expected)
+    }
+
+    @Test
+    fun writeHtmlToFile_withNullOutputStream_reportsCrash_andShowsFailToast() {
+        val formatter = mockk<ExportFormatter>()
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter)
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns null
+
+        exporter.writeHtmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any(), "Error exporting HTML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        val expected = activity.getString(R.string.export_failed, "Failed to open output stream")
         assertTrue(toast.toString() == expected)
     }
 }
