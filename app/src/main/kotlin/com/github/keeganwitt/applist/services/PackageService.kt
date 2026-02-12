@@ -48,12 +48,6 @@ class AndroidPackageService(
 
     override fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo {
         var flags = PackageManager.GET_PERMISSIONS.toLong()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            flags = flags or PackageManager.GET_SIGNING_CERTIFICATES.toLong()
-        } else {
-            @Suppress("DEPRECATION")
-            flags = flags or PackageManager.GET_SIGNATURES.toLong()
-        }
 
         if (Build.VERSION.SDK_INT >= 35) {
             flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
