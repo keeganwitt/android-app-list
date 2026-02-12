@@ -15,6 +15,7 @@ import java.util.Date
 class AppListViewModel(
     private val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
+    private val summaryCalculator: SummaryCalculator,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -66,9 +67,10 @@ class AppListViewModel(
                         descending = state.descending,
                         reload = reload,
                     ).collect { apps ->
+                        val summary = summaryCalculator.calculate(apps)
                         withContext(dispatchers.main) {
                             allApps = apps
-                            _uiState.update { it.copy(isLoading = false) }
+                            _uiState.update { it.copy(isLoading = false, summary = summary) }
                             applyFilterAndEmit()
                         }
                     }

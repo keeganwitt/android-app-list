@@ -127,7 +127,12 @@ class MainActivity :
                                 store,
                                 crashReporter,
                             )
-                        val vm = AppListViewModel(repo, DefaultDispatcherProvider())
+                        val vm =
+                            AppListViewModel(
+                                repo,
+                                DefaultDispatcherProvider(),
+                                SummaryCalculator(applicationContext),
+                            )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
                     }
@@ -254,12 +259,36 @@ class MainActivity :
                 return true
             }
 
+            R.id.summary -> {
+                showSummaryDialog()
+                return true
+            }
+
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showSummaryDialog() {
+        val summary = latestState.summary
+        if (summary == null) {
+            Toast.makeText(this, "Summary not available yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val view = layoutInflater.inflate(R.layout.dialog_summary, null)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.summary_recycler_view)
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        recyclerView.adapter = SummaryAdapter(summary)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.summary)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun updateSystemAppToggleIcon(item: MenuItem) {
