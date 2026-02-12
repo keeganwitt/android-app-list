@@ -70,4 +70,17 @@ class SharedPreferencesAppSettingsTest {
         appSettings.setThemeMode(AppSettings.ThemeMode.DARK)
         assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.DARK)
     }
+
+    @Test
+    fun `getLastDisplayedAppInfoField returns VERSION when value is invalid`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PreferenceManager
+            .getDefaultSharedPreferences(context)
+            .edit()
+            .putString(AppSettings.KEY_LAST_DISPLAYED_APP_INFO_FIELD, "INVALID_VALUE")
+            .commit()
+
+        val field = appSettings.getLastDisplayedAppInfoField()
+        assertTrue(field == AppInfoField.VERSION)
+    }
 }
