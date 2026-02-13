@@ -1,9 +1,11 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -76,5 +78,62 @@ class AppListApplicationTest {
 
         assertTrue(disabledCalled)
         assertTrue(deleteCalled)
+    }
+
+    @Test
+    fun `given theme mode is light when onCreate called then default night mode is NO`() {
+        appSettings.setThemeMode(AppSettings.ThemeMode.LIGHT)
+
+        val application =
+            object : AppListApplication() {
+                init {
+                    attachBaseContext(context)
+                }
+
+                override fun setCrashlyticsCollectionEnabled(enabled: Boolean) {}
+
+                override fun deleteUnsentReports() {}
+            }
+        application.onCreate()
+
+        assertEquals(AppCompatDelegate.MODE_NIGHT_NO, AppCompatDelegate.getDefaultNightMode())
+    }
+
+    @Test
+    fun `given theme mode is dark when onCreate called then default night mode is YES`() {
+        appSettings.setThemeMode(AppSettings.ThemeMode.DARK)
+
+        val application =
+            object : AppListApplication() {
+                init {
+                    attachBaseContext(context)
+                }
+
+                override fun setCrashlyticsCollectionEnabled(enabled: Boolean) {}
+
+                override fun deleteUnsentReports() {}
+            }
+        application.onCreate()
+
+        assertEquals(AppCompatDelegate.MODE_NIGHT_YES, AppCompatDelegate.getDefaultNightMode())
+    }
+
+    @Test
+    fun `given theme mode is system when onCreate called then default night mode is FOLLOW_SYSTEM`() {
+        appSettings.setThemeMode(AppSettings.ThemeMode.SYSTEM)
+
+        val application =
+            object : AppListApplication() {
+                init {
+                    attachBaseContext(context)
+                }
+
+                override fun setCrashlyticsCollectionEnabled(enabled: Boolean) {}
+
+                override fun deleteUnsentReports() {}
+            }
+        application.onCreate()
+
+        assertEquals(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, AppCompatDelegate.getDefaultNightMode())
     }
 }
