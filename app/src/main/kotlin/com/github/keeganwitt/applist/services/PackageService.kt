@@ -16,8 +16,6 @@ interface PackageService {
 
     fun loadLabel(applicationInfo: ApplicationInfo): String
 
-    fun loadIcon(applicationInfo: ApplicationInfo): Drawable
-
     @Throws(PackageManager.NameNotFoundException::class)
     fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo
 
@@ -43,8 +41,6 @@ class AndroidPackageService(
     override fun getLaunchIntentForPackage(packageName: String): android.content.Intent? = pm.getLaunchIntentForPackage(packageName)
 
     override fun loadLabel(applicationInfo: ApplicationInfo): String = applicationInfo.loadLabel(pm).toString()
-
-    override fun loadIcon(applicationInfo: ApplicationInfo): Drawable = pm.getApplicationIcon(applicationInfo)
 
     override fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo {
         var flags = PackageManager.GET_PERMISSIONS.toLong()

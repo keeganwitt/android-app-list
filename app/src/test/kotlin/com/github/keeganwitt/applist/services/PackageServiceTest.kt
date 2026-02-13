@@ -80,17 +80,6 @@ class PackageServiceTest {
     }
 
     @Test
-    fun `given application info, when loadIcon called, then returns drawable`() {
-        val appInfo = mockk<ApplicationInfo>()
-        val drawable = mockk<Drawable>()
-        every { packageManager.getApplicationIcon(appInfo) } returns drawable
-
-        val result = service.loadIcon(appInfo)
-
-        assertNotNull(result)
-    }
-
-    @Test
     fun `given application info, when getPackageInfo called, then returns package info`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo().apply { versionName = "1.0.0" }
