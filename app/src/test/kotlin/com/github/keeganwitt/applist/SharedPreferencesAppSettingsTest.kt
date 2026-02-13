@@ -83,4 +83,43 @@ class SharedPreferencesAppSettingsTest {
         val field = appSettings.getLastDisplayedAppInfoField()
         assertTrue(field == AppInfoField.VERSION)
     }
+
+    @Test
+    fun `getLastDisplayedAppInfoField returns VERSION when value is empty`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PreferenceManager
+            .getDefaultSharedPreferences(context)
+            .edit()
+            .putString(AppSettings.KEY_LAST_DISPLAYED_APP_INFO_FIELD, "")
+            .commit()
+
+        val field = appSettings.getLastDisplayedAppInfoField()
+        assertTrue(field == AppInfoField.VERSION)
+    }
+
+    @Test
+    fun `getThemeMode returns SYSTEM when value is invalid`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PreferenceManager
+            .getDefaultSharedPreferences(context)
+            .edit()
+            .putString(AppSettings.KEY_THEME_MODE, "INVALID_VALUE")
+            .commit()
+
+        val mode = appSettings.getThemeMode()
+        assertTrue(mode == AppSettings.ThemeMode.SYSTEM)
+    }
+
+    @Test
+    fun `getThemeMode returns SYSTEM when value is empty`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PreferenceManager
+            .getDefaultSharedPreferences(context)
+            .edit()
+            .putString(AppSettings.KEY_THEME_MODE, "")
+            .commit()
+
+        val mode = appSettings.getThemeMode()
+        assertTrue(mode == AppSettings.ThemeMode.SYSTEM)
+    }
 }
