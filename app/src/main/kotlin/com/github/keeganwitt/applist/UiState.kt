@@ -7,5 +7,5 @@ data class UiState(
     val query: String = "",
     val isLoading: Boolean = false,
     val items: List<AppItemUiModel> = emptyList(),
-    val summary: List<SummaryItem>? = null,
+    val summary: SummaryItem? = null,
 )

@@ -67,7 +67,7 @@ class AppListViewModel(
                         descending = state.descending,
                         reload = reload,
                     ).collect { apps ->
-                        val summary = withContext(dispatchers.default) { summaryCalculator.calculate(apps) }
+                        val summary = withContext(dispatchers.default) { summaryCalculator.calculate(apps, state.selectedField) }
                         withContext(dispatchers.main) {
                             allApps = apps
                             _uiState.update { it.copy(isLoading = false, summary = summary) }

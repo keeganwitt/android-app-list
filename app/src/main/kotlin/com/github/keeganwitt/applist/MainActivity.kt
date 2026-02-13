@@ -282,7 +282,7 @@ class MainActivity :
         val view = layoutInflater.inflate(R.layout.dialog_summary, null)
         val recyclerView = view.findViewById<RecyclerView>(R.id.summary_recycler_view)
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        recyclerView.adapter = SummaryAdapter(summary)
+        recyclerView.adapter = SummaryAdapter(listOf(summary))
 
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.summary)
