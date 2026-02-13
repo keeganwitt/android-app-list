@@ -17,22 +17,60 @@ class SummaryCalculatorTest {
         val app1 = createApp(enabled = true, archived = false, apkSize = 5 * 1024 * 1024) // Small
         val app2 = createApp(enabled = false, archived = true, apkSize = 20 * 1024 * 1024) // Medium
         val app3 = createApp(enabled = true, archived = false, apkSize = 150 * 1024 * 1024) // Huge
+        val app4 = createApp(enabled = true, archived = false, apkSize = 75 * 1024 * 1024) // Large
 
-        val result = calculator.calculate(listOf(app1, app2, app3))
+        val result = calculator.calculate(listOf(app1, app2, app3, app4))
 
         val enabledSummary = result.find { it.field == AppInfoField.ENABLED }
-        assertEquals(2, enabledSummary?.buckets?.get("Enabled"))
+        assertEquals(3, enabledSummary?.buckets?.get("Enabled"))
         assertEquals(1, enabledSummary?.buckets?.get("Disabled"))
 
         val archivedSummary = result.find { it.field == AppInfoField.ARCHIVED }
         assertEquals(1, archivedSummary?.buckets?.get("Archived"))
-        assertEquals(2, archivedSummary?.buckets?.get("Installed"))
+        assertEquals(3, archivedSummary?.buckets?.get("Installed"))
 
         val sizeSummary = result.find { it.field == AppInfoField.APK_SIZE }
         assertEquals(1, sizeSummary?.buckets?.get("Small"))
         assertEquals(1, sizeSummary?.buckets?.get("Medium"))
-        assertEquals(0, sizeSummary?.buckets?.get("Large"))
+        assertEquals(1, sizeSummary?.buckets?.get("Large"))
         assertEquals(1, sizeSummary?.buckets?.get("Huge"))
+    }
+
+    @Test
+    fun `calculateSdkSummary groups by sdk version`() {
+        mockStrings()
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(targetSdk = 33, minSdk = 24)
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(targetSdk = 33, minSdk = 26)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(targetSdk = 34, minSdk = 24)
+
+        val result = calculator.calculate(listOf(app1, app2, app3))
+
+        val targetSdkSummary = result.find { it.field == AppInfoField.TARGET_SDK }
+        assertEquals(2, targetSdkSummary?.buckets?.get("33"))
+        assertEquals(1, targetSdkSummary?.buckets?.get("34"))
+
+        val minSdkSummary = result.find { it.field == AppInfoField.MIN_SDK }
+        assertEquals(2, minSdkSummary?.buckets?.get("24"))
+        assertEquals(1, minSdkSummary?.buckets?.get("26"))
+    }
+
+    @Test
+    fun `calculatePermissionSummary buckets correctly`() {
+        mockStrings()
+        val app0 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 3)
+        val app8 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 8)
+        val app15 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 15)
+        val app25 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 25)
+
+        val result = calculator.calculate(listOf(app0, app3, app8, app15, app25))
+
+        val permSummary = result.find { it.field == AppInfoField.GRANTED_PERMISSIONS }
+        assertEquals(1, permSummary?.buckets?.get("None")) // 0
+        assertEquals(1, permSummary?.buckets?.get("Few"))  // 1-5
+        assertEquals(1, permSummary?.buckets?.get("Some")) // 6-10
+        assertEquals(1, permSummary?.buckets?.get("Many")) // 11-20
+        assertEquals(1, permSummary?.buckets?.get("Lots")) // 20+
     }
 
     private fun mockStrings() {
