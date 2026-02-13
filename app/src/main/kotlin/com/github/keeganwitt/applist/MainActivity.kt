@@ -33,7 +33,6 @@ import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
-import com.github.keeganwitt.applist.utils.IconLoader
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -95,9 +94,7 @@ class MainActivity :
         toggleButton = findViewById(R.id.toggleButton)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
-        val packageService = AndroidPackageService(applicationContext)
-        val iconLoader = IconLoader(packageService)
-        appAdapter = AppAdapter(this, this, iconLoader)
+        appAdapter = AppAdapter(this)
         recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
         recyclerView.adapter = appAdapter
 

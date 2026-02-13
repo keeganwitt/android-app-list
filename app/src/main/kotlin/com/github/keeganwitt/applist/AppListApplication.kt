@@ -1,8 +1,13 @@
 package com.github.keeganwitt.applist
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import com.github.keeganwitt.applist.services.AndroidPackageService
+import com.github.keeganwitt.applist.utils.PackageIconFetcher
+import com.github.keeganwitt.applist.utils.PackageIconKeyer
 
-open class AppListApplication : Application() {
+open class AppListApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         val appSettings = SharedPreferencesAppSettings(this)
@@ -29,6 +34,15 @@ open class AppListApplication : Application() {
             }
         androidx.appcompat.app.AppCompatDelegate
             .setDefaultNightMode(nightMode)
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .components {
+                add(PackageIconFetcher.Factory(AndroidPackageService(this@AppListApplication)))
+                add(PackageIconKeyer())
+            }
+            .build()
     }
 
     protected open fun setCrashlyticsCollectionEnabled(enabled: Boolean) {

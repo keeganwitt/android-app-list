@@ -59,6 +59,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil:2.6.0")
     // Android dependencies
     implementation("androidx.activity:activity-ktx:1.12.4")
     implementation("androidx.appcompat:appcompat:1.7.1")
