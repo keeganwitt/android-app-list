@@ -105,44 +105,31 @@ class AppExporter(
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        try {
-            val outputStream =
-                activity.contentResolver.openOutputStream(uri)
-                    ?: throw java.io.IOException("Failed to open output stream")
-            outputStream.use {
-                val items = itemsProvider()
-                val xml = formatter.toXml(items, selectedAppInfoField!!)
-                it.write(xml.toByteArray(Charsets.UTF_8))
-            }
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_successful),
-                    Toast.LENGTH_SHORT,
-                ).show()
-        } catch (e: Exception) {
-            val message = "Error exporting XML"
-            Log.e(TAG, message, e)
-            crashReporter?.recordException(e, message)
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_failed, e.message),
-                    Toast.LENGTH_SHORT,
-                ).show()
+        exportToFile(uri, "XML") { items ->
+            formatter.toXml(items, selectedAppInfoField!!)
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
+        exportToFile(uri, "HTML") { items ->
+            formatter.toHtml(items)
+        }
+    }
+
+    private fun exportToFile(
+        uri: Uri,
+        formatName: String,
+        contentGenerator: (List<AppItemUiModel>) -> String,
+    ) {
         try {
             val outputStream =
                 activity.contentResolver.openOutputStream(uri)
                     ?: throw java.io.IOException("Failed to open output stream")
-            outputStream.use {
-                val writer = OutputStreamWriter(it, StandardCharsets.UTF_8)
+            outputStream.use { stream ->
+                val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
                 val items = itemsProvider()
-                val html = formatter.toHtml(items)
-                writer.write(html)
+                val content = contentGenerator(items)
+                writer.write(content)
                 writer.flush()
             }
             Toast
@@ -152,7 +139,7 @@ class AppExporter(
                     Toast.LENGTH_SHORT,
                 ).show()
         } catch (e: Exception) {
-            val message = "Error exporting HTML"
+            val message = "Error exporting $formatName"
             Log.e(TAG, message, e)
             crashReporter?.recordException(e, message)
             Toast
