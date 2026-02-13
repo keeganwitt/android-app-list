@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import android.os.Bundle
 import org.junit.Before
 import org.junit.Test
 
@@ -289,10 +290,13 @@ class AppRepositoryTest {
     @Test
     fun `given apps with archived status, when loadApps called with ARCHIVED field, then apps are sorted by archived status`() =
         runTest {
-            val app1 = createApplicationInfo("com.test.app1").apply {
-                metaData = android.os.Bundle().apply { putBoolean("com.android.vending.archive", true) }
-            }
+            val app1 = createApplicationInfo("com.test.app1")
+            val mockBundle = mockk<Bundle>()
+            every { mockBundle.containsKey("com.android.vending.archive") } returns true
+            app1.metaData = mockBundle
+
             val app2 = createApplicationInfo("com.test.app2")
+            app2.metaData = null
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
             every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
