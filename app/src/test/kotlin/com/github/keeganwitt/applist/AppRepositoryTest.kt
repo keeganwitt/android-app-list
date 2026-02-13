@@ -287,6 +287,38 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `given apps with archived status, when loadApps called with ARCHIVED field, then apps are sorted by archived status`() =
+        runTest {
+            val app1 = createApplicationInfo("com.test.app1").apply {
+                metaData = android.os.Bundle().apply { putBoolean("com.android.vending.archive", true) }
+            }
+            val app2 = createApplicationInfo("com.test.app2")
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
+            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { packageService.loadLabel(any()) } returns "App"
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
+            every { appStoreService.existsInAppStore(any(), any()) } returns null
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.ARCHIVED,
+                        showSystemApps = false,
+                        descending = true,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(2, result.size)
+            assertEquals(true, result[0].archived)
+            assertEquals(false, result[1].archived)
+        }
+
+    @Test
     fun `given reload true, when loadApps called, then usage stats are reloaded`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
