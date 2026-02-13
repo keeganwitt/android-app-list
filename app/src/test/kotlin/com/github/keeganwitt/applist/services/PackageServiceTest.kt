@@ -43,7 +43,7 @@ class PackageServiceTest {
 
         every { packageManager.getInstalledPackages(any<Int>()) } returns packages
 
-        val result = service.getInstalledApplications(PackageManager.GET_META_DATA)
+        val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
 
         assertEquals(2, result.size)
         assertEquals("com.test.app1", result[0].packageName)

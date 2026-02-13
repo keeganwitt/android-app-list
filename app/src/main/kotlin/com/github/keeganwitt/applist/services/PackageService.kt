@@ -8,8 +8,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 
 interface PackageService {
-    fun getInstalledApplications(flags: Int): List<ApplicationInfo>
-
     fun getInstalledApplications(flags: Long): List<ApplicationInfo>
 
     fun getLaunchIntentForPackage(packageName: String): android.content.Intent?
@@ -30,8 +28,6 @@ class AndroidPackageService(
     context: Context,
 ) : PackageService {
     private val pm: PackageManager = context.packageManager
-
-    override fun getInstalledApplications(flags: Int): List<ApplicationInfo> = pm.getInstalledPackages(flags).map { it.applicationInfo!! }
 
     override fun getInstalledApplications(flags: Long): List<ApplicationInfo> =
         if (Build.VERSION.SDK_INT >= 33) {
