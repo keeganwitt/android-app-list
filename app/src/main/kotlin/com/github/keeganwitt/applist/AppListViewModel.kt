@@ -6,9 +6,9 @@ import com.github.keeganwitt.applist.services.PackageService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Date
 
@@ -20,6 +20,8 @@ class AppListViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var allApps: List<App> = emptyList()
+    private var cachedMappedItems: List<AppItemUiModel>? = null
+    private var cachedMappedItemsField: AppInfoField? = null
 
     fun init(initialField: AppInfoField) {
         _uiState.update { it.copy(selectedField = initialField) }
@@ -58,26 +60,31 @@ class AppListViewModel(
         _uiState.update { it.copy(isLoading = true) }
 
         loadJob =
-            viewModelScope.launch(dispatchers.io) {
+            viewModelScope.launch(dispatchers.main) {
                 repository
                     .loadApps(
                         field = state.selectedField,
                         showSystemApps = state.showSystem,
                         descending = state.descending,
                         reload = reload,
-                    ).collect { apps ->
-                        withContext(dispatchers.main) {
-                            allApps = apps
-                            _uiState.update { it.copy(isLoading = false) }
-                            applyFilterAndEmit()
-                        }
+                    )
+                    .flowOn(dispatchers.io)
+                    .collect { apps ->
+                        allApps = apps
+                        cachedMappedItems = null
+                        _uiState.update { it.copy(isLoading = false) }
+                        applyFilterAndEmit()
                     }
             }
     }
 
     private fun applyFilterAndEmit() {
         val state = _uiState.value
-        val list = allApps.map { mapToItem(it, state.selectedField) }
+        if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
+            cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
+            cachedMappedItemsField = state.selectedField
+        }
+        val list = cachedMappedItems!!
         val filtered =
             if (state.query.isBlank()) {
                 list
