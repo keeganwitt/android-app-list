@@ -23,7 +23,7 @@ class AppExporter(
     private val crashReporter: CrashReporter? = null,
 ) {
     internal var selectedAppInfoField: AppInfoField? = null
-    private var currentExportType: String? = null
+    private var currentExportType: ExportFormat? = null
 
     private val createFileLauncher: ActivityResultLauncher<Intent>
 
@@ -39,8 +39,9 @@ class AppExporter(
                 if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
                     val uri = result.data?.data ?: return@register
                     when (currentExportType) {
-                        "xml" -> writeXmlToFile(uri)
-                        "html" -> writeHtmlToFile(uri)
+                        ExportFormat.XML -> writeXmlToFile(uri)
+                        ExportFormat.HTML -> writeHtmlToFile(uri)
+                        null -> { /* Should not happen */ }
                     }
                 }
             }
@@ -64,9 +65,9 @@ class AppExporter(
         ) { dialog: DialogInterface?, which: Int ->
             val selectedId = radioGroup.checkedRadioButtonId
             if (selectedId == R.id.radio_xml) {
-                initiateExport("xml")
+                initiateExport(ExportFormat.XML)
             } else if (selectedId == R.id.radio_html) {
-                initiateExport("html")
+                initiateExport(ExportFormat.HTML)
             }
         }
         builder.setNegativeButton(
@@ -77,7 +78,7 @@ class AppExporter(
         dialog.show()
     }
 
-    internal fun initiateExport(type: String) {
+    internal fun initiateExport(type: ExportFormat) {
         val items = itemsProvider()
         if (items.isEmpty()) {
             Toast
@@ -94,55 +95,42 @@ class AppExporter(
             SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
                 .format(Date())
         val appInfoType = selectedAppInfoField!!.name.lowercase(Locale.getDefault())
-        val fileName = "apps_" + appInfoType + "_" + timestamp + "." + type
+        val fileName = "apps_" + appInfoType + "_" + timestamp + "." + type.extension
 
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.setType(if (type == "xml") "text/xml" else "text/html")
+        intent.setType(type.mimeType)
         intent.putExtra(Intent.EXTRA_TITLE, fileName)
 
         createFileLauncher.launch(intent)
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        try {
-            val outputStream =
-                activity.contentResolver.openOutputStream(uri)
-                    ?: throw java.io.IOException("Failed to open output stream")
-            outputStream.use {
-                val items = itemsProvider()
-                val xml = formatter.toXml(items, selectedAppInfoField!!)
-                it.write(xml.toByteArray(Charsets.UTF_8))
-            }
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_successful),
-                    Toast.LENGTH_SHORT,
-                ).show()
-        } catch (e: Exception) {
-            val message = "Error exporting XML"
-            Log.e(TAG, message, e)
-            crashReporter?.recordException(e, message)
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_failed, e.message),
-                    Toast.LENGTH_SHORT,
-                ).show()
+        exportToFile(uri, ExportFormat.XML) { items ->
+            formatter.toXml(items, selectedAppInfoField!!)
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
+        exportToFile(uri, ExportFormat.HTML) { items ->
+            formatter.toHtml(items)
+        }
+    }
+
+    private fun exportToFile(
+        uri: Uri,
+        format: ExportFormat,
+        contentGenerator: (List<AppItemUiModel>) -> String,
+    ) {
         try {
             val outputStream =
                 activity.contentResolver.openOutputStream(uri)
                     ?: throw java.io.IOException("Failed to open output stream")
-            outputStream.use {
-                val writer = OutputStreamWriter(it, StandardCharsets.UTF_8)
+            outputStream.use { stream ->
+                val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
                 val items = itemsProvider()
-                val html = formatter.toHtml(items)
-                writer.write(html)
+                val content = contentGenerator(items)
+                writer.write(content)
                 writer.flush()
             }
             Toast
@@ -152,7 +140,7 @@ class AppExporter(
                     Toast.LENGTH_SHORT,
                 ).show()
         } catch (e: Exception) {
-            val message = "Error exporting HTML"
+            val message = "Error exporting ${format.displayName}"
             Log.e(TAG, message, e)
             crashReporter?.recordException(e, message)
             Toast
@@ -166,5 +154,10 @@ class AppExporter(
 
     companion object {
         private val TAG = AppExporter::class.java.simpleName
+    }
+
+    internal enum class ExportFormat(val extension: String, val mimeType: String, val displayName: String) {
+        XML("xml", "text/xml", "XML"),
+        HTML("html", "text/html", "HTML"),
     }
 }
