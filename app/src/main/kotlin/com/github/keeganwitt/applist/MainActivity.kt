@@ -177,6 +177,7 @@ class MainActivity :
                     appAdapter.submitList(state.items)
                     progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
+                    invalidateOptionsMenu()
                 }
             }
         }
@@ -186,6 +187,13 @@ class MainActivity :
         menuInflater.inflate(R.menu.app_menu, menu)
 
         menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
+
+        val summaryItem = menu.findItem(R.id.summary)
+        summaryItem.isEnabled = latestState.summary != null
+        val icon = summaryItem.icon
+        if (icon != null) {
+            icon.alpha = if (latestState.summary != null) 255 else 128
+        }
 
         val searchItem = menu.findItem(R.id.search)
         (searchItem.actionView as? SearchView)?.setOnQueryTextListener(

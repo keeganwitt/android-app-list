@@ -69,13 +69,12 @@ class AppListViewModel(
                         descending = state.descending,
                         reload = reload,
                     ).collect { apps ->
-                        val summary = withContext(dispatchers.default) { summaryCalculator.calculate(apps, state.selectedField) }
                         withContext(dispatchers.main) {
                             allApps = apps
                             val field = _uiState.value.selectedField
                             cachedMappedItems = apps.map { mapToItem(it, field) }
                             cachedMappedItemsField = field
-                            _uiState.update { it.copy(isLoading = false, summary = summary) }
+                            _uiState.update { it.copy(isLoading = false) }
                             applyFilterAndEmit()
                         }
                     }
@@ -100,6 +99,20 @@ class AppListViewModel(
                 }
             }
         _uiState.update { it.copy(items = filtered) }
+
+        viewModelScope.launch(dispatchers.default) {
+            val filteredApps = if (state.query.isBlank()) {
+                allApps
+            } else {
+                val filteredPackageNames = filtered.map { it.packageName }.toSet()
+                allApps.filter { app -> app.packageName in filteredPackageNames }
+            }
+
+            val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
+            withContext(dispatchers.main) {
+                _uiState.update { it.copy(summary = summary) }
+            }
+        }
     }
 
     private fun mapToItem(

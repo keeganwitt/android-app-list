@@ -280,6 +280,32 @@ class AppListViewModelTest {
             coVerify { summaryCalculator.calculate(mockApps, AppInfoField.ENABLED) }
         }
 
+    @Test
+    fun `given apps loaded, when query changes, then summary is recalculated based on filtered apps`() =
+        runTest {
+            val app1 = createTestApp("com.test.app1", "Test App 1")
+            val app2 = createTestApp("com.other.app2", "Other App 2")
+            val mockApps = listOf(app1, app2)
+            val mockSummaryFull = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 2))
+            val mockSummaryFiltered = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 1))
+
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+            // Initial calculation
+            coEvery { summaryCalculator.calculate(mockApps, any()) } returns mockSummaryFull
+            // Filtered calculation
+            coEvery { summaryCalculator.calculate(listOf(app1), any()) } returns mockSummaryFiltered
+
+            viewModel.init(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            viewModel.setQuery("Test App 1")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(mockSummaryFiltered, state.summary)
+            coVerify { summaryCalculator.calculate(listOf(app1), AppInfoField.ENABLED) }
+        }
+
     private fun createTestApp(
         packageName: String,
         name: String,
