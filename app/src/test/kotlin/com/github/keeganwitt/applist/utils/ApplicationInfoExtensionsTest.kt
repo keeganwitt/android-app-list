@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 class ApplicationInfoExtensionsTest {
@@ -16,25 +17,35 @@ class ApplicationInfoExtensionsTest {
     @Config(sdk = [35])
     fun `given SDK 35 and isArchived true, then isArchivedApp returns true`() {
         val appInfo = ApplicationInfo()
-        val field = ApplicationInfo::class.java.getField("isArchived")
-        field.set(appInfo, true)
+        ReflectionHelpers.setField(appInfo, "isArchived", true)
 
         assertTrue(appInfo.isArchivedApp)
     }
 
     @Test
     @Config(sdk = [35])
-    fun `given SDK 35 and isArchived false and metadata false, then isArchivedApp returns false`() {
+    fun `given SDK 35 and isArchived false and metadata true, then isArchivedApp returns true`() {
         val appInfo = ApplicationInfo()
-        val field = ApplicationInfo::class.java.getField("isArchived")
-        field.set(appInfo, false)
+        ReflectionHelpers.setField(appInfo, "isArchived", false)
+        appInfo.metaData = Bundle().apply {
+            putBoolean("com.android.vending.archive", true)
+        }
+
+        assertTrue(appInfo.isArchivedApp)
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun `given SDK 35 and isArchived false and no metadata, then isArchivedApp returns false`() {
+        val appInfo = ApplicationInfo()
+        ReflectionHelpers.setField(appInfo, "isArchived", false)
 
         assertFalse(appInfo.isArchivedApp)
     }
 
     @Test
     @Config(sdk = [34])
-    fun `given SDK 34 and metadata has archive key true, then isArchivedApp returns true`() {
+    fun `given SDK 34 and metadata has archive key, then isArchivedApp returns true`() {
         val appInfo = ApplicationInfo().apply {
             metaData = Bundle().apply {
                 putBoolean("com.android.vending.archive", true)
@@ -45,10 +56,10 @@ class ApplicationInfoExtensionsTest {
 
     @Test
     @Config(sdk = [34])
-    fun `given SDK 34 and metadata has archive key false, then isArchivedApp returns false`() {
+    fun `given SDK 34 and metadata does not have archive key, then isArchivedApp returns false`() {
         val appInfo = ApplicationInfo().apply {
             metaData = Bundle().apply {
-                putBoolean("com.android.vending.archive", false)
+                putString("other_key", "value")
             }
         }
         assertFalse(appInfo.isArchivedApp)

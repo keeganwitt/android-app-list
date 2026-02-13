@@ -13,10 +13,16 @@ import android.os.Build
  * On older versions, it checks for the "com.android.vending.archive" metadata key.
  */
 val ApplicationInfo.isArchivedApp: Boolean
-    get() = if (Build.VERSION.SDK_INT >= 35 && isArchived) {
-        true
-    } else {
-        metaData?.containsKey("com.android.vending.archive") == true
+    get() {
+        if (Build.VERSION.SDK_INT >= 35 && isArchived) {
+            return true
+        }
+        val meta = metaData
+        return if (meta != null) {
+            meta.containsKey("com.android.vending.archive")
+        } else {
+            false
+        }
     }
 
 /**
