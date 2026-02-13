@@ -70,7 +70,9 @@ class AppListViewModel(
                     ).collect { apps ->
                         withContext(dispatchers.main) {
                             allApps = apps
-                            cachedMappedItems = null
+                            val field = _uiState.value.selectedField
+                            cachedMappedItems = apps.map { mapToItem(it, field) }
+                            cachedMappedItemsField = field
                             _uiState.update { it.copy(isLoading = false) }
                             applyFilterAndEmit()
                         }
@@ -84,16 +86,15 @@ class AppListViewModel(
             cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
             cachedMappedItemsField = state.selectedField
         }
-        val list = cachedMappedItems!!
+        val list = cachedMappedItems ?: emptyList()
         val filtered =
             if (state.query.isBlank()) {
                 list
             } else {
                 list.filter { item ->
-                    val q = state.query.lowercase()
-                    item.appName.lowercase().contains(q) ||
-                        item.packageName.lowercase().contains(q) ||
-                        item.infoText.lowercase().contains(q)
+                    item.appName.contains(state.query, ignoreCase = true) ||
+                        item.packageName.contains(state.query, ignoreCase = true) ||
+                        item.infoText.contains(state.query, ignoreCase = true)
                 }
             }
         _uiState.update { it.copy(items = filtered) }
