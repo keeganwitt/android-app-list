@@ -91,10 +91,11 @@ class AppListViewModel(
             if (state.query.isBlank()) {
                 list
             } else {
+                val q = state.query.lowercase()
                 list.filter { item ->
-                    item.appName.contains(state.query, ignoreCase = true) ||
-                        item.packageName.contains(state.query, ignoreCase = true) ||
-                        item.infoText.contains(state.query, ignoreCase = true)
+                    item.appNameLower.contains(q) ||
+                        item.packageNameLower.contains(q) ||
+                        item.infoTextLower.contains(q)
                 }
             }
         _uiState.update { it.copy(items = filtered) }
