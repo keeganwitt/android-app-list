@@ -137,6 +137,35 @@ class StorageServiceTest {
     }
 
     @Test
+    fun `given queryStatsForPackage throws generic exception, when getStorageUsage called, then returns partial results`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Something went wrong")
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
+    fun `given invalid publicSourceDir, when getStorageUsage called, then returns partial results and handles exception`() {
+        val appInfo =
+            ApplicationInfo().apply {
+                packageName = "com.test.app"
+                publicSourceDir = null
+            }
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(0L, result.apkBytes)
+    }
+
+    @Test
     @Config(sdk = [31])
     fun `given SDK 31 and mounted volume, when getStorageUsage called, then storage stats are included`() {
         val tempFile = tempFolder.newFile("test.apk")

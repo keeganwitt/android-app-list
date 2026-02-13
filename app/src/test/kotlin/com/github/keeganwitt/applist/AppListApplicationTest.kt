@@ -5,6 +5,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -135,5 +141,45 @@ class AppListApplicationTest {
         application.onCreate()
 
         assertEquals(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, AppCompatDelegate.getDefaultNightMode())
+    }
+
+    @Test
+    fun `given crashlytics mocked when setCrashlyticsCollectionEnabled called then sets enabled on instance`() {
+        mockkStatic(FirebaseCrashlytics::class)
+        val crashlytics = mockk<FirebaseCrashlytics>(relaxed = true)
+        every { FirebaseCrashlytics.getInstance() } returns crashlytics
+
+        val application =
+            object : AppListApplication() {
+                public override fun setCrashlyticsCollectionEnabled(enabled: Boolean) {
+                    super.setCrashlyticsCollectionEnabled(enabled)
+                }
+            }
+
+        application.setCrashlyticsCollectionEnabled(true)
+
+        verify { crashlytics.isCrashlyticsCollectionEnabled = true }
+
+        unmockkStatic(FirebaseCrashlytics::class)
+    }
+
+    @Test
+    fun `given crashlytics mocked when deleteUnsentReports called then deletes reports`() {
+        mockkStatic(FirebaseCrashlytics::class)
+        val crashlytics = mockk<FirebaseCrashlytics>(relaxed = true)
+        every { FirebaseCrashlytics.getInstance() } returns crashlytics
+
+        val application =
+            object : AppListApplication() {
+                public override fun deleteUnsentReports() {
+                    super.deleteUnsentReports()
+                }
+            }
+
+        application.deleteUnsentReports()
+
+        verify { crashlytics.deleteUnsentReports() }
+
+        unmockkStatic(FirebaseCrashlytics::class)
     }
 }
