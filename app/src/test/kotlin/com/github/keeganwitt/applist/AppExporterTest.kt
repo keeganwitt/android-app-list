@@ -48,7 +48,7 @@ class AppExporterTest {
         exporter.selectedAppInfoField = AppInfoField.VERSION
 
         Shadows.shadowOf(activity.mainLooper).runPaused {
-            exporter.initiateExport("xml")
+            exporter.initiateExport(AppExporter.ExportFormat.XML)
         }
 
         val text = ShadowToast.getTextOfLatestToast()
