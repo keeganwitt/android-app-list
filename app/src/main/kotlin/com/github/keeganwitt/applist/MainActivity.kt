@@ -13,10 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ProgressBar
-import android.widget.Spinner
 import android.widget.Toast
-import android.widget.ToggleButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -27,8 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
@@ -43,11 +39,7 @@ class MainActivity :
     AppAdapter.OnClickListener {
     private lateinit var appInfoFields: List<AppInfoField>
     private lateinit var appAdapter: AppAdapter
-    private lateinit var spinner: Spinner
-    private lateinit var toggleButton: ToggleButton
-    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var binding: ActivityMainBinding
     private var showSystemApps = false
     private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
@@ -59,7 +51,8 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         val isLightMode =
@@ -88,15 +81,9 @@ class MainActivity :
         androidx.appcompat.app.AppCompatDelegate
             .setDefaultNightMode(nightMode)
 
-        progressBar = findViewById(R.id.progress_bar)
-        recyclerView = findViewById(R.id.recycler_view)
-        spinner = findViewById(R.id.spinner)
-        toggleButton = findViewById(R.id.toggleButton)
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-
         appAdapter = AppAdapter(this)
-        recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
-        recyclerView.adapter = appAdapter
+        binding.recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
+        binding.recyclerView.adapter = appAdapter
 
         val crashReporter = FirebaseCrashReporter()
         appExporter =
@@ -142,22 +129,22 @@ class MainActivity :
         val arrayAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, appInfoFieldStrings)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = arrayAdapter
+        binding.spinner.adapter = arrayAdapter
 
         // initial selection to VERSION
         val lastDisplayedField = appSettings.getLastDisplayedAppInfoField()
         val initialLabel =
             fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
         val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
-        spinner.setSelection(initialIndex, false)
-        spinner.onItemSelectedListener = this
+        binding.spinner.setSelection(initialIndex, false)
+        binding.spinner.onItemSelectedListener = this
         appListViewModel.init(lastDisplayedField)
 
-        toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
+        binding.toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
 
-        swipeRefreshLayout.setOnRefreshListener {
+        binding.swipeRefreshLayout.setOnRefreshListener {
             appListViewModel.refresh()
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeRefreshLayout.isRefreshing = false
         }
     }
 
@@ -167,8 +154,8 @@ class MainActivity :
                 appListViewModel.uiState.collectLatest { state ->
                     latestState = state
                     appAdapter.submitList(state.items)
-                    progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-                    recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
+                    binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                    binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -221,12 +208,12 @@ class MainActivity :
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
-        val adapter = spinner.adapter
+        val adapter = binding.spinner.adapter
         val versionText = getString(R.string.appInfoField_version)
         val versionIndex =
             (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
         if (versionIndex != null) {
-            spinner.setSelection(versionIndex)
+            binding.spinner.setSelection(versionIndex)
         }
         appListViewModel.updateSelectedField(AppInfoField.VERSION)
     }

@@ -164,27 +164,7 @@ class AndroidAppRepository(
     private fun sortKey(
         app: App,
         field: AppInfoField,
-    ): Comparable<*>? =
-        when (field) {
-            AppInfoField.APK_SIZE -> app.sizes.apkBytes
-            AppInfoField.APP_SIZE -> app.sizes.appBytes
-            AppInfoField.CACHE_SIZE -> app.sizes.cacheBytes
-            AppInfoField.DATA_SIZE -> app.sizes.dataBytes
-            AppInfoField.ENABLED -> app.enabled.toString()
-            AppInfoField.ARCHIVED -> app.archived ?: false
-            AppInfoField.EXISTS_IN_APP_STORE -> app.existsInStore ?: false
-            AppInfoField.EXTERNAL_CACHE_SIZE -> app.sizes.externalCacheBytes
-            AppInfoField.FIRST_INSTALLED -> app.firstInstalled
-            AppInfoField.LAST_UPDATED -> app.lastUpdated
-            AppInfoField.LAST_USED -> app.lastUsed
-            AppInfoField.MIN_SDK -> app.minSdk ?: 0
-            AppInfoField.PACKAGE_MANAGER -> app.installerName ?: ""
-            AppInfoField.GRANTED_PERMISSIONS -> app.grantedPermissionsCount ?: 0
-            AppInfoField.REQUESTED_PERMISSIONS -> app.requestedPermissionsCount ?: 0
-            AppInfoField.TARGET_SDK -> app.targetSdk ?: 0
-            AppInfoField.TOTAL_SIZE -> app.sizes.totalBytes
-            AppInfoField.VERSION -> app.versionName ?: ""
-        }
+    ): Comparable<*>? = field.getValue(app)
 
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
