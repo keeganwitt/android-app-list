@@ -26,7 +26,7 @@ class AndroidStorageService(
         try {
             storageUsage.apkBytes = File(applicationInfo.publicSourceDir).length()
         } catch (e: Exception) {
-            Log.w(TAG, "Unable to get APK size for ${applicationInfo.packageName}", e)
+            Log.w(TAG, "Unable to get APK size", e)
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -62,7 +62,7 @@ class AndroidStorageService(
                     Log.w(TAG, message, e)
                 } catch (e: Exception) {
                     val message = "Unable to process storage usage"
-                    Log.w(TAG, message + " for ${applicationInfo.packageName} on $uuid", e)
+                    Log.w(TAG, "$message on $uuid", e)
                 }
             }
         }
