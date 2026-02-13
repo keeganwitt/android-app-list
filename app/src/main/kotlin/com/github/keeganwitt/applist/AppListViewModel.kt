@@ -20,6 +20,8 @@ class AppListViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var allApps: List<App> = emptyList()
+    private var cachedMappedApps: List<AppItemUiModel>? = null
+    private var cachedMappedAppsField: AppInfoField? = null
 
     fun init(initialField: AppInfoField) {
         _uiState.update { it.copy(selectedField = initialField) }
@@ -68,6 +70,9 @@ class AppListViewModel(
                     ).collect { apps ->
                         withContext(dispatchers.main) {
                             allApps = apps
+                            val field = _uiState.value.selectedField
+                            cachedMappedApps = apps.map { mapToItem(it, field) }
+                            cachedMappedAppsField = field
                             _uiState.update { it.copy(isLoading = false) }
                             applyFilterAndEmit()
                         }
@@ -77,16 +82,19 @@ class AppListViewModel(
 
     private fun applyFilterAndEmit() {
         val state = _uiState.value
-        val list = allApps.map { mapToItem(it, state.selectedField) }
+        if (cachedMappedApps == null || cachedMappedAppsField != state.selectedField) {
+            cachedMappedApps = allApps.map { mapToItem(it, state.selectedField) }
+            cachedMappedAppsField = state.selectedField
+        }
+        val list = cachedMappedApps ?: emptyList()
         val filtered =
             if (state.query.isBlank()) {
                 list
             } else {
                 list.filter { item ->
-                    val q = state.query.lowercase()
-                    item.appName.lowercase().contains(q) ||
-                        item.packageName.lowercase().contains(q) ||
-                        item.infoText.lowercase().contains(q)
+                    item.appName.contains(state.query, ignoreCase = true) ||
+                        item.packageName.contains(state.query, ignoreCase = true) ||
+                        item.infoText.contains(state.query, ignoreCase = true)
                 }
             }
         _uiState.update { it.copy(items = filtered) }
