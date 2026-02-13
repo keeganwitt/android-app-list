@@ -96,10 +96,11 @@ class AppExporterTest {
     @Test
     fun writeXmlToFile_withNullOutputStream_reportsCrash_andShowsFailToast() {
         val formatter = mockk<ExportFormatter>()
+        val itemsProvider = mockk<() -> List<AppItemUiModel>>()
         val spyActivity = spyk(activity)
         val mockContentResolver = mockk<ContentResolver>()
         every { spyActivity.contentResolver } returns mockContentResolver
-        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter)
+        val exporter = AppExporter(spyActivity, itemsProvider, formatter, crashReporter)
         exporter.selectedAppInfoField = AppInfoField.VERSION
         val uri = Uri.parse("content://test/uri")
         every { mockContentResolver.openOutputStream(uri) } returns null
@@ -107,6 +108,8 @@ class AppExporterTest {
         exporter.writeXmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
+        verify(exactly = 0) { formatter.toXml(any(), any()) }
+        verify(exactly = 0) { itemsProvider() }
         verify { crashReporter.recordException(any(), "Error exporting XML") }
         val toast = ShadowToast.getTextOfLatestToast()
         val expected = activity.getString(R.string.export_failed, "Failed to open output stream")
@@ -152,16 +155,19 @@ class AppExporterTest {
     @Test
     fun writeHtmlToFile_withNullOutputStream_reportsCrash_andShowsFailToast() {
         val formatter = mockk<ExportFormatter>()
+        val itemsProvider = mockk<() -> List<AppItemUiModel>>()
         val spyActivity = spyk(activity)
         val mockContentResolver = mockk<ContentResolver>()
         every { spyActivity.contentResolver } returns mockContentResolver
-        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter)
+        val exporter = AppExporter(spyActivity, itemsProvider, formatter, crashReporter)
         val uri = Uri.parse("content://test/uri")
         every { mockContentResolver.openOutputStream(uri) } returns null
 
         exporter.writeHtmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
+        verify(exactly = 0) { formatter.toHtml(any()) }
+        verify(exactly = 0) { itemsProvider() }
         verify { crashReporter.recordException(any(), "Error exporting HTML") }
         val toast = ShadowToast.getTextOfLatestToast()
         val expected = activity.getString(R.string.export_failed, "Failed to open output stream")
