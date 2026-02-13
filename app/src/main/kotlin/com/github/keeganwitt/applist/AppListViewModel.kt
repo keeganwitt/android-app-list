@@ -20,10 +20,6 @@ class AppListViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var allApps: List<App> = emptyList()
-        set(value) {
-            field = value
-            cachedMappedItems = null
-        }
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null
 
@@ -74,6 +70,7 @@ class AppListViewModel(
                     ).collect { apps ->
                         withContext(dispatchers.main) {
                             allApps = apps
+                            cachedMappedItems = null
                             _uiState.update { it.copy(isLoading = false) }
                             applyFilterAndEmit()
                         }
