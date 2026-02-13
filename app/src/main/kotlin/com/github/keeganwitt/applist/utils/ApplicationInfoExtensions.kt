@@ -14,8 +14,16 @@ import android.os.Build
  */
 val ApplicationInfo.isArchivedApp: Boolean
     get() {
-        if (Build.VERSION.SDK_INT >= 35 && isArchived) {
-            return true
+        if (Build.VERSION.SDK_INT >= 35) {
+            val archived =
+                try {
+                    isArchived
+                } catch (e: NoSuchFieldError) {
+                    false
+                } catch (e: NoSuchMethodError) {
+                    false
+                }
+            if (archived) return true
         }
         val meta = metaData
         return if (meta != null) {
