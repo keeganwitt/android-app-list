@@ -19,8 +19,8 @@ android {
         applicationId = "com.github.keeganwitt.applist"
         minSdk = 24
         targetSdk = 36
-        versionCode = 19
-        versionName = "1.6.2"
+        versionCode = 20
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,6 +39,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     testCoverage {
@@ -98,6 +99,7 @@ dependencies {
 
 val fileFilter =
     listOf(
+        // Android classes
         "**/R.class",
         "**/R$*.class",
         "**/BuildConfig.*",
@@ -107,6 +109,7 @@ val fileFilter =
         "**/databinding/*Binding.class",
         "**/*Binding.class",
         "**/BR.class",
+        // application classes
         "**/AndroidStorageService*.class",
         "**/AndroidUsageStatsService*.class",
         "**/AppAdapter*.class",
