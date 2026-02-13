@@ -106,10 +106,13 @@ class AppExporter(
 
     internal fun writeXmlToFile(uri: Uri) {
         try {
-            activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
+            val outputStream =
+                activity.contentResolver.openOutputStream(uri)
+                    ?: throw java.io.IOException("Failed to open output stream")
+            outputStream.use {
                 val items = itemsProvider()
                 val xml = formatter.toXml(items, selectedAppInfoField!!)
-                outputStream.write(xml.toByteArray(Charsets.UTF_8))
+                it.write(xml.toByteArray(Charsets.UTF_8))
             }
             Toast
                 .makeText(
@@ -132,8 +135,11 @@ class AppExporter(
 
     internal fun writeHtmlToFile(uri: Uri) {
         try {
-            activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                val writer = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
+            val outputStream =
+                activity.contentResolver.openOutputStream(uri)
+                    ?: throw java.io.IOException("Failed to open output stream")
+            outputStream.use {
+                val writer = OutputStreamWriter(it, StandardCharsets.UTF_8)
                 val items = itemsProvider()
                 val html = formatter.toHtml(items)
                 writer.write(html)
