@@ -32,14 +32,18 @@ open class AppListApplication : Application() {
     }
 
     protected open fun setCrashlyticsCollectionEnabled(enabled: Boolean) {
-        android.util.Log.d("AppListApplication", "Setting crashlytics enabled: $enabled")
+        if (BuildConfig.DEBUG) {
+            android.util.Log.d("AppListApplication", "Setting crashlytics enabled: $enabled")
+        }
         com.google.firebase.crashlytics.FirebaseCrashlytics
             .getInstance()
             .isCrashlyticsCollectionEnabled = enabled
     }
 
     protected open fun deleteUnsentReports() {
-        android.util.Log.d("AppListApplication", "Deleting unsent reports")
+        if (BuildConfig.DEBUG) {
+            android.util.Log.d("AppListApplication", "Deleting unsent reports")
+        }
         com.google.firebase.crashlytics.FirebaseCrashlytics
             .getInstance()
             .deleteUnsentReports()
