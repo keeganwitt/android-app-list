@@ -12,6 +12,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.text.Collator
 
 interface AppRepository {
@@ -53,12 +55,17 @@ class AndroidAppRepository(
 
             // Phase 2: Fetch heavy data and emit updated list
             val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+            val semaphore = Semaphore(MAX_CONCURRENCY)
 
             val detailedApps =
                 coroutineScope {
                     val appsDeferred =
                         filtered.map { ai ->
-                            async { mapToAppDetailed(ai, lastUsedEpochs) }
+                            async {
+                                semaphore.withPermit {
+                                    mapToAppDetailed(ai, lastUsedEpochs)
+                                }
+                            }
                         }
                     appsDeferred.awaitAll().filterNotNull()
                 }
@@ -169,5 +176,6 @@ class AndroidAppRepository(
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
         const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
+        const val MAX_CONCURRENCY = 4
     }
 }
