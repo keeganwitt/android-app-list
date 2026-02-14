@@ -3,6 +3,7 @@ package com.github.keeganwitt.applist
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
@@ -17,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import android.os.Bundle
 import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
@@ -292,6 +294,41 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `given apps with archived status, when loadApps called with ARCHIVED field, then apps are sorted by archived status`() =
+        runTest {
+            val app1 = createApplicationInfo("com.test.app1")
+            val mockBundle = mockk<Bundle>()
+            every { mockBundle.containsKey("com.android.vending.archive") } returns true
+            app1.metaData = mockBundle
+
+            val app2 = createApplicationInfo("com.test.app2")
+            app2.metaData = null
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
+            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { packageService.loadLabel(any()) } returns "App"
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
+            every { appStoreService.existsInAppStore(any(), any()) } returns null
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.ARCHIVED,
+                        showSystemApps = false,
+                        descending = true,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(2, result.size)
+            assertEquals(true, result[0].archived)
+            assertEquals(false, result[1].archived)
+        }
+
+    @Test
     fun `given reload true, when loadApps called, then usage stats are reloaded`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
@@ -450,5 +487,38 @@ class AppRepositoryTest {
             this.versionName = versionName
             this.firstInstallTime = System.currentTimeMillis()
             this.lastUpdateTime = System.currentTimeMillis()
+        }
+
+    @Test
+    fun `given SDK 35, when loadApps called, then MATCH_ARCHIVED_PACKAGES flag is used`() =
+        runTest {
+            // MATCH_ARCHIVED_PACKAGES is defined in SDK 35. 
+            // We use the constant if available or reflection/hardcoded fallback if needed, 
+            // but since we compile with 36, it should be available.
+            // Using logic parallel to implementation to ensure it matches.
+            var baseFlags = (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
+            val expectedFlags = baseFlags or PackageManager.MATCH_ARCHIVED_PACKAGES.toLong()
+
+            every { packageService.getInstalledApplications(expectedFlags) } returns emptyList()
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+
+            // Instantiate repository with SDK 35 injected
+            val repoSdk35 = AndroidAppRepository(
+                packageService,
+                usageStatsService,
+                storageService,
+                appStoreService,
+                crashReporter,
+                sdkVersion = 35
+            )
+
+            repoSdk35.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = false,
+                descending = false,
+                reload = false
+            ).toList()
+
+            verify { packageService.getInstalledApplications(expectedFlags) }
         }
 }
