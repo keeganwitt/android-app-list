@@ -77,6 +77,7 @@ dependencies {
 
     // Other dependencies
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("io.coil-kt:coil:2.7.0")
 
     // Unit test dependencies
     testImplementation("junit:junit:4.13.2")
