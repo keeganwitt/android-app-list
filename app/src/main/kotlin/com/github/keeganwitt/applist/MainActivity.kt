@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
@@ -272,11 +274,15 @@ class MainActivity :
         }
 
         val view = layoutInflater.inflate(R.layout.dialog_summary, null)
+        val titleView = view.findViewById<TextView>(R.id.summary_title)
+        titleView.text = getString(summary.field.titleResId)
+
         val recyclerView = view.findViewById<RecyclerView>(R.id.summary_recycler_view)
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        recyclerView.adapter = SummaryAdapter(listOf(summary))
+        recyclerView.adapter = SummaryAdapter(summary.buckets.toList())
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        androidx.appcompat.app.AlertDialog
+            .Builder(this)
             .setTitle(R.string.summary)
             .setView(view)
             .setPositiveButton(android.R.string.ok, null)

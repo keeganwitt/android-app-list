@@ -2,13 +2,13 @@ package com.github.keeganwitt.applist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.keeganwitt.applist.services.PackageService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 class AppListViewModel(
     private val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
@@ -98,12 +98,13 @@ class AppListViewModel(
         _uiState.update { it.copy(items = filtered) }
 
         viewModelScope.launch(dispatchers.default) {
-            val filteredApps = if (state.query.isBlank()) {
-                allApps
-            } else {
-                val filteredPackageNames = filtered.map { it.packageName }.toSet()
-                allApps.filter { app -> app.packageName in filteredPackageNames }
-            }
+            val filteredApps =
+                if (state.query.isBlank()) {
+                    allApps
+                } else {
+                    val filteredPackageNames = filtered.map { it.packageName }.toSet()
+                    allApps.filter { app -> app.packageName in filteredPackageNames }
+                }
 
             val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
             withContext(dispatchers.main) {

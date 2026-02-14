@@ -83,7 +83,7 @@ class SummaryCalculatorTest {
         val result = calculator.calculate(listOf(app0, app3, app8, app15, app25), AppInfoField.GRANTED_PERMISSIONS)
 
         assertEquals(1, result?.buckets?.get("None")) // 0
-        assertEquals(1, result?.buckets?.get("Few"))  // 1-5
+        assertEquals(1, result?.buckets?.get("Few")) // 1-5
         assertEquals(1, result?.buckets?.get("Some")) // 6-10
         assertEquals(1, result?.buckets?.get("Many")) // 11-20
         assertEquals(1, result?.buckets?.get("Lots")) // 20+
@@ -117,7 +117,11 @@ class SummaryCalculatorTest {
         every { context.getString(R.string.perm_bucket_lots) } returns "Lots"
     }
 
-    private fun createApp(enabled: Boolean, archived: Boolean, apkSize: Long): App {
+    private fun createApp(
+        enabled: Boolean,
+        archived: Boolean,
+        apkSize: Long,
+    ): App {
         val sizes = StorageUsage()
         sizes.apkBytes = apkSize
         return App(
@@ -135,7 +139,7 @@ class SummaryCalculatorTest {
             existsInStore = true,
             grantedPermissionsCount = 0,
             requestedPermissionsCount = 0,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }
