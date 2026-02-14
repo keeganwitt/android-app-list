@@ -3,6 +3,7 @@ package com.github.keeganwitt.applist
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
@@ -432,5 +433,38 @@ class AppRepositoryTest {
             this.versionName = versionName
             this.firstInstallTime = System.currentTimeMillis()
             this.lastUpdateTime = System.currentTimeMillis()
+        }
+
+    @Test
+    fun `given SDK 35, when loadApps called, then MATCH_ARCHIVED_PACKAGES flag is used`() =
+        runTest {
+            // MATCH_ARCHIVED_PACKAGES is defined in SDK 35. 
+            // We use the constant if available or reflection/hardcoded fallback if needed, 
+            // but since we compile with 36, it should be available.
+            // Using logic parallel to implementation to ensure it matches.
+            var baseFlags = (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
+            val expectedFlags = baseFlags or PackageManager.MATCH_ARCHIVED_PACKAGES.toLong()
+
+            every { packageService.getInstalledApplications(expectedFlags) } returns emptyList()
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+
+            // Instantiate repository with SDK 35 injected
+            val repoSdk35 = AndroidAppRepository(
+                packageService,
+                usageStatsService,
+                storageService,
+                appStoreService,
+                crashReporter,
+                sdkVersion = 35
+            )
+
+            repoSdk35.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = false,
+                descending = false,
+                reload = false
+            ).toList()
+
+            verify { packageService.getInstalledApplications(expectedFlags) }
         }
 }
