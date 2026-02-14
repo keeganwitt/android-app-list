@@ -30,19 +30,21 @@ class AppListViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: AppRepository
     private lateinit var dispatcherProvider: DispatcherProvider
+    private lateinit var summaryCalculator: SummaryCalculator
     private lateinit var viewModel: AppListViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = mockk(relaxed = true)
+        summaryCalculator = mockk(relaxed = true)
         dispatcherProvider =
             object : DispatcherProvider {
                 override val io = testDispatcher
                 override val main = testDispatcher
                 override val default = testDispatcher
             }
-        viewModel = AppListViewModel(repository, dispatcherProvider)
+        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator)
     }
 
     @After
@@ -260,6 +262,48 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertFalse(state.isLoading)
             assertEquals(1, state.items.size)
+        }
+
+    @Test
+    fun `given apps loaded, when successful, then summary is calculated`() =
+        runTest {
+            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
+            val mockSummary = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 1))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+            coEvery { summaryCalculator.calculate(any(), any()) } returns mockSummary
+
+            viewModel.init(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(mockSummary, state.summary)
+            coVerify { summaryCalculator.calculate(mockApps, AppInfoField.ENABLED) }
+        }
+
+    @Test
+    fun `given apps loaded, when query changes, then summary is recalculated based on filtered apps`() =
+        runTest {
+            val app1 = createTestApp("com.test.app1", "Test App 1")
+            val app2 = createTestApp("com.other.app2", "Other App 2")
+            val mockApps = listOf(app1, app2)
+            val mockSummaryFull = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 2))
+            val mockSummaryFiltered = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 1))
+
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+            // Initial calculation
+            coEvery { summaryCalculator.calculate(mockApps, any()) } returns mockSummaryFull
+            // Filtered calculation
+            coEvery { summaryCalculator.calculate(listOf(app1), any()) } returns mockSummaryFiltered
+
+            viewModel.init(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            viewModel.setQuery("Test App 1")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(mockSummaryFiltered, state.summary)
+            coVerify { summaryCalculator.calculate(listOf(app1), AppInfoField.ENABLED) }
         }
 
     private fun createTestApp(

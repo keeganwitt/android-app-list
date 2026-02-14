@@ -19,6 +19,9 @@
     android:title="@string/export"
     android:icon="@android:drawable/ic_menu_save"
     app:showAsAction="ifRoom" />
+  <item android:id="@+id/summary"
+    android:title="@string/summary"
+    app:showAsAction="never" />
   <item android:id="@+id/settings"
     android:title="@string/settings"
     app:showAsAction="never" />

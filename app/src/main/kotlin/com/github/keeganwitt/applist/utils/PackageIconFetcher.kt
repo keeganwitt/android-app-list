@@ -9,7 +9,9 @@ import coil.key.Keyer
 import coil.request.Options
 import com.github.keeganwitt.applist.services.PackageService
 
-data class PackageIcon(val packageName: String)
+data class PackageIcon(
+    val packageName: String,
+)
 
 class PackageIconFetcher(
     private val packageService: PackageService,
@@ -31,9 +33,7 @@ class PackageIconFetcher(
             data: PackageIcon,
             options: Options,
             imageLoader: ImageLoader,
-        ): Fetcher {
-            return PackageIconFetcher(packageService, data)
-        }
+        ): Fetcher = PackageIconFetcher(packageService, data)
     }
 }
 
@@ -41,7 +41,5 @@ class PackageIconKeyer : Keyer<PackageIcon> {
     override fun key(
         data: PackageIcon,
         options: Options,
-    ): String {
-        return "pkg:${data.packageName}"
-    }
+    ): String = "pkg:${data.packageName}"
 }

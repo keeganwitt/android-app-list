@@ -40,4 +40,16 @@
     <string name="theme_entry_light">Maliwanag</string>
   <string name="theme_entry_dark">Madilim</string>
   <string name="theme_entry_system">System</string>
+
+<string name="summary">Summary</string>
+  <string name="size_bucket_small">&lt; 10 MB</string>
+  <string name="size_bucket_medium">10 - 50 MB</string>
+  <string name="size_bucket_large">50 - 100 MB</string>
+  <string name="size_bucket_huge">100+ MB</string>
+
+  <string name="perm_bucket_none">0</string>
+  <string name="perm_bucket_few">1 - 5</string>
+  <string name="perm_bucket_some">6 - 10</string>
+  <string name="perm_bucket_many">11 - 20</string>
+  <string name="perm_bucket_lots">20+</string>
 </resources>
