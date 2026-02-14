@@ -23,14 +23,15 @@ val ApplicationInfo.isArchivedApp: Boolean
                 } catch (e: NoSuchMethodError) {
                     false
                 }
-            if (archived) return true
+            if (archived) {
+                return true
+            }
         }
         val meta = metaData
-        return if (meta != null) {
-            meta.containsKey("com.android.vending.archive")
-        } else {
-            false
+        if (meta != null) {
+            return meta.containsKey("com.android.vending.archive")
         }
+        return false
     }
 
 /**
