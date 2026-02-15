@@ -29,9 +29,10 @@ class AndroidPackageService(
 
     override fun getInstalledApplications(flags: Long): List<ApplicationInfo> =
         if (Build.VERSION.SDK_INT >= 33) {
-            pm.getInstalledPackages(PackageManager.PackageInfoFlags.of(flags)).map { it.applicationInfo!! }
+            pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags))
         } else {
-            pm.getInstalledPackages(flags.toInt()).map { it.applicationInfo!! }
+            @Suppress("DEPRECATION")
+            pm.getInstalledApplications(flags.toInt())
         }
 
     override fun getLaunchIntentForPackage(packageName: String): android.content.Intent? = pm.getLaunchIntentForPackage(packageName)
