@@ -18,6 +18,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowToast
 import java.io.File
+import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestAppListApplication::class)
@@ -78,7 +79,26 @@ class AppExporterTest {
     fun writeXmlToFile_onError_reportsCrash_andShowsFailToast() {
         val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toXml(any(), any()) } throws RuntimeException(exceptionMessage)
+        every { failingFormatter.toXml(any(), any()) } throws IOException(exceptionMessage)
+        val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any(), "Error exporting XML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        val expected = activity.getString(R.string.export_failed, exceptionMessage)
+        assertTrue(toast.toString() == expected)
+    }
+
+    @Test
+    fun writeXmlToFile_onSecurityException_reportsCrash_andShowsFailToast() {
+        val exceptionMessage = "security boom"
+        val failingFormatter = mockk<ExportFormatter>()
+        every { failingFormatter.toXml(any(), any()) } throws SecurityException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter)
         exporter.selectedAppInfoField = AppInfoField.VERSION
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
@@ -138,7 +158,7 @@ class AppExporterTest {
     fun writeHtmlToFile_onError_reportsCrash_andShowsFailToast() {
         val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toHtml(any()) } throws RuntimeException(exceptionMessage)
+        every { failingFormatter.toHtml(any()) } throws IOException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter)
         val file = File.createTempFile("apps", ".html").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
