@@ -61,6 +61,37 @@ class PackageServiceTest {
     }
 
     @Test
+    fun `getLaunchablePackages returns union of launcher and info categories`() {
+        val launcherResolve = android.content.pm.ResolveInfo().apply {
+            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.launcher.app" }
+        }
+        val infoResolve = android.content.pm.ResolveInfo().apply {
+            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.info.app" }
+        }
+        val bothResolve = android.content.pm.ResolveInfo().apply {
+            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.both.app" }
+        }
+
+        every { packageManager.queryIntentActivities(any(), any<Int>()) } answers {
+            val intent = firstArg<Intent>()
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+                listOf(launcherResolve, bothResolve)
+            } else if (intent.hasCategory(Intent.CATEGORY_INFO)) {
+                listOf(infoResolve, bothResolve)
+            } else {
+                emptyList()
+            }
+        }
+
+        val result = service.getLaunchablePackages()
+
+        assertEquals(3, result.size)
+        assertTrue(result.contains("com.launcher.app"))
+        assertTrue(result.contains("com.info.app"))
+        assertTrue(result.contains("com.both.app"))
+    }
+
+    @Test
     fun `given non-launchable app, when getLaunchIntentForPackage called, then returns null`() {
         every { packageManager.getLaunchIntentForPackage("com.test.app") } returns null
 
