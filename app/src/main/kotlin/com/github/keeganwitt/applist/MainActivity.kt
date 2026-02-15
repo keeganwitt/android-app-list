@@ -50,6 +50,17 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupUI()
+        setupSettings()
+        setupTheme()
+        setupRecyclerView()
+        setupViewModel()
+        setupExporter()
+        setupSpinner()
+        setupListeners()
+    }
+
+    private fun setupUI() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -59,10 +70,14 @@ class MainActivity :
             resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
                 Configuration.UI_MODE_NIGHT_YES
         windowInsetsController.isAppearanceLightStatusBars = isLightMode
+    }
 
+    private fun setupSettings() {
         appInfoFields = AppInfoField.entries
         appSettings = SharedPreferencesAppSettings(this)
+    }
 
+    private fun setupTheme() {
         val themeMode = appSettings.getThemeMode()
         val nightMode =
             when (themeMode) {
@@ -80,20 +95,16 @@ class MainActivity :
             }
         androidx.appcompat.app.AppCompatDelegate
             .setDefaultNightMode(nightMode)
+    }
 
+    private fun setupRecyclerView() {
         appAdapter = AppAdapter(this)
         binding.recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
         binding.recyclerView.adapter = appAdapter
+    }
 
+    private fun setupViewModel() {
         val crashReporter = FirebaseCrashReporter()
-        appExporter =
-            AppExporter(
-                this,
-                itemsProvider = { appAdapter.currentList },
-                formatter = ExportFormatter(),
-                crashReporter = crashReporter,
-            )
-
         appListViewModel =
             ViewModelProvider(
                 this,
@@ -118,7 +129,20 @@ class MainActivity :
                 },
             )[AppListViewModel::class.java]
         observeViewModel()
+    }
 
+    private fun setupExporter() {
+        val crashReporter = FirebaseCrashReporter()
+        appExporter =
+            AppExporter(
+                this,
+                itemsProvider = { appAdapter.currentList },
+                formatter = ExportFormatter(),
+                crashReporter = crashReporter,
+            )
+    }
+
+    private fun setupSpinner() {
         fieldToLabelMap = AppInfoField.entries.associateWith { getString(it.titleResId) }
         labelToFieldMap = fieldToLabelMap.entries.associate { (k, v) -> v to k }
 
@@ -139,7 +163,9 @@ class MainActivity :
         binding.spinner.setSelection(initialIndex, false)
         binding.spinner.onItemSelectedListener = this
         appListViewModel.init(lastDisplayedField)
+    }
 
+    private fun setupListeners() {
         binding.toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
