@@ -144,13 +144,13 @@ class AppInfoFieldTest {
     @Test
     fun `given App with data, when getValue called, then correct value returned`() {
         val storage =
-            StorageUsage().apply {
-                apkBytes = 100
-                appBytes = 200
-                cacheBytes = 300
-                dataBytes = 400
-                externalCacheBytes = 500
-            }
+            StorageUsage(
+                apkBytes = 100,
+                appBytes = 200,
+                cacheBytes = 300,
+                dataBytes = 400,
+                externalCacheBytes = 500,
+            )
         val app =
             App(
                 packageName = "com.test",
@@ -232,9 +232,9 @@ class AppInfoFieldTest {
     @Test
     fun `given App with data, when getFormattedValue called, then correct string returned`() {
         val storage =
-            StorageUsage().apply {
-                apkBytes = 100
-            }
+            StorageUsage(
+                apkBytes = 100,
+            )
         val app =
             App(
                 packageName = "com.test",
