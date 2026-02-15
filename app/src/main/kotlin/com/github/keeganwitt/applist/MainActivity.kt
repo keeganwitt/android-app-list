@@ -255,14 +255,7 @@ class MainActivity :
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if ((
-                field == AppInfoField.CACHE_SIZE ||
-                    field == AppInfoField.DATA_SIZE ||
-                    field == AppInfoField.EXTERNAL_CACHE_SIZE ||
-                    field == AppInfoField.TOTAL_SIZE ||
-                    field == AppInfoField.LAST_USED
-            ) && !hasUsageStatsPermission()
-        ) {
+        if (field.requiresUsageStats && !hasUsageStatsPermission()) {
             requestUsageStatsPermission()
         }
     }
