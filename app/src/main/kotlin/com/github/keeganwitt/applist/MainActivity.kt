@@ -220,7 +220,9 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        appListViewModel.refresh()
+        if (appListViewModel.uiState.value.items.isEmpty() && !appListViewModel.uiState.value.isLoading) {
+            appListViewModel.refresh()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
