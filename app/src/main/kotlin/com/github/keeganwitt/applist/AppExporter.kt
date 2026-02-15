@@ -10,6 +10,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -125,7 +126,7 @@ class AppExporter(
         try {
             val outputStream =
                 activity.contentResolver.openOutputStream(uri)
-                    ?: throw java.io.IOException("Failed to open output stream")
+                    ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
                 val items = itemsProvider()
@@ -139,17 +140,26 @@ class AppExporter(
                     activity.getString(R.string.export_successful),
                     Toast.LENGTH_SHORT,
                 ).show()
-        } catch (e: Exception) {
-            val message = "Error exporting ${format.displayName}"
-            Log.e(TAG, message, e)
-            crashReporter?.recordException(e, message)
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_failed, e.message),
-                    Toast.LENGTH_SHORT,
-                ).show()
+        } catch (e: IOException) {
+            handleExportError(e, format)
+        } catch (e: SecurityException) {
+            handleExportError(e, format)
         }
+    }
+
+    private fun handleExportError(
+        e: Exception,
+        format: ExportFormat,
+    ) {
+        val message = "Error exporting ${format.displayName}"
+        Log.e(TAG, message, e)
+        crashReporter?.recordException(e, message)
+        Toast
+            .makeText(
+                activity,
+                activity.getString(R.string.export_failed, e.message),
+                Toast.LENGTH_SHORT,
+            ).show()
     }
 
     companion object {
