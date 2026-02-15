@@ -46,7 +46,8 @@ class AndroidAppRepository(
                 flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
             }
             val allInstalled = packageService.getInstalledApplications(flags)
-            val filtered = filterApplications(allInstalled, showSystemApps)
+            val launchablePackages = packageService.getLaunchablePackages()
+            val filtered = filterApplications(allInstalled, launchablePackages, showSystemApps)
 
             // Phase 1: Emit apps with basic info only (fast)
             val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
@@ -135,12 +136,13 @@ class AndroidAppRepository(
 
     private fun filterApplications(
         apps: List<ApplicationInfo>,
+        launchablePackages: Set<String>,
         showSystemApps: Boolean,
     ): List<ApplicationInfo> =
         apps.filter { ai ->
             val include = showSystemApps || isUserInstalledApp(ai)
             val archived = isArchived(ai) ?: false
-            val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
+            val hasLaunch = launchablePackages.contains(ai.packageName)
             include && (archived || hasLaunch)
         }
 

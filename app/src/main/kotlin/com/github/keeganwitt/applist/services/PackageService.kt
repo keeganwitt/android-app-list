@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist.services
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -9,6 +10,8 @@ import android.os.Build
 
 interface PackageService {
     fun getInstalledApplications(flags: Long): List<ApplicationInfo>
+
+    fun getLaunchablePackages(): Set<String>
 
     fun getLaunchIntentForPackage(packageName: String): android.content.Intent?
 
@@ -33,6 +36,26 @@ class AndroidPackageService(
         } else {
             pm.getInstalledPackages(flags.toInt()).map { it.applicationInfo!! }
         }
+
+    override fun getLaunchablePackages(): Set<String> {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val launcherApps =
+            if (Build.VERSION.SDK_INT >= 33) {
+                pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
+            } else {
+                pm.queryIntentActivities(intent, 0)
+            }
+
+        val infoIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_INFO)
+        val infoApps =
+            if (Build.VERSION.SDK_INT >= 33) {
+                pm.queryIntentActivities(infoIntent, PackageManager.ResolveInfoFlags.of(0L))
+            } else {
+                pm.queryIntentActivities(infoIntent, 0)
+            }
+
+        return (launcherApps.map { it.activityInfo.packageName } + infoApps.map { it.activityInfo.packageName }).toSet()
+    }
 
     override fun getLaunchIntentForPackage(packageName: String): android.content.Intent? = pm.getLaunchIntentForPackage(packageName)
 
