@@ -14,7 +14,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import java.text.Collator
 
@@ -34,6 +36,11 @@ class AndroidAppRepository(
     private val appStoreService: AppStoreService,
     private val crashReporter: CrashReporter? = null,
 ) : AppRepository {
+    private val cacheMutex = Mutex()
+    private var cachedAllInstalled: List<ApplicationInfo>? = null
+    private var cachedDetailedApps: List<App>? = null
+    private var cachedShowSystemApps: Boolean? = null
+
     override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
@@ -41,13 +48,43 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            var flags =
-                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                    .toLong()
-            if (Build.VERSION.SDK_INT >= 35) {
-                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+            val (allInstalled, lastUsedEpochs, cachedApps) =
+                cacheMutex.withLock {
+                    if (reload) {
+                        cachedAllInstalled = null
+                        cachedDetailedApps = null
+                        cachedShowSystemApps = null
+                    }
+
+                    if (!reload && cachedDetailedApps != null && cachedShowSystemApps == showSystemApps) {
+                        Triple(cachedAllInstalled!!, usageStatsService.getLastUsedEpochs(false), cachedDetailedApps)
+                    } else {
+                        var apps = cachedAllInstalled
+                        if (apps == null) {
+                            var flags =
+                                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                                    .toLong()
+                            if (Build.VERSION.SDK_INT >= 35) {
+                                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+                            }
+                            apps = packageService.getInstalledApplications(flags)
+                            cachedAllInstalled = apps
+                        }
+                        val epochs = usageStatsService.getLastUsedEpochs(reload)
+                        Triple(apps, epochs, null)
+                    }
+                }
+
+            if (cachedApps != null) {
+                // If we have cached detailed apps, we can still emit basic apps first for consistent UI behavior
+                // but they are derived from the cached detailed apps.
+                val filtered = filterApplications(allInstalled, showSystemApps)
+                val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
+                emit(sortApps(basicApps, field, descending))
+                emit(sortApps(cachedApps, field, descending))
+                return@flow
             }
-            val allInstalled = packageService.getInstalledApplications(flags)
+
             val filtered = filterApplications(allInstalled, showSystemApps)
 
             // Phase 1: Emit apps with basic info only (fast)
@@ -56,7 +93,6 @@ class AndroidAppRepository(
             emit(sortedBasicApps)
 
             // Phase 2: Fetch heavy data and emit updated list
-            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
             val semaphore = Semaphore(MAX_CONCURRENCY)
 
             val detailedApps =
@@ -73,6 +109,10 @@ class AndroidAppRepository(
                 }
 
             val sortedDetailedApps = sortApps(detailedApps, field, descending)
+            cacheMutex.withLock {
+                cachedDetailedApps = sortedDetailedApps
+                cachedShowSystemApps = showSystemApps
+            }
             emit(sortedDetailedApps)
         }
 
