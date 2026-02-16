@@ -52,6 +52,14 @@ class AppExporter(
                             writeHtmlToFile(uri)
                         }
 
+                        ExportFormat.CSV -> {
+                            writeCsvToFile(uri)
+                        }
+
+                        ExportFormat.TSV -> {
+                            writeTsvToFile(uri)
+                        }
+
                         null -> { /* Should not happen */ }
                     }
                 }
@@ -79,6 +87,10 @@ class AppExporter(
                 initiateExport(ExportFormat.XML)
             } else if (selectedId == R.id.radio_html) {
                 initiateExport(ExportFormat.HTML)
+            } else if (selectedId == R.id.radio_csv) {
+                initiateExport(ExportFormat.CSV)
+            } else if (selectedId == R.id.radio_tsv) {
+                initiateExport(ExportFormat.TSV)
             }
         }
         builder.setNegativeButton(
@@ -122,6 +134,26 @@ class AppExporter(
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, ExportFormat.XML, items) {
                 formatter.toXml(it, field)
+            }
+        }
+    }
+
+    internal fun writeCsvToFile(uri: Uri) {
+        val items = itemsProvider()
+        val field = selectedAppInfoField!!
+        activity.lifecycleScope.launch(dispatchers.io) {
+            exportToFile(uri, ExportFormat.CSV, items) {
+                formatter.toCsv(it, field)
+            }
+        }
+    }
+
+    internal fun writeTsvToFile(uri: Uri) {
+        val items = itemsProvider()
+        val field = selectedAppInfoField!!
+        activity.lifecycleScope.launch(dispatchers.io) {
+            exportToFile(uri, ExportFormat.TSV, items) {
+                formatter.toTsv(it, field)
             }
         }
     }
@@ -194,5 +226,7 @@ class AppExporter(
     ) {
         XML("xml", "text/xml", "XML"),
         HTML("html", "text/html", "HTML"),
+        CSV("csv", "text/csv", "CSV"),
+        TSV("tsv", "text/tab-separated-values", "TSV"),
     }
 }

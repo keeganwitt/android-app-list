@@ -205,4 +205,42 @@ class AppExporterTest {
         val expected = activity.getString(R.string.export_failed, "Failed to open output stream")
         assertTrue(toast.toString() == expected)
     }
+
+    @Test
+    fun writeCsvToFile_writesContent_andShowsSuccessToast() {
+        val formatter = mockk<ExportFormatter>()
+        val csvOutput = "App Name,Package Name,Info Type,Info Value\n\"App 1\",\"com.example.app1\",\"VERSION\",\"1.0\""
+        every { formatter.toCsv(any(), any()) } returns csvOutput
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        val file = File.createTempFile("apps", ".csv").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeCsvToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toCsv(items, AppInfoField.VERSION) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun writeTsvToFile_writesContent_andShowsSuccessToast() {
+        val formatter = mockk<ExportFormatter>()
+        val tsvOutput = "App Name\tPackage Name\tInfo Type\tInfo Value\nApp 1\tcom.example.app1\tVERSION\t1.0"
+        every { formatter.toTsv(any(), any()) } returns tsvOutput
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        val file = File.createTempFile("apps", ".tsv").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeTsvToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toTsv(items, AppInfoField.VERSION) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+    }
 }

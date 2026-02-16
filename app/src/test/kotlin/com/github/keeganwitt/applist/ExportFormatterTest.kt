@@ -230,4 +230,82 @@ class ExportFormatterTest {
                 "</html>\n"
         assertEquals(expected, result)
     }
+
+    @Test
+    fun `given list of apps, when toCsv called, then return correct csv`() {
+        // Given
+        val items =
+            listOf(
+                AppItemUiModel(
+                    packageName = "com.example.app1",
+                    appName = "App 1",
+                    infoText = "1.0",
+                ),
+                AppItemUiModel(
+                    packageName = "com.example.app2",
+                    appName = "App 2",
+                    infoText = "2.0",
+                ),
+            )
+
+        // When
+        val result = formatter.toCsv(items, AppInfoField.VERSION)
+
+        // Then
+        val expected =
+            "App Name,Package Name,Info Type,Info Value\n" +
+                "\"App 1\",\"com.example.app1\",\"VERSION\",\"1.0\"\n" +
+                "\"App 2\",\"com.example.app2\",\"VERSION\",\"2.0\"\n"
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `given apps with quotes and commas, when toCsv called, then return escaped csv`() {
+        // Given
+        val items =
+            listOf(
+                AppItemUiModel(
+                    packageName = "com.example.app,1",
+                    appName = "App \"1\"",
+                    infoText = "1.0",
+                ),
+            )
+
+        // When
+        val result = formatter.toCsv(items, AppInfoField.VERSION)
+
+        // Then
+        val expected =
+            "App Name,Package Name,Info Type,Info Value\n" +
+                "\"App \"\"1\"\"\",\"com.example.app,1\",\"VERSION\",\"1.0\"\n"
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `given list of apps, when toTsv called, then return correct tsv`() {
+        // Given
+        val items =
+            listOf(
+                AppItemUiModel(
+                    packageName = "com.example.app1",
+                    appName = "App 1",
+                    infoText = "1.0",
+                ),
+                AppItemUiModel(
+                    packageName = "com.example.app2",
+                    appName = "App 2",
+                    infoText = "2.0",
+                ),
+            )
+
+        // When
+        val result = formatter.toTsv(items, AppInfoField.VERSION)
+
+        // Then
+        val expected =
+            "App Name\tPackage Name\tInfo Type\tInfo Value\n" +
+                "App 1\tcom.example.app1\tVERSION\t1.0\n" +
+                "App 2\tcom.example.app2\tVERSION\t2.0\n"
+        assertEquals(expected, result)
+    }
 }
