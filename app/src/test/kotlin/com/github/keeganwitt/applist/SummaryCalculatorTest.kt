@@ -122,7 +122,7 @@ class SummaryCalculatorTest {
         archived: Boolean,
         apkSize: Long,
     ): App {
-        val sizes = StorageUsage(apkSize)
+        val sizes = StorageUsage(apkBytes = apkSize)
         return App(
             packageName = "pkg",
             name = "name",
