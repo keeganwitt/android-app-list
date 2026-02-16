@@ -29,6 +29,7 @@ import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -64,22 +65,8 @@ class MainActivity :
         appSettings = SharedPreferencesAppSettings(this)
 
         val themeMode = appSettings.getThemeMode()
-        val nightMode =
-            when (themeMode) {
-                AppSettings.ThemeMode.LIGHT -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                }
-
-                AppSettings.ThemeMode.DARK -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                }
-
-                AppSettings.ThemeMode.SYSTEM -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
-            }
         androidx.appcompat.app.AppCompatDelegate
-            .setDefaultNightMode(nightMode)
+            .setDefaultNightMode(themeMode.nightMode)
 
         appAdapter = AppAdapter(this)
         binding.recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
