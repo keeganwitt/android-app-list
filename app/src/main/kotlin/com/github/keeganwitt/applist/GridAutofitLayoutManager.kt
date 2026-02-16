@@ -38,6 +38,7 @@ class GridAutofitLayoutManager : GridLayoutManager {
         if (newColumnWidth > 0 && newColumnWidth != columnWidth) {
             columnWidth = newColumnWidth
             isColumnWidthChanged = true
+            requestLayout()
         }
     }
 

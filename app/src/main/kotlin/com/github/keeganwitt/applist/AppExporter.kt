@@ -10,6 +10,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
@@ -22,6 +25,7 @@ class AppExporter(
     private val itemsProvider: () -> List<AppItemUiModel>,
     private val formatter: ExportFormatter,
     private val crashReporter: CrashReporter? = null,
+    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
 ) {
     internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: ExportFormat? = null
@@ -40,8 +44,14 @@ class AppExporter(
                 if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
                     val uri = result.data?.data ?: return@register
                     when (currentExportType) {
-                        ExportFormat.XML -> writeXmlToFile(uri)
-                        ExportFormat.HTML -> writeHtmlToFile(uri)
+                        ExportFormat.XML -> {
+                            writeXmlToFile(uri)
+                        }
+
+                        ExportFormat.HTML -> {
+                            writeHtmlToFile(uri)
+                        }
+
                         null -> { /* Should not happen */ }
                     }
                 }
@@ -107,20 +117,28 @@ class AppExporter(
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        exportToFile(uri, ExportFormat.XML) { items ->
-            formatter.toXml(items, selectedAppInfoField!!)
+        val items = itemsProvider()
+        val field = selectedAppInfoField!!
+        activity.lifecycleScope.launch(dispatchers.io) {
+            exportToFile(uri, ExportFormat.XML, items) {
+                formatter.toXml(it, field)
+            }
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
-        exportToFile(uri, ExportFormat.HTML) { items ->
-            formatter.toHtml(items)
+        val items = itemsProvider()
+        activity.lifecycleScope.launch(dispatchers.io) {
+            exportToFile(uri, ExportFormat.HTML, items) {
+                formatter.toHtml(it)
+            }
         }
     }
 
-    private fun exportToFile(
+    private suspend fun exportToFile(
         uri: Uri,
         format: ExportFormat,
+        items: List<AppItemUiModel>,
         contentGenerator: (List<AppItemUiModel>) -> String,
     ) {
         try {
@@ -129,17 +147,18 @@ class AppExporter(
                     ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
-                val items = itemsProvider()
                 val content = contentGenerator(items)
                 writer.write(content)
                 writer.flush()
             }
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_successful),
-                    Toast.LENGTH_SHORT,
-                ).show()
+            withContext(dispatchers.main) {
+                Toast
+                    .makeText(
+                        activity,
+                        activity.getString(R.string.export_successful),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+            }
         } catch (e: IOException) {
             handleExportError(e, format)
         } catch (e: SecurityException) {
@@ -147,26 +166,32 @@ class AppExporter(
         }
     }
 
-    private fun handleExportError(
+    private suspend fun handleExportError(
         e: Exception,
         format: ExportFormat,
     ) {
         val message = "Error exporting ${format.displayName}"
         Log.e(TAG, message, e)
         crashReporter?.recordException(e, message)
-        Toast
-            .makeText(
-                activity,
-                activity.getString(R.string.export_failed, e.message),
-                Toast.LENGTH_SHORT,
-            ).show()
+        withContext(dispatchers.main) {
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_failed, e.message),
+                    Toast.LENGTH_SHORT,
+                ).show()
+        }
     }
 
     companion object {
         private val TAG = AppExporter::class.java.simpleName
     }
 
-    internal enum class ExportFormat(val extension: String, val mimeType: String, val displayName: String) {
+    internal enum class ExportFormat(
+        val extension: String,
+        val mimeType: String,
+        val displayName: String,
+    ) {
         XML("xml", "text/xml", "XML"),
         HTML("html", "text/html", "HTML"),
     }

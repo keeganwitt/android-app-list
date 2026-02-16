@@ -6,8 +6,11 @@ import coil.ImageLoaderFactory
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.utils.PackageIconFetcher
 import com.github.keeganwitt.applist.utils.PackageIconKeyer
+import com.github.keeganwitt.applist.utils.nightMode
 
-open class AppListApplication : Application(), ImageLoaderFactory {
+open class AppListApplication :
+    Application(),
+    ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         val appSettings = SharedPreferencesAppSettings(this)
@@ -18,32 +21,17 @@ open class AppListApplication : Application(), ImageLoaderFactory {
         }
 
         val themeMode = appSettings.getThemeMode()
-        val nightMode =
-            when (themeMode) {
-                AppSettings.ThemeMode.LIGHT -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                }
-
-                AppSettings.ThemeMode.DARK -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                }
-
-                AppSettings.ThemeMode.SYSTEM -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
-            }
         androidx.appcompat.app.AppCompatDelegate
-            .setDefaultNightMode(nightMode)
+            .setDefaultNightMode(themeMode.nightMode)
     }
 
-    override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this)
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader
+            .Builder(this)
             .components {
                 add(PackageIconFetcher.Factory(AndroidPackageService(this@AppListApplication)))
                 add(PackageIconKeyer())
-            }
-            .build()
-    }
+            }.build()
 
     protected open fun setCrashlyticsCollectionEnabled(enabled: Boolean) {
         if (BuildConfig.DEBUG) {

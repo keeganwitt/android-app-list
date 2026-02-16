@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,11 +25,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -47,9 +50,21 @@ class MainActivity :
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
+    private var shouldRefreshOnResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupUI()
+        setupSettings()
+        setupTheme()
+        setupRecyclerView()
+        setupViewModel()
+        setupExporter()
+        setupSpinner()
+        setupListeners()
+    }
+
+    private fun setupUI() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -59,41 +74,27 @@ class MainActivity :
             resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
                 Configuration.UI_MODE_NIGHT_YES
         windowInsetsController.isAppearanceLightStatusBars = isLightMode
+    }
 
+    private fun setupSettings() {
         appInfoFields = AppInfoField.entries
         appSettings = SharedPreferencesAppSettings(this)
+    }
 
+    private fun setupTheme() {
         val themeMode = appSettings.getThemeMode()
-        val nightMode =
-            when (themeMode) {
-                AppSettings.ThemeMode.LIGHT -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                }
-
-                AppSettings.ThemeMode.DARK -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                }
-
-                AppSettings.ThemeMode.SYSTEM -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
-            }
         androidx.appcompat.app.AppCompatDelegate
-            .setDefaultNightMode(nightMode)
+            .setDefaultNightMode(themeMode.nightMode)
+    }
 
+    private fun setupRecyclerView() {
         appAdapter = AppAdapter(this)
         binding.recyclerView.layoutManager = GridAutofitLayoutManager(this, 450)
         binding.recyclerView.adapter = appAdapter
+    }
 
+    private fun setupViewModel() {
         val crashReporter = FirebaseCrashReporter()
-        appExporter =
-            AppExporter(
-                this,
-                itemsProvider = { appAdapter.currentList },
-                formatter = ExportFormatter(),
-                crashReporter = crashReporter,
-            )
-
         appListViewModel =
             ViewModelProvider(
                 this,
@@ -111,14 +112,32 @@ class MainActivity :
                                 store,
                                 crashReporter,
                             )
-                        val vm = AppListViewModel(repo, DefaultDispatcherProvider())
+                        val vm =
+                            AppListViewModel(
+                                repo,
+                                DefaultDispatcherProvider(),
+                                SummaryCalculator(applicationContext),
+                            )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
                     }
                 },
             )[AppListViewModel::class.java]
         observeViewModel()
+    }
 
+    private fun setupExporter() {
+        val crashReporter = FirebaseCrashReporter()
+        appExporter =
+            AppExporter(
+                this,
+                itemsProvider = { appAdapter.currentList },
+                formatter = ExportFormatter(),
+                crashReporter = crashReporter,
+            )
+    }
+
+    private fun setupSpinner() {
         fieldToLabelMap = AppInfoField.entries.associateWith { getString(it.titleResId) }
         labelToFieldMap = fieldToLabelMap.entries.associate { (k, v) -> v to k }
 
@@ -139,7 +158,9 @@ class MainActivity :
         binding.spinner.setSelection(initialIndex, false)
         binding.spinner.onItemSelectedListener = this
         appListViewModel.init(lastDisplayedField)
+    }
 
+    private fun setupListeners() {
         binding.toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -156,6 +177,7 @@ class MainActivity :
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
+                    invalidateOptionsMenu()
                 }
             }
         }
@@ -165,6 +187,13 @@ class MainActivity :
         menuInflater.inflate(R.menu.app_menu, menu)
 
         menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
+
+        val summaryItem = menu.findItem(R.id.summary)
+        summaryItem.isEnabled = latestState.summary != null
+        val icon = summaryItem.icon
+        if (icon != null) {
+            icon.alpha = if (latestState.summary != null) 255 else 128
+        }
 
         val searchItem = menu.findItem(R.id.search)
         (searchItem.actionView as? SearchView)?.setOnQueryTextListener(
@@ -220,7 +249,15 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        appListViewModel.refresh()
+        if (shouldRefreshOnResume) {
+            appListViewModel.refresh()
+            shouldRefreshOnResume = false
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        shouldRefreshOnResume = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -238,12 +275,40 @@ class MainActivity :
                 return true
             }
 
+            R.id.summary -> {
+                showSummaryDialog()
+                return true
+            }
+
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showSummaryDialog() {
+        val summary = latestState.summary
+        if (summary == null) {
+            Toast.makeText(this, "Summary not available yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val view = layoutInflater.inflate(R.layout.dialog_summary, null)
+        val titleView = view.findViewById<TextView>(R.id.summary_title)
+        titleView.text = getString(summary.field.titleResId)
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.summary_recycler_view)
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        recyclerView.adapter = SummaryAdapter(summary.buckets.toList())
+
+        androidx.appcompat.app.AlertDialog
+            .Builder(this)
+            .setTitle(R.string.summary)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun updateSystemAppToggleIcon(item: MenuItem) {
@@ -255,14 +320,7 @@ class MainActivity :
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if ((
-                field == AppInfoField.CACHE_SIZE ||
-                    field == AppInfoField.DATA_SIZE ||
-                    field == AppInfoField.EXTERNAL_CACHE_SIZE ||
-                    field == AppInfoField.TOTAL_SIZE ||
-                    field == AppInfoField.LAST_USED
-            ) && !hasUsageStatsPermission()
-        ) {
+        if (field.requiresUsageStats && !hasUsageStatsPermission()) {
             requestUsageStatsPermission()
         }
     }
