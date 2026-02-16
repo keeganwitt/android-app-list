@@ -96,8 +96,12 @@ class MainActivity :
                 }
             }
         androidx.appcompat.app.AppCompatDelegate
+<<<<<<< HEAD
+            .setDefaultNightMode(nightMode)
+=======
             .setDefaultNightMode(themeMode.nightMode)
     }
+>>>>>>> origin/main
 
     private fun setupRecyclerView() {
         appAdapter = AppAdapter(this)

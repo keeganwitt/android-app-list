@@ -142,9 +142,15 @@ class AndroidAppRepository(
         showSystemApps: Boolean,
     ): List<ApplicationInfo> =
         apps.filter { ai ->
+<<<<<<< HEAD
+            val include = showSystemApps || isUserInstalledApp(ai)
+            val archived = isArchived(ai) ?: false
+            val hasLaunch = launchablePackages.contains(ai.packageName)
+=======
             val include = showSystemApps || ai.isUserInstalled
             val archived = ai.isArchivedApp
             val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
+>>>>>>> origin/main
             include && (archived || hasLaunch)
         }
 

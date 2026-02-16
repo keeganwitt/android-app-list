@@ -469,6 +469,30 @@ class AppRepositoryTest {
                 }
             }
 
+<<<<<<< HEAD
+        every { packageService.getInstalledApplications(any<Long>()) } returns apps
+        every { packageService.getLaunchablePackages() } returns apps.map { it.packageName }.toSet()
+        every { packageService.loadLabel(any()) } returns "App"
+        every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+
+        // Concurrency tracker
+        val activeCoroutines = AtomicInteger(0)
+        val maxConcurrency = AtomicInteger(0)
+
+        // Mock a heavy operation
+        every { packageService.getPackageInfo(any()) } answers {
+            val current = activeCoroutines.incrementAndGet()
+            maxConcurrency.updateAndGet { prev -> max(prev, current) }
+
+            // Simulate blocking work
+            Thread.sleep(10)
+
+            activeCoroutines.decrementAndGet()
+            PackageInfo().apply {
+                versionName = "1.0"
+                firstInstallTime = 0
+                lastUpdateTime = 0
+=======
             // Run on IO dispatcher to allow concurrency
             withContext(Dispatchers.IO) {
                 repository
@@ -478,6 +502,7 @@ class AppRepositoryTest {
                         descending = false,
                         reload = false,
                     ).toList()
+>>>>>>> origin/main
             }
 
             val maxObserved = maxConcurrency.get()

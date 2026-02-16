@@ -34,6 +34,7 @@ class PackageServiceTest {
     }
 
     @Test
+<<<<<<< HEAD
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
     fun `given installed apps on Tiramisu, when getInstalledApplications called, then returns list of apps`() {
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
@@ -49,11 +50,17 @@ class PackageServiceTest {
     }
 
     @Test
+    fun `given installed apps, when getInstalledApplications called, then returns list of apps`() {
+=======
     fun `given installed apps, when getInstalledApplications called on API 33+, then returns list of apps`() {
+>>>>>>> origin/main
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
         val appInfo2 = ApplicationInfo().apply { packageName = "com.test.app2" }
         val apps = listOf(appInfo1, appInfo2)
 
+<<<<<<< HEAD
+        every { packageManager.getInstalledPackages(any<Int>()) } returns packages
+=======
         every { packageManager.getInstalledApplications(any<PackageManager.ApplicationInfoFlags>()) } returns apps
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
@@ -71,6 +78,7 @@ class PackageServiceTest {
         val apps = listOf(appInfo1, appInfo2)
 
         every { packageManager.getInstalledApplications(any<Int>()) } returns apps
+>>>>>>> origin/main
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
 
@@ -207,6 +215,10 @@ class PackageServiceTest {
     }
 
     @Test
+<<<<<<< HEAD
+    @Config(sdk = [Build.VERSION_CODES.P])
+    fun `getPackageInfo on P does not include signing certificates flag`() {
+=======
     @Config(sdk = [Build.VERSION_CODES.O])
     fun `getPackageInfo on O does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
@@ -222,8 +234,9 @@ class PackageServiceTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    @Config(sdk = [34])
     fun `getPackageInfo on modern SDK does not include signing certificates flag`() {
+>>>>>>> origin/main
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
         val flagsSlot = slot<Int>()
@@ -235,6 +248,8 @@ class PackageServiceTest {
         val flags = flagsSlot.captured.toLong()
         assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
     }
+<<<<<<< HEAD
+=======
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.P])
@@ -291,4 +306,5 @@ class PackageServiceTest {
 
         assertNull(result)
     }
+>>>>>>> origin/main
 }
