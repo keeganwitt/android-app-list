@@ -87,16 +87,19 @@ class PackageServiceTest {
             activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.both.app" }
         }
 
-        every { packageManager.queryIntentActivities(any(), any<Int>()) } answers {
-            val intent = firstArg<Intent>()
-            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
-                listOf(launcherResolve, bothResolve)
-            } else if (intent.hasCategory(Intent.CATEGORY_INFO)) {
-                listOf(infoResolve, bothResolve)
-            } else {
-                emptyList()
-            }
-        }
+        every {
+            packageManager.queryIntentActivities(
+                match { it.hasCategory(Intent.CATEGORY_LAUNCHER) },
+                any<Int>()
+            )
+        } returns listOf(launcherResolve, bothResolve)
+
+        every {
+            packageManager.queryIntentActivities(
+                match { it.hasCategory(Intent.CATEGORY_INFO) },
+                any<Int>()
+            )
+        } returns listOf(infoResolve, bothResolve)
 
         val result = service.getLaunchablePackages()
 
