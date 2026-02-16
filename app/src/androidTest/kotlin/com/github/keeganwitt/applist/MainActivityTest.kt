@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -9,6 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +29,11 @@ class MainActivityTest {
     @After
     fun tearDown() {
         scenario.close()
+    }
+
+    @Test
+    fun mainActivity_whenLaunched_thenItIsResumed() {
+        assertEquals(Lifecycle.State.RESUMED, scenario.state)
     }
 
     @Test
