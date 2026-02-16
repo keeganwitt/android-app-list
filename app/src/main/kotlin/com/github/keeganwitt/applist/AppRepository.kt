@@ -7,6 +7,8 @@ import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
+import com.github.keeganwitt.applist.utils.isArchivedApp
+import com.github.keeganwitt.applist.utils.isUserInstalled
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -80,7 +82,7 @@ class AndroidAppRepository(
             packageName = packageName,
             name = packageService.loadLabel(ai),
             versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
-            archived = isArchived(ai) ?: false,
+            archived = ai.isArchivedApp,
             minSdk = ai.minSdkVersion,
             targetSdk = ai.targetSdkVersion,
             firstInstalled = 0,
@@ -139,8 +141,8 @@ class AndroidAppRepository(
         showSystemApps: Boolean,
     ): List<ApplicationInfo> =
         apps.filter { ai ->
-            val include = showSystemApps || isUserInstalledApp(ai)
-            val archived = isArchived(ai) ?: false
+            val include = showSystemApps || ai.isUserInstalled
+            val archived = ai.isArchivedApp
             val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
             include && (archived || hasLaunch)
         }
@@ -158,15 +160,6 @@ class AndroidAppRepository(
             .map { app -> app to sortKey(app, field) }
             .sortedWith(finalComparator)
             .map { it.first }
-    }
-
-    private fun isUserInstalledApp(appInfo: ApplicationInfo): Boolean = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
-
-    private fun isArchived(applicationInfo: ApplicationInfo): Boolean? {
-        if (Build.VERSION.SDK_INT >= 35 && applicationInfo.isArchived) {
-            return true
-        }
-        return applicationInfo.metaData?.containsKey("com.android.vending.archive")
     }
 
     private fun sortKey(

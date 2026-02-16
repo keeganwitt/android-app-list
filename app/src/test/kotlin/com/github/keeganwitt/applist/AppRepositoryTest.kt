@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import android.os.Bundle
 import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
@@ -289,6 +290,41 @@ class AppRepositoryTest {
             assertEquals(1, result.size)
             assertEquals(2, result[0].requestedPermissionsCount)
             assertEquals(1, result[0].grantedPermissionsCount)
+        }
+
+    @Test
+    fun `given apps with archived status, when loadApps called with ARCHIVED field, then apps are sorted by archived status`() =
+        runTest {
+            val app1 = createApplicationInfo("com.test.app1")
+            val mockBundle = mockk<Bundle>()
+            every { mockBundle.containsKey("com.android.vending.archive") } returns true
+            app1.metaData = mockBundle
+
+            val app2 = createApplicationInfo("com.test.app2")
+            app2.metaData = null
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
+            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { packageService.loadLabel(any()) } returns "App"
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
+            every { appStoreService.existsInAppStore(any(), any()) } returns null
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.ARCHIVED,
+                        showSystemApps = false,
+                        descending = true,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(2, result.size)
+            assertEquals(true, result[0].archived)
+            assertEquals(false, result[1].archived)
         }
 
     @Test
