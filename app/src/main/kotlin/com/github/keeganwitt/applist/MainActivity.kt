@@ -29,6 +29,7 @@ import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -47,6 +48,7 @@ class MainActivity :
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
+    private var shouldRefreshOnResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,22 +81,8 @@ class MainActivity :
 
     private fun setupTheme() {
         val themeMode = appSettings.getThemeMode()
-        val nightMode =
-            when (themeMode) {
-                AppSettings.ThemeMode.LIGHT -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                }
-
-                AppSettings.ThemeMode.DARK -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                }
-
-                AppSettings.ThemeMode.SYSTEM -> {
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
-            }
         androidx.appcompat.app.AppCompatDelegate
-            .setDefaultNightMode(nightMode)
+            .setDefaultNightMode(themeMode.nightMode)
     }
 
     private fun setupRecyclerView() {
@@ -246,7 +234,15 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        appListViewModel.refresh()
+        if (shouldRefreshOnResume) {
+            appListViewModel.refresh()
+            shouldRefreshOnResume = false
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        shouldRefreshOnResume = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -281,14 +277,7 @@ class MainActivity :
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if ((
-                field == AppInfoField.CACHE_SIZE ||
-                    field == AppInfoField.DATA_SIZE ||
-                    field == AppInfoField.EXTERNAL_CACHE_SIZE ||
-                    field == AppInfoField.TOTAL_SIZE ||
-                    field == AppInfoField.LAST_USED
-            ) && !hasUsageStatsPermission()
-        ) {
+        if (field.requiresUsageStats && !hasUsageStatsPermission()) {
             requestUsageStatsPermission()
         }
     }
