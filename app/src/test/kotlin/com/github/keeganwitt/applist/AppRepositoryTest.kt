@@ -55,7 +55,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
             every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
@@ -89,7 +89,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -120,7 +120,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -148,7 +148,7 @@ class AppRepositoryTest {
             val appInfo = createApplicationInfo("com.test.app")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns null
+            every { packageService.getLaunchablePackages() } returns emptySet()
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
 
             val result =
@@ -173,7 +173,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2, app3)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2", "com.test.app3")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(app1) } returns "App A"
             every { packageService.loadLabel(app2) } returns "App B"
@@ -206,7 +206,7 @@ class AppRepositoryTest {
             val appInfo = createApplicationInfo("com.test.app")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } throws PackageManager.NameNotFoundException()
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
 
@@ -234,7 +234,7 @@ class AppRepositoryTest {
             val lastUsedTime = 1234567890L
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -268,7 +268,7 @@ class AppRepositoryTest {
                 }
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -304,7 +304,7 @@ class AppRepositoryTest {
             app2.metaData = null
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2")
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { packageService.loadLabel(any()) } returns "App"
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
@@ -334,7 +334,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -361,7 +361,7 @@ class AppRepositoryTest {
             val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
             every { packageService.getInstallerPackageName(any()) } returns null
@@ -398,9 +398,9 @@ class AppRepositoryTest {
         runTest {
             val appInfo = createApplicationInfo("com.test.error")
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.error")
             // returning valid basic info
             every { packageService.loadLabel(any()) } returns "Error App"
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
             // failing detailed info
             every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Error")
 
@@ -435,8 +435,8 @@ class AppRepositoryTest {
                 }
 
             every { packageService.getInstalledApplications(any<Long>()) } returns apps
+            every { packageService.getLaunchablePackages() } returns apps.map { it.packageName }.toSet()
             every { packageService.loadLabel(any()) } returns "App"
-            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
 
             // Concurrency tracker
             val activeCoroutines = AtomicInteger(0)
