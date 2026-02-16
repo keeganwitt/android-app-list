@@ -47,6 +47,7 @@ class MainActivity :
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
+    private var shouldRefreshOnResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -220,9 +221,15 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        if (appListViewModel.uiState.value.items.isEmpty() && !appListViewModel.uiState.value.isLoading) {
+        if (shouldRefreshOnResume) {
             appListViewModel.refresh()
+            shouldRefreshOnResume = false
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        shouldRefreshOnResume = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
