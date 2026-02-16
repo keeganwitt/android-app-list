@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
@@ -110,7 +112,12 @@ class MainActivity :
                                 store,
                                 crashReporter,
                             )
-                        val vm = AppListViewModel(repo, DefaultDispatcherProvider())
+                        val vm =
+                            AppListViewModel(
+                                repo,
+                                DefaultDispatcherProvider(),
+                                SummaryCalculator(applicationContext),
+                            )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
                     }
@@ -170,6 +177,7 @@ class MainActivity :
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
+                    invalidateOptionsMenu()
                 }
             }
         }
@@ -179,6 +187,13 @@ class MainActivity :
         menuInflater.inflate(R.menu.app_menu, menu)
 
         menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
+
+        val summaryItem = menu.findItem(R.id.summary)
+        summaryItem.isEnabled = latestState.summary != null
+        val icon = summaryItem.icon
+        if (icon != null) {
+            icon.alpha = if (latestState.summary != null) 255 else 128
+        }
 
         val searchItem = menu.findItem(R.id.search)
         (searchItem.actionView as? SearchView)?.setOnQueryTextListener(
@@ -260,12 +275,40 @@ class MainActivity :
                 return true
             }
 
+            R.id.summary -> {
+                showSummaryDialog()
+                return true
+            }
+
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showSummaryDialog() {
+        val summary = latestState.summary
+        if (summary == null) {
+            Toast.makeText(this, "Summary not available yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val view = layoutInflater.inflate(R.layout.dialog_summary, null)
+        val titleView = view.findViewById<TextView>(R.id.summary_title)
+        titleView.text = getString(summary.field.titleResId)
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.summary_recycler_view)
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        recyclerView.adapter = SummaryAdapter(summary.buckets.toList())
+
+        androidx.appcompat.app.AlertDialog
+            .Builder(this)
+            .setTitle(R.string.summary)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun updateSystemAppToggleIcon(item: MenuItem) {

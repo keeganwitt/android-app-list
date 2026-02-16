@@ -404,12 +404,13 @@ class AppRepositoryTest {
             // failing detailed info
             every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Error")
 
-            val flow = repository.loadApps(
-                field = AppInfoField.VERSION,
-                showSystemApps = false,
-                descending = false,
-                reload = false,
-            )
+            val flow =
+                repository.loadApps(
+                    field = AppInfoField.VERSION,
+                    showSystemApps = false,
+                    descending = false,
+                    reload = false,
+                )
 
             val result = flow.toList()
             val finalDocs = result.last()
@@ -421,53 +422,56 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `verify concurrency limit`() = runBlocking {
-        val appCount = 200
-        val apps = (1..appCount).map { i ->
-            ApplicationInfo().apply {
-                packageName = "com.app.$i"
-                flags = 0
-                enabled = true
+    fun `verify concurrency limit`() =
+        runBlocking {
+            val appCount = 200
+            val apps =
+                (1..appCount).map { i ->
+                    ApplicationInfo().apply {
+                        packageName = "com.app.$i"
+                        flags = 0
+                        enabled = true
+                    }
+                }
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns apps
+            every { packageService.loadLabel(any()) } returns "App"
+            every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
+
+            // Concurrency tracker
+            val activeCoroutines = AtomicInteger(0)
+            val maxConcurrency = AtomicInteger(0)
+
+            // Mock a heavy operation
+            every { packageService.getPackageInfo(any()) } answers {
+                val current = activeCoroutines.incrementAndGet()
+                maxConcurrency.updateAndGet { prev -> max(prev, current) }
+
+                // Simulate blocking work
+                Thread.sleep(10)
+
+                activeCoroutines.decrementAndGet()
+                PackageInfo().apply {
+                    versionName = "1.0"
+                    firstInstallTime = 0
+                    lastUpdateTime = 0
+                }
             }
-        }
 
-        every { packageService.getInstalledApplications(any<Long>()) } returns apps
-        every { packageService.loadLabel(any()) } returns "App"
-        every { packageService.getLaunchIntentForPackage(any()) } returns mockk()
-
-        // Concurrency tracker
-        val activeCoroutines = AtomicInteger(0)
-        val maxConcurrency = AtomicInteger(0)
-
-        // Mock a heavy operation
-        every { packageService.getPackageInfo(any()) } answers {
-            val current = activeCoroutines.incrementAndGet()
-            maxConcurrency.updateAndGet { prev -> max(prev, current) }
-
-            // Simulate blocking work
-            Thread.sleep(10)
-
-            activeCoroutines.decrementAndGet()
-            PackageInfo().apply {
-                versionName = "1.0"
-                firstInstallTime = 0
-                lastUpdateTime = 0
+            // Run on IO dispatcher to allow concurrency
+            withContext(Dispatchers.IO) {
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = true,
+                        descending = false,
+                        reload = false,
+                    ).toList()
             }
-        }
 
-        // Run on IO dispatcher to allow concurrency
-        withContext(Dispatchers.IO) {
-            repository.loadApps(
-                field = AppInfoField.VERSION,
-                showSystemApps = true,
-                descending = false,
-                reload = false
-            ).toList()
+            val maxObserved = maxConcurrency.get()
+            assertTrue("Max concurrency should be limited to 4, but was $maxObserved", maxObserved <= 4)
         }
-
-        val maxObserved = maxConcurrency.get()
-        assertTrue("Max concurrency should be limited to 4, but was $maxObserved", maxObserved <= 4)
-    }
 
     private fun createApplicationInfo(
         packageName: String,

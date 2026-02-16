@@ -201,7 +201,10 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.toLong()
-        assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
+        assertTrue(
+            "Expected GET_SIGNING_CERTIFICATES flag to be absent",
+            (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L,
+        )
     }
 
     @Test

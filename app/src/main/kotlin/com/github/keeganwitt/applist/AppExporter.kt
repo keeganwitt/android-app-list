@@ -43,8 +43,14 @@ class AppExporter(
                 if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
                     val uri = result.data?.data ?: return@register
                     when (currentExportType) {
-                        ExportFormat.XML -> writeXmlToFile(uri)
-                        ExportFormat.HTML -> writeHtmlToFile(uri)
+                        ExportFormat.XML -> {
+                            writeXmlToFile(uri)
+                        }
+
+                        ExportFormat.HTML -> {
+                            writeHtmlToFile(uri)
+                        }
+
                         null -> { /* Should not happen */ }
                     }
                 }
@@ -171,7 +177,11 @@ class AppExporter(
         private val TAG = AppExporter::class.java.simpleName
     }
 
-    internal enum class ExportFormat(val extension: String, val mimeType: String, val displayName: String) {
+    internal enum class ExportFormat(
+        val extension: String,
+        val mimeType: String,
+        val displayName: String,
+    ) {
         XML("xml", "text/xml", "XML"),
         HTML("html", "text/html", "HTML"),
     }

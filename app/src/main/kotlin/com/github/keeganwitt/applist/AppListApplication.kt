@@ -8,7 +8,9 @@ import com.github.keeganwitt.applist.utils.PackageIconFetcher
 import com.github.keeganwitt.applist.utils.PackageIconKeyer
 import com.github.keeganwitt.applist.utils.nightMode
 
-open class AppListApplication : Application(), ImageLoaderFactory {
+open class AppListApplication :
+    Application(),
+    ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         val appSettings = SharedPreferencesAppSettings(this)
@@ -23,14 +25,13 @@ open class AppListApplication : Application(), ImageLoaderFactory {
             .setDefaultNightMode(themeMode.nightMode)
     }
 
-    override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this)
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader
+            .Builder(this)
             .components {
                 add(PackageIconFetcher.Factory(AndroidPackageService(this@AppListApplication)))
                 add(PackageIconKeyer())
-            }
-            .build()
-    }
+            }.build()
 
     protected open fun setCrashlyticsCollectionEnabled(enabled: Boolean) {
         if (BuildConfig.DEBUG) {
