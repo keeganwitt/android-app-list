@@ -11,9 +11,10 @@
     tools:ignore="ProtectedPermissions" />
   <uses-permission android:name="android.permission.INTERNET" />
 
+  <!-- Disable backup to prevent local data extraction of sensitive information (e.g. SharedPreferences) -->
   <application
     android:name=".AppListApplication"
-    android:allowBackup="true"
+    android:allowBackup="false"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
