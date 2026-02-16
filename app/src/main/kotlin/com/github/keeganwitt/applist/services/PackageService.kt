@@ -12,9 +12,15 @@ import androidx.annotation.RequiresApi
 interface PackageService {
     fun getInstalledApplications(flags: Long): List<ApplicationInfo>
 
+<<<<<<< HEAD
     fun getLaunchablePackages(): Set<String>
 
     fun getLaunchIntentForPackage(packageName: String): android.content.Intent?
+=======
+    fun getLaunchIntentForPackage(packageName: String): Intent?
+
+    fun getLaunchablePackages(): Set<String>
+>>>>>>> origin/main
 
     fun loadLabel(applicationInfo: ApplicationInfo): String
 
@@ -39,6 +45,7 @@ class AndroidPackageService(
             pm.getInstalledApplications(flags.toInt())
         }
 
+<<<<<<< HEAD
     override fun getLaunchablePackages(): Set<String> {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         val launcherApps =
@@ -60,6 +67,29 @@ class AndroidPackageService(
     }
 
     override fun getLaunchIntentForPackage(packageName: String): android.content.Intent? = pm.getLaunchIntentForPackage(packageName)
+=======
+    override fun getLaunchIntentForPackage(packageName: String): Intent? = pm.getLaunchIntentForPackage(packageName)
+
+    override fun getLaunchablePackages(): Set<String> {
+        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val launcherApps = if (Build.VERSION.SDK_INT >= 33) {
+            Api33Impl.queryIntentActivities(pm, launcherIntent, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(launcherIntent, 0)
+        }
+
+        val infoIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_INFO)
+        val infoApps = if (Build.VERSION.SDK_INT >= 33) {
+            Api33Impl.queryIntentActivities(pm, infoIntent, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(infoIntent, 0)
+        }
+
+        return (launcherApps + infoApps).mapNotNull { it.activityInfo?.packageName }.toSet()
+    }
+>>>>>>> origin/main
 
     override fun loadLabel(applicationInfo: ApplicationInfo): String = applicationInfo.loadLabel(pm).toString()
 
@@ -112,6 +142,10 @@ class AndroidPackageService(
 
         fun getPackageInfo(pm: PackageManager, packageName: String, flags: Long): PackageInfo {
             return pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags))
+        }
+
+        fun queryIntentActivities(pm: PackageManager, intent: Intent, flags: Long): List<android.content.pm.ResolveInfo> {
+            return pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(flags))
         }
     }
 

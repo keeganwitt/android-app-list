@@ -2,9 +2,11 @@ package com.github.keeganwitt.applist.services
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
 import android.os.Build
 import io.mockk.*
@@ -138,6 +140,23 @@ class PackageServiceTest {
         val result = service.getLaunchIntentForPackage("com.test.app")
 
         assertNull(result)
+    }
+
+    @Test
+    fun `when getLaunchablePackages called, then returns set of package names`() {
+        val resolveInfo1 = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.app.launcher" } }
+        val resolveInfo2 = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.app.info" } }
+
+        every { packageManager.queryIntentActivities(any<Intent>(), any<PackageManager.ResolveInfoFlags>()) } returnsMany listOf(
+            listOf(resolveInfo1),
+            listOf(resolveInfo2)
+        )
+
+        val result = service.getLaunchablePackages()
+
+        assertEquals(2, result.size)
+        assertTrue(result.contains("com.app.launcher"))
+        assertTrue(result.contains("com.app.info"))
     }
 
     @Test

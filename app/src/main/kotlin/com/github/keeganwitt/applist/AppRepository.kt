@@ -49,10 +49,23 @@ class AndroidAppRepository(
             }
             val allInstalled = packageService.getInstalledApplications(flags)
             val launchablePackages = packageService.getLaunchablePackages()
+<<<<<<< HEAD
             val filtered = filterApplications(allInstalled, launchablePackages, showSystemApps)
+=======
+>>>>>>> origin/main
 
-            // Phase 1: Emit apps with basic info only (fast)
-            val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
+            // Phase 1: Filter and map basic info in one pass (fast)
+            val filteredWithBasic = allInstalled.mapNotNull { ai ->
+                val archived = ai.isArchivedApp
+                val isUserInstalled = ai.isUserInstalled
+                val hasLaunch = launchablePackages.contains(ai.packageName)
+                if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+                    ai to mapToAppBasic(ai, archived)
+                } else {
+                    null
+                }
+            }
+            val basicApps = filteredWithBasic.map { it.second }
             val sortedBasicApps = sortApps(basicApps, field, descending)
             emit(sortedBasicApps)
 
@@ -63,27 +76,31 @@ class AndroidAppRepository(
             val detailedApps =
                 coroutineScope {
                     val appsDeferred =
+<<<<<<< HEAD
                         filtered.map { ai ->
+=======
+                        filteredWithBasic.map { (ai, basicApp) ->
+>>>>>>> origin/main
                             async {
                                 semaphore.withPermit {
                                     mapToAppDetailed(ai, lastUsedEpochs)
                                 }
                             }
                         }
-                    appsDeferred.awaitAll().filterNotNull()
+                    appsDeferred.awaitAll()
                 }
 
             val sortedDetailedApps = sortApps(detailedApps, field, descending)
             emit(sortedDetailedApps)
         }
 
-    private fun mapToAppBasic(ai: ApplicationInfo): App {
+    private fun mapToAppBasic(ai: ApplicationInfo, archived: Boolean): App {
         val packageName = ai.packageName ?: ""
         return App(
             packageName = packageName,
             name = packageService.loadLabel(ai),
             versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
-            archived = ai.isArchivedApp,
+            archived = archived,
             minSdk = ai.minSdkVersion,
             targetSdk = ai.targetSdkVersion,
             firstInstalled = 0,
@@ -101,7 +118,7 @@ class AndroidAppRepository(
     private fun mapToAppDetailed(
         ai: ApplicationInfo,
         lastUsedEpochs: Map<String, Long>,
-    ): App? =
+    ): App =
         try {
             val pkgInfo = packageService.getPackageInfo(ai)
             val storage = storageService.getStorageUsage(ai)
@@ -114,6 +131,7 @@ class AndroidAppRepository(
                     ?: 0
             val requestedCount = pkgInfo.requestedPermissions?.size ?: 0
 
+<<<<<<< HEAD
             App(
                 packageName = ai.packageName ?: "",
                 name = packageService.loadLabel(ai),
@@ -121,6 +139,10 @@ class AndroidAppRepository(
                 archived = isArchived(ai) ?: false, // Re-evaluate or reuse
                 minSdk = ai.minSdkVersion,
                 targetSdk = ai.targetSdkVersion,
+=======
+            basicApp.copy(
+                versionName = pkgInfo.versionName,
+>>>>>>> origin/main
                 firstInstalled = pkgInfo.firstInstallTime,
                 lastUpdated = pkgInfo.lastUpdateTime,
                 lastUsed = lastUsedEpochs[ai.packageName] ?: 0L,
@@ -129,10 +151,10 @@ class AndroidAppRepository(
                 existsInStore = existsInStore,
                 grantedPermissionsCount = grantedCount,
                 requestedPermissionsCount = requestedCount,
-                enabled = ai.enabled,
             )
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
+<<<<<<< HEAD
             mapToAppBasic(ai)
         }
 
@@ -152,6 +174,9 @@ class AndroidAppRepository(
             val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
 >>>>>>> origin/main
             include && (archived || hasLaunch)
+=======
+            basicApp
+>>>>>>> origin/main
         }
 
     private fun sortApps(
