@@ -34,6 +34,21 @@ class PackageServiceTest {
     }
 
     @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    fun `given installed apps on Tiramisu, when getInstalledApplications called, then returns list of apps`() {
+        val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
+        val packageInfo1 = PackageInfo().apply { applicationInfo = appInfo1 }
+        val packages = listOf(packageInfo1)
+
+        every { packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>()) } returns packages
+
+        val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
+
+        assertEquals(1, result.size)
+        assertEquals("com.test.app1", result[0].packageName)
+    }
+
+    @Test
     fun `given installed apps, when getInstalledApplications called, then returns list of apps`() {
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
         val packageInfo1 = PackageInfo().apply { applicationInfo = appInfo1 }
