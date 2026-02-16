@@ -194,4 +194,75 @@ class PackageServiceTest {
         val flags = flagsSlot.captured.toLong()
         assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
     }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    fun `getLaunchablePackages on Tiramisu uses ResolveInfoFlags`() {
+        every { packageManager.queryIntentActivities(any(), any<PackageManager.ResolveInfoFlags>()) } returns emptyList()
+        service.getLaunchablePackages()
+        verify(atLeast = 1) { packageManager.queryIntentActivities(any(), any<PackageManager.ResolveInfoFlags>()) }
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun `getPackageInfo on SDK 35 includes MATCH_ARCHIVED_PACKAGES`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo()
+        val flagsSlot = slot<PackageManager.PackageInfoFlags>()
+
+        every { packageManager.getPackageInfo(any<String>(), capture(flagsSlot)) } returns packageInfo
+
+        service.getPackageInfo(appInfo)
+
+        val flags = flagsSlot.captured.getValue()
+        assertTrue("Expected MATCH_ARCHIVED_PACKAGES flag to be present", (flags and 0x00800000L) != 0L)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.R])
+    fun `getInstallerPackageName on R uses getInstallSourceInfo`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val sourceInfo = mockk<android.content.pm.InstallSourceInfo>()
+        every { sourceInfo.installingPackageName } returns "com.android.vending"
+        every { packageManager.getInstallSourceInfo("com.test.app") } returns sourceInfo
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertEquals("com.android.vending", result)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `getInstallerPackageName on Q uses getInstallerPackageName`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getInstallerPackageName("com.test.app") } returns "com.android.vending"
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertEquals("com.android.vending", result)
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun `getApplicationIcon on SDK 35 retries with MATCH_ARCHIVED_PACKAGES on failure`() {
+        val packageName = "com.test.archived"
+        val appInfo = ApplicationInfo().apply { this.packageName = packageName }
+        val icon = mockk<Drawable>()
+
+        every { packageManager.getApplicationIcon(packageName) } throws PackageManager.NameNotFoundException()
+        every { packageManager.getApplicationInfo(packageName, any<PackageManager.ApplicationInfoFlags>()) } returns appInfo
+        every { packageManager.getApplicationIcon(appInfo) } returns icon
+
+        val result = service.getApplicationIcon(packageName)
+
+        assertNotNull(result)
+        verify { packageManager.getApplicationInfo(packageName, any<PackageManager.ApplicationInfoFlags>()) }
+    }
+
+    @Test
+    fun `getApplicationIcon returns null on general exception`() {
+        every { packageManager.getApplicationIcon(any<String>()) } throws RuntimeException("Fatal")
+        val result = service.getApplicationIcon("com.test.app")
+        assertNull(result)
+    }
 }
