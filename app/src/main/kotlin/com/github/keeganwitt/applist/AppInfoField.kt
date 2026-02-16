@@ -5,6 +5,7 @@ import java.util.Date
 
 enum class AppInfoField(
     val titleResId: Int,
+    val requiresUsageStats: Boolean = false,
 ) {
     APK_SIZE(R.string.appInfoField_apkSize) {
         override fun getValue(app: App) = app.sizes.apkBytes
@@ -16,10 +17,10 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.archived ?: false
         override fun getFormattedValue(app: App) = (app.archived ?: false).toString()
     },
-    CACHE_SIZE(R.string.appInfoField_cacheSize) {
+    CACHE_SIZE(R.string.appInfoField_cacheSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.cacheBytes
     },
-    DATA_SIZE(R.string.appInfoField_dataSize) {
+    DATA_SIZE(R.string.appInfoField_dataSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.dataBytes
     },
     ENABLED(R.string.appInfoField_enabled) {
@@ -30,7 +31,7 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.existsInStore ?: false
         override fun getFormattedValue(app: App) = (app.existsInStore ?: false).toString()
     },
-    EXTERNAL_CACHE_SIZE(R.string.appInfoField_externalCacheSize) {
+    EXTERNAL_CACHE_SIZE(R.string.appInfoField_externalCacheSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.externalCacheBytes
     },
     FIRST_INSTALLED(R.string.appInfoField_firstInstalled) {
@@ -46,7 +47,7 @@ enum class AppInfoField(
         override fun getFormattedValue(app: App) =
             app.lastUpdated?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
     },
-    LAST_USED(R.string.appInfoField_lastUsed) {
+    LAST_USED(R.string.appInfoField_lastUsed, requiresUsageStats = true) {
         override fun getValue(app: App) = app.lastUsed
         override fun getFormattedValue(app: App) =
             app.lastUsed?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
@@ -65,7 +66,7 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.targetSdk ?: 0
         override fun getFormattedValue(app: App) = app.targetSdk?.toString() ?: ""
     },
-    TOTAL_SIZE(R.string.appInfoField_totalSize) {
+    TOTAL_SIZE(R.string.appInfoField_totalSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.totalBytes
     },
     VERSION(R.string.appInfoField_version) {

@@ -10,10 +10,10 @@ class AppTest {
     @Test
     fun `given App data class, when created with all fields, then all fields are set correctly`() {
         val storage =
-            StorageUsage().apply {
-                increaseAppBytes(1000L)
-                increaseCacheBytes(500L)
-            }
+            StorageUsage(
+                appBytes = 1000L,
+                cacheBytes = 500L,
+            )
 
         val app =
             App(
@@ -91,7 +91,7 @@ class AppTest {
 
     @Test
     fun `given two App instances with same data, when compared, then they are equal`() {
-        val storage = StorageUsage().apply { increaseAppBytes(1000L) }
+        val storage = StorageUsage(appBytes = 1000L)
 
         val app1 =
             App(
