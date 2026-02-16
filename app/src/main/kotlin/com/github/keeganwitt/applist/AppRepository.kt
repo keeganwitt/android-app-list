@@ -38,6 +38,7 @@ class AndroidAppRepository(
 ) : AppRepository {
     private val cacheMutex = Mutex()
     private var cachedAllInstalled: List<ApplicationInfo>? = null
+    private var cachedLaunchablePackages: Set<String>? = null
     private var cachedDetailedApps: List<App>? = null
     private var cachedShowSystemApps: Boolean? = null
 
@@ -48,49 +49,70 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            val (allInstalled, lastUsedEpochs, cachedApps) =
-                cacheMutex.withLock {
-                    if (reload) {
-                        cachedAllInstalled = null
-                        cachedDetailedApps = null
-                        cachedShowSystemApps = null
-                    }
+            var allInstalled: List<ApplicationInfo>
+            var launchablePackages: Set<String>
+            var lastUsedEpochs: Map<String, Long>
+            var cachedApps: List<App>?
 
-                    if (!reload && cachedDetailedApps != null && cachedShowSystemApps == showSystemApps) {
-                        Triple(cachedAllInstalled!!, usageStatsService.getLastUsedEpochs(false), cachedDetailedApps)
-                    } else {
-                        var apps = cachedAllInstalled
-                        if (apps == null) {
-                            var flags =
-                                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                                    .toLong()
-                            if (Build.VERSION.SDK_INT >= 35) {
-                                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
-                            }
-                            apps = packageService.getInstalledApplications(flags)
-                            cachedAllInstalled = apps
-                        }
-                        val epochs = usageStatsService.getLastUsedEpochs(reload)
-                        Triple(apps, epochs, null)
-                    }
+            cacheMutex.withLock {
+                if (reload) {
+                    cachedAllInstalled = null
+                    cachedLaunchablePackages = null
+                    cachedDetailedApps = null
+                    cachedShowSystemApps = null
                 }
 
+                if (!reload && cachedDetailedApps != null && cachedShowSystemApps == showSystemApps) {
+                    allInstalled = cachedAllInstalled!!
+                    launchablePackages = cachedLaunchablePackages!!
+                    lastUsedEpochs = usageStatsService.getLastUsedEpochs(false)
+                    cachedApps = cachedDetailedApps
+                } else {
+                    var apps = cachedAllInstalled
+                    if (apps == null) {
+                        var flags =
+                            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                                .toLong()
+                        if (Build.VERSION.SDK_INT >= 35) {
+                            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+                        }
+                        apps = packageService.getInstalledApplications(flags)
+                        cachedAllInstalled = apps
+                    }
+                    allInstalled = apps
+
+                    var launchable = cachedLaunchablePackages
+                    if (launchable == null) {
+                        launchable = packageService.getLaunchablePackages()
+                        cachedLaunchablePackages = launchable
+                    }
+                    launchablePackages = launchable
+
+                    lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+                    cachedApps = null
+                }
+            }
+
+            // Phase 1: Filter and map basic info in one pass (fast)
+            val filteredWithBasic =
+                allInstalled.mapNotNull { ai ->
+                    val archived = ai.isArchivedApp
+                    val isUserInstalled = ai.isUserInstalled
+                    val hasLaunch = launchablePackages.contains(ai.packageName)
+                    if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+                        ai to mapToAppBasic(ai, archived)
+                    } else {
+                        null
+                    }
+                }
+            val basicApps = filteredWithBasic.map { it.second }
+            val sortedBasicApps = sortApps(basicApps, field, descending)
+            emit(sortedBasicApps)
+
             if (cachedApps != null) {
-                // If we have cached detailed apps, we can still emit basic apps first for consistent UI behavior
-                // but they are derived from the cached detailed apps.
-                val filtered = filterApplications(allInstalled, showSystemApps)
-                val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
-                emit(sortApps(basicApps, field, descending))
                 emit(sortApps(cachedApps, field, descending))
                 return@flow
             }
-
-            val filtered = filterApplications(allInstalled, showSystemApps)
-
-            // Phase 1: Emit apps with basic info only (fast)
-            val basicApps = filtered.map { ai -> mapToAppBasic(ai) }
-            val sortedBasicApps = sortApps(basicApps, field, descending)
-            emit(sortedBasicApps)
 
             // Phase 2: Fetch heavy data and emit updated list
             val semaphore = Semaphore(MAX_CONCURRENCY)
@@ -98,31 +120,34 @@ class AndroidAppRepository(
             val detailedApps =
                 coroutineScope {
                     val appsDeferred =
-                        filtered.zip(basicApps).map { (ai, basicApp) ->
+                        filteredWithBasic.map { (ai, basicApp) ->
                             async {
                                 semaphore.withPermit {
                                     mapToAppDetailed(ai, basicApp, lastUsedEpochs)
                                 }
                             }
                         }
-                    appsDeferred.awaitAll().filterNotNull()
+                    appsDeferred.awaitAll()
                 }
 
             val sortedDetailedApps = sortApps(detailedApps, field, descending)
             cacheMutex.withLock {
-                cachedDetailedApps = sortedDetailedApps
+                cachedDetailedApps = detailedApps
                 cachedShowSystemApps = showSystemApps
             }
             emit(sortedDetailedApps)
         }
 
-    private fun mapToAppBasic(ai: ApplicationInfo): App {
+    private fun mapToAppBasic(
+        ai: ApplicationInfo,
+        archived: Boolean,
+    ): App {
         val packageName = ai.packageName ?: ""
         return App(
             packageName = packageName,
             name = packageService.loadLabel(ai),
             versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
-            archived = ai.isArchivedApp,
+            archived = archived,
             minSdk = ai.minSdkVersion,
             targetSdk = ai.targetSdkVersion,
             firstInstalled = 0,
@@ -141,7 +166,7 @@ class AndroidAppRepository(
         ai: ApplicationInfo,
         basicApp: App,
         lastUsedEpochs: Map<String, Long>,
-    ): App? =
+    ): App =
         try {
             val pkgInfo = packageService.getPackageInfo(ai)
             val storage = storageService.getStorageUsage(ai)
@@ -154,13 +179,8 @@ class AndroidAppRepository(
                     ?: 0
             val requestedCount = pkgInfo.requestedPermissions?.size ?: 0
 
-            App(
-                packageName = ai.packageName ?: "",
-                name = basicApp.name,
+            basicApp.copy(
                 versionName = pkgInfo.versionName,
-                archived = basicApp.archived,
-                minSdk = ai.minSdkVersion,
-                targetSdk = ai.targetSdkVersion,
                 firstInstalled = pkgInfo.firstInstallTime,
                 lastUpdated = pkgInfo.lastUpdateTime,
                 lastUsed = lastUsedEpochs[ai.packageName] ?: 0L,
@@ -169,22 +189,10 @@ class AndroidAppRepository(
                 existsInStore = existsInStore,
                 grantedPermissionsCount = grantedCount,
                 requestedPermissionsCount = requestedCount,
-                enabled = ai.enabled,
             )
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
-            mapToAppBasic(ai)
-        }
-
-    private fun filterApplications(
-        apps: List<ApplicationInfo>,
-        showSystemApps: Boolean,
-    ): List<ApplicationInfo> =
-        apps.filter { ai ->
-            val include = showSystemApps || ai.isUserInstalled
-            val archived = ai.isArchivedApp
-            val hasLaunch = packageService.getLaunchIntentForPackage(ai.packageName) != null
-            include && (archived || hasLaunch)
+            basicApp
         }
 
     private fun sortApps(
