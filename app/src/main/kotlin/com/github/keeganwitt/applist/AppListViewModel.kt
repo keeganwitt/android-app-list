@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.DateFormat
-import java.util.Date
-
 class AppListViewModel(
     private val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
@@ -20,6 +17,8 @@ class AppListViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var allApps: List<App> = emptyList()
+    private var cachedMappedItems: List<AppItemUiModel>? = null
+    private var cachedMappedItemsField: AppInfoField? = null
 
     fun init(initialField: AppInfoField) {
         _uiState.update { it.copy(selectedField = initialField) }
@@ -68,6 +67,9 @@ class AppListViewModel(
                     ).collect { apps ->
                         withContext(dispatchers.main) {
                             allApps = apps
+                            val field = _uiState.value.selectedField
+                            cachedMappedItems = apps.map { mapToItem(it, field) }
+                            cachedMappedItemsField = field
                             _uiState.update { it.copy(isLoading = false) }
                             applyFilterAndEmit()
                         }
@@ -77,16 +79,19 @@ class AppListViewModel(
 
     private fun applyFilterAndEmit() {
         val state = _uiState.value
-        val list = allApps.map { mapToItem(it, state.selectedField) }
+        if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
+            cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
+            cachedMappedItemsField = state.selectedField
+        }
+        val list = cachedMappedItems ?: emptyList()
         val filtered =
             if (state.query.isBlank()) {
                 list
             } else {
                 list.filter { item ->
-                    val q = state.query.lowercase()
-                    item.appName.lowercase().contains(q) ||
-                        item.packageName.lowercase().contains(q) ||
-                        item.infoText.lowercase().contains(q)
+                    item.appName.contains(state.query, ignoreCase = true) ||
+                        item.packageName.contains(state.query, ignoreCase = true) ||
+                        item.infoText.contains(state.query, ignoreCase = true)
                 }
             }
         _uiState.update { it.copy(items = filtered) }
@@ -96,27 +101,7 @@ class AppListViewModel(
         app: App,
         field: AppInfoField,
     ): AppItemUiModel {
-        val info =
-            when (field) {
-                AppInfoField.APK_SIZE -> app.sizes.apkBytes.toString()
-                AppInfoField.APP_SIZE -> app.sizes.appBytes.toString()
-                AppInfoField.CACHE_SIZE -> app.sizes.cacheBytes.toString()
-                AppInfoField.DATA_SIZE -> app.sizes.dataBytes.toString()
-                AppInfoField.ENABLED -> app.enabled.toString()
-                AppInfoField.ARCHIVED -> (app.archived ?: false).toString()
-                AppInfoField.EXISTS_IN_APP_STORE -> (app.existsInStore ?: false).toString()
-                AppInfoField.EXTERNAL_CACHE_SIZE -> app.sizes.externalCacheBytes.toString()
-                AppInfoField.FIRST_INSTALLED -> app.firstInstalled?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
-                AppInfoField.LAST_UPDATED -> app.lastUpdated?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
-                AppInfoField.LAST_USED -> app.lastUsed?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
-                AppInfoField.MIN_SDK -> app.minSdk?.toString() ?: ""
-                AppInfoField.PACKAGE_MANAGER -> app.installerName ?: ""
-                AppInfoField.GRANTED_PERMISSIONS -> app.grantedPermissionsCount?.toString() ?: "0"
-                AppInfoField.REQUESTED_PERMISSIONS -> app.requestedPermissionsCount?.toString() ?: "0"
-                AppInfoField.TARGET_SDK -> app.targetSdk?.toString() ?: ""
-                AppInfoField.TOTAL_SIZE -> app.sizes.totalBytes.toString()
-                AppInfoField.VERSION -> app.versionName ?: ""
-            }
+        val info = field.getFormattedValue(app)
         return AppItemUiModel(
             packageName = app.packageName,
             appName = app.name,

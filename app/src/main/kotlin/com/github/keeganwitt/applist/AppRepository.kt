@@ -14,6 +14,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.text.Collator
 
 interface AppRepository {
@@ -55,12 +57,17 @@ class AndroidAppRepository(
 
             // Phase 2: Fetch heavy data and emit updated list
             val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+            val semaphore = Semaphore(MAX_CONCURRENCY)
 
             val detailedApps =
                 coroutineScope {
                     val appsDeferred =
-                        filtered.map { ai ->
-                            async { mapToAppDetailed(ai, lastUsedEpochs) }
+                        filtered.zip(basicApps).map { (ai, basicApp) ->
+                            async {
+                                semaphore.withPermit {
+                                    mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                                }
+                            }
                         }
                     appsDeferred.awaitAll().filterNotNull()
                 }
@@ -92,6 +99,7 @@ class AndroidAppRepository(
 
     private fun mapToAppDetailed(
         ai: ApplicationInfo,
+        basicApp: App,
         lastUsedEpochs: Map<String, Long>,
     ): App? =
         try {
@@ -108,9 +116,9 @@ class AndroidAppRepository(
 
             App(
                 packageName = ai.packageName ?: "",
-                name = packageService.loadLabel(ai),
+                name = basicApp.name,
                 versionName = pkgInfo.versionName,
-                archived = ai.isArchivedApp, // Re-evaluate or reuse
+                archived = basicApp.archived,
                 minSdk = ai.minSdkVersion,
                 targetSdk = ai.targetSdkVersion,
                 firstInstalled = pkgInfo.firstInstallTime,
@@ -157,30 +165,11 @@ class AndroidAppRepository(
     private fun sortKey(
         app: App,
         field: AppInfoField,
-    ): Comparable<*>? =
-        when (field) {
-            AppInfoField.APK_SIZE -> app.sizes.apkBytes
-            AppInfoField.APP_SIZE -> app.sizes.appBytes
-            AppInfoField.CACHE_SIZE -> app.sizes.cacheBytes
-            AppInfoField.DATA_SIZE -> app.sizes.dataBytes
-            AppInfoField.ENABLED -> app.enabled.toString()
-            AppInfoField.ARCHIVED -> app.archived ?: false
-            AppInfoField.EXISTS_IN_APP_STORE -> app.existsInStore ?: false
-            AppInfoField.EXTERNAL_CACHE_SIZE -> app.sizes.externalCacheBytes
-            AppInfoField.FIRST_INSTALLED -> app.firstInstalled
-            AppInfoField.LAST_UPDATED -> app.lastUpdated
-            AppInfoField.LAST_USED -> app.lastUsed
-            AppInfoField.MIN_SDK -> app.minSdk ?: 0
-            AppInfoField.PACKAGE_MANAGER -> app.installerName ?: ""
-            AppInfoField.GRANTED_PERMISSIONS -> app.grantedPermissionsCount ?: 0
-            AppInfoField.REQUESTED_PERMISSIONS -> app.requestedPermissionsCount ?: 0
-            AppInfoField.TARGET_SDK -> app.targetSdk ?: 0
-            AppInfoField.TOTAL_SIZE -> app.sizes.totalBytes
-            AppInfoField.VERSION -> app.versionName ?: ""
-        }
+    ): Comparable<*>? = field.getValue(app)
 
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
         const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
+        const val MAX_CONCURRENCY = 4
     }
 }

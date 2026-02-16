@@ -39,6 +39,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     testCoverage {
@@ -48,6 +49,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+        isCoreLibraryDesugaringEnabled = true
     }
 
     testOptions {
@@ -58,6 +60,8 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+
     // Android dependencies
     implementation("androidx.activity:activity-ktx:1.12.4")
     implementation("androidx.appcompat:appcompat:1.7.1")
@@ -76,6 +80,7 @@ dependencies {
 
     // Other dependencies
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("io.coil-kt:coil:2.7.0")
 
     // Unit test dependencies
     testImplementation("junit:junit:4.13.2")

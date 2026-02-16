@@ -8,15 +8,11 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 
 interface PackageService {
-    fun getInstalledApplications(flags: Int): List<ApplicationInfo>
-
     fun getInstalledApplications(flags: Long): List<ApplicationInfo>
 
     fun getLaunchIntentForPackage(packageName: String): android.content.Intent?
 
     fun loadLabel(applicationInfo: ApplicationInfo): String
-
-    fun loadIcon(applicationInfo: ApplicationInfo): Drawable
 
     @Throws(PackageManager.NameNotFoundException::class)
     fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo
@@ -31,8 +27,6 @@ class AndroidPackageService(
 ) : PackageService {
     private val pm: PackageManager = context.packageManager
 
-    override fun getInstalledApplications(flags: Int): List<ApplicationInfo> = pm.getInstalledPackages(flags).map { it.applicationInfo!! }
-
     override fun getInstalledApplications(flags: Long): List<ApplicationInfo> =
         if (Build.VERSION.SDK_INT >= 33) {
             pm.getInstalledPackages(PackageManager.PackageInfoFlags.of(flags)).map { it.applicationInfo!! }
@@ -44,16 +38,8 @@ class AndroidPackageService(
 
     override fun loadLabel(applicationInfo: ApplicationInfo): String = applicationInfo.loadLabel(pm).toString()
 
-    override fun loadIcon(applicationInfo: ApplicationInfo): Drawable = pm.getApplicationIcon(applicationInfo)
-
     override fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo {
         var flags = PackageManager.GET_PERMISSIONS.toLong()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            flags = flags or PackageManager.GET_SIGNING_CERTIFICATES.toLong()
-        } else {
-            @Suppress("DEPRECATION")
-            flags = flags or PackageManager.GET_SIGNATURES.toLong()
-        }
 
         if (Build.VERSION.SDK_INT >= 35) {
             flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
