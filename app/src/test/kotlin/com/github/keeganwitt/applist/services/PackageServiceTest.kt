@@ -34,14 +34,28 @@ class PackageServiceTest {
     }
 
     @Test
-    fun `given installed apps, when getInstalledApplications called, then returns list of apps`() {
+    fun `given installed apps, when getInstalledApplications called on API 33+, then returns list of apps`() {
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
-        val packageInfo1 = PackageInfo().apply { applicationInfo = appInfo1 }
         val appInfo2 = ApplicationInfo().apply { packageName = "com.test.app2" }
-        val packageInfo2 = PackageInfo().apply { applicationInfo = appInfo2 }
-        val packages = listOf(packageInfo1, packageInfo2)
+        val apps = listOf(appInfo1, appInfo2)
 
-        every { packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>()) } returns packages
+        every { packageManager.getInstalledApplications(any<PackageManager.ApplicationInfoFlags>()) } returns apps
+
+        val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
+
+        assertEquals(2, result.size)
+        assertEquals("com.test.app1", result[0].packageName)
+        assertEquals("com.test.app2", result[1].packageName)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `given installed apps, when getInstalledApplications called on legacy API, then returns list of apps`() {
+        val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
+        val appInfo2 = ApplicationInfo().apply { packageName = "com.test.app2" }
+        val apps = listOf(appInfo1, appInfo2)
+
+        every { packageManager.getInstalledApplications(any<Int>()) } returns apps
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
 
@@ -80,10 +94,22 @@ class PackageServiceTest {
     }
 
     @Test
-    fun `given application info, when getPackageInfo called, then returns package info`() {
+    fun `given application info, when getPackageInfo called on API 33+, then returns package info`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo().apply { versionName = "1.0.0" }
         every { packageManager.getPackageInfo(eq("com.test.app"), any<PackageManager.PackageInfoFlags>()) } returns packageInfo
+
+        val result = service.getPackageInfo(appInfo)
+
+        assertEquals("1.0.0", result.versionName)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `given application info, when getPackageInfo called on legacy API, then returns package info`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo().apply { versionName = "1.0.0" }
+        every { packageManager.getPackageInfo(eq("com.test.app"), any<Int>()) } returns packageInfo
 
         val result = service.getPackageInfo(appInfo)
 
@@ -120,7 +146,7 @@ class PackageServiceTest {
     }
 
     @Test
-    fun `getPackageInfo on O does not include signatures flag`() {
+    fun `getPackageInfo on API 33+ does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
         val flagsSlot = slot<PackageManager.PackageInfoFlags>()
@@ -134,8 +160,23 @@ class PackageServiceTest {
     }
 
     @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `getPackageInfo on O does not include signatures flag`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo()
+        val flagsSlot = slot<Int>()
+
+        every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
+
+        service.getPackageInfo(appInfo)
+
+        val flags = flagsSlot.captured.toLong()
+        assertTrue("Expected GET_SIGNATURES flag to be absent", (flags and PackageManager.GET_SIGNATURES.toLong()) == 0L)
+    }
+
+    @Test
     @Config(sdk = [34])
-    fun `getPackageInfo on P does not include signing certificates flag`() {
+    fun `getPackageInfo on modern SDK does not include signing certificates flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
         val flagsSlot = slot<PackageManager.PackageInfoFlags>()
@@ -145,6 +186,21 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.getValue()
+        assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.P])
+    fun `getPackageInfo on P does not include signing certificates flag`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo()
+        val flagsSlot = slot<Int>()
+
+        every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
+
+        service.getPackageInfo(appInfo)
+
+        val flags = flagsSlot.captured.toLong()
         assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
     }
 
