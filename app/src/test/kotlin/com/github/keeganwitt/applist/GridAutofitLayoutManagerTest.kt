@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -135,6 +137,83 @@ class GridAutofitLayoutManagerTest {
         layoutManager = GridAutofitLayoutManager(context, 450)
 
         assertEquals(RecyclerView.VERTICAL, layoutManager.orientation)
+    }
+
+    @Test
+    fun `given horizontal orientation, when layout happens, then span count is correct`() {
+        layoutManager = GridAutofitLayoutManager(context, 100)
+        layoutManager.orientation = RecyclerView.HORIZONTAL
+        recyclerView.layoutManager = layoutManager
+
+        // 400 height, 100 column width -> 4 spans
+        triggerLayout(1000, 400)
+
+        assertEquals(4, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given zero width, when layout happens, then span count is not updated`() {
+        layoutManager = GridAutofitLayoutManager(context, 100)
+        recyclerView.layoutManager = layoutManager
+        val initialSpanCount = layoutManager.spanCount
+
+        triggerLayout(0, 1000)
+
+        assertEquals(initialSpanCount, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given zero height, when layout happens, then span count is not updated`() {
+        layoutManager = GridAutofitLayoutManager(context, 100)
+        recyclerView.layoutManager = layoutManager
+        val initialSpanCount = layoutManager.spanCount
+
+        triggerLayout(1000, 0)
+
+        assertEquals(initialSpanCount, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given same column width, when setColumnWidth called, then does not update column width`() {
+        layoutManager = spyk(GridAutofitLayoutManager(context, 100))
+        layoutManager.setColumnWidth(100)
+
+        verify(exactly = 0) { layoutManager.requestLayout() }
+    }
+
+    @Test
+    fun `given non-positive column width, when setColumnWidth called, then does not update column width`() {
+        layoutManager = spyk(GridAutofitLayoutManager(context, 100))
+        layoutManager.setColumnWidth(0)
+        layoutManager.setColumnWidth(-1)
+
+        verify(exactly = 0) { layoutManager.requestLayout() }
+    }
+
+    @Test
+    fun `given layout done, when onLayoutChildren called again with same dimensions, then setSpanCount is not called again`() {
+        val spyLayoutManager = spyk(GridAutofitLayoutManager(context, 100))
+        recyclerView.layoutManager = spyLayoutManager
+
+        triggerLayout(400, 1000)
+        verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
+
+        triggerLayout(400, 1000)
+        // Should still be exactly 1 call to setSpanCount(4)
+        verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
+    }
+
+    @Test
+    fun `given layout done, when setColumnWidth called with new value and layout triggered again, then setSpanCount is called again`() {
+        val spyLayoutManager = spyk(GridAutofitLayoutManager(context, 100))
+        recyclerView.layoutManager = spyLayoutManager
+
+        triggerLayout(400, 1000)
+        verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
+
+        spyLayoutManager.setColumnWidth(200)
+        triggerLayout(400, 1000)
+        verify(exactly = 1) { spyLayoutManager.setSpanCount(2) }
     }
 
     private fun triggerLayout(width: Int, height: Int) {
