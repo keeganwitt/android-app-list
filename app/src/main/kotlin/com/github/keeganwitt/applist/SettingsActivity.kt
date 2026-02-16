@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.github.keeganwitt.applist.databinding.ActivitySettingsBinding
-import com.github.keeganwitt.applist.utils.nightMode
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
@@ -57,8 +56,23 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<androidx.preference.ListPreference>(AppSettings.KEY_THEME_MODE)
                 ?.setOnPreferenceChangeListener { _, newValue ->
                     val mode = AppSettings.ThemeMode.valueOf(newValue as String)
+                    val nightMode =
+                        when (mode) {
+                            AppSettings.ThemeMode.LIGHT -> {
+                                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                            }
+
+                            AppSettings.ThemeMode.DARK -> {
+                                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                            }
+
+                            AppSettings.ThemeMode.SYSTEM -> {
+                                androidx.appcompat.app.AppCompatDelegate
+                                    .MODE_NIGHT_FOLLOW_SYSTEM
+                            }
+                        }
                     androidx.appcompat.app.AppCompatDelegate
-                        .setDefaultNightMode(mode.nightMode)
+                        .setDefaultNightMode(nightMode)
                     true
                 }
         }

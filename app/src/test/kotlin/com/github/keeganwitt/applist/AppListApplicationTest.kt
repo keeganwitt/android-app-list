@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.keeganwitt.applist.utils.PackageIconFetcher
-import com.github.keeganwitt.applist.utils.PackageIconKeyer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -137,22 +135,5 @@ class AppListApplicationTest {
         application.onCreate()
 
         assertEquals(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, AppCompatDelegate.getDefaultNightMode())
-    }
-
-    @Test
-    fun `when newImageLoader called then it contains expected components`() {
-        val application =
-            object : AppListApplication() {
-                init {
-                    attachBaseContext(context)
-                }
-            }
-        val imageLoader = application.newImageLoader()
-
-        val fetcherFactories = imageLoader.components.fetcherFactories
-        assertTrue(fetcherFactories.any { it.first is PackageIconFetcher.Factory })
-
-        val keyers = imageLoader.components.keyers
-        assertTrue(keyers.any { it.first is PackageIconKeyer })
     }
 }

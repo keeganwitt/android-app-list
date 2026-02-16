@@ -22,22 +22,16 @@ class AndroidStorageService(
     private val storageStatsManager: StorageStatsManager? = null,
 ) : StorageService {
     override fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage {
-        var apkBytes: Long = 0
+        val storageUsage = StorageUsage()
         try {
-            apkBytes = File(applicationInfo.publicSourceDir).length()
+            storageUsage.apkBytes = File(applicationInfo.publicSourceDir).length()
         } catch (e: Exception) {
             Log.w(TAG, "Unable to get APK size for ${applicationInfo.packageName}", e)
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return StorageUsage(apkBytes = apkBytes)
+            return storageUsage
         }
-
-        var appBytes: Long = 0
-        var cacheBytes: Long = 0
-        var dataBytes: Long = 0
-        var externalCacheBytes: Long = 0
-
         val actualStorageManager = storageManager ?: (context.getSystemService(Context.STORAGE_SERVICE) as StorageManager)
         val actualStorageStatsManager =
             storageStatsManager ?: (context.getSystemService(Context.STORAGE_STATS_SERVICE) as StorageStatsManager)
@@ -57,11 +51,11 @@ class AndroidStorageService(
                             applicationInfo.packageName,
                             Process.myUserHandle(),
                         )
-                    appBytes += storageStats.appBytes
-                    cacheBytes += storageStats.cacheBytes
-                    dataBytes += storageStats.dataBytes
+                    storageUsage.increaseAppBytes(storageStats.appBytes)
+                    storageUsage.increaseCacheBytes(storageStats.cacheBytes)
+                    storageUsage.increaseDataBytes(storageStats.dataBytes)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        externalCacheBytes += storageStats.externalCacheBytes
+                        storageUsage.increaseExternalCacheBytes(storageStats.externalCacheBytes)
                     }
                 } catch (e: SecurityException) {
                     val message = "Missing storage permission"
@@ -72,13 +66,7 @@ class AndroidStorageService(
                 }
             }
         }
-        return StorageUsage(
-            apkBytes = apkBytes,
-            appBytes = appBytes,
-            cacheBytes = cacheBytes,
-            dataBytes = dataBytes,
-            externalCacheBytes = externalCacheBytes,
-        )
+        return storageUsage
     }
 
     companion object {

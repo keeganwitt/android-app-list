@@ -10,38 +10,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
 
 class UsageStatsServiceTest {
     private lateinit var context: Context
     private lateinit var usageStatsManager: UsageStatsManager
     private lateinit var service: AndroidUsageStatsService
-    private lateinit var clock: Clock
 
     @Before
     fun setup() {
         context = mockk(relaxed = true)
         usageStatsManager = mockk(relaxed = true)
-        // Fixed time: 2023-01-01 12:00:00 UTC
-        val fixedInstant = Instant.parse("2023-01-01T12:00:00Z")
-        clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = AndroidUsageStatsService(context, usageStatsManager, clock)
-    }
-
-    @Test
-    fun `given fixed clock, when getLastUsedEpochs called, then queries with correct timestamps`() {
-        every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } returns emptyMap()
-
-        service.getLastUsedEpochs(reload = false)
-
-        // 2023-01-01 12:00:00 UTC
-        val expectedEnd = Instant.parse("2023-01-01T12:00:00Z").toEpochMilli()
-        // 2021-01-01 12:00:00 UTC
-        val expectedStart = Instant.parse("2021-01-01T12:00:00Z").toEpochMilli()
-
-        verify { usageStatsManager.queryAndAggregateUsageStats(expectedStart, expectedEnd) }
+        service = AndroidUsageStatsService(context, usageStatsManager)
     }
 
     @Test

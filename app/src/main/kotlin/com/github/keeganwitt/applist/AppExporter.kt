@@ -10,9 +10,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -24,7 +21,6 @@ class AppExporter(
     private val itemsProvider: () -> List<AppItemUiModel>,
     private val formatter: ExportFormatter,
     private val crashReporter: CrashReporter? = null,
-    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
 ) {
     internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: ExportFormat? = null
@@ -110,28 +106,20 @@ class AppExporter(
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
-        activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.XML, items) {
-                formatter.toXml(it, field)
-            }
+        exportToFile(uri, ExportFormat.XML) { items ->
+            formatter.toXml(items, selectedAppInfoField!!)
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
-        val items = itemsProvider()
-        activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.HTML, items) {
-                formatter.toHtml(it)
-            }
+        exportToFile(uri, ExportFormat.HTML) { items ->
+            formatter.toHtml(items)
         }
     }
 
-    private suspend fun exportToFile(
+    private fun exportToFile(
         uri: Uri,
         format: ExportFormat,
-        items: List<AppItemUiModel>,
         contentGenerator: (List<AppItemUiModel>) -> String,
     ) {
         try {
@@ -140,30 +128,27 @@ class AppExporter(
                     ?: throw java.io.IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
+                val items = itemsProvider()
                 val content = contentGenerator(items)
                 writer.write(content)
                 writer.flush()
             }
-            withContext(dispatchers.main) {
-                Toast
-                    .makeText(
-                        activity,
-                        activity.getString(R.string.export_successful),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-            }
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_successful),
+                    Toast.LENGTH_SHORT,
+                ).show()
         } catch (e: Exception) {
             val message = "Error exporting ${format.displayName}"
             Log.e(TAG, message, e)
             crashReporter?.recordException(e, message)
-            withContext(dispatchers.main) {
-                Toast
-                    .makeText(
-                        activity,
-                        activity.getString(R.string.export_failed, e.message),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-            }
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_failed, e.message),
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
     }
 

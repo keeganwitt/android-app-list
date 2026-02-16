@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.github.keeganwitt.applist.AppAdapter.AppInfoViewHolder
-import com.github.keeganwitt.applist.databinding.SnippetListRowBinding
 import com.github.keeganwitt.applist.utils.PackageIcon
 
 class AppAdapter(
@@ -25,8 +24,8 @@ class AppAdapter(
         viewType: Int,
     ): AppInfoViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = SnippetListRowBinding.inflate(inflater, parent, false)
-        return AppInfoViewHolder(binding)
+        val view = inflater.inflate(R.layout.snippet_list_row, parent, false)
+        return AppInfoViewHolder(view)
     }
 
     override fun onBindViewHolder(
@@ -34,18 +33,21 @@ class AppAdapter(
         position: Int,
     ) {
         val item = currentList[position]
-        val binding = holder.binding
+        val iconView = holder.iconView
+        val appNameView = holder.appNameView
+        val appInfoView = holder.appInfoView
+        val packageNameView = holder.packageNameView
 
-        binding.appIcon.load(PackageIcon(item.packageName)) {
+        iconView.load(PackageIcon(item.packageName)) {
             placeholder(android.R.drawable.sym_def_app_icon)
             error(android.R.drawable.sym_def_app_icon)
             fallback(android.R.drawable.sym_def_app_icon)
         }
 
-        binding.packageName.text = item.packageName
-        binding.appName.text = item.appName
-        binding.appInfo.movementMethod = LinkMovementMethod.getInstance()
-        binding.appInfo.text = item.infoText
+        packageNameView.text = item.packageName
+        appNameView.text = item.appName
+        appInfoView.movementMethod = LinkMovementMethod.getInstance()
+        appInfoView.text = item.infoText
     }
 
     interface OnClickListener {
@@ -53,11 +55,16 @@ class AppAdapter(
     }
 
     inner class AppInfoViewHolder(
-        val binding: SnippetListRowBinding,
-    ) : RecyclerView.ViewHolder(binding.root),
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
+        var iconView: ImageView = itemView.findViewById(R.id.app_icon)
+        var appNameView: TextView = itemView.findViewById(R.id.app_name)
+        var packageNameView: TextView = itemView.findViewById(R.id.package_name)
+        var appInfoView: TextView = itemView.findViewById(R.id.app_info)
+
         init {
-            binding.root.setOnClickListener(this)
+            itemView.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {

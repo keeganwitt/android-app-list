@@ -61,10 +61,10 @@ class AndroidAppRepository(
             val detailedApps =
                 coroutineScope {
                     val appsDeferred =
-                        filtered.zip(basicApps).map { (ai, basicApp) ->
+                        filtered.map { ai ->
                             async {
                                 semaphore.withPermit {
-                                    mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                                    mapToAppDetailed(ai, lastUsedEpochs)
                                 }
                             }
                         }
@@ -98,7 +98,6 @@ class AndroidAppRepository(
 
     private fun mapToAppDetailed(
         ai: ApplicationInfo,
-        basicApp: App,
         lastUsedEpochs: Map<String, Long>,
     ): App? =
         try {
@@ -115,9 +114,9 @@ class AndroidAppRepository(
 
             App(
                 packageName = ai.packageName ?: "",
-                name = basicApp.name,
+                name = packageService.loadLabel(ai),
                 versionName = pkgInfo.versionName,
-                archived = basicApp.archived,
+                archived = isArchived(ai) ?: false, // Re-evaluate or reuse
                 minSdk = ai.minSdkVersion,
                 targetSdk = ai.targetSdkVersion,
                 firstInstalled = pkgInfo.firstInstallTime,
