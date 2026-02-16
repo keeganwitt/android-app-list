@@ -52,10 +52,12 @@ class PackageServiceTest {
     @Config(sdk = [Build.VERSION_CODES.O])
     fun `given installed apps, when getInstalledApplications called on legacy API, then returns list of apps`() {
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
+        val packageInfo1 = PackageInfo().apply { applicationInfo = appInfo1 }
         val appInfo2 = ApplicationInfo().apply { packageName = "com.test.app2" }
-        val apps = listOf(appInfo1, appInfo2)
+        val packageInfo2 = PackageInfo().apply { applicationInfo = appInfo2 }
+        val packages = listOf(packageInfo1, packageInfo2)
 
-        every { packageManager.getInstalledApplications(any<Int>()) } returns apps
+        every { packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>()) } returns packages
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
 
