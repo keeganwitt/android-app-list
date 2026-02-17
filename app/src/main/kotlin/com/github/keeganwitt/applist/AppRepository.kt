@@ -41,50 +41,56 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            var flags =
-                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                    .toLong()
-            if (Build.VERSION.SDK_INT >= 35) {
-                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
-            }
-            val allInstalled = packageService.getInstalledApplications(flags)
-            val launchablePackages = packageService.getLaunchablePackages()
+            val filteredWithBasic = getFilteredApps(showSystemApps)
 
-            // Phase 1: Filter and map basic info in one pass (fast)
-            val filteredWithBasic = allInstalled.mapNotNull { ai ->
-                val archived = ai.isArchivedApp
-                val isUserInstalled = ai.isUserInstalled
-                val hasLaunch = launchablePackages.contains(ai.packageName)
-                if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
-                    ai to mapToAppBasic(ai, archived)
-                } else {
-                    null
-                }
-            }
             val basicApps = filteredWithBasic.map { it.second }
-            val sortedBasicApps = sortApps(basicApps, field, descending)
-            emit(sortedBasicApps)
+            emit(sortApps(basicApps, field, descending))
 
-            // Phase 2: Fetch heavy data and emit updated list
-            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
-            val semaphore = Semaphore(MAX_CONCURRENCY)
-
-            val detailedApps =
-                coroutineScope {
-                    val appsDeferred =
-                        filteredWithBasic.map { (ai, basicApp) ->
-                            async {
-                                semaphore.withPermit {
-                                    mapToAppDetailed(ai, basicApp, lastUsedEpochs)
-                                }
-                            }
-                        }
-                    appsDeferred.awaitAll()
-                }
-
-            val sortedDetailedApps = sortApps(detailedApps, field, descending)
-            emit(sortedDetailedApps)
+            val detailedApps = loadDetailedApps(filteredWithBasic, reload)
+            emit(sortApps(detailedApps, field, descending))
         }
+
+    private fun getFilteredApps(showSystemApps: Boolean): List<Pair<ApplicationInfo, App>> {
+        var flags =
+            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                .toLong()
+        if (Build.VERSION.SDK_INT >= 35) {
+            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+        }
+        val allInstalled = packageService.getInstalledApplications(flags)
+        val launchablePackages = packageService.getLaunchablePackages()
+
+        return allInstalled.mapNotNull { ai ->
+            val archived = ai.isArchivedApp
+            val isUserInstalled = ai.isUserInstalled
+            val hasLaunch = launchablePackages.contains(ai.packageName)
+            if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+                ai to mapToAppBasic(ai, archived)
+            } else {
+                null
+            }
+        }
+    }
+
+    private suspend fun loadDetailedApps(
+        filteredWithBasic: List<Pair<ApplicationInfo, App>>,
+        reload: Boolean,
+    ): List<App> {
+        val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+        val semaphore = Semaphore(MAX_CONCURRENCY)
+
+        return coroutineScope {
+            val appsDeferred =
+                filteredWithBasic.map { (ai, basicApp) ->
+                    async {
+                        semaphore.withPermit {
+                            mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                        }
+                    }
+                }
+            appsDeferred.awaitAll()
+        }
+    }
 
     private fun mapToAppBasic(ai: ApplicationInfo, archived: Boolean): App {
         val packageName = ai.packageName ?: ""
