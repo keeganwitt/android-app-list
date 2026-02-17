@@ -546,6 +546,30 @@ class AppRepositoryTest {
             assertEquals("com.test.error", result[0].packageName)
         }
 
+    @Test
+    fun `given default constructor, when loadApps called, then it works`() =
+        runTest {
+            val repoDefault = AndroidAppRepository(
+                packageService,
+                usageStatsService,
+                storageService,
+                appStoreService
+            )
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "App"
+
+            val result = repoDefault.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = true,
+                descending = false,
+                reload = false,
+            ).toList().last()
+
+            assertEquals(1, result.size)
+        }
+
     private fun createApplicationInfo(
         packageName: String,
         isSystemApp: Boolean = false,
