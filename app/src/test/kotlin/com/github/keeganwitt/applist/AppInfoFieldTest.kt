@@ -267,6 +267,8 @@ class AppInfoFieldTest {
 
         val dateFormat = DateFormat.getDateTimeInstance()
         assertEquals(dateFormat.format(Date(1000L)), AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
+        assertEquals(dateFormat.format(Date(2000L)), AppInfoField.LAST_UPDATED.getFormattedValue(app))
+        assertEquals(dateFormat.format(Date(3000L)), AppInfoField.LAST_USED.getFormattedValue(app))
     }
 
     @Test
