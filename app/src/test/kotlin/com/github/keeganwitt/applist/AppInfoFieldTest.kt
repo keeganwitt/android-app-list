@@ -234,6 +234,10 @@ class AppInfoFieldTest {
         val storage =
             StorageUsage(
                 apkBytes = 100,
+                appBytes = 200,
+                cacheBytes = 300,
+                dataBytes = 400,
+                externalCacheBytes = 500,
             )
         val app =
             App(
@@ -255,6 +259,12 @@ class AppInfoFieldTest {
             )
 
         assertEquals("100", AppInfoField.APK_SIZE.getFormattedValue(app))
+        assertEquals("200", AppInfoField.APP_SIZE.getFormattedValue(app))
+        assertEquals("300", AppInfoField.CACHE_SIZE.getFormattedValue(app))
+        assertEquals("400", AppInfoField.DATA_SIZE.getFormattedValue(app))
+        assertEquals("500", AppInfoField.EXTERNAL_CACHE_SIZE.getFormattedValue(app))
+        assertEquals(storage.totalBytes.toString(), AppInfoField.TOTAL_SIZE.getFormattedValue(app))
+
         assertEquals("true", AppInfoField.ARCHIVED.getFormattedValue(app))
         assertEquals("true", AppInfoField.ENABLED.getFormattedValue(app))
         assertEquals("true", AppInfoField.EXISTS_IN_APP_STORE.getFormattedValue(app))
@@ -291,6 +301,13 @@ class AppInfoFieldTest {
                 requestedPermissionsCount = null,
                 enabled = false,
             )
+
+        assertEquals("0", AppInfoField.APK_SIZE.getFormattedValue(app))
+        assertEquals("0", AppInfoField.APP_SIZE.getFormattedValue(app))
+        assertEquals("0", AppInfoField.CACHE_SIZE.getFormattedValue(app))
+        assertEquals("0", AppInfoField.DATA_SIZE.getFormattedValue(app))
+        assertEquals("0", AppInfoField.EXTERNAL_CACHE_SIZE.getFormattedValue(app))
+        assertEquals("0", AppInfoField.TOTAL_SIZE.getFormattedValue(app))
 
         assertEquals("false", AppInfoField.ARCHIVED.getFormattedValue(app)) // false.toString()
         assertEquals("false", AppInfoField.EXISTS_IN_APP_STORE.getFormattedValue(app)) // false.toString()
