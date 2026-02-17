@@ -306,6 +306,28 @@ class AppListViewModelTest {
             coVerify { summaryCalculator.calculate(listOf(app1), AppInfoField.ENABLED) }
         }
 
+    @Test
+    fun `given apps loaded, when query matches info text, then app is included in filtered results`() =
+        runTest {
+            val mockApps =
+                listOf(
+                    createTestApp("com.test.app1", "App One", versionName = "1.2.3"),
+                    createTestApp("com.test.app2", "App Two", versionName = "2.0.0"),
+                )
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            viewModel.setQuery("1.2.3")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.items.size)
+            assertEquals("com.test.app1", state.items[0].packageName)
+            assertEquals("1.2.3", state.items[0].infoText)
+        }
+
     private fun createTestApp(
         packageName: String,
         name: String,
