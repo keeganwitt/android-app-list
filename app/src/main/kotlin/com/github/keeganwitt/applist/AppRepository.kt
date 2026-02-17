@@ -14,7 +14,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import java.text.Collator
 
@@ -34,6 +36,12 @@ class AndroidAppRepository(
     private val appStoreService: AppStoreService,
     private val crashReporter: CrashReporter? = null,
 ) : AppRepository {
+    private val cacheMutex = Mutex()
+    private var cachedRawApps: List<ApplicationInfo>? = null
+    private var cachedLaunchablePackages: Set<String>? = null
+    private var cachedShowSystemApps: Boolean? = null
+    private var cachedApps: List<App>? = null
+
     override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
@@ -41,48 +49,69 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            var flags =
-                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                    .toLong()
-            if (Build.VERSION.SDK_INT >= 35) {
-                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
-            }
-            val allInstalled = packageService.getInstalledApplications(flags)
-            val launchablePackages = packageService.getLaunchablePackages()
+            val (allInstalled, launchablePackages, cachedFullApps) =
+                cacheMutex.withLock {
+                    if (!reload && cachedShowSystemApps == showSystemApps && cachedRawApps != null && cachedLaunchablePackages != null) {
+                        Triple(cachedRawApps!!, cachedLaunchablePackages!!, cachedApps)
+                    } else {
+                        var flags =
+                            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                                .toLong()
+                        if (Build.VERSION.SDK_INT >= 35) {
+                            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+                        }
+                        val installed = packageService.getInstalledApplications(flags)
+                        val launchable = packageService.getLaunchablePackages()
+                        cachedRawApps = installed
+                        cachedLaunchablePackages = launchable
+                        cachedShowSystemApps = showSystemApps
+                        cachedApps = null
+                        Triple(installed, launchable, null)
+                    }
+                }
 
             // Phase 1: Filter and map basic info in one pass (fast)
-            val filteredWithBasic = allInstalled.mapNotNull { ai ->
-                val archived = ai.isArchivedApp
-                val isUserInstalled = ai.isUserInstalled
-                val hasLaunch = launchablePackages.contains(ai.packageName)
-                if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
-                    ai to mapToAppBasic(ai, archived)
-                } else {
-                    null
+            val filteredWithBasic =
+                allInstalled.mapNotNull { ai ->
+                    val archived = ai.isArchivedApp
+                    val isUserInstalled = ai.isUserInstalled
+                    val hasLaunch = launchablePackages.contains(ai.packageName)
+                    if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+                        ai to mapToAppBasic(ai, archived)
+                    } else {
+                        null
+                    }
                 }
-            }
             val basicApps = filteredWithBasic.map { it.second }
             val sortedBasicApps = sortApps(basicApps, field, descending)
             emit(sortedBasicApps)
 
             // Phase 2: Fetch heavy data and emit updated list
-            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
-            val semaphore = Semaphore(MAX_CONCURRENCY)
+            val sortedDetailedApps =
+                if (cachedFullApps != null) {
+                    sortApps(cachedFullApps, field, descending)
+                } else {
+                    val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+                    val semaphore = Semaphore(MAX_CONCURRENCY)
 
-            val detailedApps =
-                coroutineScope {
-                    val appsDeferred =
-                        filteredWithBasic.map { (ai, basicApp) ->
-                            async {
-                                semaphore.withPermit {
-                                    mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                    val detailedApps =
+                        coroutineScope {
+                            val appsDeferred =
+                                filteredWithBasic.map { (ai, basicApp) ->
+                                    async {
+                                        semaphore.withPermit {
+                                            mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                                        }
+                                    }
                                 }
-                            }
+                            appsDeferred.awaitAll()
                         }
-                    appsDeferred.awaitAll()
+                    cacheMutex.withLock {
+                        cachedApps = detailedApps
+                    }
+                    sortApps(detailedApps, field, descending)
                 }
 
-            val sortedDetailedApps = sortApps(detailedApps, field, descending)
             emit(sortedDetailedApps)
         }
 
