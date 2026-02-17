@@ -1,7 +1,6 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
-import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertFalse
@@ -19,7 +18,8 @@ class SharedPreferencesAppSettingsTest {
     @Before
     fun `set up`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context
+            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
             .edit()
             .clear()
             .commit()
@@ -73,7 +73,8 @@ class SharedPreferencesAppSettingsTest {
     @Test
     fun `getLastDisplayedAppInfoField returns VERSION when value is invalid`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context
+            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
             .edit()
             .putString(AppSettings.KEY_LAST_DISPLAYED_APP_INFO_FIELD, "INVALID_VALUE")
             .commit()
@@ -85,7 +86,8 @@ class SharedPreferencesAppSettingsTest {
     @Test
     fun `getLastDisplayedAppInfoField returns VERSION when value is empty`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context
+            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
             .edit()
             .putString(AppSettings.KEY_LAST_DISPLAYED_APP_INFO_FIELD, "")
             .commit()
@@ -97,7 +99,8 @@ class SharedPreferencesAppSettingsTest {
     @Test
     fun `getThemeMode returns SYSTEM when value is invalid`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context
+            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
             .edit()
             .putString(AppSettings.KEY_THEME_MODE, "INVALID_VALUE")
             .commit()
@@ -109,7 +112,8 @@ class SharedPreferencesAppSettingsTest {
     @Test
     fun `getThemeMode returns SYSTEM when value is empty`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context
+            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
             .edit()
             .putString(AppSettings.KEY_THEME_MODE, "")
             .commit()
