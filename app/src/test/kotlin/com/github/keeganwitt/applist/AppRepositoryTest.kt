@@ -473,6 +473,68 @@ class AppRepositoryTest {
             assertTrue("Max concurrency should be limited to 4, but was $maxObserved", maxObserved <= 4)
         }
 
+    @Test
+    fun `given apps are already cached, when loadApps called with reload false, then cached apps are returned without calling packageService again`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "Test App"
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+
+            // First call to populate cache
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any<Long>()) }
+
+            // Second call
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertEquals("com.test.app", result[0].packageName)
+            // Should still be 1 because it should have used the cache
+            verify(exactly = 1) { packageService.getInstalledApplications(any<Long>()) }
+        }
+
+    @Test
+    fun `given apps are already cached, when loadApps called with reload true, then packageService is called and cache is updated`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "Test App"
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+
+            // First call
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any<Long>()) }
+
+            // Second call with reload = true
+            repository.loadApps(AppInfoField.VERSION, false, false, true).toList()
+
+            // Should be 2 because reload = true bypasses cache
+            verify(exactly = 2) { packageService.getInstalledApplications(any<Long>()) }
+        }
+
+    @Test
+    fun `given apps are already cached, when loadApps called with different showSystemApps, then packageService is called and cache is updated`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "Test App"
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+
+            // First call with showSystemApps = false
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any<Long>()) }
+
+            // Second call with showSystemApps = true
+            repository.loadApps(AppInfoField.VERSION, true, false, false).toList()
+
+            // Should be 2 because showSystemApps changed
+            verify(exactly = 2) { packageService.getInstalledApplications(any<Long>()) }
+        }
+
     private fun createApplicationInfo(
         packageName: String,
         isSystemApp: Boolean = false,
