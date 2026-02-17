@@ -51,8 +51,6 @@ enum class AppInfoField(
     },
     MIN_SDK(R.string.appInfoField_minSdk) {
         override fun getValue(app: App) = app.minSdk ?: 0
-
-        override fun getFormattedValue(app: App) = app.minSdk?.toString() ?: ""
     },
     PACKAGE_MANAGER(R.string.appInfoField_packageManager) {
         override fun getValue(app: App) = app.installerName ?: ""
@@ -62,8 +60,6 @@ enum class AppInfoField(
     },
     TARGET_SDK(R.string.appInfoField_targetSdk) {
         override fun getValue(app: App) = app.targetSdk ?: 0
-
-        override fun getFormattedValue(app: App) = app.targetSdk?.toString() ?: ""
     },
     TOTAL_SIZE(R.string.appInfoField_totalSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.totalBytes

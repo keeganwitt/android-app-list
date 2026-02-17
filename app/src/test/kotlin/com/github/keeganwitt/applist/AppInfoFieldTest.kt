@@ -312,8 +312,8 @@ class AppInfoFieldTest {
         assertEquals("false", AppInfoField.ARCHIVED.getFormattedValue(app)) // false.toString()
         assertEquals("false", AppInfoField.EXISTS_IN_APP_STORE.getFormattedValue(app)) // false.toString()
 
-        assertEquals("", AppInfoField.MIN_SDK.getFormattedValue(app))
-        assertEquals("", AppInfoField.TARGET_SDK.getFormattedValue(app))
+        assertEquals("0", AppInfoField.MIN_SDK.getFormattedValue(app))
+        assertEquals("0", AppInfoField.TARGET_SDK.getFormattedValue(app))
         assertEquals("", AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
         assertEquals("", AppInfoField.LAST_UPDATED.getFormattedValue(app))
         assertEquals("", AppInfoField.LAST_USED.getFormattedValue(app))
