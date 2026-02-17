@@ -3,7 +3,6 @@ package com.github.keeganwitt.applist
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 
 interface AppSettings {
     fun isCrashReportingEnabled(): Boolean
@@ -28,6 +27,7 @@ interface AppSettings {
         const val KEY_CRASH_REPORTING_ENABLED = "crash_reporting_enabled"
         const val KEY_LAST_DISPLAYED_APP_INFO_FIELD = "last_displayed_app_info_field"
         const val KEY_THEME_MODE = "theme_mode"
+        const val DEFAULT_PREF_NAME_SUFFIX = "_preferences"
     }
 }
 
@@ -35,7 +35,10 @@ class SharedPreferencesAppSettings(
     context: Context,
 ) : AppSettings {
     private val preferences: SharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context.getSharedPreferences(
+            context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX,
+            Context.MODE_PRIVATE,
+        )
 
     override fun isCrashReportingEnabled(): Boolean = preferences.getBoolean(AppSettings.KEY_CRASH_REPORTING_ENABLED, true)
 
