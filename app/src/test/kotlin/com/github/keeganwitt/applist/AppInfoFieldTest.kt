@@ -144,13 +144,13 @@ class AppInfoFieldTest {
     @Test
     fun `given App with data, when getValue called, then correct value returned`() {
         val storage =
-            StorageUsage().apply {
-                apkBytes = 100
-                appBytes = 200
-                cacheBytes = 300
-                dataBytes = 400
-                externalCacheBytes = 500
-            }
+            StorageUsage(
+                apkBytes = 100,
+                appBytes = 200,
+                cacheBytes = 300,
+                dataBytes = 400,
+                externalCacheBytes = 500,
+            )
         val app =
             App(
                 packageName = "com.test",
@@ -232,9 +232,9 @@ class AppInfoFieldTest {
     @Test
     fun `given App with data, when getFormattedValue called, then correct string returned`() {
         val storage =
-            StorageUsage().apply {
-                apkBytes = 100
-            }
+            StorageUsage(
+                apkBytes = 100,
+            )
         val app =
             App(
                 packageName = "com.test",
@@ -303,5 +303,31 @@ class AppInfoFieldTest {
 
         assertEquals("0", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
         assertEquals("0", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
+    }
+
+    @Test
+    fun `given field requiring usage stats, when accessed, then requiresUsageStats is true`() {
+        assertEquals(true, AppInfoField.CACHE_SIZE.requiresUsageStats)
+        assertEquals(true, AppInfoField.DATA_SIZE.requiresUsageStats)
+        assertEquals(true, AppInfoField.EXTERNAL_CACHE_SIZE.requiresUsageStats)
+        assertEquals(true, AppInfoField.TOTAL_SIZE.requiresUsageStats)
+        assertEquals(true, AppInfoField.LAST_USED.requiresUsageStats)
+    }
+
+    @Test
+    fun `given field not requiring usage stats, when accessed, then requiresUsageStats is false`() {
+        assertEquals(false, AppInfoField.APK_SIZE.requiresUsageStats)
+        assertEquals(false, AppInfoField.APP_SIZE.requiresUsageStats)
+        assertEquals(false, AppInfoField.ARCHIVED.requiresUsageStats)
+        assertEquals(false, AppInfoField.ENABLED.requiresUsageStats)
+        assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.requiresUsageStats)
+        assertEquals(false, AppInfoField.FIRST_INSTALLED.requiresUsageStats)
+        assertEquals(false, AppInfoField.GRANTED_PERMISSIONS.requiresUsageStats)
+        assertEquals(false, AppInfoField.LAST_UPDATED.requiresUsageStats)
+        assertEquals(false, AppInfoField.MIN_SDK.requiresUsageStats)
+        assertEquals(false, AppInfoField.PACKAGE_MANAGER.requiresUsageStats)
+        assertEquals(false, AppInfoField.REQUESTED_PERMISSIONS.requiresUsageStats)
+        assertEquals(false, AppInfoField.TARGET_SDK.requiresUsageStats)
+        assertEquals(false, AppInfoField.VERSION.requiresUsageStats)
     }
 }

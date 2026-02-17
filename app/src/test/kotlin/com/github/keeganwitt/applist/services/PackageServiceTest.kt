@@ -21,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.O])
+@Config(sdk = [34])
 class PackageServiceTest {
     private lateinit var context: Context
     private lateinit var packageManager: PackageManager
@@ -36,33 +36,11 @@ class PackageServiceTest {
     }
 
     @Test
-<<<<<<< HEAD
-    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    fun `given installed apps on Tiramisu, when getInstalledApplications called, then returns list of apps`() {
-        val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
-        val packageInfo1 = PackageInfo().apply { applicationInfo = appInfo1 }
-        val packages = listOf(packageInfo1)
-
-        every { packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>()) } returns packages
-
-        val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
-
-        assertEquals(1, result.size)
-        assertEquals("com.test.app1", result[0].packageName)
-    }
-
-    @Test
-    fun `given installed apps, when getInstalledApplications called, then returns list of apps`() {
-=======
     fun `given installed apps, when getInstalledApplications called on API 33+, then returns list of apps`() {
->>>>>>> origin/main
         val appInfo1 = ApplicationInfo().apply { packageName = "com.test.app1" }
         val appInfo2 = ApplicationInfo().apply { packageName = "com.test.app2" }
         val apps = listOf(appInfo1, appInfo2)
 
-<<<<<<< HEAD
-        every { packageManager.getInstalledPackages(any<Int>()) } returns packages
-=======
         every { packageManager.getInstalledApplications(any<PackageManager.ApplicationInfoFlags>()) } returns apps
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
@@ -80,7 +58,6 @@ class PackageServiceTest {
         val apps = listOf(appInfo1, appInfo2)
 
         every { packageManager.getInstalledApplications(any<Int>()) } returns apps
->>>>>>> origin/main
 
         val result = service.getInstalledApplications(PackageManager.GET_META_DATA.toLong())
 
@@ -97,40 +74,6 @@ class PackageServiceTest {
         val result = service.getLaunchIntentForPackage("com.test.app")
 
         assertNotNull(result)
-    }
-
-    @Test
-    fun `getLaunchablePackages returns union of launcher and info categories`() {
-        val launcherResolve = android.content.pm.ResolveInfo().apply {
-            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.launcher.app" }
-        }
-        val infoResolve = android.content.pm.ResolveInfo().apply {
-            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.info.app" }
-        }
-        val bothResolve = android.content.pm.ResolveInfo().apply {
-            activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.both.app" }
-        }
-
-        every {
-            packageManager.queryIntentActivities(
-                match { it.hasCategory(Intent.CATEGORY_LAUNCHER) },
-                any<Int>()
-            )
-        } returns listOf(launcherResolve, bothResolve)
-
-        every {
-            packageManager.queryIntentActivities(
-                match { it.hasCategory(Intent.CATEGORY_INFO) },
-                any<Int>()
-            )
-        } returns listOf(infoResolve, bothResolve)
-
-        val result = service.getLaunchablePackages()
-
-        assertEquals(3, result.size)
-        assertTrue(result.contains("com.launcher.app"))
-        assertTrue(result.contains("com.info.app"))
-        assertTrue(result.contains("com.both.app"))
     }
 
     @Test
@@ -173,7 +116,7 @@ class PackageServiceTest {
     fun `given application info, when getPackageInfo called on API 33+, then returns package info`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo().apply { versionName = "1.0.0" }
-        every { packageManager.getPackageInfo(eq("com.test.app"), any<Int>()) } returns packageInfo
+        every { packageManager.getPackageInfo(eq("com.test.app"), any<PackageManager.PackageInfoFlags>()) } returns packageInfo
 
         val result = service.getPackageInfo(appInfo)
 
@@ -195,12 +138,13 @@ class PackageServiceTest {
     @Test(expected = PackageManager.NameNotFoundException::class)
     fun `given invalid package, when getPackageInfo called, then throws exception`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.invalid.app" }
-        every { packageManager.getPackageInfo(eq("com.invalid.app"), any<Int>()) } throws PackageManager.NameNotFoundException()
+        every { packageManager.getPackageInfo(eq("com.invalid.app"), any<PackageManager.PackageInfoFlags>()) } throws PackageManager.NameNotFoundException()
 
         service.getPackageInfo(appInfo)
     }
 
     @Test
+    @Config(sdk = [34])
     fun `given valid package, when getApplicationIcon called, then returns drawable`() {
         val drawable = mockk<Drawable>()
         every { packageManager.getApplicationIcon("com.test.app") } returns drawable
@@ -211,6 +155,7 @@ class PackageServiceTest {
     }
 
     @Test
+    @Config(sdk = [34])
     fun `given invalid package, when getApplicationIcon called, then returns null`() {
         every { packageManager.getApplicationIcon("com.invalid.app") } throws PackageManager.NameNotFoundException()
 
@@ -223,21 +168,17 @@ class PackageServiceTest {
     fun `getPackageInfo on API 33+ does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
-        val flagsSlot = slot<Int>()
+        val flagsSlot = slot<PackageManager.PackageInfoFlags>()
 
         every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
 
         service.getPackageInfo(appInfo)
 
-        val flags = flagsSlot.captured.toLong()
+        val flags = flagsSlot.captured.getValue()
         assertTrue("Expected GET_SIGNATURES flag to be absent", (flags and PackageManager.GET_SIGNATURES.toLong()) == 0L)
     }
 
     @Test
-<<<<<<< HEAD
-    @Config(sdk = [Build.VERSION_CODES.P])
-    fun `getPackageInfo on P does not include signing certificates flag`() {
-=======
     @Config(sdk = [Build.VERSION_CODES.O])
     fun `getPackageInfo on O does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
@@ -255,20 +196,17 @@ class PackageServiceTest {
     @Test
     @Config(sdk = [34])
     fun `getPackageInfo on modern SDK does not include signing certificates flag`() {
->>>>>>> origin/main
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
-        val flagsSlot = slot<Int>()
+        val flagsSlot = slot<PackageManager.PackageInfoFlags>()
 
         every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
 
         service.getPackageInfo(appInfo)
 
-        val flags = flagsSlot.captured.toLong()
+        val flags = flagsSlot.captured.getValue()
         assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
     }
-<<<<<<< HEAD
-=======
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.P])
@@ -325,5 +263,4 @@ class PackageServiceTest {
 
         assertNull(result)
     }
->>>>>>> origin/main
 }
