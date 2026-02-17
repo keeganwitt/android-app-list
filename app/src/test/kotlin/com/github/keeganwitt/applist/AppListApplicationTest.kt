@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.keeganwitt.applist.utils.PackageIconFetcher
@@ -21,8 +22,7 @@ class AppListApplicationTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        context
-            .getSharedPreferences(context.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX, Context.MODE_PRIVATE)
+        PreferenceManager.getDefaultSharedPreferences(context)
             .edit()
             .clear()
             .commit()

@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.app.Application
+import androidx.preference.PreferenceManager
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.github.keeganwitt.applist.services.AndroidPackageService
@@ -13,6 +14,7 @@ open class AppListApplication :
     ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
+        PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false)
         val appSettings = SharedPreferencesAppSettings(this)
         val crashReportingEnabled = appSettings.isCrashReportingEnabled()
         setCrashlyticsCollectionEnabled(crashReportingEnabled)
