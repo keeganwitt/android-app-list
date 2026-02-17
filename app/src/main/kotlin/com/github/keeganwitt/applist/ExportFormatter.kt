@@ -58,6 +58,36 @@ class ExportFormatter {
         return sb.toString()
     }
 
+    fun toCsv(
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ): String {
+        val sb = StringBuilder()
+        sb.append("App Name,Package Name,Info Type,Info Value\n")
+        items.forEach { item ->
+            sb.append("\"").append(item.appName.replace("\"", "\"\"")).append("\",")
+            sb.append("\"").append(item.packageName.replace("\"", "\"\"")).append("\",")
+            sb.append("\"").append(selectedField.name.replace("\"", "\"\"")).append("\",")
+            sb.append("\"").append(item.infoText.replace("\"", "\"\"")).append("\"\n")
+        }
+        return sb.toString()
+    }
+
+    fun toTsv(
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ): String {
+        val sb = StringBuilder()
+        sb.append("App Name\tPackage Name\tInfo Type\tInfo Value\n")
+        items.forEach { item ->
+            sb.append(item.appName).append("\t")
+            sb.append(item.packageName).append("\t")
+            sb.append(selectedField.name).append("\t")
+            sb.append(item.infoText).append("\n")
+        }
+        return sb.toString()
+    }
+
     // This is not using Html.escapeHtml for unit tests (since it's not implemented by Robolectric)
     private fun escapeMarkup(s: String): String =
         s

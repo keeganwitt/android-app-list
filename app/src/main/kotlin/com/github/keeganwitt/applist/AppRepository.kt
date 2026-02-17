@@ -110,7 +110,7 @@ class AndroidAppRepository(
             emit(sortedBasicApps)
 
             if (cachedApps != null) {
-                emit(sortApps(cachedApps!!, field, descending))
+                emit(sortApps(cachedApps, field, descending))
                 return@flow
             }
 

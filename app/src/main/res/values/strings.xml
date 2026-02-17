@@ -33,6 +33,8 @@
   <string name="export_as">Export as</string>
   <string name="export_xml" translatable="false">XML</string>
   <string name="export_html" translatable="false">HTML</string>
+  <string name="export_csv" translatable="false">CSV</string>
+  <string name="export_tsv" translatable="false">TSV</string>
   <string name="export_no_apps">No apps to export</string>
   <string name="export_successful">Export successful</string>
   <string name="export_failed">Export failed: %1$s</string>
