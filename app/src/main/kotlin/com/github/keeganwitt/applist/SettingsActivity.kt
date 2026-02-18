@@ -3,6 +3,7 @@ package com.github.keeganwitt.applist
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.github.keeganwitt.applist.databinding.ActivitySettingsBinding
@@ -54,7 +55,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
 
-            findPreference<androidx.preference.ListPreference>(AppSettings.KEY_THEME_MODE)
+            findPreference<ListPreference>(AppSettings.KEY_THEME_MODE)
                 ?.setOnPreferenceChangeListener { _, newValue ->
                     val mode = AppSettings.ThemeMode.valueOf(newValue as String)
                     androidx.appcompat.app.AppCompatDelegate
