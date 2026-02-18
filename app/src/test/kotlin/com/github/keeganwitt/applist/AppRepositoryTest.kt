@@ -20,9 +20,13 @@ import org.junit.Assert.assertTrue
 import android.os.Bundle
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
+@RunWith(RobolectricTestRunner::class)
 class AppRepositoryTest {
     private lateinit var packageService: PackageService
     private lateinit var usageStatsService: UsageStatsService
@@ -516,7 +520,7 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given apps are already cached, when loadApps called with different showSystemApps, then packageService is called and cache is updated`() =
+    fun `given apps are already cached, when loadApps called with different showSystemApps, then raw apps are still cached`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
@@ -531,8 +535,101 @@ class AppRepositoryTest {
             // Second call with showSystemApps = true
             repository.loadApps(AppInfoField.VERSION, true, false, false).toList()
 
-            // Should be 2 because showSystemApps changed
-            verify(exactly = 2) { packageService.getInstalledApplications(any<Long>()) }
+            // Raw applications should still be cached even if showSystemApps changed
+            verify(exactly = 1) { packageService.getInstalledApplications(any<Long>()) }
+        }
+
+    @Test
+    @Config(sdk = [35])
+    fun `given API 35, when loadApps called, then MATCH_ARCHIVED_PACKAGES flag is used`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "App"
+
+            repository.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = true,
+                descending = false,
+                reload = false,
+            ).toList()
+
+            // PackageManager.MATCH_ARCHIVED_PACKAGES is 0x100000000L = 4294967296L
+            verify { packageService.getInstalledApplications(match { it and 4294967296L != 0L }) }
+        }
+
+    @Test
+    fun `given app with null package name, when loadApps called, then it handles it safely`() =
+        runTest {
+            val appInfo = ApplicationInfo().apply {
+                this.packageName = null
+                this.flags = 0
+                this.enabled = true
+                this.metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+            }
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.loadLabel(any()) } returns "Test App"
+
+            val result = repository.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = true,
+                descending = false,
+                reload = false,
+            ).toList().last()
+
+            assertEquals(1, result.size)
+            assertEquals("", result[0].packageName)
+        }
+
+    @Test
+    fun `given no crash reporter, when loadApps fails, then it does not crash`() =
+        runTest {
+            val repoNoCrashReporter = AndroidAppRepository(
+                packageService,
+                usageStatsService,
+                storageService,
+                appStoreService,
+                null
+            )
+            val appInfo = createApplicationInfo("com.test.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.error")
+            every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Error")
+
+            val result = repoNoCrashReporter.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = false,
+                descending = false,
+                reload = false,
+            ).toList().last()
+
+            assertEquals(1, result.size)
+            assertEquals("com.test.error", result[0].packageName)
+        }
+
+    @Test
+    fun `given default constructor, when loadApps called, then it works`() =
+        runTest {
+            val repoDefault = AndroidAppRepository(
+                packageService,
+                usageStatsService,
+                storageService,
+                appStoreService
+            )
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "App"
+
+            val result = repoDefault.loadApps(
+                field = AppInfoField.VERSION,
+                showSystemApps = true,
+                descending = false,
+                reload = false,
+            ).toList().last()
+
+            assertEquals(1, result.size)
         }
 
     private fun createApplicationInfo(
