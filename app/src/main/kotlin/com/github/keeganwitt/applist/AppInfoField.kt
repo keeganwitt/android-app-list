@@ -73,7 +73,5 @@ enum class AppInfoField(
 
     open fun getFormattedValue(app: App): String = getValue(app)?.toString() ?: ""
 
-    protected fun formatDate(timestamp: Long?): String {
-        return timestamp?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
-    }
+    protected fun formatDate(timestamp: Long?): String = timestamp?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
 }

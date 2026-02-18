@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StorageUsageTest {
-
     @Test
     fun `given new instance, when created with defaults, then all values are zero`() {
         val storageUsage = StorageUsage()
@@ -19,13 +18,14 @@ class StorageUsageTest {
 
     @Test
     fun `given values, when created, then properties match values`() {
-        val storageUsage = StorageUsage(
-            apkBytes = 100L,
-            appBytes = 200L,
-            cacheBytes = 300L,
-            dataBytes = 400L,
-            externalCacheBytes = 500L
-        )
+        val storageUsage =
+            StorageUsage(
+                apkBytes = 100L,
+                appBytes = 200L,
+                cacheBytes = 300L,
+                dataBytes = 400L,
+                externalCacheBytes = 500L,
+            )
 
         assertEquals(100L, storageUsage.apkBytes)
         assertEquals(200L, storageUsage.appBytes)
@@ -36,13 +36,14 @@ class StorageUsageTest {
 
     @Test
     fun `given values, when totalBytes accessed, then returns correct sum`() {
-        val storageUsage = StorageUsage(
-            apkBytes = 100L, // Should not be included in total
-            appBytes = 1000L,
-            cacheBytes = 500L,
-            dataBytes = 2000L,
-            externalCacheBytes = 300L
-        )
+        val storageUsage =
+            StorageUsage(
+                apkBytes = 100L, // Should not be included in total
+                appBytes = 1000L,
+                cacheBytes = 500L,
+                dataBytes = 2000L,
+                externalCacheBytes = 300L,
+            )
 
         assertEquals(3800L, storageUsage.totalBytes)
     }

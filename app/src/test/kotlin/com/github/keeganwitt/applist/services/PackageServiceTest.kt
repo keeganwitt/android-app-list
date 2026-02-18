@@ -90,10 +90,11 @@ class PackageServiceTest {
         val resolveInfo1 = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.app.launcher" } }
         val resolveInfo2 = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.app.info" } }
 
-        every { packageManager.queryIntentActivities(any<Intent>(), any<PackageManager.ResolveInfoFlags>()) } returnsMany listOf(
-            listOf(resolveInfo1),
-            listOf(resolveInfo2)
-        )
+        every { packageManager.queryIntentActivities(any<Intent>(), any<PackageManager.ResolveInfoFlags>()) } returnsMany
+            listOf(
+                listOf(resolveInfo1),
+                listOf(resolveInfo2),
+            )
 
         val result = service.getLaunchablePackages()
 
@@ -138,7 +139,8 @@ class PackageServiceTest {
     @Test(expected = PackageManager.NameNotFoundException::class)
     fun `given invalid package, when getPackageInfo called, then throws exception`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.invalid.app" }
-        every { packageManager.getPackageInfo(eq("com.invalid.app"), any<PackageManager.PackageInfoFlags>()) } throws PackageManager.NameNotFoundException()
+        every { packageManager.getPackageInfo(eq("com.invalid.app"), any<PackageManager.PackageInfoFlags>()) } throws
+            PackageManager.NameNotFoundException()
 
         service.getPackageInfo(appInfo)
     }
@@ -205,7 +207,10 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.getValue()
-        assertTrue("Expected GET_SIGNING_CERTIFICATES flag to be absent", (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L)
+        assertTrue(
+            "Expected GET_SIGNING_CERTIFICATES flag to be absent",
+            (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L,
+        )
     }
 
     @Test
@@ -257,7 +262,8 @@ class PackageServiceTest {
         val packageName = "com.test.missing"
 
         every { packageManager.getApplicationIcon(packageName) } throws PackageManager.NameNotFoundException()
-        every { packageManager.getApplicationInfo(packageName, any<PackageManager.ApplicationInfoFlags>()) } throws PackageManager.NameNotFoundException()
+        every { packageManager.getApplicationInfo(packageName, any<PackageManager.ApplicationInfoFlags>()) } throws
+            PackageManager.NameNotFoundException()
 
         val result = service.getApplicationIcon(packageName)
 

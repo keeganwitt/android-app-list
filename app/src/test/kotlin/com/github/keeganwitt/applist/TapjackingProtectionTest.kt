@@ -12,7 +12,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class TapjackingProtectionTest {
-
     @Test
     fun `activity_main layout should have filterTouchesWhenObscured set to true`() {
         val context = ApplicationProvider.getApplicationContext<AppListApplication>()
@@ -25,10 +24,11 @@ class TapjackingProtectionTest {
     @Test
     fun `activity_settings layout should have filterTouchesWhenObscured set to true`() {
         // MaterialToolbar requires a valid Material theme
-        val context = ContextThemeWrapper(
-            ApplicationProvider.getApplicationContext(),
-            R.style.Theme_AppList_Settings
-        )
+        val context =
+            ContextThemeWrapper(
+                ApplicationProvider.getApplicationContext(),
+                R.style.Theme_AppList_Settings,
+            )
         val inflater = LayoutInflater.from(context)
         val view = inflater.inflate(R.layout.activity_settings, null)
 

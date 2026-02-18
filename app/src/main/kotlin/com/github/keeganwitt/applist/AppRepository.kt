@@ -57,7 +57,6 @@ class AndroidAppRepository(
             emit(sortApps(detailedApps, field, descending))
         }
 
-
     private fun getFilteredApps(showSystemApps: Boolean): List<Pair<ApplicationInfo, App>> {
         var flags =
             (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
@@ -80,7 +79,10 @@ class AndroidAppRepository(
         }
     }
 
-    private fun mapToAppBasic(ai: ApplicationInfo, archived: Boolean): App {
+    private fun mapToAppBasic(
+        ai: ApplicationInfo,
+        archived: Boolean,
+    ): App {
         val packageName = ai.packageName ?: ""
         return App(
             packageName = packageName,

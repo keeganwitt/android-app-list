@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -15,7 +16,6 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
-import kotlinx.coroutines.Dispatchers
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowToast
 import java.io.File
