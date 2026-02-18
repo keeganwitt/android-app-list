@@ -20,6 +20,9 @@ class AppListViewModel(
     private var allApps: List<App> = emptyList()
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null
+    private var currentField: AppInfoField? = null
+    private var currentShowSystem: Boolean? = null
+    private var currentDescending: Boolean? = null
 
     fun init(initialField: AppInfoField) {
         _uiState.update { it.copy(selectedField = initialField) }
@@ -27,6 +30,7 @@ class AppListViewModel(
     }
 
     fun updateSelectedField(field: AppInfoField) {
+        if (_uiState.value.selectedField == field && allApps.isNotEmpty()) return
         _uiState.update { it.copy(selectedField = field) }
         loadApps(reload = false)
     }
@@ -53,9 +57,24 @@ class AppListViewModel(
     private var loadJob: kotlinx.coroutines.Job? = null
 
     private fun loadApps(reload: Boolean) {
-        loadJob?.cancel()
         val state = _uiState.value
-        _uiState.update { it.copy(isLoading = true) }
+        if (!reload &&
+            state.selectedField == currentField &&
+            state.showSystem == currentShowSystem &&
+            state.descending == currentDescending &&
+            loadJob?.isActive == true
+        ) {
+            return
+        }
+
+        loadJob?.cancel()
+        currentField = state.selectedField
+        currentShowSystem = state.showSystem
+        currentDescending = state.descending
+
+        if (allApps.isEmpty() || reload) {
+            _uiState.update { it.copy(isLoading = true) }
+        }
 
         loadJob =
             viewModelScope.launch(dispatchers.io) {
@@ -71,14 +90,13 @@ class AppListViewModel(
                             val field = _uiState.value.selectedField
                             cachedMappedItems = apps.map { mapToItem(it, field) }
                             cachedMappedItemsField = field
-                            _uiState.update { it.copy(isLoading = false) }
-                            applyFilterAndEmit()
+                            applyFilterAndEmit(isLoading = false)
                         }
                     }
             }
     }
 
-    private fun applyFilterAndEmit() {
+    private fun applyFilterAndEmit(isLoading: Boolean = _uiState.value.isLoading) {
         val state = _uiState.value
         if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
             cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
@@ -95,7 +113,7 @@ class AppListViewModel(
                         item.infoText.contains(state.query, ignoreCase = true)
                 }
             }
-        _uiState.update { it.copy(items = filtered) }
+        _uiState.update { it.copy(items = filtered, isLoading = isLoading) }
 
         viewModelScope.launch(dispatchers.default) {
             val filteredApps =

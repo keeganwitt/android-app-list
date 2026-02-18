@@ -156,8 +156,8 @@ class MainActivity :
             fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
         val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
         binding.spinner.setSelection(initialIndex, false)
-        binding.spinner.onItemSelectedListener = this
         appListViewModel.init(lastDisplayedField)
+        binding.spinner.onItemSelectedListener = this
     }
 
     private fun setupListeners() {
