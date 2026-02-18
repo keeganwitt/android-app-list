@@ -14,8 +14,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import java.text.Collator
 
 interface AppRepository {
@@ -42,13 +40,23 @@ class AndroidAppRepository(
     ): Flow<List<App>> =
         flow {
             val filteredWithBasic = getFilteredApps(showSystemApps)
-
             val basicApps = filteredWithBasic.map { it.second }
             emit(sortApps(basicApps, field, descending))
 
-            val detailedApps = loadDetailedApps(filteredWithBasic, reload)
+            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
+            val detailedApps =
+                coroutineScope {
+                    val appsDeferred =
+                        filteredWithBasic.map { (ai, basicApp) ->
+                            async {
+                                mapToAppDetailed(ai, basicApp, lastUsedEpochs)
+                            }
+                        }
+                    appsDeferred.awaitAll()
+                }
             emit(sortApps(detailedApps, field, descending))
         }
+
 
     private fun getFilteredApps(showSystemApps: Boolean): List<Pair<ApplicationInfo, App>> {
         var flags =
@@ -69,26 +77,6 @@ class AndroidAppRepository(
             } else {
                 null
             }
-        }
-    }
-
-    private suspend fun loadDetailedApps(
-        filteredWithBasic: List<Pair<ApplicationInfo, App>>,
-        reload: Boolean,
-    ): List<App> {
-        val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
-        val semaphore = Semaphore(MAX_CONCURRENCY)
-
-        return coroutineScope {
-            val appsDeferred =
-                filteredWithBasic.map { (ai, basicApp) ->
-                    async {
-                        semaphore.withPermit {
-                            mapToAppDetailed(ai, basicApp, lastUsedEpochs)
-                        }
-                    }
-                }
-            appsDeferred.awaitAll()
         }
     }
 
@@ -169,6 +157,5 @@ class AndroidAppRepository(
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
         const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
-        const val MAX_CONCURRENCY = 4
     }
 }
