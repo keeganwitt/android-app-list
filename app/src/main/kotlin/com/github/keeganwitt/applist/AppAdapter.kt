@@ -46,6 +46,7 @@ class AppAdapter(
         binding.appName.text = item.appName
         binding.appInfo.movementMethod = LinkMovementMethod.getInstance()
         binding.appInfo.text = item.infoText
+        binding.appInfo.alpha = if (item.isFinalValue) 1.0f else 0.5f
     }
 
     interface OnClickListener {

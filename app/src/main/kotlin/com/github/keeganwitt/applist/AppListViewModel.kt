@@ -140,6 +140,7 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
+            isFinalValue = app.isDetailed || field.isBasic,
         )
     }
 }

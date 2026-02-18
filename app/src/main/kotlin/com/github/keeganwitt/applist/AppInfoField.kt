@@ -6,6 +6,7 @@ import java.util.Date
 enum class AppInfoField(
     val titleResId: Int,
     val requiresUsageStats: Boolean = false,
+    val isBasic: Boolean = false,
 ) {
     APK_SIZE(R.string.appInfoField_apkSize) {
         override fun getValue(app: App) = app.sizes.apkBytes
@@ -13,7 +14,7 @@ enum class AppInfoField(
     APP_SIZE(R.string.appInfoField_appSize) {
         override fun getValue(app: App) = app.sizes.appBytes
     },
-    ARCHIVED(R.string.appInfoField_archived) {
+    ARCHIVED(R.string.appInfoField_archived, isBasic = true) {
         override fun getValue(app: App) = app.archived ?: false
     },
     CACHE_SIZE(R.string.appInfoField_cacheSize, requiresUsageStats = true) {
@@ -22,7 +23,7 @@ enum class AppInfoField(
     DATA_SIZE(R.string.appInfoField_dataSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.dataBytes
     },
-    ENABLED(R.string.appInfoField_enabled) {
+    ENABLED(R.string.appInfoField_enabled, isBasic = true) {
         override fun getValue(app: App) = app.enabled
     },
     EXISTS_IN_APP_STORE(R.string.appInfoField_exists_in_app_store) {
@@ -49,7 +50,7 @@ enum class AppInfoField(
 
         override fun getFormattedValue(app: App) = formatDate(app.lastUsed)
     },
-    MIN_SDK(R.string.appInfoField_minSdk) {
+    MIN_SDK(R.string.appInfoField_minSdk, isBasic = true) {
         override fun getValue(app: App) = app.minSdk ?: 0
     },
     PACKAGE_MANAGER(R.string.appInfoField_packageManager) {
@@ -58,7 +59,7 @@ enum class AppInfoField(
     REQUESTED_PERMISSIONS(R.string.appInfoField_requestedPermissions) {
         override fun getValue(app: App) = app.requestedPermissionsCount ?: 0
     },
-    TARGET_SDK(R.string.appInfoField_targetSdk) {
+    TARGET_SDK(R.string.appInfoField_targetSdk, isBasic = true) {
         override fun getValue(app: App) = app.targetSdk ?: 0
     },
     TOTAL_SIZE(R.string.appInfoField_totalSize, requiresUsageStats = true) {
