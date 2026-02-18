@@ -43,20 +43,22 @@ class AndroidPackageService(
 
     override fun getLaunchablePackages(): Set<String> {
         val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        val launcherApps = if (Build.VERSION.SDK_INT >= 33) {
-            Api33Impl.queryIntentActivities(pm, launcherIntent, 0)
-        } else {
-            @Suppress("DEPRECATION")
-            pm.queryIntentActivities(launcherIntent, 0)
-        }
+        val launcherApps =
+            if (Build.VERSION.SDK_INT >= 33) {
+                Api33Impl.queryIntentActivities(pm, launcherIntent, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                pm.queryIntentActivities(launcherIntent, 0)
+            }
 
         val infoIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_INFO)
-        val infoApps = if (Build.VERSION.SDK_INT >= 33) {
-            Api33Impl.queryIntentActivities(pm, infoIntent, 0)
-        } else {
-            @Suppress("DEPRECATION")
-            pm.queryIntentActivities(infoIntent, 0)
-        }
+        val infoApps =
+            if (Build.VERSION.SDK_INT >= 33) {
+                Api33Impl.queryIntentActivities(pm, infoIntent, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                pm.queryIntentActivities(infoIntent, 0)
+            }
 
         return (launcherApps + infoApps).mapNotNull { it.activityInfo?.packageName }.toSet()
     }
@@ -106,29 +108,36 @@ class AndroidPackageService(
 
     @RequiresApi(33)
     private object Api33Impl {
-        fun getInstalledApplications(pm: PackageManager, flags: Long): List<ApplicationInfo> {
-            return pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags))
-        }
+        fun getInstalledApplications(
+            pm: PackageManager,
+            flags: Long,
+        ): List<ApplicationInfo> = pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags))
 
-        fun getPackageInfo(pm: PackageManager, packageName: String, flags: Long): PackageInfo {
-            return pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags))
-        }
+        fun getPackageInfo(
+            pm: PackageManager,
+            packageName: String,
+            flags: Long,
+        ): PackageInfo = pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags))
 
-        fun queryIntentActivities(pm: PackageManager, intent: Intent, flags: Long): List<android.content.pm.ResolveInfo> {
-            return pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(flags))
-        }
+        fun queryIntentActivities(
+            pm: PackageManager,
+            intent: Intent,
+            flags: Long,
+        ): List<android.content.pm.ResolveInfo> = pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(flags))
     }
 
     @RequiresApi(35)
     private object Api35Impl {
-        fun getApplicationIcon(pm: PackageManager, packageName: String): Drawable? {
-            return try {
+        fun getApplicationIcon(
+            pm: PackageManager,
+            packageName: String,
+        ): Drawable? =
+            try {
                 val flags = PackageManager.MATCH_ARCHIVED_PACKAGES or PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong()
                 val ai = pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(flags))
                 pm.getApplicationIcon(ai)
             } catch (_: Exception) {
                 null
             }
-        }
     }
 }

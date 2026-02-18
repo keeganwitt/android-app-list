@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ThemeModeExtensionsTest {
-
     @Test
     fun `nightMode returns MODE_NIGHT_NO for LIGHT theme`() {
         assertEquals(AppCompatDelegate.MODE_NIGHT_NO, AppSettings.ThemeMode.LIGHT.nightMode)

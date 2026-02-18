@@ -12,7 +12,6 @@ import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 class ApplicationInfoExtensionsTest {
-
     @Test
     @Config(sdk = [35])
     fun `given SDK 35 and isArchived true, then isArchivedApp returns true`() {
@@ -31,7 +30,8 @@ class ApplicationInfoExtensionsTest {
         val appInfo = ApplicationInfo()
         try {
             ReflectionHelpers.setField(appInfo, "isArchived", false)
-        } catch (e: Throwable) {}
+        } catch (e: Throwable) {
+        }
         appInfo.metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
         assertTrue(appInfo.isArchivedApp)
     }
@@ -39,18 +39,20 @@ class ApplicationInfoExtensionsTest {
     @Test
     @Config(sdk = [34])
     fun `given SDK 34 and metadata has archive key, then isArchivedApp returns true`() {
-        val appInfo = ApplicationInfo().apply {
-            metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
-        }
+        val appInfo =
+            ApplicationInfo().apply {
+                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+            }
         assertTrue(appInfo.isArchivedApp)
     }
 
     @Test
     @Config(sdk = [34])
     fun `given SDK 34 and metadata does not have archive key, then isArchivedApp returns false`() {
-        val appInfo = ApplicationInfo().apply {
-            metaData = Bundle().apply { putBoolean("other", true) }
-        }
+        val appInfo =
+            ApplicationInfo().apply {
+                metaData = Bundle().apply { putBoolean("other", true) }
+            }
         assertFalse(appInfo.isArchivedApp)
     }
 

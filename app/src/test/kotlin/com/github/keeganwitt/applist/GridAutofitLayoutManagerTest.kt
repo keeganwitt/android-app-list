@@ -25,13 +25,20 @@ class GridAutofitLayoutManagerTest {
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
         recyclerView = RecyclerView(context)
-        recyclerView.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                return object : RecyclerView.ViewHolder(android.view.View(parent.context)) {}
+        recyclerView.adapter =
+            object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                override fun onCreateViewHolder(
+                    parent: android.view.ViewGroup,
+                    viewType: Int,
+                ): RecyclerView.ViewHolder = object : RecyclerView.ViewHolder(android.view.View(parent.context)) {}
+
+                override fun onBindViewHolder(
+                    holder: RecyclerView.ViewHolder,
+                    position: Int,
+                ) {}
+
+                override fun getItemCount(): Int = 20
             }
-            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {}
-            override fun getItemCount(): Int = 20
-        }
     }
 
     @Test
@@ -51,11 +58,13 @@ class GridAutofitLayoutManagerTest {
         recyclerView.layoutManager = layoutManager
 
         // Default width is 48dp.
-        val expectedWidth = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            48f,
-            context.resources.displayMetrics
-        ).roundToInt()
+        val expectedWidth =
+            TypedValue
+                .applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    48f,
+                    context.resources.displayMetrics,
+                ).roundToInt()
 
         // Use a width that is clearly divisible or test logic
         // E.g. 5 * expectedWidth
@@ -71,11 +80,13 @@ class GridAutofitLayoutManagerTest {
         recyclerView.layoutManager = layoutManager
 
         // Default width is 48dp.
-        val expectedWidth = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            48f,
-            context.resources.displayMetrics
-        ).roundToInt()
+        val expectedWidth =
+            TypedValue
+                .applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    48f,
+                    context.resources.displayMetrics,
+                ).roundToInt()
 
         val testWidth = expectedWidth * 3
         triggerLayout(testWidth, 1000)
@@ -216,10 +227,15 @@ class GridAutofitLayoutManagerTest {
         verify(exactly = 1) { spyLayoutManager.setSpanCount(2) }
     }
 
-    private fun triggerLayout(width: Int, height: Int) {
+    private fun triggerLayout(
+        width: Int,
+        height: Int,
+    ) {
         recyclerView.measure(
-            android.view.View.MeasureSpec.makeMeasureSpec(width, android.view.View.MeasureSpec.EXACTLY),
-            android.view.View.MeasureSpec.makeMeasureSpec(height, android.view.View.MeasureSpec.EXACTLY)
+            android.view.View.MeasureSpec
+                .makeMeasureSpec(width, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec
+                .makeMeasureSpec(height, android.view.View.MeasureSpec.EXACTLY),
         )
         recyclerView.layout(0, 0, width, height)
     }
