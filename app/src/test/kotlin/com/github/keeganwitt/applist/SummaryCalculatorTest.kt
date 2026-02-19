@@ -26,6 +26,25 @@ class SummaryCalculatorTest {
     }
 
     @Test
+    fun `calculate returns correct requested permissions summary`() {
+        mockStrings()
+        val app0 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 0)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 3)
+        val app8 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 8)
+        val app15 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 15)
+        val app25 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 25)
+
+        val result = calculator.calculate(listOf(app0, app3, app8, app15, app25), AppInfoField.REQUESTED_PERMISSIONS)
+
+        assertEquals(AppInfoField.REQUESTED_PERMISSIONS, result?.field)
+        assertEquals(1, result?.buckets?.get("None")) // 0
+        assertEquals(1, result?.buckets?.get("Few")) // 1-5
+        assertEquals(1, result?.buckets?.get("Some")) // 6-10
+        assertEquals(1, result?.buckets?.get("Many")) // 11-20
+        assertEquals(1, result?.buckets?.get("Lots")) // 20+
+    }
+
+    @Test
     fun `calculate returns correct archived summary`() {
         mockStrings()
         val app1 = createApp(enabled = true, archived = false, apkSize = 0)
@@ -72,7 +91,7 @@ class SummaryCalculatorTest {
     }
 
     @Test
-    fun `calculatePermissionSummary buckets correctly`() {
+    fun `calculate returns correct granted permissions summary`() {
         mockStrings()
         val app0 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0)
         val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 3)
