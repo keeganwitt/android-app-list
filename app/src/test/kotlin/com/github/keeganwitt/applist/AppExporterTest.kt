@@ -20,6 +20,7 @@ import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowToast
 import java.io.File
 import java.io.IOException
+import java.io.Writer
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestAppListApplication::class)
@@ -68,7 +69,9 @@ class AppExporterTest {
     fun writeXmlToFile_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val xmlOutput = "<?xml version=\"1.0\"?><apps></apps>"
-        every { formatter.toXml(any(), any()) } returns xmlOutput
+        every { formatter.writeXml(any(), any(), any()) } answers {
+            firstArg<Writer>().write(xmlOutput)
+        }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
         exporter.selectedAppInfoField = AppInfoField.VERSION
@@ -78,7 +81,7 @@ class AppExporterTest {
         exporter.writeXmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.toXml(items, AppInfoField.VERSION) }
+        verify { formatter.writeXml(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }
@@ -87,7 +90,7 @@ class AppExporterTest {
     fun writeXmlToFile_onIOException_reportsCrash_andShowsFailToast() {
         val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toXml(any(), any()) } throws IOException(exceptionMessage)
+        every { failingFormatter.writeXml(any(), any(), any()) } throws IOException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter, testDispatchers)
         exporter.selectedAppInfoField = AppInfoField.VERSION
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
@@ -106,7 +109,7 @@ class AppExporterTest {
     fun writeXmlToFile_onSecurityException_reportsCrash_andShowsFailToast() {
         val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toXml(any(), any()) } throws SecurityException(exceptionMessage)
+        every { failingFormatter.writeXml(any(), any(), any()) } throws SecurityException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter, testDispatchers)
         exporter.selectedAppInfoField = AppInfoField.VERSION
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
@@ -137,7 +140,7 @@ class AppExporterTest {
         exporter.writeXmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { formatter.toXml(any(), any()) }
+        verify(exactly = 0) { formatter.writeXml(any(), any(), any()) }
         // itemsProvider is called to capture items before launching coroutine
         verify(exactly = 1) { itemsProvider() }
         verify { crashReporter.recordException(any(), "Error exporting XML") }
@@ -150,7 +153,9 @@ class AppExporterTest {
     fun writeHtmlToFile_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val htmlOutput = "<!DOCTYPE html><html></html>"
-        every { formatter.toHtml(any()) } returns htmlOutput
+        every { formatter.writeHtml(any(), any()) } answers {
+            firstArg<Writer>().write(htmlOutput)
+        }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".html").apply { deleteOnExit() }
@@ -159,7 +164,7 @@ class AppExporterTest {
         exporter.writeHtmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.toHtml(items) }
+        verify { formatter.writeHtml(any(), items) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }
@@ -168,7 +173,7 @@ class AppExporterTest {
     fun writeHtmlToFile_onError_reportsCrash_andShowsFailToast() {
         val exceptionMessage = "boom"
         val failingFormatter = mockk<ExportFormatter>()
-        every { failingFormatter.toHtml(any()) } throws IOException(exceptionMessage)
+        every { failingFormatter.writeHtml(any(), any()) } throws IOException(exceptionMessage)
         val exporter = AppExporter(activity, { items }, failingFormatter, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".html").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
@@ -197,7 +202,7 @@ class AppExporterTest {
         exporter.writeHtmlToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { formatter.toHtml(any()) }
+        verify(exactly = 0) { formatter.writeHtml(any(), any()) }
         // itemsProvider is called to capture items before launching coroutine
         verify(exactly = 1) { itemsProvider() }
         verify { crashReporter.recordException(any(), "Error exporting HTML") }
@@ -210,7 +215,9 @@ class AppExporterTest {
     fun writeCsvToFile_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val csvOutput = "App Name,Package Name,Info Type,Info Value\n\"App 1\",\"com.example.app1\",\"VERSION\",\"1.0\""
-        every { formatter.toCsv(any(), any()) } returns csvOutput
+        every { formatter.writeCsv(any(), any(), any()) } answers {
+            firstArg<Writer>().write(csvOutput)
+        }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
         exporter.selectedAppInfoField = AppInfoField.VERSION
@@ -220,7 +227,7 @@ class AppExporterTest {
         exporter.writeCsvToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.toCsv(items, AppInfoField.VERSION) }
+        verify { formatter.writeCsv(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }
@@ -229,7 +236,9 @@ class AppExporterTest {
     fun writeTsvToFile_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val tsvOutput = "App Name\tPackage Name\tInfo Type\tInfo Value\nApp 1\tcom.example.app1\tVERSION\t1.0"
-        every { formatter.toTsv(any(), any()) } returns tsvOutput
+        every { formatter.writeTsv(any(), any(), any()) } answers {
+            firstArg<Writer>().write(tsvOutput)
+        }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
         exporter.selectedAppInfoField = AppInfoField.VERSION
@@ -239,7 +248,7 @@ class AppExporterTest {
         exporter.writeTsvToFile(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.toTsv(items, AppInfoField.VERSION) }
+        verify { formatter.writeTsv(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
     }

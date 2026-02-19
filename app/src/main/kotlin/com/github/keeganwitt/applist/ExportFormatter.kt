@@ -1,29 +1,48 @@
 package com.github.keeganwitt.applist
 
+import java.io.StringWriter
+import java.io.Writer
+
 class ExportFormatter {
     fun toXml(
         items: List<AppItemUiModel>,
         selectedField: AppInfoField,
     ): String {
-        val sb =
-            StringBuilder()
-                .append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-                .append("<apps>\n")
+        val sw = StringWriter()
+        writeXml(sw, items, selectedField)
+        return sw.toString()
+    }
+
+    fun writeXml(
+        writer: Writer,
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ) {
+        writer
+            .append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            .append("<apps>\n")
         items.forEach { item ->
-            sb.append("<app>\n")
-            sb.append("<appName>").append(escapeMarkup(item.appName)).append("</appName>\n")
-            sb.append("<appPackage>").append(escapeMarkup(item.packageName)).append("</appPackage>\n")
-            sb.append("<appInfoType>").append(selectedField.name).append("</appInfoType>\n")
-            sb.append("<appInfoValue>").append(escapeMarkup(item.infoText)).append("</appInfoValue>\n")
-            sb.append("</app>\n")
+            writer.append("<app>\n")
+            writer.append("<appName>").append(escapeMarkup(item.appName)).append("</appName>\n")
+            writer.append("<appPackage>").append(escapeMarkup(item.packageName)).append("</appPackage>\n")
+            writer.append("<appInfoType>").append(selectedField.name).append("</appInfoType>\n")
+            writer.append("<appInfoValue>").append(escapeMarkup(item.infoText)).append("</appInfoValue>\n")
+            writer.append("</app>\n")
         }
-        sb.append("</apps>\n")
-        return sb.toString()
+        writer.append("</apps>\n")
     }
 
     fun toHtml(items: List<AppItemUiModel>): String {
-        val sb = StringBuilder()
-        sb
+        val sw = StringWriter()
+        writeHtml(sw, items)
+        return sw.toString()
+    }
+
+    fun writeHtml(
+        writer: Writer,
+        items: List<AppItemUiModel>,
+    ) {
+        writer
             .append("<!DOCTYPE html>\n")
             .append("<html>\n")
             .append("<head>\n")
@@ -45,47 +64,62 @@ class ExportFormatter {
             .append("<h1>App List</h1>\n")
             .append("<div class=\"app-grid\">\n")
         items.forEach { item ->
-            sb.append("<div class=\"app-item\">\n")
-            sb.append("<div class=\"app-name\">").append(escapeMarkup(item.appName)).append("</div>\n")
-            sb.append("<div class=\"package-name\">").append(escapeMarkup(item.packageName)).append("</div>\n")
-            sb.append("<div class=\"app-info\">").append(escapeMarkup(item.infoText)).append("</div>\n")
-            sb.append("</div>\n")
+            writer.append("<div class=\"app-item\">\n")
+            writer.append("<div class=\"app-name\">").append(escapeMarkup(item.appName)).append("</div>\n")
+            writer.append("<div class=\"package-name\">").append(escapeMarkup(item.packageName)).append("</div>\n")
+            writer.append("<div class=\"app-info\">").append(escapeMarkup(item.infoText)).append("</div>\n")
+            writer.append("</div>\n")
         }
-        sb
+        writer
             .append("</div>\n")
             .append("</body>\n")
             .append("</html>\n")
-        return sb.toString()
     }
 
     fun toCsv(
         items: List<AppItemUiModel>,
         selectedField: AppInfoField,
     ): String {
-        val sb = StringBuilder()
-        sb.append("App Name,Package Name,Info Type,Info Value\n")
+        val sw = StringWriter()
+        writeCsv(sw, items, selectedField)
+        return sw.toString()
+    }
+
+    fun writeCsv(
+        writer: Writer,
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ) {
+        writer.append("App Name,Package Name,Info Type,Info Value\n")
         items.forEach { item ->
-            sb.append("\"").append(item.appName.replace("\"", "\"\"")).append("\",")
-            sb.append("\"").append(item.packageName.replace("\"", "\"\"")).append("\",")
-            sb.append("\"").append(selectedField.name.replace("\"", "\"\"")).append("\",")
-            sb.append("\"").append(item.infoText.replace("\"", "\"\"")).append("\"\n")
+            writer.append("\"").append(item.appName.replace("\"", "\"\"")).append("\",")
+            writer.append("\"").append(item.packageName.replace("\"", "\"\"")).append("\",")
+            writer.append("\"").append(selectedField.name.replace("\"", "\"\"")).append("\",")
+            writer.append("\"").append(item.infoText.replace("\"", "\"\"")).append("\"\n")
         }
-        return sb.toString()
     }
 
     fun toTsv(
         items: List<AppItemUiModel>,
         selectedField: AppInfoField,
     ): String {
-        val sb = StringBuilder()
-        sb.append("App Name\tPackage Name\tInfo Type\tInfo Value\n")
+        val sw = StringWriter()
+        writeTsv(sw, items, selectedField)
+        return sw.toString()
+    }
+
+    fun writeTsv(
+        writer: Writer,
+        items: List<AppItemUiModel>,
+        selectedField: AppInfoField,
+    ) {
+        writer.append("App Name\tPackage Name\tInfo Type\tInfo Value\n")
         items.forEach { item ->
-            sb.append(item.appName).append("\t")
-            sb.append(item.packageName).append("\t")
-            sb.append(selectedField.name).append("\t")
-            sb.append(item.infoText).append("\n")
+            writer.append(item.appName).append("\t")
+            writer.append(item.packageName).append("\t")
+            writer.append(selectedField.name).append("\t")
+            writer.append(item.infoText).append("\n")
         }
-        return sb.toString()
     }
 
     // This is not using Html.escapeHtml for unit tests (since it's not implemented by Robolectric)
