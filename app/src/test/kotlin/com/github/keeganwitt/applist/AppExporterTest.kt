@@ -1,13 +1,17 @@
 package com.github.keeganwitt.applist
 
 import android.content.ContentResolver
+import android.content.DialogInterface
 import android.net.Uri
+import android.widget.RadioGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +21,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
+import org.robolectric.shadows.ShadowAlertDialog
 import org.robolectric.shadows.ShadowToast
 import java.io.File
 import java.io.IOException
@@ -242,5 +247,89 @@ class AppExporterTest {
         verify { formatter.toTsv(items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun export_showsDialog() {
+        val exporter = AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers)
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        assertNotNull(dialog)
+        assertTrue(dialog.isShowing)
+    }
+
+    @Test
+    fun dialogPositiveButton_initiatesExportWithXml() {
+        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
+        radioGroup.check(R.id.radio_xml)
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { exporter.initiateExport(AppExporter.ExportFormat.XML) }
+    }
+
+    @Test
+    fun dialogPositiveButton_initiatesExportWithHtml() {
+        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
+        radioGroup.check(R.id.radio_html)
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { exporter.initiateExport(AppExporter.ExportFormat.HTML) }
+    }
+
+    @Test
+    fun dialogPositiveButton_initiatesExportWithCsv() {
+        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
+        radioGroup.check(R.id.radio_csv)
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { exporter.initiateExport(AppExporter.ExportFormat.CSV) }
+    }
+
+    @Test
+    fun dialogPositiveButton_initiatesExportWithTsv() {
+        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
+        radioGroup.check(R.id.radio_tsv)
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { exporter.initiateExport(AppExporter.ExportFormat.TSV) }
+    }
+
+    @Test
+    fun dialogNegativeButton_dismissesDialog() {
+        val exporter = AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers)
+        exporter.export(AppInfoField.VERSION)
+
+        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
+        assertTrue(dialog.isShowing)
+
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        assertTrue(!dialog.isShowing)
     }
 }
