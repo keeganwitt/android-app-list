@@ -43,7 +43,6 @@ class MainActivity :
     private lateinit var appInfoFields: List<AppInfoField>
     private lateinit var appAdapter: AppAdapter
     private lateinit var binding: ActivityMainBinding
-    private var showSystemApps = false
     private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
@@ -173,11 +172,17 @@ class MainActivity :
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 appListViewModel.uiState.collectLatest { state ->
+                    val shouldInvalidate =
+                        latestState.isFullyLoaded != state.isFullyLoaded ||
+                            (latestState.summary == null) != (state.summary == null) ||
+                            latestState.showSystem != state.showSystem
                     latestState = state
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
-                    invalidateOptionsMenu()
+                    if (shouldInvalidate) {
+                        invalidateOptionsMenu()
+                    }
                 }
             }
         }
@@ -186,7 +191,7 @@ class MainActivity :
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.app_menu, menu)
 
-        menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
+        menu.findItem(R.id.systemAppToggle).isChecked = latestState.showSystem
 
         val summaryItem = menu.findItem(R.id.summary)
         if (!latestState.isFullyLoaded) {
@@ -202,7 +207,12 @@ class MainActivity :
         }
 
         val searchItem = menu.findItem(R.id.search)
-        (searchItem.actionView as? SearchView)?.setOnQueryTextListener(
+        val searchView = searchItem.actionView as? SearchView
+        if (latestState.query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView?.setQuery(latestState.query, false)
+        }
+        searchView?.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     appListViewModel.setQuery(query ?: "")
@@ -274,10 +284,7 @@ class MainActivity :
             }
 
             R.id.systemAppToggle -> {
-                item.isChecked = !item.isChecked
-                showSystemApps = item.isChecked
-                updateSystemAppToggleIcon(item)
-                appListViewModel.setShowSystem(showSystemApps)
+                appListViewModel.setShowSystem(!latestState.showSystem)
                 return true
             }
 
@@ -315,14 +322,6 @@ class MainActivity :
             .setView(view)
             .setPositiveButton(android.R.string.ok, null)
             .show()
-    }
-
-    private fun updateSystemAppToggleIcon(item: MenuItem) {
-        if (item.isChecked) {
-            item.setIcon(R.drawable.ic_system_apps_on)
-        } else {
-            item.setIcon(R.drawable.ic_system_apps_off)
-        }
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
