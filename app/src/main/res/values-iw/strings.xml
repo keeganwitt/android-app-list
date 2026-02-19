@@ -41,4 +41,5 @@
     <string name="theme_entry_system">מערכת</string>
     <string name="summary">סיכום</string>
 
+    <string name="summary_loading">סיכום (טוען…)</string>
 </resources>

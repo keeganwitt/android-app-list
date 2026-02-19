@@ -47,6 +47,7 @@
     <string name="theme_entry_dark">Dark</string>
     <string name="theme_entry_system">System</string>
     <string name="summary">Summary</string>
+    <string name="summary_loading">Summary (loading&#8230;)</string>
     <string name="size_bucket_small" translatable="false">&lt; 10 MB</string>
     <string name="size_bucket_medium" translatable="false">10 – 50 MB</string>
     <string name="size_bucket_large" translatable="false">50 – 100 MB</string>

@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Системная</string>
     <string name="summary">Сводка</string>
 
+    <string name="summary_loading">Сводка (загрузка…)</string>
 </resources>

@@ -189,10 +189,16 @@ class MainActivity :
         menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
 
         val summaryItem = menu.findItem(R.id.summary)
-        summaryItem.isEnabled = latestState.summary != null
+        if (!latestState.isFullyLoaded) {
+            summaryItem.isEnabled = false
+            summaryItem.title = getString(R.string.summary_loading)
+        } else {
+            summaryItem.isEnabled = latestState.summary != null
+            summaryItem.title = getString(R.string.summary)
+        }
         val icon = summaryItem.icon
         if (icon != null) {
-            icon.alpha = if (latestState.summary != null) 255 else 128
+            icon.alpha = if (summaryItem.isEnabled) 255 else 128
         }
 
         val searchItem = menu.findItem(R.id.search)

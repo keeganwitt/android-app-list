@@ -55,7 +55,7 @@ class AppListViewModel(
     private fun loadApps(reload: Boolean) {
         loadJob?.cancel()
         val state = _uiState.value
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true, isFullyLoaded = false, summary = null) }
 
         loadJob =
             viewModelScope.launch(dispatchers.io) {
@@ -71,7 +71,8 @@ class AppListViewModel(
                             val field = _uiState.value.selectedField
                             cachedMappedItems = apps.map { mapToItem(it, field) }
                             cachedMappedItemsField = field
-                            _uiState.update { it.copy(isLoading = false) }
+                            val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
+                            _uiState.update { it.copy(isLoading = false, isFullyLoaded = fullyLoaded) }
                             applyFilterAndEmit()
                         }
                     }
@@ -98,17 +99,23 @@ class AppListViewModel(
         _uiState.update { it.copy(items = filtered) }
 
         viewModelScope.launch(dispatchers.default) {
-            val filteredApps =
-                if (state.query.isBlank()) {
-                    allApps
-                } else {
-                    val filteredPackageNames = filtered.map { it.packageName }.toSet()
-                    allApps.filter { app -> app.packageName in filteredPackageNames }
-                }
+            if (state.isFullyLoaded) {
+                val filteredApps =
+                    if (state.query.isBlank()) {
+                        allApps
+                    } else {
+                        val filteredPackageNames = filtered.map { it.packageName }.toSet()
+                        allApps.filter { app -> app.packageName in filteredPackageNames }
+                    }
 
-            val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
-            withContext(dispatchers.main) {
-                _uiState.update { it.copy(summary = summary) }
+                val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
+                withContext(dispatchers.main) {
+                    _uiState.update { it.copy(summary = summary) }
+                }
+            } else {
+                withContext(dispatchers.main) {
+                    _uiState.update { it.copy(summary = null) }
+                }
             }
         }
     }

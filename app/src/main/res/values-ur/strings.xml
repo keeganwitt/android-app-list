@@ -41,4 +41,5 @@
     <string name="theme_entry_system">سسٹم</string>
     <string name="summary">خلاصہ</string>
 
+    <string name="summary_loading">خلاصہ (لوڈ ہو رہا ہے…)</string>
 </resources>

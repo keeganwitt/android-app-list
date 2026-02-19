@@ -41,4 +41,5 @@
     <string name="theme_entry_system">সিস্টেম</string>
     <string name="summary">সারাংশ</string>
 
+    <string name="summary_loading">সারাংশ (লোড হচ্ছে…)</string>
 </resources>

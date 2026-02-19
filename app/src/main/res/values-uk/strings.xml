@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Системна</string>
     <string name="summary">Підсумок</string>
 
+    <string name="summary_loading">Підсумок (завантаження…)</string>
 </resources>

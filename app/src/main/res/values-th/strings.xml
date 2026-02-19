@@ -41,4 +41,5 @@
     <string name="theme_entry_system">ระบบ</string>
     <string name="summary">สรุป</string>
 
+    <string name="summary_loading">สรุป (กำลังโหลด…)</string>
 </resources>
