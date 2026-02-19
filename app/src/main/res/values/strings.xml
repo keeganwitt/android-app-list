@@ -1,63 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name" translatable="false">App List</string>
-  <string name="app_icon_description">App Icon</string>
-  <string name="search">Search</string>
-  <string name="systemAppToggle">System apps</string>
-  <string name="appInfoField_apkSize">APK Size</string>
-  <string name="appInfoField_appSize">App Size</string>
-  <string name="appInfoField_archived">Archived</string>
-  <string name="appInfoField_cacheSize">Cache Size</string>
-  <string name="appInfoField_dataSize">Data Size</string>
-  <string name="appInfoField_enabled">Enabled</string>
-  <string name="appInfoField_exists_in_app_store">Exists in App Store</string>
-  <string name="appInfoField_externalCacheSize">External Cache Size</string>
-  <string name="appInfoField_firstInstalled">First Installed</string>
-  <string name="appInfoField_grantedPermissions">Granted Permissions</string>
-  <string name="appInfoField_lastUpdated">Last Updated</string>
-  <string name="appInfoField_lastUsed">Last Used</string>
-  <string name="appInfoField_minSdk">Min SDK</string>
-  <string name="appInfoField_packageManager">Package Manager</string>
-  <string name="appInfoField_requestedPermissions">Requested Permissions</string>
-  <string name="appInfoField_targetSdk">Target SDK</string>
-  <string name="appInfoField_totalSize">Total Size</string>
-  <string name="appInfoField_version">Version</string>
-  <string name="enabled">Enabled</string>
-  <string name="disabled">Disabled</string>
-  <string name="installed">Installed</string>
-  <string name="archived">Archived</string>
-  <string name="boolean_true">True</string>
-  <string name="boolean_false">False</string>
-  <string name="unknown">Unknown</string>
-  <string name="export">Export</string>
-  <string name="export_as">Export as</string>
-  <string name="export_xml" translatable="false">XML</string>
-  <string name="export_html" translatable="false">HTML</string>
-  <string name="export_csv" translatable="false">CSV</string>
-  <string name="export_tsv" translatable="false">TSV</string>
-  <string name="export_no_apps">No apps to export</string>
-  <string name="export_successful">Export successful</string>
-  <string name="export_failed">Export failed: %1$s</string>
-  <string name="settings">Settings</string>
-  <string name="crash_reporting_title">Share crash reports</string>
-  <string name="crash_reporting_summary">Allow sending anonymous crash reports to help improve the
+    <string name="app_name" translatable="false">App List</string>
+    <string name="app_icon_description">App Icon</string>
+    <string name="search">Search</string>
+    <string name="systemAppToggle">System apps</string>
+    <string name="appInfoField_apkSize">APK Size</string>
+    <string name="appInfoField_appSize">App Size</string>
+    <string name="appInfoField_archived">Archived</string>
+    <string name="appInfoField_cacheSize">Cache Size</string>
+    <string name="appInfoField_dataSize">Data Size</string>
+    <string name="appInfoField_enabled">Enabled</string>
+    <string name="appInfoField_exists_in_app_store">Exists in App Store</string>
+    <string name="appInfoField_externalCacheSize">External Cache Size</string>
+    <string name="appInfoField_firstInstalled">First Installed</string>
+    <string name="appInfoField_grantedPermissions">Granted Permissions</string>
+    <string name="appInfoField_lastUpdated">Last Updated</string>
+    <string name="appInfoField_lastUsed">Last Used</string>
+    <string name="appInfoField_minSdk">Min SDK</string>
+    <string name="appInfoField_packageManager">Package Manager</string>
+    <string name="appInfoField_requestedPermissions">Requested Permissions</string>
+    <string name="appInfoField_targetSdk">Target SDK</string>
+    <string name="appInfoField_totalSize">Total Size</string>
+    <string name="appInfoField_version">Version</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="installed">Installed</string>
+    <string name="archived">Archived</string>
+    <string name="boolean_true">True</string>
+    <string name="boolean_false">False</string>
+    <string name="export">Export</string>
+    <string name="export_as">Export as</string>
+    <string name="export_xml" translatable="false">XML</string>
+    <string name="export_html" translatable="false">HTML</string>
+    <string name="export_csv" translatable="false">CSV</string>
+    <string name="export_tsv" translatable="false">TSV</string>
+    <string name="export_no_apps">No apps to export</string>
+    <string name="export_successful">Export successful</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="settings">Settings</string>
+    <string name="crash_reporting_title">Share crash reports</string>
+    <string name="crash_reporting_summary">Allow sending anonymous crash reports to help improve the
     app</string>
-  <string name="theme_title">Theme</string>
+    <string name="theme_title">Theme</string>
 
-  <string name="theme_entry_light">Light</string>
-  <string name="theme_entry_dark">Dark</string>
-  <string name="theme_entry_system">System</string>
+    <string name="theme_entry_light">Light</string>
+    <string name="theme_entry_dark">Dark</string>
+    <string name="theme_entry_system">System</string>
+    <string name="summary">Summary</string>
+    <string name="size_bucket_small" translatable="false">&lt; 10 MB</string>
+    <string name="size_bucket_medium" translatable="false">10 – 50 MB</string>
+    <string name="size_bucket_large" translatable="false">50 – 100 MB</string>
+    <string name="size_bucket_huge" translatable="false">100+ MB</string>
 
-  <string name="summary">Summary</string>
-  <string name="size_bucket_small">&lt; 10 MB</string>
-  <string name="size_bucket_medium">10 - 50 MB</string>
-  <string name="size_bucket_large">50 - 100 MB</string>
-  <string name="size_bucket_huge">100+ MB</string>
-
-  <string name="perm_bucket_none">0</string>
-  <string name="perm_bucket_few">1 - 5</string>
-  <string name="perm_bucket_some">6 - 10</string>
-  <string name="perm_bucket_many">11 - 20</string>
-  <string name="perm_bucket_lots">20+</string>
+    <string name="perm_bucket_none" translatable="false">0</string>
+    <string name="perm_bucket_few" translatable="false">1 – 5</string>
+    <string name="perm_bucket_some" translatable="false">6 – 10</string>
+    <string name="perm_bucket_many" translatable="false">11 – 20</string>
+    <string name="perm_bucket_lots" translatable="false">20+</string>
 
 </resources>
