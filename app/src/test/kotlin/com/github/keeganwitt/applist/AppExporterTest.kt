@@ -1,10 +1,17 @@
 package com.github.keeganwitt.applist
 
+import android.app.Activity
 import android.content.ContentResolver
+import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -242,5 +249,149 @@ class AppExporterTest {
         verify { formatter.toTsv(items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withXml_exportsXml() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
+
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toXml(items, AppInfoField.VERSION) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Toast was: $toast", toast?.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withHtml_exportsHtml() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.HTML)
+
+        val file = File.createTempFile("apps", ".html").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toHtml(items) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast?.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withCsv_exportsCsv() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.CSV)
+
+        val file = File.createTempFile("apps", ".csv").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toCsv(items, AppInfoField.VERSION) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast?.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withTsv_exportsTsv() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.TSV)
+
+        val file = File.createTempFile("apps", ".tsv").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.toTsv(items, AppInfoField.VERSION) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast?.toString() == activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_whenCancelled_doesNothing() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
+
+        val result = ActivityResult(Activity.RESULT_CANCELED, null)
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify(exactly = 0) { formatter.toXml(any(), any()) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast == null || toast.toString() != activity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withNullData_doesNothing() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
+
+        val result = ActivityResult(Activity.RESULT_OK, null)
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify(exactly = 0) { formatter.toXml(any(), any()) }
     }
 }

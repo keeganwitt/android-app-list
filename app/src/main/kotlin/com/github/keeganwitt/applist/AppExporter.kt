@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,7 @@ class AppExporter(
     private val formatter: ExportFormatter,
     private val crashReporter: CrashReporter? = null,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
+    private val registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
     internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: ExportFormat? = null
@@ -37,7 +39,7 @@ class AppExporter(
         // safely register at any point in the Activity lifecycle (including after RESUMED),
         // which is especially useful for unit tests that use a fully-started Activity.
         createFileLauncher =
-            activity.activityResultRegistry.register(
+            registry.register(
                 "app_exporter_${System.identityHashCode(this)}",
                 StartActivityForResult(),
             ) { result ->
