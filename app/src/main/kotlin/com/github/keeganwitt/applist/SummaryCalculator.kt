@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.AppInfoField.APK_SIZE
 import com.github.keeganwitt.applist.AppInfoField.APP_SIZE
 import com.github.keeganwitt.applist.AppInfoField.ARCHIVED
@@ -27,6 +28,7 @@ data class SummaryItem(
 
 class SummaryCalculator(
     private val context: Context,
+    private val appStoreService: AppStoreService,
 ) {
     fun calculate(
         apps: List<App>,
@@ -106,7 +108,23 @@ class SummaryCalculator(
                 calculatePermissionSummary(REQUESTED_PERMISSIONS, apps.mapNotNull { it.requestedPermissionsCount })
             }
 
-            VERSION, FIRST_INSTALLED, LAST_UPDATED, LAST_USED, PACKAGE_MANAGER -> {
+            FIRST_INSTALLED -> {
+                calculateDateSummary(FIRST_INSTALLED, apps.mapNotNull { it.firstInstalled })
+            }
+
+            LAST_UPDATED -> {
+                calculateDateSummary(LAST_UPDATED, apps.mapNotNull { it.lastUpdated })
+            }
+
+            LAST_USED -> {
+                calculateDateSummary(LAST_USED, apps.mapNotNull { it.lastUsed })
+            }
+
+            PACKAGE_MANAGER -> {
+                calculatePackageManagerSummary(apps)
+            }
+
+            VERSION -> {
                 null
             }
         }
@@ -182,5 +200,49 @@ class SummaryCalculator(
         }
 
         return SummaryItem(field, orderedBuckets)
+    }
+
+    private fun calculateDateSummary(
+        field: AppInfoField,
+        timestamps: List<Long>,
+    ): SummaryItem {
+        val orderedBuckets = linkedMapOf<String, Int>()
+        val lastMonth = context.getString(R.string.date_bucket_last_month)
+        val lastThreeMonths = context.getString(R.string.date_bucket_last_three_months)
+        val lastSixMonths = context.getString(R.string.date_bucket_last_six_months)
+        val older = context.getString(R.string.date_bucket_older)
+
+        orderedBuckets[lastMonth] = 0
+        orderedBuckets[lastThreeMonths] = 0
+        orderedBuckets[lastSixMonths] = 0
+        orderedBuckets[older] = 0
+
+        val now = System.currentTimeMillis()
+        val oneMonthAgo = now - 30L * 24 * 60 * 60 * 1000
+        val threeMonthsAgo = now - 90L * 24 * 60 * 60 * 1000
+        val sixMonthsAgo = now - 180L * 24 * 60 * 60 * 1000
+
+        timestamps.forEach { timestamp ->
+            val key =
+                when {
+                    timestamp > oneMonthAgo -> lastMonth
+                    timestamp > threeMonthsAgo -> lastThreeMonths
+                    timestamp > sixMonthsAgo -> lastSixMonths
+                    else -> older
+                }
+            orderedBuckets[key] = orderedBuckets[key]!! + 1
+        }
+
+        return SummaryItem(field, orderedBuckets)
+    }
+
+    private fun calculatePackageManagerSummary(apps: List<App>): SummaryItem {
+        val packageManagerMap =
+            apps
+                .groupingBy {
+                    appStoreService.installerDisplayName(it.installerName)
+                }.eachCount()
+                .toSortedMap()
+        return SummaryItem(PACKAGE_MANAGER, packageManagerMap)
     }
 }

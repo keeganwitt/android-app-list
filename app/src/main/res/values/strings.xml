@@ -58,4 +58,9 @@
     <string name="perm_bucket_many" translatable="false">11 – 20</string>
     <string name="perm_bucket_lots" translatable="false">20+</string>
 
+    <string name="date_bucket_last_month">Last month</string>
+    <string name="date_bucket_last_three_months">Last 3 months</string>
+    <string name="date_bucket_last_six_months">Last 6 months</string>
+    <string name="date_bucket_older">Older</string>
+
 </resources>

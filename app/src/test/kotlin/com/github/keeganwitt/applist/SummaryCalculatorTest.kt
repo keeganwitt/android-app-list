@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import com.github.keeganwitt.applist.services.AppStoreService
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -9,7 +10,8 @@ import org.junit.Test
 
 class SummaryCalculatorTest {
     private val context = mockk<Context>()
-    private val calculator = SummaryCalculator(context)
+    private val store = mockk<AppStoreService>()
+    private val calculator = SummaryCalculator(context, store)
 
     @Test
     fun `calculate returns correct enabled summary`() {
@@ -90,6 +92,44 @@ class SummaryCalculatorTest {
     }
 
     @Test
+    fun `calculateDateSummary buckets correctly`() {
+        mockStrings()
+        val now = System.currentTimeMillis()
+        val oneMonthAgo = now - 15L * 24 * 60 * 60 * 1000
+        val threeMonthsAgo = now - 45L * 24 * 60 * 60 * 1000
+        val sixMonthsAgo = now - 120L * 24 * 60 * 60 * 1000
+        val older = now - 200L * 24 * 60 * 60 * 1000
+
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = oneMonthAgo)
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = threeMonthsAgo)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = sixMonthsAgo)
+        val app4 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = older)
+
+        val result = calculator.calculate(listOf(app1, app2, app3, app4), AppInfoField.FIRST_INSTALLED)
+
+        assertEquals(1, result?.buckets?.get("Last month"))
+        assertEquals(1, result?.buckets?.get("Last 3 months"))
+        assertEquals(1, result?.buckets?.get("Last 6 months"))
+        assertEquals(1, result?.buckets?.get("Older"))
+    }
+
+    @Test
+    fun `calculatePackageManagerSummary groups correctly`() {
+        mockStrings()
+        every { store.installerDisplayName("store1") } returns "Store 1"
+        every { store.installerDisplayName("store2") } returns "Store 2"
+
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store1")
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store1")
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store2")
+
+        val result = calculator.calculate(listOf(app1, app2, app3), AppInfoField.PACKAGE_MANAGER)
+
+        assertEquals(2, result?.buckets?.get("Store 1"))
+        assertEquals(1, result?.buckets?.get("Store 2"))
+    }
+
+    @Test
     fun `calculate returns null for version field`() {
         val app = createApp(enabled = true, archived = false, apkSize = 0)
         val result = calculator.calculate(listOf(app), AppInfoField.VERSION)
@@ -115,6 +155,11 @@ class SummaryCalculatorTest {
         every { context.getString(R.string.perm_bucket_some) } returns "Some"
         every { context.getString(R.string.perm_bucket_many) } returns "Many"
         every { context.getString(R.string.perm_bucket_lots) } returns "Lots"
+
+        every { context.getString(R.string.date_bucket_last_month) } returns "Last month"
+        every { context.getString(R.string.date_bucket_last_three_months) } returns "Last 3 months"
+        every { context.getString(R.string.date_bucket_last_six_months) } returns "Last 6 months"
+        every { context.getString(R.string.date_bucket_older) } returns "Older"
     }
 
     private fun createApp(

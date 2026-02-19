@@ -116,7 +116,7 @@ class MainActivity :
                             AppListViewModel(
                                 repo,
                                 DefaultDispatcherProvider(),
-                                SummaryCalculator(applicationContext),
+                                SummaryCalculator(applicationContext, store),
                             )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
