@@ -14,24 +14,23 @@ class GridAutofitLayoutManager : GridLayoutManager {
     private var lastHeight = 0
 
     constructor(context: Context, columnWidth: Int) : super(context, 1) {
-        setColumnWidth(checkedColumnWidth(context, columnWidth))
+        this.columnWidth = getValidColumnWidth(context, columnWidth)
     }
 
-    private fun checkedColumnWidth(
+    private fun getValidColumnWidth(
         context: Context,
         columnWidth: Int,
     ): Int {
-        if (columnWidth <= 0) {
-            setColumnWidth(
-                TypedValue
-                    .applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        48f,
-                        context.resources.displayMetrics,
-                    ).toInt(),
-            )
+        return if (columnWidth <= 0) {
+            TypedValue
+                .applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    48f,
+                    context.resources.displayMetrics,
+                ).toInt()
+        } else {
+            columnWidth
         }
-        return columnWidth
     }
 
     fun setColumnWidth(newColumnWidth: Int) {
