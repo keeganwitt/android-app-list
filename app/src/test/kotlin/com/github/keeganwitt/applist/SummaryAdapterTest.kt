@@ -2,7 +2,6 @@ package com.github.keeganwitt.applist
 
 import android.content.Context
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Test

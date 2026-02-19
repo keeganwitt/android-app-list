@@ -83,14 +83,22 @@ class AppExporter(
             R.string.export,
         ) { dialog: DialogInterface?, which: Int ->
             val selectedId = radioGroup.checkedRadioButtonId
-            if (selectedId == R.id.radio_xml) {
-                initiateExport(ExportFormat.XML)
-            } else if (selectedId == R.id.radio_html) {
-                initiateExport(ExportFormat.HTML)
-            } else if (selectedId == R.id.radio_csv) {
-                initiateExport(ExportFormat.CSV)
-            } else if (selectedId == R.id.radio_tsv) {
-                initiateExport(ExportFormat.TSV)
+            when (selectedId) {
+                R.id.radio_xml -> {
+                    initiateExport(ExportFormat.XML)
+                }
+
+                R.id.radio_html -> {
+                    initiateExport(ExportFormat.HTML)
+                }
+
+                R.id.radio_csv -> {
+                    initiateExport(ExportFormat.CSV)
+                }
+
+                R.id.radio_tsv -> {
+                    initiateExport(ExportFormat.TSV)
+                }
             }
         }
         builder.setNegativeButton(

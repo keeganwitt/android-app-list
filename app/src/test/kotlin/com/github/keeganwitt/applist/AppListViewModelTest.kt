@@ -3,7 +3,6 @@ package com.github.keeganwitt.applist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,7 +68,14 @@ class AppListViewModelTest {
             assertEquals(AppInfoField.VERSION, state.selectedField)
             assertEquals(2, state.items.size)
             assertFalse(state.isLoading)
-            coVerify { repository.loadApps(AppInfoField.VERSION, false, false, false) }
+            coVerify {
+                repository.loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    descending = false,
+                    reload = false,
+                )
+            }
         }
 
     @Test
@@ -86,7 +92,14 @@ class AppListViewModelTest {
 
             val state = viewModel.uiState.value
             assertEquals(AppInfoField.TARGET_SDK, state.selectedField)
-            coVerify { repository.loadApps(AppInfoField.TARGET_SDK, false, false, false) }
+            coVerify {
+                repository.loadApps(
+                    AppInfoField.TARGET_SDK,
+                    showSystemApps = false,
+                    descending = false,
+                    reload = false,
+                )
+            }
         }
 
     @Test
@@ -104,7 +117,14 @@ class AppListViewModelTest {
             advanceUntilIdle()
 
             assertTrue(viewModel.uiState.value.descending)
-            coVerify { repository.loadApps(AppInfoField.VERSION, false, true, false) }
+            coVerify {
+                repository.loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    descending = true,
+                    reload = false,
+                )
+            }
         }
 
     @Test
@@ -125,7 +145,14 @@ class AppListViewModelTest {
 
             val state = viewModel.uiState.value
             assertTrue(state.showSystem)
-            coVerify { repository.loadApps(AppInfoField.VERSION, true, false, true) }
+            coVerify {
+                repository.loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = true,
+                    descending = false,
+                    reload = true,
+                )
+            }
         }
 
     @Test
@@ -188,8 +215,22 @@ class AppListViewModelTest {
             viewModel.refresh()
             advanceUntilIdle()
 
-            coVerify(exactly = 2) { repository.loadApps(AppInfoField.VERSION, false, false, any()) }
-            coVerify { repository.loadApps(AppInfoField.VERSION, false, false, true) }
+            coVerify(exactly = 2) {
+                repository.loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    descending = false,
+                    reload = any(),
+                )
+            }
+            coVerify {
+                repository.loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    descending = false,
+                    reload = true,
+                )
+            }
         }
 
     @Test

@@ -18,10 +18,7 @@ val ApplicationInfo.isArchivedApp: Boolean
             return true
         }
         val meta = metaData
-        if (meta != null && meta.containsKey("com.android.vending.archive")) {
-            return true
-        }
-        return false
+        return meta != null && meta.containsKey("com.android.vending.archive")
     }
 
 /**
