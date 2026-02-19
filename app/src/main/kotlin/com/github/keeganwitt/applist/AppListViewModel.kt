@@ -122,6 +122,7 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
+            isLoading = !app.isDetailed,
         )
     }
 }

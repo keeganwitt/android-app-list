@@ -41,6 +41,8 @@ class AppAdapter(
             error(android.R.drawable.sym_def_app_icon)
             fallback(android.R.drawable.sym_def_app_icon)
         }
+        binding.appLoadingProgress.visibility = if (item.isLoading) View.VISIBLE else View.GONE
+        binding.appIcon.alpha = if (item.isLoading) 0.5f else 1.0f
 
         binding.packageName.text = item.packageName
         binding.appName.text = item.appName

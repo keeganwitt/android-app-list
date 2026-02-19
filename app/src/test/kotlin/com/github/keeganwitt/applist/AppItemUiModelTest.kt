@@ -3,8 +3,10 @@ package com.github.keeganwitt.applist
 import android.graphics.drawable.Drawable
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppItemUiModelTest {
@@ -20,6 +22,20 @@ class AppItemUiModelTest {
         assertEquals("com.test.app", model.packageName)
         assertEquals("Test App", model.appName)
         assertEquals("1.0.0", model.infoText)
+        assertFalse(model.isLoading)
+    }
+
+    @Test
+    fun `given AppItemUiModel created with isLoading true, then isLoading is true`() {
+        val model =
+            AppItemUiModel(
+                packageName = "com.test.app",
+                appName = "Test App",
+                infoText = "1.0.0",
+                isLoading = true,
+            )
+
+        assertTrue(model.isLoading)
     }
 
     @Test

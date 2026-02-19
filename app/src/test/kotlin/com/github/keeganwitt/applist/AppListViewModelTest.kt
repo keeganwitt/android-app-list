@@ -243,7 +243,7 @@ class AppListViewModelTest {
     fun `given loading apps, when successful, then isLoading updates to false`() =
         runTest {
             val mockApps =
-                listOf(createTestApp("com.test.app1", "Test App 1"))
+                listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = true))
             // Use MutableSharedFlow to control emission timing
             val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
             coEvery { repository.loadApps(any(), any(), any(), any()) } returns flow
@@ -262,6 +262,35 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertFalse(state.isLoading)
             assertEquals(1, state.items.size)
+            assertFalse(state.items[0].isLoading)
+        }
+
+    @Test
+    fun `given basic apps emitted, then items show loading state`() =
+        runTest {
+            val basicApps = listOf(createTestApp("com.test.app", "Test App", isDetailed = false))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(basicApps)
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.items.size)
+            assertTrue(state.items[0].isLoading)
+        }
+
+    @Test
+    fun `given detailed apps emitted, then items do not show loading state`() =
+        runTest {
+            val detailedApps = listOf(createTestApp("com.test.app", "Test App", isDetailed = true))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(detailedApps)
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.items.size)
+            assertFalse(state.items[0].isLoading)
         }
 
     @Test
@@ -333,6 +362,7 @@ class AppListViewModelTest {
         name: String,
         versionName: String = "1.0.0",
         enabled: Boolean = true,
+        isDetailed: Boolean = true,
     ): App =
         App(
             packageName = packageName,
@@ -350,5 +380,6 @@ class AppListViewModelTest {
             grantedPermissionsCount = 5,
             requestedPermissionsCount = 10,
             enabled = enabled,
+            isDetailed = isDetailed,
         )
 }

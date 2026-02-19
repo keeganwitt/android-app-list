@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -390,11 +391,13 @@ class AppRepositoryTest {
             val firstEmission = results[0]
             assertEquals(1, firstEmission.size)
             assertEquals("", firstEmission[0].versionName)
+            assertFalse(firstEmission[0].isDetailed)
 
             // Second emission: Detailed info
             val secondEmission = results[1]
             assertEquals(1, secondEmission.size)
             assertEquals("1.0.0", secondEmission[0].versionName)
+            assertTrue(secondEmission[0].isDetailed)
         }
 
     @Test
@@ -423,6 +426,8 @@ class AppRepositoryTest {
             assertEquals("com.test.error", finalDocs[0].packageName)
             // Verify we got the basic info back
             assertEquals("Error App", finalDocs[0].name)
+            // Verify it is still marked as detailed because the process finished (even if it failed)
+            assertTrue(finalDocs[0].isDetailed)
         }
 
     @Test

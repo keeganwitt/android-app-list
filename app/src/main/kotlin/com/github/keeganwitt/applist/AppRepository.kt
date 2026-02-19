@@ -100,6 +100,7 @@ class AndroidAppRepository(
             grantedPermissionsCount = 0,
             requestedPermissionsCount = 0,
             enabled = ai.enabled,
+            isDetailed = false,
         )
     }
 
@@ -130,10 +131,11 @@ class AndroidAppRepository(
                 existsInStore = existsInStore,
                 grantedPermissionsCount = grantedCount,
                 requestedPermissionsCount = requestedCount,
+                isDetailed = true,
             )
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
-            basicApp
+            basicApp.copy(isDetailed = true)
         }
 
     private fun sortApps(

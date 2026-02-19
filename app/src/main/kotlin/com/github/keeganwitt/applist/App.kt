@@ -16,4 +16,5 @@ data class App(
     val grantedPermissionsCount: Int?,
     val requestedPermissionsCount: Int?,
     val enabled: Boolean,
+    val isDetailed: Boolean = false,
 )

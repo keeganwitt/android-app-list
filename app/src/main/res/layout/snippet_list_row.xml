@@ -6,12 +6,23 @@
   android:gravity="center_horizontal"
   android:padding="5dp">
 
-  <ImageView
-    android:id="@+id/app_icon"
+  <FrameLayout
     android:layout_width="50dp"
-    android:layout_height="50dp"
-    android:scaleType="centerCrop"
-    android:contentDescription="@string/app_icon_description" />
+    android:layout_height="50dp">
+    <ImageView
+      android:id="@+id/app_icon"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:scaleType="centerCrop"
+      android:contentDescription="@string/app_icon_description" />
+    <ProgressBar
+      android:id="@+id/app_loading_progress"
+      style="?android:attr/progressBarStyleSmall"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_gravity="center"
+      android:visibility="gone" />
+  </FrameLayout>
 
   <TextView
     android:id="@+id/app_name"
