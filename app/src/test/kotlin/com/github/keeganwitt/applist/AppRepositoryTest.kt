@@ -52,7 +52,7 @@ class AppRepositoryTest {
     fun `given installed apps, when loadApps called, then apps are returned`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
@@ -86,7 +86,7 @@ class AppRepositoryTest {
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
@@ -117,7 +117,7 @@ class AppRepositoryTest {
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
@@ -170,7 +170,7 @@ class AppRepositoryTest {
             val app1 = createApplicationInfo("com.test.app1")
             val app2 = createApplicationInfo("com.test.app2")
             val app3 = createApplicationInfo("com.test.app3")
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2, app3)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2", "com.test.app3")
@@ -230,7 +230,7 @@ class AppRepositoryTest {
     fun `given apps with usage stats, when loadApps called, last used times are populated`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
             val lastUsedTime = 1234567890L
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
@@ -262,7 +262,7 @@ class AppRepositoryTest {
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
             val packageInfo =
-                createPackageInfo("1.0.0").apply {
+                createPackageInfo().apply {
                     requestedPermissions = arrayOf("android.permission.INTERNET", "android.permission.CAMERA")
                     requestedPermissionsFlags = intArrayOf(2, 0)
                 }
@@ -305,7 +305,7 @@ class AppRepositoryTest {
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2")
-            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo()
             every { packageService.loadLabel(any()) } returns "App"
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
@@ -331,7 +331,7 @@ class AppRepositoryTest {
     fun `given reload true, when loadApps called, then usage stats are reloaded`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
@@ -358,7 +358,7 @@ class AppRepositoryTest {
     fun `given apps, when loadApps called, then emits basic info first then detailed info`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
+            val packageInfo = createPackageInfo()
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
@@ -543,9 +543,9 @@ class AppRepositoryTest {
             this.targetSdkVersion = 33
         }
 
-    private fun createPackageInfo(versionName: String): PackageInfo =
+    private fun createPackageInfo(): PackageInfo =
         PackageInfo().apply {
-            this.versionName = versionName
+            this.versionName = "1.0.0"
             this.firstInstallTime = System.currentTimeMillis()
             this.lastUpdateTime = System.currentTimeMillis()
         }
