@@ -4,4 +4,5 @@ data class AppItemUiModel(
     val packageName: String,
     val appName: String,
     val infoText: String,
+    val isLoading: Boolean = false,
 )

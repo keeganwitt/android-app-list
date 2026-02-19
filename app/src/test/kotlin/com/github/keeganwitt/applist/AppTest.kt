@@ -49,6 +49,32 @@ class AppTest {
         assertEquals(5, app.grantedPermissionsCount)
         assertEquals(10, app.requestedPermissionsCount)
         assertTrue(app.enabled)
+        assertFalse(app.isDetailed)
+    }
+
+    @Test
+    fun `given App created with isDetailed true, then isDetailed is true`() {
+        val app =
+            App(
+                packageName = "com.test.app",
+                name = "Test App",
+                versionName = "1.0.0",
+                archived = false,
+                minSdk = 24,
+                targetSdk = 33,
+                firstInstalled = 1000000L,
+                lastUpdated = 2000000L,
+                lastUsed = 3000000L,
+                sizes = StorageUsage(),
+                installerName = "Google Play",
+                existsInStore = true,
+                grantedPermissionsCount = 5,
+                requestedPermissionsCount = 10,
+                enabled = true,
+                isDetailed = true,
+            )
+
+        assertTrue(app.isDetailed)
     }
 
     @Test
