@@ -1,17 +1,20 @@
 package com.github.keeganwitt.applist
 
+import android.app.Activity
 import android.content.ContentResolver
-import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
-import android.widget.RadioGroup
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -21,11 +24,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
-import org.robolectric.shadows.ShadowAlertDialog
 import org.robolectric.shadows.ShadowToast
 import java.io.File
 import java.io.IOException
-import java.io.Writer
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestAppListApplication::class)
@@ -75,7 +76,7 @@ class AppExporterTest {
         val formatter = mockk<ExportFormatter>()
         val xmlOutput = "<?xml version=\"1.0\"?><apps></apps>"
         every { formatter.writeXml(any(), any(), any()) } answers {
-            firstArg<Writer>().write(xmlOutput)
+            (args[0] as java.io.Writer).write(xmlOutput)
         }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
@@ -89,6 +90,7 @@ class AppExporterTest {
         verify { formatter.writeXml(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(file.readText() == xmlOutput)
     }
 
     @Test
@@ -159,7 +161,7 @@ class AppExporterTest {
         val formatter = mockk<ExportFormatter>()
         val htmlOutput = "<!DOCTYPE html><html></html>"
         every { formatter.writeHtml(any(), any()) } answers {
-            firstArg<Writer>().write(htmlOutput)
+            (args[0] as java.io.Writer).write(htmlOutput)
         }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
@@ -172,6 +174,7 @@ class AppExporterTest {
         verify { formatter.writeHtml(any(), items) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(file.readText() == htmlOutput)
     }
 
     @Test
@@ -221,7 +224,7 @@ class AppExporterTest {
         val formatter = mockk<ExportFormatter>()
         val csvOutput = "App Name,Package Name,Info Type,Info Value\n\"App 1\",\"com.example.app1\",\"VERSION\",\"1.0\""
         every { formatter.writeCsv(any(), any(), any()) } answers {
-            firstArg<Writer>().write(csvOutput)
+            (args[0] as java.io.Writer).write(csvOutput)
         }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
@@ -235,6 +238,7 @@ class AppExporterTest {
         verify { formatter.writeCsv(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(file.readText() == csvOutput)
     }
 
     @Test
@@ -242,7 +246,7 @@ class AppExporterTest {
         val formatter = mockk<ExportFormatter>()
         val tsvOutput = "App Name\tPackage Name\tInfo Type\tInfo Value\nApp 1\tcom.example.app1\tVERSION\t1.0"
         every { formatter.writeTsv(any(), any(), any()) } answers {
-            firstArg<Writer>().write(tsvOutput)
+            (args[0] as java.io.Writer).write(tsvOutput)
         }
 
         val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers)
@@ -256,89 +260,190 @@ class AppExporterTest {
         verify { formatter.writeTsv(any(), items, AppInfoField.VERSION) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
+        assertTrue(file.readText() == tsvOutput)
     }
 
     @Test
-    fun export_showsDialog() {
-        val exporter = AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers)
-        exporter.export(AppInfoField.VERSION)
+    fun onActivityResult_withXml_exportsXml() {
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val mockOutputStream = java.io.ByteArrayOutputStream()
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns mockOutputStream
 
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        assertNotNull(dialog)
-        assertTrue(dialog.isShowing)
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val xmlOutput = "xml content"
+        every { formatter.writeXml(any(), any(), any()) } answers {
+            (args[0] as java.io.Writer).write(xmlOutput)
+        }
+
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
+
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(spyActivity.mainLooper).idle()
+
+        verify { formatter.writeXml(any(), items, AppInfoField.VERSION) }
+        assertTrue(mockOutputStream.toString("UTF-8") == xmlOutput)
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Expected successful toast but was: $toast", toast?.toString() == spyActivity.getString(R.string.export_successful))
     }
 
     @Test
-    fun dialogPositiveButton_initiatesExportWithXml() {
-        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
-        exporter.export(AppInfoField.VERSION)
+    fun onActivityResult_withHtml_exportsHtml() {
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val mockOutputStream = java.io.ByteArrayOutputStream()
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns mockOutputStream
 
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
-        radioGroup.check(R.id.radio_xml)
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val htmlOutput = "html content"
+        every { formatter.writeHtml(any(), any()) } answers {
+            (args[0] as java.io.Writer).write(htmlOutput)
+        }
 
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.HTML)
+
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(spyActivity.mainLooper).idle()
+
+        verify { formatter.writeHtml(any(), items) }
+        assertTrue(mockOutputStream.toString("UTF-8") == htmlOutput)
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Expected successful toast but was: $toast", toast?.toString() == spyActivity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withCsv_exportsCsv() {
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val mockOutputStream = java.io.ByteArrayOutputStream()
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns mockOutputStream
+
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val csvOutput = "csv content"
+        every { formatter.writeCsv(any(), any(), any()) } answers {
+            (args[0] as java.io.Writer).write(csvOutput)
+        }
+
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.CSV)
+
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(spyActivity.mainLooper).idle()
+
+        verify { formatter.writeCsv(any(), items, AppInfoField.VERSION) }
+        assertTrue(mockOutputStream.toString("UTF-8") == csvOutput)
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Expected successful toast but was: $toast", toast?.toString() == spyActivity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_withTsv_exportsTsv() {
+        val spyActivity = spyk(activity)
+        val mockContentResolver = mockk<ContentResolver>()
+        every { spyActivity.contentResolver } returns mockContentResolver
+        val mockOutputStream = java.io.ByteArrayOutputStream()
+        val uri = Uri.parse("content://test/uri")
+        every { mockContentResolver.openOutputStream(uri) } returns mockOutputStream
+
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val tsvOutput = "tsv content"
+        every { formatter.writeTsv(any(), any(), any()) } answers {
+            (args[0] as java.io.Writer).write(tsvOutput)
+        }
+
+        val exporter = AppExporter(spyActivity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.TSV)
+
+        val result = ActivityResult(Activity.RESULT_OK, Intent().apply { data = uri })
+        callbackSlot.captured.onActivityResult(result)
+
+        Shadows.shadowOf(spyActivity.mainLooper).idle()
+
+        verify { formatter.writeTsv(any(), items, AppInfoField.VERSION) }
+        assertTrue(mockOutputStream.toString("UTF-8") == tsvOutput)
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Expected successful toast but was: $toast", toast?.toString() == spyActivity.getString(R.string.export_successful))
+    }
+
+    @Test
+    fun onActivityResult_whenCancelled_doesNothing() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
+
+        val result = ActivityResult(Activity.RESULT_CANCELED, null)
+        callbackSlot.captured.onActivityResult(result)
+
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { exporter.initiateExport(AppExporter.ExportFormat.XML) }
+        verify(exactly = 0) { formatter.writeXml(any(), any(), any()) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue(toast == null || toast.toString() != activity.getString(R.string.export_successful))
     }
 
     @Test
-    fun dialogPositiveButton_initiatesExportWithHtml() {
-        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
-        exporter.export(AppInfoField.VERSION)
+    fun onActivityResult_withNullData_doesNothing() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
+        every {
+            registry.register(any(), any<ActivityResultContract<Intent, ActivityResult>>(), capture(callbackSlot))
+        } returns mockk(relaxed = true)
+        val formatter = mockk<ExportFormatter>(relaxed = true)
 
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
-        radioGroup.check(R.id.radio_html)
+        val exporter = AppExporter(activity, { items }, formatter, crashReporter, testDispatchers, registry)
+        exporter.selectedAppInfoField = AppInfoField.VERSION
+        exporter.initiateExport(AppExporter.ExportFormat.XML)
 
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        val result = ActivityResult(Activity.RESULT_OK, null)
+        callbackSlot.captured.onActivityResult(result)
+
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { exporter.initiateExport(AppExporter.ExportFormat.HTML) }
-    }
-
-    @Test
-    fun dialogPositiveButton_initiatesExportWithCsv() {
-        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
-        exporter.export(AppInfoField.VERSION)
-
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
-        radioGroup.check(R.id.radio_csv)
-
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
-        Shadows.shadowOf(activity.mainLooper).idle()
-
-        verify { exporter.initiateExport(AppExporter.ExportFormat.CSV) }
-    }
-
-    @Test
-    fun dialogPositiveButton_initiatesExportWithTsv() {
-        val exporter = spyk(AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers))
-        exporter.export(AppInfoField.VERSION)
-
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        val radioGroup = dialog.findViewById<RadioGroup>(R.id.export_radio_group)!!
-        radioGroup.check(R.id.radio_tsv)
-
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
-        Shadows.shadowOf(activity.mainLooper).idle()
-
-        verify { exporter.initiateExport(AppExporter.ExportFormat.TSV) }
-    }
-
-    @Test
-    fun dialogNegativeButton_dismissesDialog() {
-        val exporter = AppExporter(activity, { items }, ExportFormatter(), crashReporter, testDispatchers)
-        exporter.export(AppInfoField.VERSION)
-
-        val dialog = ShadowAlertDialog.getLatestDialog() as AlertDialog
-        assertTrue(dialog.isShowing)
-
-        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
-        Shadows.shadowOf(activity.mainLooper).idle()
-
-        assertTrue(!dialog.isShowing)
+        verify(exactly = 0) { formatter.writeXml(any(), any(), any()) }
     }
 }
