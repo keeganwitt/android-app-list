@@ -10,7 +10,7 @@ enum class AppInfoField(
     APK_SIZE(R.string.appInfoField_apkSize) {
         override fun getValue(app: App) = app.sizes.apkBytes
     },
-    APP_SIZE(R.string.appInfoField_appSize) {
+    APP_SIZE(R.string.appInfoField_appSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.appBytes
     },
     ARCHIVED(R.string.appInfoField_archived) {

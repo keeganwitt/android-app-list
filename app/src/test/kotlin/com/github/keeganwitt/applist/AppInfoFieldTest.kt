@@ -326,6 +326,7 @@ class AppInfoFieldTest {
 
     @Test
     fun `given field requiring usage stats, when accessed, then requiresUsageStats is true`() {
+        assertEquals(true, AppInfoField.APP_SIZE.requiresUsageStats)
         assertEquals(true, AppInfoField.CACHE_SIZE.requiresUsageStats)
         assertEquals(true, AppInfoField.DATA_SIZE.requiresUsageStats)
         assertEquals(true, AppInfoField.EXTERNAL_CACHE_SIZE.requiresUsageStats)
@@ -336,7 +337,6 @@ class AppInfoFieldTest {
     @Test
     fun `given field not requiring usage stats, when accessed, then requiresUsageStats is false`() {
         assertEquals(false, AppInfoField.APK_SIZE.requiresUsageStats)
-        assertEquals(false, AppInfoField.APP_SIZE.requiresUsageStats)
         assertEquals(false, AppInfoField.ARCHIVED.requiresUsageStats)
         assertEquals(false, AppInfoField.ENABLED.requiresUsageStats)
         assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.requiresUsageStats)
