@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Sistem</string>
     <string name="summary">Özet</string>
 
+    <string name="summary_loading">Özet (yükleniyor…)</string>
 </resources>

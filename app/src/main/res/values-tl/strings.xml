@@ -41,4 +41,5 @@
     <string name="theme_entry_system">System</string>
     <string name="summary">Buod</string>
 
+    <string name="summary_loading">Buod (Naglo-load…)</string>
 </resources>

@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Hệ thống</string>
     <string name="summary">Tóm tắt</string>
 
+    <string name="summary_loading">Tóm tắt (Đang tải…)</string>
 </resources>

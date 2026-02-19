@@ -41,4 +41,5 @@
     <string name="theme_entry_system">सिस्टम</string>
     <string name="summary">सारांश</string>
 
+    <string name="summary_loading">सारांश (लोड हो रहा है…)</string>
 </resources>

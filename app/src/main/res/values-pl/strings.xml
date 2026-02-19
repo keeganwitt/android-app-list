@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Systemowy</string>
     <string name="summary">Podsumowanie</string>
 
+    <string name="summary_loading">Podsumowanie (ładowanie…)</string>
 </resources>

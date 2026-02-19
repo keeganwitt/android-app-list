@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Systeem</string>
     <string name="summary">Samenvatting</string>
 
+    <string name="summary_loading">Samenvatting (laden…)</string>
 </resources>

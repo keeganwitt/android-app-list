@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Sistema</string>
     <string name="summary">Riepilogo</string>
 
+    <string name="summary_loading">Riepilogo (caricamento…)</string>
 </resources>

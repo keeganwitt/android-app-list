@@ -41,4 +41,5 @@
     <string name="theme_entry_system">시스템</string>
     <string name="summary">요약</string>
 
+    <string name="summary_loading">요약 (로딩 중…)</string>
 </resources>

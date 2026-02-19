@@ -41,4 +41,5 @@
     <string name="theme_entry_system">システム</string>
     <string name="summary">概要</string>
 
+    <string name="summary_loading">概要 (読み込み中…)</string>
 </resources>

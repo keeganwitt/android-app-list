@@ -335,9 +335,9 @@ class AppListViewModelTest {
         }
 
     @Test
-    fun `given apps loaded, when successful, then summary is calculated`() =
+    fun `given detailed apps loaded, when successful, then summary is calculated`() =
         runTest {
-            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
+            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = true))
             val mockSummary = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 1))
             coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
             coEvery { summaryCalculator.calculate(any(), any()) } returns mockSummary
@@ -346,8 +346,24 @@ class AppListViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
+            assertTrue(state.isFullyLoaded)
             assertEquals(mockSummary, state.summary)
             coVerify { summaryCalculator.calculate(mockApps, AppInfoField.ENABLED) }
+        }
+
+    @Test
+    fun `given basic apps loaded, when successful, then summary is not calculated`() =
+        runTest {
+            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = false))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+
+            viewModel.init(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isFullyLoaded)
+            assertEquals(null, state.summary)
+            coVerify(exactly = 0) { summaryCalculator.calculate(any(), any()) }
         }
 
     @Test

@@ -41,4 +41,5 @@
     <string name="theme_entry_system">Sistem</string>
     <string name="summary">Ringkasan</string>
 
+    <string name="summary_loading">Ringkasan (Memuat…)</string>
 </resources>
