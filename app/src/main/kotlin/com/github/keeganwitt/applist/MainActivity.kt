@@ -50,6 +50,7 @@ class MainActivity :
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
     private var shouldRefreshOnResume = false
+    private var ignoreQueryChanges = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,6 +170,7 @@ class MainActivity :
     }
 
     private fun observeViewModel() {
+        latestState = appListViewModel.uiState.value
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 appListViewModel.uiState.collectLatest { state ->
@@ -181,6 +183,7 @@ class MainActivity :
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
                     if (shouldInvalidate) {
+                        ignoreQueryChanges = true
                         invalidateOptionsMenu()
                     }
                 }
@@ -189,6 +192,7 @@ class MainActivity :
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        ignoreQueryChanges = false
         menuInflater.inflate(R.menu.app_menu, menu)
 
         menu.findItem(R.id.systemAppToggle).isChecked = latestState.showSystem
@@ -220,6 +224,7 @@ class MainActivity :
                 }
 
                 override fun onQueryTextChange(query: String?): Boolean {
+                    if (ignoreQueryChanges) return true
                     appListViewModel.setQuery(query ?: "")
                     return true
                 }
