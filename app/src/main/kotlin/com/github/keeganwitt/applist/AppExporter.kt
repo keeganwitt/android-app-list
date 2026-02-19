@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.OutputStreamWriter
-import java.io.Writer
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -143,8 +142,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.XML) {
-                formatter.writeXml(it, items, field)
+            exportToFile(uri, ExportFormat.XML, items) {
+                formatter.toXml(it, field)
             }
         }
     }
@@ -153,8 +152,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.CSV) {
-                formatter.writeCsv(it, items, field)
+            exportToFile(uri, ExportFormat.CSV, items) {
+                formatter.toCsv(it, field)
             }
         }
     }
@@ -163,8 +162,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.TSV) {
-                formatter.writeTsv(it, items, field)
+            exportToFile(uri, ExportFormat.TSV, items) {
+                formatter.toTsv(it, field)
             }
         }
     }
@@ -172,8 +171,8 @@ class AppExporter(
     internal fun writeHtmlToFile(uri: Uri) {
         val items = itemsProvider()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.HTML) {
-                formatter.writeHtml(it, items)
+            exportToFile(uri, ExportFormat.HTML, items) {
+                formatter.toHtml(it)
             }
         }
     }
@@ -181,7 +180,8 @@ class AppExporter(
     private suspend fun exportToFile(
         uri: Uri,
         format: ExportFormat,
-        writeAction: (Writer) -> Unit,
+        items: List<AppItemUiModel>,
+        contentGenerator: (List<AppItemUiModel>) -> String,
     ) {
         try {
             val outputStream =
@@ -189,7 +189,8 @@ class AppExporter(
                     ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
-                writeAction(writer)
+                val content = contentGenerator(items)
+                writer.write(content)
                 writer.flush()
             }
             withContext(dispatchers.main) {
