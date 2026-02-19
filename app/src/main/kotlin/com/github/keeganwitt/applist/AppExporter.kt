@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.io.Writer
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -142,8 +143,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.XML, items) { writer, itemsToExport ->
-                formatter.writeXml(writer, itemsToExport, field)
+            exportToFile(uri, ExportFormat.XML) {
+                formatter.writeXml(it, items, field)
             }
         }
     }
@@ -152,8 +153,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.CSV, items) { writer, itemsToExport ->
-                formatter.writeCsv(writer, itemsToExport, field)
+            exportToFile(uri, ExportFormat.CSV) {
+                formatter.writeCsv(it, items, field)
             }
         }
     }
@@ -162,8 +163,8 @@ class AppExporter(
         val items = itemsProvider()
         val field = selectedAppInfoField!!
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.TSV, items) { writer, itemsToExport ->
-                formatter.writeTsv(writer, itemsToExport, field)
+            exportToFile(uri, ExportFormat.TSV) {
+                formatter.writeTsv(it, items, field)
             }
         }
     }
@@ -171,8 +172,8 @@ class AppExporter(
     internal fun writeHtmlToFile(uri: Uri) {
         val items = itemsProvider()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.HTML, items) { writer, itemsToExport ->
-                formatter.writeHtml(writer, itemsToExport)
+            exportToFile(uri, ExportFormat.HTML) {
+                formatter.writeHtml(it, items)
             }
         }
     }
@@ -180,8 +181,7 @@ class AppExporter(
     private suspend fun exportToFile(
         uri: Uri,
         format: ExportFormat,
-        items: List<AppItemUiModel>,
-        contentWriter: (java.io.Writer, List<AppItemUiModel>) -> Unit,
+        writeAction: (Writer) -> Unit,
     ) {
         try {
             val outputStream =
@@ -189,7 +189,7 @@ class AppExporter(
                     ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
-                contentWriter(writer, items)
+                writeAction(writer)
                 writer.flush()
             }
             withContext(dispatchers.main) {
