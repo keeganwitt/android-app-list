@@ -144,13 +144,10 @@ class AndroidAppRepository(
         descending: Boolean,
     ): List<App> {
         val collator = Collator.getInstance()
-        val comparator = compareBy<Pair<App, Comparable<*>?>> { it.second }.thenBy(collator) { it.first.name }
+        val comparator = compareBy<App> { sortKey(it, field) }.thenBy(collator) { it.name }
         val finalComparator = if (descending) comparator.reversed() else comparator
 
-        return apps
-            .map { app -> app to sortKey(app, field) }
-            .sortedWith(finalComparator)
-            .map { it.first }
+        return apps.sortedWith(finalComparator)
     }
 
     private fun sortKey(
