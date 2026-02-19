@@ -14,6 +14,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.Collator
 
 interface AppRepository {
@@ -32,6 +34,10 @@ class AndroidAppRepository(
     private val appStoreService: AppStoreService,
     private val crashReporter: CrashReporter? = null,
 ) : AppRepository {
+    private val cacheMutex = Mutex()
+    private var cachedFilteredApps: List<Pair<ApplicationInfo, App>>? = null
+    private var cachedShowSystemApps: Boolean? = null
+
     override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
@@ -39,7 +45,7 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            val filteredWithBasic = getFilteredApps(showSystemApps)
+            val filteredWithBasic = getFilteredApps(showSystemApps, reload)
             val basicApps = filteredWithBasic.map { it.second }
             emit(sortApps(basicApps, field, descending))
 
@@ -57,27 +63,39 @@ class AndroidAppRepository(
             emit(sortApps(detailedApps, field, descending))
         }
 
-    private fun getFilteredApps(showSystemApps: Boolean): List<Pair<ApplicationInfo, App>> {
-        var flags =
-            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                .toLong()
-        if (Build.VERSION.SDK_INT >= 35) {
-            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
-        }
-        val allInstalled = packageService.getInstalledApplications(flags)
-        val launchablePackages = packageService.getLaunchablePackages()
-
-        return allInstalled.mapNotNull { ai ->
-            val archived = ai.isArchivedApp
-            val isUserInstalled = ai.isUserInstalled
-            val hasLaunch = launchablePackages.contains(ai.packageName)
-            if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
-                ai to mapToAppBasic(ai, archived)
-            } else {
-                null
+    private suspend fun getFilteredApps(
+        showSystemApps: Boolean,
+        reload: Boolean,
+    ): List<Pair<ApplicationInfo, App>> =
+        cacheMutex.withLock {
+            if (!reload && cachedShowSystemApps == showSystemApps && cachedFilteredApps != null) {
+                return@withLock cachedFilteredApps!!
             }
+
+            var flags =
+                (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                    .toLong()
+            if (Build.VERSION.SDK_INT >= 35) {
+                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+            }
+            val allInstalled = packageService.getInstalledApplications(flags)
+            val launchablePackages = packageService.getLaunchablePackages()
+
+            val result =
+                allInstalled.mapNotNull { ai ->
+                    val archived = ai.isArchivedApp
+                    val isUserInstalled = ai.isUserInstalled
+                    val hasLaunch = launchablePackages.contains(ai.packageName)
+                    if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+                        ai to mapToAppBasic(ai, archived)
+                    } else {
+                        null
+                    }
+                }
+            cachedFilteredApps = result
+            cachedShowSystemApps = showSystemApps
+            result
         }
-    }
 
     private fun mapToAppBasic(
         ai: ApplicationInfo,

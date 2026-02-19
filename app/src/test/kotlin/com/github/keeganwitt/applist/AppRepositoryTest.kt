@@ -328,6 +328,40 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `given cached data, when loadApps called with reload false, then cached data is used`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "App"
+
+            // First call to populate cache
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any()) }
+
+            // Second call with same params, should use cache
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any()) }
+        }
+
+    @Test
+    fun `given cached data, when loadApps called with reload true, then data is reloaded`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.loadLabel(any()) } returns "App"
+
+            // First call to populate cache
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            verify(exactly = 1) { packageService.getInstalledApplications(any()) }
+
+            // Second call with reload true, should reload
+            repository.loadApps(AppInfoField.VERSION, false, false, true).toList()
+            verify(exactly = 2) { packageService.getInstalledApplications(any()) }
+        }
+
+    @Test
     fun `given reload true, when loadApps called, then usage stats are reloaded`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
