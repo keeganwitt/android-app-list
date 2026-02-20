@@ -92,4 +92,15 @@ class PermissionUtilsTest {
         assertTrue(startedIntent?.action == android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS)
         assertTrue(startedIntent?.data == null)
     }
+
+    @Test
+    fun `requestUsageStatsPermission shows toast when no activity resolves`() {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        // No resolve info added
+
+        PermissionUtils.requestUsageStatsPermission(activity)
+
+        val toastText = org.robolectric.shadows.ShadowToast.getTextOfLatestToast()
+        assertTrue(toastText.toString().contains("Please enable Usage Access permission manually in Settings"))
+    }
 }
