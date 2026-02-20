@@ -99,22 +99,22 @@ class AppListViewModel(
         _uiState.update { it.copy(items = filtered) }
 
         viewModelScope.launch(dispatchers.default) {
-            if (state.isFullyLoaded) {
-                val filteredApps =
-                    if (state.query.isBlank()) {
-                        allApps
-                    } else {
-                        val filteredPackageNames = filtered.map { it.packageName }.toSet()
-                        allApps.filter { app -> app.packageName in filteredPackageNames }
-                    }
+            val filteredApps =
+                if (state.query.isBlank()) {
+                    allApps
+                } else {
+                    val filteredPackageNames = filtered.map { it.packageName }.toSet()
+                    allApps.filter { app -> app.packageName in filteredPackageNames }
+                }
 
+            if (state.isFullyLoaded) {
                 val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
                 withContext(dispatchers.main) {
-                    _uiState.update { it.copy(summary = summary) }
+                    _uiState.update { it.copy(summary = summary, filteredApps = filteredApps) }
                 }
             } else {
                 withContext(dispatchers.main) {
-                    _uiState.update { it.copy(summary = null) }
+                    _uiState.update { it.copy(summary = null, filteredApps = filteredApps) }
                 }
             }
         }
