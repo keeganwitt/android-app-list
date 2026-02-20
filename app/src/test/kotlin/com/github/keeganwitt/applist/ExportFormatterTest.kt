@@ -127,6 +127,19 @@ class ExportFormatterTest {
         assertTrue(result.contains("<b>VERSION:</b>"))
     }
 
+    @Test
+    fun `given apps with special characters, when writeCsv called, then return escaped csv`() {
+        // Given
+        val apps = listOf(createTestApp("com.example,pkg", "App \"Name\""))
+
+        // When
+        val result = formatter.toCsv(apps, includeUsageStats = false)
+
+        // Then
+        assertTrue(result.contains("\"App \"\"Name\"\"\""))
+        assertTrue(result.contains("\"com.example,pkg\""))
+    }
+
     private fun createTestApp(
         packageName: String,
         name: String,

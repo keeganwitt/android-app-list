@@ -94,6 +94,20 @@ class AppExporterTest {
     }
 
     @Test
+    fun `writeXmlToFile when setting disabled then includeUsageStats is false`() {
+        val formatter = mockk<ExportFormatter>(relaxed = true)
+        every { appSettings.isIncludeUsageStatsInExportEnabled() } returns false
+        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { formatter.writeXml(any(), apps, false) }
+    }
+
+    @Test
     fun onActivityResult_withXml_exportsXml() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
         val callbackSlot = slot<ActivityResultCallback<ActivityResult>>()
