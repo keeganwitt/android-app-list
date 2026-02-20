@@ -104,7 +104,7 @@ class AndroidAppRepository(
         )
     }
 
-    private fun mapToAppDetailed(
+    private suspend fun mapToAppDetailed(
         ai: ApplicationInfo,
         basicApp: App,
         lastUsedEpochs: Map<String, Long>,

@@ -1,7 +1,11 @@
 package com.github.keeganwitt.applist.services
 
+import com.github.keeganwitt.applist.utils.await
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -45,19 +49,20 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given non-Google Play installer, when existsInAppStore called, then returns null`() {
+    fun `given non-Google Play installer, when existsInAppStore called, then returns null`() = runBlocking {
         val result = service.existsInAppStore("com.test.app", "com.amazon.venezia")
         assertNull(result)
     }
 
     @Test
-    fun `given Google Play installer and successful response, when existsInAppStore called, then returns true`() {
+    fun `given Google Play installer and successful response, when existsInAppStore called, then returns true`() = runBlocking {
         val call = mockk<Call>()
         val response = mockk<Response>()
 
+        mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
         every { response.isSuccessful } returns true
         every { response.close() } returns Unit
-        every { call.execute() } returns response
+        coEvery { call.await() } returns response
         every { httpClient.newCall(any()) } returns call
 
         val result = service.existsInAppStore("com.test.app", "com.android.vending")
@@ -66,13 +71,14 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given Google Play installer and unsuccessful response, when existsInAppStore called, then returns false`() {
+    fun `given Google Play installer and unsuccessful response, when existsInAppStore called, then returns false`() = runBlocking {
         val call = mockk<Call>()
         val response = mockk<Response>()
 
+        mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
         every { response.isSuccessful } returns false
         every { response.close() } returns Unit
-        every { call.execute() } returns response
+        coEvery { call.await() } returns response
         every { httpClient.newCall(any()) } returns call
 
         val result = service.existsInAppStore("com.test.app", "com.android.vending")
@@ -81,10 +87,11 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given Google Play installer and network error, when existsInAppStore called, then returns null`() {
+    fun `given Google Play installer and network error, when existsInAppStore called, then returns null`() = runBlocking {
         val call = mockk<Call>()
 
-        every { call.execute() } throws IOException("Network error")
+        mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
+        coEvery { call.await() } throws IOException("Network error")
         every { httpClient.newCall(any()) } returns call
 
         val result = service.existsInAppStore("com.test.app", "com.android.vending")
@@ -93,13 +100,14 @@ class AppStoreServiceTest {
     }
 
     @Test
-    fun `given cached result, when existsInAppStore called again, then returns cached value without network call`() {
+    fun `given cached result, when existsInAppStore called again, then returns cached value without network call`() = runBlocking {
         val call = mockk<Call>()
         val response = mockk<Response>()
 
+        mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
         every { response.isSuccessful } returns true
         every { response.close() } returns Unit
-        every { call.execute() } returns response
+        coEvery { call.await() } returns response
         every { httpClient.newCall(any()) } returns call
 
         val result1 = service.existsInAppStore("com.test.app", "com.android.vending")
