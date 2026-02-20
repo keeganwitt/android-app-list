@@ -31,6 +31,7 @@ import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -131,8 +132,9 @@ class MainActivity :
         appExporter =
             AppExporter(
                 this,
-                itemsProvider = { appAdapter.currentList },
+                appsProvider = { latestState.filteredApps },
                 formatter = ExportFormatter(),
+                appSettings = appSettings,
                 crashReporter = crashReporter,
             )
     }
@@ -284,7 +286,7 @@ class MainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                appExporter.export(latestState.selectedField)
+                appExporter.export()
                 return true
             }
 
@@ -330,43 +332,8 @@ class MainActivity :
     }
 
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if (field.requiresUsageStats && !hasUsageStatsPermission()) {
-            requestUsageStatsPermission()
-        }
-    }
-
-    private fun hasUsageStatsPermission(): Boolean {
-        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode =
-            appOps.checkOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                Process.myUid(),
-                packageName,
-            )
-        return mode == AppOpsManager.MODE_ALLOWED
-    }
-
-    private fun requestUsageStatsPermission() {
-        val intent =
-            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                data = Uri.fromParts("package", packageName, null)
-            }
-
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            val fallbackIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            if (fallbackIntent.resolveActivity(packageManager) != null) {
-                startActivity(fallbackIntent)
-            } else {
-                Log.w(TAG, "No Activity found to handle USAGE_ACCESS_SETTINGS intent.")
-                Toast
-                    .makeText(
-                        this,
-                        "Please enable Usage Access permission manually in Settings",
-                        Toast.LENGTH_LONG,
-                    ).show()
-            }
+        if (field.requiresUsageStats && !PermissionUtils.hasUsageStatsPermission(this)) {
+            PermissionUtils.requestUsageStatsPermission(this)
         }
     }
 
