@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.github.keeganwitt.applist.utils.PermissionUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -24,13 +25,13 @@ import java.util.Locale
 
 class AppExporter(
     private val activity: AppCompatActivity,
-    private val itemsProvider: () -> List<AppItemUiModel>,
+    private val appsProvider: () -> List<App>,
     private val formatter: ExportFormatter,
+    private val appSettings: AppSettings,
     private val crashReporter: CrashReporter? = null,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
     private val registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
-    internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: ExportFormat? = null
 
     private val createFileLauncher: ActivityResultLauncher<Intent>
@@ -69,8 +70,7 @@ class AppExporter(
             }
     }
 
-    fun export(selectedAppInfoField: AppInfoField) {
-        this.selectedAppInfoField = selectedAppInfoField
+    fun export() {
         showExportDialog()
     }
 
@@ -113,8 +113,8 @@ class AppExporter(
     }
 
     internal fun initiateExport(type: ExportFormat) {
-        val items = itemsProvider()
-        if (items.isEmpty()) {
+        val apps = appsProvider()
+        if (apps.isEmpty()) {
             Toast
                 .makeText(
                     activity,
@@ -128,8 +128,7 @@ class AppExporter(
         val timestamp =
             SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
                 .format(Date())
-        val appInfoType = selectedAppInfoField!!.name.lowercase(Locale.getDefault())
-        val fileName = "apps_" + appInfoType + "_" + timestamp + "." + type.extension
+        val fileName = "apps_" + timestamp + "." + type.extension
 
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -140,43 +139,48 @@ class AppExporter(
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, ExportFormat.XML) {
-                formatter.writeXml(it, items, field)
+                formatter.writeXml(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeCsvToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, ExportFormat.CSV) {
-                formatter.writeCsv(it, items, field)
+                formatter.writeCsv(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeTsvToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, ExportFormat.TSV) {
-                formatter.writeTsv(it, items, field)
+                formatter.writeTsv(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
-        val items = itemsProvider()
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, ExportFormat.HTML) {
-                formatter.writeHtml(it, items)
+                formatter.writeHtml(it, apps, includeUsageStats)
             }
         }
     }
+
+    private fun shouldIncludeUsageStats(): Boolean =
+        appSettings.isIncludeUsageStatsInExportEnabled() &&
+            PermissionUtils.hasUsageStatsPermission(activity)
 
     private suspend fun exportToFile(
         uri: Uri,

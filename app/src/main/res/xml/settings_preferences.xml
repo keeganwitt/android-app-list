@@ -7,6 +7,12 @@
         android:summary="@string/crash_reporting_summary"
         android:defaultValue="true" />
 
+    <SwitchPreferenceCompat
+        android:key="include_usage_stats_in_export"
+        android:title="@string/export_usage_stats_title"
+        android:summary="@string/export_usage_stats_summary"
+        android:defaultValue="false" />
+
     <ListPreference
         android:key="theme_mode"
         android:title="@string/theme_title"

@@ -414,6 +414,25 @@ class AppListViewModelTest {
             assertEquals("1.2.3", state.items[0].infoText)
         }
 
+    @Test
+    fun `given apps loaded, when query matches, then filteredApps is populated`() =
+        runTest {
+            val app1 = createTestApp("com.test.app1", "App One")
+            val app2 = createTestApp("com.test.app2", "App Two")
+            val mockApps = listOf(app1, app2)
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            viewModel.setQuery("One")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.filteredApps.size)
+            assertEquals("com.test.app1", state.filteredApps[0].packageName)
+        }
+
     private fun createTestApp(
         packageName: String,
         name: String,

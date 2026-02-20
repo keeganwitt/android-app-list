@@ -43,6 +43,10 @@
     app</string>
     <string name="theme_title">Theme</string>
 
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size,
+    last used) in exports</string>
+
     <string name="theme_entry_light">Light</string>
     <string name="theme_entry_dark">Dark</string>
     <string name="theme_entry_system">System</string>
