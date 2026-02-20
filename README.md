@@ -14,3 +14,11 @@ Some of the useful things that can be displayed are
 
 <img src="images/screenshot-1.png" alt="Screenshot 1" width="300"/>
 <img src="images/screenshot-2.png" alt="Screenshot 2" width="300"/>
+
+## Setup
+
+This project uses Firebase. For security reasons, the `google-services.json` file is not included in the repository.
+
+To build the project:
+1. The build script will automatically create a `app/google-services.json` file from `app/google-services.json.template` if it's missing. This allows the project to build with dummy values.
+2. To use Firebase features, you must replace `app/google-services.json` with your own valid configuration file from the Firebase Console.
