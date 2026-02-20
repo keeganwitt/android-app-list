@@ -42,4 +42,6 @@
     <string name="summary">Zusammenfassung</string>
 
     <string name="summary_loading">Zusammenfassung (wird geladen…)</string>
+    <string name="export_usage_stats_title">Nutzungsfelder in Export einbeziehen</string>
+    <string name="export_usage_stats_summary">Felder einbeziehen, die eine Nutzungserlaubnis erfordern (z. B. App-Größe, letzte Nutzung) in Exporte</string>
 </resources>

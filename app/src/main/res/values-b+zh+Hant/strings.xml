@@ -42,4 +42,6 @@
     <string name="summary">摘要</string>
 
     <string name="summary_loading">摘要 (載入中…)</string>
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
 </resources>
