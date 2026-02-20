@@ -3,7 +3,10 @@ package com.github.keeganwitt.applist
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ExportFormatterTest {
     private val formatter = ExportFormatter()
 
@@ -16,11 +19,8 @@ class ExportFormatterTest {
         val result = formatter.toXml(apps, includeUsageStats = false)
 
         // Then
-        val expected =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<apps>\n" +
-                "</apps>\n"
-        assertEquals(expected, result)
+        assertTrue(result.contains("<?xml version='1.0' encoding='UTF-8' ?>"))
+        assertTrue(result.contains("<apps>\n</apps>\n"))
     }
 
     @Test
@@ -138,6 +138,32 @@ class ExportFormatterTest {
         // Then
         assertTrue(result.contains("\"App \"\"Name\"\"\""))
         assertTrue(result.contains("\"com.example,pkg\""))
+    }
+
+    @Test
+    fun `given apps with special characters, when toXml called, then return escaped xml`() {
+        // Given
+        val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App <Name> & \"More\""))
+
+        // When
+        val result = formatter.toXml(apps, includeUsageStats = false)
+
+        // Then
+        // XmlSerializer doesn't escape quotes in text content
+        assertTrue(result.contains("<appName>App &lt;Name&gt; &amp; \"More\"</appName>"))
+    }
+
+    @Test
+    fun `given apps with special characters, when toHtml called, then return escaped html`() {
+        // Given
+        val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App <Name> & \"More\" '"))
+
+        // When
+        val result = formatter.toHtml(apps, includeUsageStats = false)
+
+        // Then
+        // TextUtils.htmlEncode escapes quotes and apostrophes
+        assertTrue(result.contains("App &lt;Name&gt; &amp; &quot;More&quot; &#39;"))
     }
 
     private fun createTestApp(

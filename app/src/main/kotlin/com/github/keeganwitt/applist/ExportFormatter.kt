@@ -1,5 +1,7 @@
 package com.github.keeganwitt.applist
 
+import android.text.TextUtils
+import android.util.Xml
 import java.io.StringWriter
 import java.io.Writer
 
@@ -19,21 +21,35 @@ class ExportFormatter {
         includeUsageStats: Boolean,
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
-        writer
-            .append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            .append("<apps>\n")
+        val serializer = Xml.newSerializer()
+        serializer.setOutput(writer)
+        serializer.startDocument("UTF-8", null)
+        serializer.text("\n")
+        serializer.startTag(null, "apps")
+        serializer.text("\n")
         apps.forEach { app ->
-            writer.append("<app>\n")
-            writer.append("<appName>").append(escapeMarkup(app.name)).append("</appName>\n")
-            writer.append("<packageName>").append(escapeMarkup(app.packageName)).append("</packageName>\n")
+            serializer.startTag(null, "app")
+            serializer.text("\n")
+            serializer.startTag(null, "appName")
+            serializer.text(app.name)
+            serializer.endTag(null, "appName")
+            serializer.text("\n")
+            serializer.startTag(null, "packageName")
+            serializer.text(app.packageName)
+            serializer.endTag(null, "packageName")
+            serializer.text("\n")
             fields.forEach { field ->
-                writer.append("<").append(field.name).append(">")
-                    .append(escapeMarkup(field.getFormattedValue(app)))
-                    .append("</").append(field.name).append(">\n")
+                serializer.startTag(null, field.name)
+                serializer.text(field.getFormattedValue(app))
+                serializer.endTag(null, field.name)
+                serializer.text("\n")
             }
-            writer.append("</app>\n")
+            serializer.endTag(null, "app")
+            serializer.text("\n")
         }
-        writer.append("</apps>\n")
+        serializer.endTag(null, "apps")
+        serializer.text("\n")
+        serializer.endDocument()
     }
 
     fun toHtml(
@@ -74,11 +90,11 @@ class ExportFormatter {
             .append("<div class=\"app-grid\">\n")
         apps.forEach { app ->
             writer.append("<div class=\"app-item\">\n")
-            writer.append("<div class=\"app-name\">").append(escapeMarkup(app.name)).append("</div>\n")
-            writer.append("<div class=\"package-name\">").append(escapeMarkup(app.packageName)).append("</div>\n")
+            writer.append("<div class=\"app-name\">").append(TextUtils.htmlEncode(app.name)).append("</div>\n")
+            writer.append("<div class=\"package-name\">").append(TextUtils.htmlEncode(app.packageName)).append("</div>\n")
             fields.forEach { field ->
                 writer.append("<div class=\"app-info\"><b>").append(field.name).append(":</b> ")
-                    .append(escapeMarkup(field.getFormattedValue(app))).append("</div>\n")
+                    .append(TextUtils.htmlEncode(field.getFormattedValue(app))).append("</div>\n")
             }
             writer.append("</div>\n")
         }
@@ -149,13 +165,4 @@ class ExportFormatter {
             writer.append("\n")
         }
     }
-
-    // This is not using Html.escapeHtml for unit tests (since it's not implemented by Robolectric)
-    private fun escapeMarkup(s: String): String =
-        s
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;")
-            .replace("'", "&apos;")
 }
