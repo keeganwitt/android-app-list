@@ -6,6 +6,7 @@ import java.util.Date
 enum class AppInfoField(
     val titleResId: Int,
     val requiresUsageStats: Boolean = false,
+    private val isDate: Boolean = false,
 ) {
     APK_SIZE(R.string.appInfoField_apkSize) {
         override fun getValue(app: App) = app.sizes.apkBytes
@@ -31,23 +32,17 @@ enum class AppInfoField(
     EXTERNAL_CACHE_SIZE(R.string.appInfoField_externalCacheSize, requiresUsageStats = true) {
         override fun getValue(app: App) = app.sizes.externalCacheBytes
     },
-    FIRST_INSTALLED(R.string.appInfoField_firstInstalled) {
+    FIRST_INSTALLED(R.string.appInfoField_firstInstalled, isDate = true) {
         override fun getValue(app: App) = app.firstInstalled
-
-        override fun getFormattedValue(app: App) = formatDate(app.firstInstalled)
     },
     GRANTED_PERMISSIONS(R.string.appInfoField_grantedPermissions) {
         override fun getValue(app: App) = app.grantedPermissionsCount ?: 0
     },
-    LAST_UPDATED(R.string.appInfoField_lastUpdated) {
+    LAST_UPDATED(R.string.appInfoField_lastUpdated, isDate = true) {
         override fun getValue(app: App) = app.lastUpdated
-
-        override fun getFormattedValue(app: App) = formatDate(app.lastUpdated)
     },
-    LAST_USED(R.string.appInfoField_lastUsed, requiresUsageStats = true) {
+    LAST_USED(R.string.appInfoField_lastUsed, requiresUsageStats = true, isDate = true) {
         override fun getValue(app: App) = app.lastUsed
-
-        override fun getFormattedValue(app: App) = formatDate(app.lastUsed)
     },
     MIN_SDK(R.string.appInfoField_minSdk) {
         override fun getValue(app: App) = app.minSdk ?: 0
@@ -71,7 +66,14 @@ enum class AppInfoField(
 
     abstract fun getValue(app: App): Comparable<*>?
 
-    open fun getFormattedValue(app: App): String = getValue(app)?.toString() ?: ""
+    open fun getFormattedValue(app: App): String {
+        val value = getValue(app)
+        return if (isDate) {
+            formatDate(value as? Long)
+        } else {
+            value?.toString() ?: ""
+        }
+    }
 
-    protected fun formatDate(timestamp: Long?): String = timestamp?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
+    private fun formatDate(timestamp: Long?): String = timestamp?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
 }
