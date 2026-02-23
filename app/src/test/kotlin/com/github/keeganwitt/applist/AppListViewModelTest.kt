@@ -43,7 +43,7 @@ class AppListViewModelTest {
                 override val main = testDispatcher
                 override val default = testDispatcher
             }
-        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator)
+        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator) { it.toString() }
     }
 
     @After
@@ -257,6 +257,21 @@ class AppListViewModelTest {
 
             val state = viewModel.uiState.value
             assertEquals("1.2.3", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given size field, when mapToItem called, then sizeFormatter is used`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))
+            val mockSizeFormatter: (Long) -> String = { "formatted $it" }
+            val viewModelWithSizeFormatter = AppListViewModel(repository, dispatcherProvider, summaryCalculator, mockSizeFormatter)
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModelWithSizeFormatter.init(AppInfoField.APK_SIZE)
+            advanceUntilIdle()
+
+            val state = viewModelWithSizeFormatter.uiState.value
+            assertEquals("formatted 1024", state.items[0].infoText)
         }
 
     @Test

@@ -349,4 +349,30 @@ class AppInfoFieldTest {
         assertEquals(false, AppInfoField.TARGET_SDK.requiresUsageStats)
         assertEquals(false, AppInfoField.VERSION.requiresUsageStats)
     }
+
+    @Test
+    fun `given size fields, when accessed, then isSize is true`() {
+        assertEquals(true, AppInfoField.APK_SIZE.isSize)
+        assertEquals(true, AppInfoField.APP_SIZE.isSize)
+        assertEquals(true, AppInfoField.CACHE_SIZE.isSize)
+        assertEquals(true, AppInfoField.DATA_SIZE.isSize)
+        assertEquals(true, AppInfoField.EXTERNAL_CACHE_SIZE.isSize)
+        assertEquals(true, AppInfoField.TOTAL_SIZE.isSize)
+    }
+
+    @Test
+    fun `given non-size fields, when accessed, then isSize is false`() {
+        assertEquals(false, AppInfoField.VERSION.isSize)
+        assertEquals(false, AppInfoField.TARGET_SDK.isSize)
+        assertEquals(false, AppInfoField.MIN_SDK.isSize)
+        assertEquals(false, AppInfoField.ENABLED.isSize)
+        assertEquals(false, AppInfoField.ARCHIVED.isSize)
+        assertEquals(false, AppInfoField.FIRST_INSTALLED.isSize)
+        assertEquals(false, AppInfoField.LAST_UPDATED.isSize)
+        assertEquals(false, AppInfoField.LAST_USED.isSize)
+        assertEquals(false, AppInfoField.PACKAGE_MANAGER.isSize)
+        assertEquals(false, AppInfoField.GRANTED_PERMISSIONS.isSize)
+        assertEquals(false, AppInfoField.REQUESTED_PERMISSIONS.isSize)
+        assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.isSize)
+    }
 }
