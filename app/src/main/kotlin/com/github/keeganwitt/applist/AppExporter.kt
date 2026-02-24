@@ -47,24 +47,8 @@ class AppExporter(
             ) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
                     val uri = result.data?.data ?: return@register
-                    when (currentExportType) {
-                        ExportFormat.XML -> {
-                            writeXmlToFile(uri)
-                        }
-
-                        ExportFormat.HTML -> {
-                            writeHtmlToFile(uri)
-                        }
-
-                        ExportFormat.CSV -> {
-                            writeCsvToFile(uri)
-                        }
-
-                        ExportFormat.TSV -> {
-                            writeTsvToFile(uri)
-                        }
-
-                        null -> { /* Should not happen */ }
+                    currentExportType?.let { format ->
+                        writeToFile(uri, format)
                     }
                 }
             }
@@ -138,42 +122,12 @@ class AppExporter(
         createFileLauncher.launch(intent)
     }
 
-    internal fun writeXmlToFile(uri: Uri) {
+    internal fun writeToFile(uri: Uri, format: ExportFormat) {
         val apps = appsProvider()
         val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.XML) {
-                formatter.writeXml(it, apps, includeUsageStats)
-            }
-        }
-    }
-
-    internal fun writeCsvToFile(uri: Uri) {
-        val apps = appsProvider()
-        val includeUsageStats = shouldIncludeUsageStats()
-        activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.CSV) {
-                formatter.writeCsv(it, apps, includeUsageStats)
-            }
-        }
-    }
-
-    internal fun writeTsvToFile(uri: Uri) {
-        val apps = appsProvider()
-        val includeUsageStats = shouldIncludeUsageStats()
-        activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.TSV) {
-                formatter.writeTsv(it, apps, includeUsageStats)
-            }
-        }
-    }
-
-    internal fun writeHtmlToFile(uri: Uri) {
-        val apps = appsProvider()
-        val includeUsageStats = shouldIncludeUsageStats()
-        activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.HTML) {
-                formatter.writeHtml(it, apps, includeUsageStats)
+            exportToFile(uri, format) {
+                formatter.write(format, it, apps, includeUsageStats)
             }
         }
     }
@@ -230,16 +184,5 @@ class AppExporter(
 
     companion object {
         private val TAG = AppExporter::class.java.simpleName
-    }
-
-    internal enum class ExportFormat(
-        val extension: String,
-        val mimeType: String,
-        val displayName: String,
-    ) {
-        XML("xml", "text/xml", "XML"),
-        HTML("html", "text/html", "HTML"),
-        CSV("csv", "text/csv", "CSV"),
-        TSV("tsv", "text/tab-separated-values", "TSV"),
     }
 }

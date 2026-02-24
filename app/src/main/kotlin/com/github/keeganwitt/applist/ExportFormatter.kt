@@ -3,8 +3,23 @@ package com.github.keeganwitt.applist
 import android.text.TextUtils
 import android.util.Xml
 import java.io.Writer
+import androidx.core.text.htmlEncode
 
 class ExportFormatter {
+    fun write(
+        format: ExportFormat,
+        writer: Writer,
+        apps: List<App>,
+        includeUsageStats: Boolean,
+    ) {
+        when (format) {
+            ExportFormat.XML -> writeXml(writer, apps, includeUsageStats)
+            ExportFormat.HTML -> writeHtml(writer, apps, includeUsageStats)
+            ExportFormat.CSV -> writeCsv(writer, apps, includeUsageStats)
+            ExportFormat.TSV -> writeTsv(writer, apps, includeUsageStats)
+        }
+    }
+
     fun writeXml(
         writer: Writer,
         apps: List<App>,
@@ -75,7 +90,7 @@ class ExportFormatter {
             writer.append("<div class=\"package-name\">").append(TextUtils.htmlEncode(app.packageName)).append("</div>\n")
             fields.forEach { field ->
                 writer.append("<div class=\"app-info\"><b>").append(field.name).append(":</b> ")
-                    .append(TextUtils.htmlEncode(field.getFormattedValue(app))).append("</div>\n")
+                    .append(field.getFormattedValue(app).htmlEncode()).append("</div>\n")
             }
             writer.append("</div>\n")
         }
@@ -91,17 +106,17 @@ class ExportFormatter {
         includeUsageStats: Boolean,
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
-        writer.append("App Name,Package Name")
+        writer.append("App Name".escapeCsv()).append(",").append(escapeCsvCell("Package Name"))
         fields.forEach { field ->
-            writer.append(",").append(field.name)
+            writer.append(",").append(field.name.escapeCsv())
         }
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append("\"").append(app.name.replace("\"", "\"\"")).append("\",")
-            writer.append("\"").append(app.packageName.replace("\"", "\"\"")).append("\"")
+            writer.append(app.name.escapeCsv()).append(",")
+            writer.append(app.packageName.escapeCsv())
             fields.forEach { field ->
-                writer.append(",\"").append(field.getFormattedValue(app).replace("\"", "\"\"")).append("\"")
+                writer.append(",").append(field.getFormattedValue(app).escapeCsv())
             }
             writer.append("\n")
         }
@@ -113,9 +128,9 @@ class ExportFormatter {
         includeUsageStats: Boolean,
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
-        writer.append("App Name\tPackage Name")
+        writer.append("App Name".escapeTsv()).append("\t").append("Package Name".escapeTsv())
         fields.forEach { field ->
-            writer.append("\t").append(field.name)
+            writer.append("\t").append(field.name.escapeTsv())
         }
         writer.append("\n")
 
@@ -127,6 +142,14 @@ class ExportFormatter {
             }
             writer.append("\n")
         }
+    }
+
+    private fun String.escapeCsv(): String {
+        var escaped = this.replace("\"", "\"\"")
+        if (escaped.startsWith("=") || escaped.startsWith("+") || escaped.startsWith("-") || escaped.startsWith("@") || escaped.startsWith("\t") || escaped.startsWith("\r")) {
+            escaped = "'$escaped"
+        }
+        return "\"$escaped\""
     }
 
     private fun String.escapeTsv(): String {

@@ -72,10 +72,10 @@ class ExportFormatterTest {
         // Then
         val lines = result.trim().split("\n")
         val header = lines[0]
-        assertTrue(header.startsWith("App Name,Package Name,"))
-        assertTrue(header.contains("VERSION"))
-        assertTrue(header.contains("APK_SIZE"))
-        assertTrue(header.contains("APP_SIZE")) // Should be there because includeUsageStats = true
+        assertTrue(header.startsWith("\"App Name\",\"Package Name\","))
+        assertTrue(header.contains("\"VERSION\""))
+        assertTrue(header.contains("\"APK_SIZE\""))
+        assertTrue(header.contains("\"APP_SIZE\"")) // Should be there because includeUsageStats = true
 
         val data = lines[1]
         assertTrue(data.startsWith("\"App 1\",\"com.example.app1\""))
@@ -93,8 +93,8 @@ class ExportFormatterTest {
 
         // Then
         val header = result.trim().split("\n")[0]
-        assertTrue(header.contains("VERSION"))
-        assertTrue(!header.contains("APP_SIZE"))
+        assertTrue(header.contains("\"VERSION\""))
+        assertTrue(!header.contains("\"APP_SIZE\""))
     }
 
     @Test
@@ -143,7 +143,10 @@ class ExportFormatterTest {
     @Test
     fun `given apps with special characters, when writeCsv called, then return escaped csv`() {
         // Given
-        val apps = listOf(createTestApp("com.example,pkg", "App \"Name\""))
+        val apps = listOf(
+            createTestApp("com.example,pkg", "App \"Name\""),
+            createTestApp("com.example.formula", "=1+2")
+        )
 
         // When
         val sw = StringWriter()
@@ -153,6 +156,47 @@ class ExportFormatterTest {
         // Then
         assertTrue(result.contains("\"App \"\"Name\"\"\""))
         assertTrue(result.contains("\"com.example,pkg\""))
+        assertTrue(result.contains("\"'=1+2\"")) // Formula injection protection
+    }
+
+    @Test
+    fun `given apps with special characters, when writeTsv called, then return escaped tsv`() {
+        // Given
+        val apps = listOf(
+            createTestApp("com.example.tsv", "App\tName"),
+            createTestApp("com.example.formula", "+1+2")
+        )
+
+        // When
+        val sw = StringWriter()
+        formatter.writeTsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
+
+        // Then
+        assertTrue(result.contains("App\\tName"))
+        assertTrue(result.contains("'+1+2")) // Formula injection protection
+    }
+
+    @Test
+    fun `given unified write, then delegates correctly`() {
+        // Given
+        val apps = listOf(createTestApp("com.example.app1", "App 1"))
+        val formats = ExportFormat.entries
+
+        formats.forEach { format ->
+            // When
+            val sw = StringWriter()
+            formatter.write(format, sw, apps, includeUsageStats = false)
+            val result = sw.toString()
+
+            // Then
+            when (format) {
+                ExportFormat.XML -> assertTrue(result.contains("<apps>"))
+                ExportFormat.HTML -> assertTrue(result.contains("<html>"))
+                ExportFormat.CSV -> assertTrue(result.contains("\"App Name\""))
+                ExportFormat.TSV -> assertTrue(result.contains("App Name"))
+            }
+        }
     }
 
     @Test
