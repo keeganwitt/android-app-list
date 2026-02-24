@@ -142,7 +142,8 @@ class ExportFormatter {
                     value.startsWith("-") ||
                     value.startsWith("@") ||
                     value.startsWith("\t") ||
-                    value.startsWith("\r")
+                    value.startsWith("\r") ||
+                    value.startsWith("\n")
                 )
         ) {
             "'$value"

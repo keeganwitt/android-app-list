@@ -16,7 +16,8 @@ class ExportFormatterSecurityTest {
             createTestApp(packageName = "com.example.pkg", name = "=SUM(1,2)"),
             createTestApp(packageName = "+formula", name = "Normal"),
             createTestApp(packageName = "com.normal", name = "-something"),
-            createTestApp(packageName = "@at", name = "Normal")
+            createTestApp(packageName = "@at", name = "Normal"),
+            createTestApp(packageName = "com.newline", name = "\n=SUM(1,2)")
         )
 
         // When
@@ -27,6 +28,7 @@ class ExportFormatterSecurityTest {
         assertTrue("CSV should sanitize packageName starting with +", result.contains("\"'+formula\""))
         assertTrue("CSV should sanitize name starting with -", result.contains("\"'-something\""))
         assertTrue("CSV should sanitize packageName starting with @", result.contains("\"'@at\""))
+        assertTrue("CSV should sanitize name starting with \\n", result.contains("\"'\n=SUM(1,2)\""))
     }
 
     @Test
@@ -36,7 +38,8 @@ class ExportFormatterSecurityTest {
             createTestApp(packageName = "com.example.pkg", name = "=SUM(1,2)"),
             createTestApp(packageName = "+formula", name = "Normal"),
             createTestApp(packageName = "com.normal", name = "-something"),
-            createTestApp(packageName = "@at", name = "Normal")
+            createTestApp(packageName = "@at", name = "Normal"),
+            createTestApp(packageName = "com.newline", name = "\n=SUM(1,2)")
         )
 
         // When
@@ -47,6 +50,7 @@ class ExportFormatterSecurityTest {
         assertTrue("TSV should sanitize packageName starting with +", result.contains("\t'+formula\t"))
         assertTrue("TSV should sanitize name starting with -", result.contains("'-something\t"))
         assertTrue("TSV should sanitize packageName starting with @", result.contains("\t'@at\t"))
+        assertTrue("TSV should sanitize name starting with \\n", result.contains("'\n=SUM(1,2)\t"))
     }
 
     private fun createTestApp(
