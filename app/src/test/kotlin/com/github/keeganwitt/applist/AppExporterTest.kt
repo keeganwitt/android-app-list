@@ -229,6 +229,40 @@ class AppExporterTest {
         assertEquals(activity.getString(R.string.export_failed, exception.message), toast.toString())
     }
 
+    @Test
+    fun writeXmlToFile_whenSecurityException_handlesError() {
+        val formatter = mockk<ExportFormatter>()
+        every { formatter.writeXml(any(), any(), any()) } throws SecurityException("Mocked SecurityException")
+
+        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any<SecurityException>(), any()) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Toast was: $toast", toast?.toString()?.contains("Mocked SecurityException") == true)
+    }
+
+    @Test
+    fun writeXmlToFile_whenIOException_handlesError() {
+        val formatter = mockk<ExportFormatter>()
+        every { formatter.writeXml(any(), any(), any()) } throws IOException("Mocked IOException")
+
+        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any<IOException>(), any()) }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertTrue("Toast was: $toast", toast?.toString()?.contains("Mocked IOException") == true)
+    }
+
     private fun createTestApp(
         packageName: String,
         name: String,
