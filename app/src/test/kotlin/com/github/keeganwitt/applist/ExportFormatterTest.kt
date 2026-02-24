@@ -191,7 +191,9 @@ class ExportFormatterTest {
         val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App\tName\nWith\rNewlines and \\ backslash"))
 
         // When
-        val result = formatter.toTsv(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeTsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         val lines = result.trim().split("\n")
