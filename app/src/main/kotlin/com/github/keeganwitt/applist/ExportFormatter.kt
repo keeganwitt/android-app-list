@@ -126,12 +126,28 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append("\"").append(app.name.replace("\"", "\"\"")).append("\",")
-            writer.append("\"").append(app.packageName.replace("\"", "\"\"")).append("\"")
+            writer.append("\"").append(sanitizeForSpreadsheet(app.name).replace("\"", "\"\"")).append("\",")
+            writer.append("\"").append(sanitizeForSpreadsheet(app.packageName).replace("\"", "\"\"")).append("\"")
             fields.forEach { field ->
-                writer.append(",\"").append(field.getFormattedValue(app).replace("\"", "\"\"")).append("\"")
+                writer.append(",\"").append(sanitizeForSpreadsheet(field.getFormattedValue(app)).replace("\"", "\"\"")).append("\"")
             }
             writer.append("\n")
+        }
+    }
+
+    private fun sanitizeForSpreadsheet(value: String): String {
+        return if (value.isNotEmpty() && (
+                value.startsWith("=") ||
+                    value.startsWith("+") ||
+                    value.startsWith("-") ||
+                    value.startsWith("@") ||
+                    value.startsWith("\t") ||
+                    value.startsWith("\r")
+                )
+        ) {
+            "'$value"
+        } else {
+            value
         }
     }
 
@@ -157,10 +173,10 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append(app.name).append("\t")
-            writer.append(app.packageName)
+            writer.append(sanitizeForSpreadsheet(app.name)).append("\t")
+            writer.append(sanitizeForSpreadsheet(app.packageName))
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app))
+                writer.append("\t").append(sanitizeForSpreadsheet(field.getFormattedValue(app)))
             }
             writer.append("\n")
         }
