@@ -126,10 +126,10 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append("\"").append(app.name.replace("\"", "\"\"")).append("\",")
-            writer.append("\"").append(app.packageName.replace("\"", "\"\"")).append("\"")
+            writer.append(escapeCsvCell(app.name)).append(",")
+            writer.append(escapeCsvCell(app.packageName))
             fields.forEach { field ->
-                writer.append(",\"").append(field.getFormattedValue(app).replace("\"", "\"\"")).append("\"")
+                writer.append(",").append(escapeCsvCell(field.getFormattedValue(app)))
             }
             writer.append("\n")
         }
@@ -157,12 +157,39 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append(app.name).append("\t")
-            writer.append(app.packageName)
+            writer.append(escapeTsvCell(app.name)).append("\t")
+            writer.append(escapeTsvCell(app.packageName))
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app))
+                writer.append("\t").append(escapeTsvCell(field.getFormattedValue(app)))
             }
             writer.append("\n")
         }
+    }
+
+    private fun escapeCsvCell(value: String): String {
+        var escaped = value.replace("\"", "\"\"")
+        if (escaped.startsWith("=") ||
+            escaped.startsWith("+") ||
+            escaped.startsWith("-") ||
+            escaped.startsWith("@") ||
+            escaped.startsWith("\t") ||
+            escaped.startsWith("\r")
+        ) {
+            escaped = "'$escaped"
+        }
+        return "\"$escaped\""
+    }
+
+    private fun escapeTsvCell(value: String): String {
+        if (value.startsWith("=") ||
+            value.startsWith("+") ||
+            value.startsWith("-") ||
+            value.startsWith("@") ||
+            value.startsWith("\t") ||
+            value.startsWith("\r")
+        ) {
+            return "'$value"
+        }
+        return value
     }
 }

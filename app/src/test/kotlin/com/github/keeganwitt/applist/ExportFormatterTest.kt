@@ -166,6 +166,28 @@ class ExportFormatterTest {
         assertTrue(result.contains("App &lt;Name&gt; &amp; &quot;More&quot; &#39;"))
     }
 
+    @Test
+    fun `given app names starting with formula characters, when writeCsv called, then they are escaped`() {
+        val formulaChars = listOf("=", "+", "-", "@", "\t", "\r")
+        formulaChars.forEach { char ->
+            val name = "${char}1+2"
+            val apps = listOf(createTestApp(packageName = "com.example.app", name = name))
+            val result = formatter.toCsv(apps, includeUsageStats = false)
+            assertTrue("CSV should escape $name", result.contains("\"'$name\""))
+        }
+    }
+
+    @Test
+    fun `given app names starting with formula characters, when writeTsv called, then they are escaped`() {
+        val formulaChars = listOf("=", "+", "-", "@", "\t", "\r")
+        formulaChars.forEach { char ->
+            val name = "${char}1+2"
+            val apps = listOf(createTestApp(packageName = "com.example.app", name = name))
+            val result = formatter.toTsv(apps, includeUsageStats = false)
+            assertTrue("TSV should escape $name", result.contains("'$name\t"))
+        }
+    }
+
     private fun createTestApp(
         packageName: String,
         name: String,
