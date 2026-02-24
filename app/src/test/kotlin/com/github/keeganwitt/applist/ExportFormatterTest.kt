@@ -185,22 +185,6 @@ class ExportFormatterTest {
         assertTrue(result.contains("App &lt;Name&gt; &amp; &quot;More&quot; &#39;"))
     }
 
-    @Test
-    fun `given apps with tabs and newlines, when toTsv called, then return escaped tsv`() {
-        // Given
-        val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App\tName\nWith\rNewlines and \\ backslash"))
-
-        // When
-        val result = formatter.toTsv(apps, includeUsageStats = false)
-
-        // Then
-        val lines = result.trim().split("\n")
-        val dataParts = lines[1].split("\t")
-
-        // App Name should be escaped
-        assertEquals("App\\tName\\nWith\\rNewlines and \\\\ backslash", dataParts[0])
-    }
-
     private fun createTestApp(
         packageName: String,
         name: String,

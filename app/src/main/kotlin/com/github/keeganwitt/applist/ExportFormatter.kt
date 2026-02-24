@@ -120,19 +120,12 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append(app.name.escapeTsv()).append("\t")
-            writer.append(app.packageName.escapeTsv())
+            writer.append(app.name).append("\t")
+            writer.append(app.packageName)
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app).escapeTsv())
+                writer.append("\t").append(field.getFormattedValue(app))
             }
             writer.append("\n")
         }
-    }
-
-    private fun String.escapeTsv(): String {
-        return this.replace("\\", "\\\\")
-            .replace("\t", "\\t")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
     }
 }
