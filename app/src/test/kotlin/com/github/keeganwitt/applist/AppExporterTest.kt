@@ -1,7 +1,10 @@
 package com.github.keeganwitt.applist
 
 import android.app.Activity
+import android.content.ContentProvider
+import android.content.ContentValues
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
@@ -163,6 +166,67 @@ class AppExporterTest {
 
         verify { formatter.writeCsv(any(), any(), any()) }
         assertEquals(csvOutput, file.readText())
+    }
+
+    @Test
+    fun writeXmlToFile_whenFormatterThrowsIOException_handlesError() {
+        val formatter = mockk<ExportFormatter>()
+        val exception = IOException("Disk full")
+        every { formatter.writeXml(any(), any(), any()) } throws exception
+
+        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(exception, "Error exporting XML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertEquals(activity.getString(R.string.export_failed, exception.message), toast.toString())
+    }
+
+    @Test
+    fun writeXmlToFile_whenOpenOutputStreamReturnsNull_handlesError() {
+        val authority = "com.github.keeganwitt.applist.test.null"
+        Robolectric.setupContentProvider(NullContentProvider::class.java, authority)
+        val exporter = AppExporter(activity, { apps }, ExportFormatter(), appSettings, crashReporter, testDispatchers)
+        val uri = Uri.parse("content://$authority/file")
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(any<IOException>(), "Error exporting XML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertEquals(activity.getString(R.string.export_failed, "Failed to open output stream"), toast.toString())
+    }
+
+    class NullContentProvider : ContentProvider() {
+        override fun onCreate(): Boolean = true
+        override fun query(uri: Uri, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor? = null
+        override fun getType(uri: Uri): String? = null
+        override fun insert(uri: Uri, p1: ContentValues?): Uri? = null
+        override fun delete(uri: Uri, p1: String?, p2: Array<out String>?): Int = 0
+        override fun update(uri: Uri, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int = 0
+        override fun openFile(uri: Uri, mode: String): android.os.ParcelFileDescriptor? = null
+    }
+
+    @Test
+    fun writeXmlToFile_whenFormatterThrowsSecurityException_handlesError() {
+        val formatter = mockk<ExportFormatter>()
+        val exception = SecurityException("Permission denied")
+        every { formatter.writeXml(any(), any(), any()) } throws exception
+
+        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+        val uri = Uri.fromFile(file)
+
+        exporter.writeXmlToFile(uri)
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify { crashReporter.recordException(exception, "Error exporting XML") }
+        val toast = ShadowToast.getTextOfLatestToast()
+        assertEquals(activity.getString(R.string.export_failed, exception.message), toast.toString())
     }
 
     private fun createTestApp(
