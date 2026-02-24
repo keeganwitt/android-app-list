@@ -188,7 +188,13 @@ class ExportFormatterTest {
     @Test
     fun `given apps with tabs and newlines, when toTsv called, then return escaped tsv`() {
         // Given
-        val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App\tName\nWith\rNewlines and \\ backslash"))
+        val apps =
+            listOf(
+                createTestApp(
+                    packageName = "com.example.pkg",
+                    name = "App\tName\nWith\rNewlines and \\ backslash",
+                ),
+            )
 
         // When
         val result = formatter.toTsv(apps, includeUsageStats = false)
@@ -204,7 +210,7 @@ class ExportFormatterTest {
     @Test
     fun `when write called with XML, then delegate to writeXml`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
-        val writer = java.io.StringWriter()
+        val writer = StringWriter()
         formatter.write(ExportFormat.XML, writer, apps, false)
         assertTrue(writer.toString().contains("<apps>"))
     }
@@ -212,7 +218,7 @@ class ExportFormatterTest {
     @Test
     fun `when write called with CSV, then delegate to writeCsv`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
-        val writer = java.io.StringWriter()
+        val writer = StringWriter()
         formatter.write(ExportFormat.CSV, writer, apps, false)
         assertTrue(writer.toString().contains("App Name,Package Name"))
     }
@@ -220,7 +226,7 @@ class ExportFormatterTest {
     @Test
     fun `when write called with TSV, then delegate to writeTsv`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
-        val writer = java.io.StringWriter()
+        val writer = StringWriter()
         formatter.write(ExportFormat.TSV, writer, apps, false)
         assertTrue(writer.toString().contains("App Name\tPackage Name"))
     }
@@ -228,7 +234,7 @@ class ExportFormatterTest {
     @Test
     fun `when write called with HTML, then delegate to writeHtml`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
-        val writer = java.io.StringWriter()
+        val writer = StringWriter()
         formatter.write(ExportFormat.HTML, writer, apps, false)
         assertTrue(writer.toString().contains("<!DOCTYPE html>"))
     }
