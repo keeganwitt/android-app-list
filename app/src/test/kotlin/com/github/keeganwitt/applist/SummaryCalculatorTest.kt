@@ -92,6 +92,20 @@ class SummaryCalculatorTest {
     }
 
     @Test
+    fun `calculate returns correct exists in app store summary`() {
+        mockStrings()
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = true)
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = false)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = true)
+
+        val result = calculator.calculate(listOf(app1, app2, app3), AppInfoField.EXISTS_IN_APP_STORE)
+
+        assertEquals(AppInfoField.EXISTS_IN_APP_STORE, result?.field)
+        assertEquals(2, result?.buckets?.get("True"))
+        assertEquals(1, result?.buckets?.get("False"))
+    }
+
+    @Test
     fun `calculatePermissionSummary handles requested permissions`() {
         mockStrings()
         val app0 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 0)
