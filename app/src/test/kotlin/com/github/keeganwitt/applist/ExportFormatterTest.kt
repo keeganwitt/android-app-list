@@ -186,7 +186,7 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given apps with tabs and newlines, when toTsv called, then return escaped tsv`() {
+    fun `given apps with tabs and newlines, when writeTsv called, then return escaped tsv`() {
         // Given
         val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App\tName\nWith\rNewlines and \\ backslash"))
 
