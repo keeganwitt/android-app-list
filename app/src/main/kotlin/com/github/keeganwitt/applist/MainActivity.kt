@@ -114,7 +114,10 @@ class MainActivity :
                                 repo,
                                 DefaultDispatcherProvider(),
                                 SummaryCalculator(applicationContext, store),
-                                sizeFormatter = { android.text.format.Formatter.formatFileSize(applicationContext, it) },
+                                sizeFormatter = {
+                                    android.text.format.Formatter
+                                        .formatFileSize(applicationContext, it)
+                                },
                             )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T

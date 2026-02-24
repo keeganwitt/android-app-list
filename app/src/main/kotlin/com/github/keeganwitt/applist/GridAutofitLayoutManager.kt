@@ -20,8 +20,8 @@ class GridAutofitLayoutManager : GridLayoutManager {
     private fun getValidColumnWidth(
         context: Context,
         columnWidth: Int,
-    ): Int {
-        return if (columnWidth <= 0) {
+    ): Int =
+        if (columnWidth <= 0) {
             TypedValue
                 .applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
@@ -31,7 +31,6 @@ class GridAutofitLayoutManager : GridLayoutManager {
         } else {
             columnWidth
         }
-    }
 
     fun setColumnWidth(newColumnWidth: Int) {
         if (newColumnWidth > 0 && newColumnWidth != columnWidth) {

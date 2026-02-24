@@ -1,7 +1,6 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
-import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.AppInfoField.APK_SIZE
 import com.github.keeganwitt.applist.AppInfoField.APP_SIZE
 import com.github.keeganwitt.applist.AppInfoField.ARCHIVED
@@ -20,6 +19,7 @@ import com.github.keeganwitt.applist.AppInfoField.REQUESTED_PERMISSIONS
 import com.github.keeganwitt.applist.AppInfoField.TARGET_SDK
 import com.github.keeganwitt.applist.AppInfoField.TOTAL_SIZE
 import com.github.keeganwitt.applist.AppInfoField.VERSION
+import com.github.keeganwitt.applist.services.AppStoreService
 
 data class SummaryItem(
     val field: AppInfoField,
