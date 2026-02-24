@@ -28,6 +28,50 @@ class SummaryCalculatorTest {
     }
 
     @Test
+    fun `calculatePermissionSummary handles boundary cases correctly`() {
+        mockStrings()
+        val apps = listOf(
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0), // None
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 1), // Few
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 5), // Few
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 6), // Some
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 10), // Some
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 11), // Many
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 20), // Many
+            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 21) // Lots
+        )
+
+        val result = calculator.calculate(apps, AppInfoField.GRANTED_PERMISSIONS)
+
+        assertEquals(1, result?.buckets?.get("None"))
+        assertEquals(2, result?.buckets?.get("Few"))
+        assertEquals(2, result?.buckets?.get("Some"))
+        assertEquals(2, result?.buckets?.get("Many"))
+        assertEquals(1, result?.buckets?.get("Lots"))
+    }
+
+    @Test
+    fun `calculate returns correct size summary for boundary cases`() {
+        mockStrings()
+        val appSmall = createApp(enabled = true, archived = false, apkSize = 10 * 1024 * 1024 - 1)
+        val appMediumBoundary = createApp(enabled = true, archived = false, apkSize = 10 * 1024 * 1024)
+        val appMedium = createApp(enabled = true, archived = false, apkSize = 50 * 1024 * 1024 - 1)
+        val appLargeBoundary = createApp(enabled = true, archived = false, apkSize = 50 * 1024 * 1024)
+        val appLarge = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024 - 1)
+        val appHugeBoundary = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024)
+
+        val result = calculator.calculate(
+            listOf(appSmall, appMediumBoundary, appMedium, appLargeBoundary, appLarge, appHugeBoundary),
+            AppInfoField.APK_SIZE
+        )
+
+        assertEquals(1, result?.buckets?.get("Small"))
+        assertEquals(2, result?.buckets?.get("Medium"))
+        assertEquals(2, result?.buckets?.get("Large"))
+        assertEquals(1, result?.buckets?.get("Huge"))
+    }
+
+    @Test
     fun `calculate returns correct archived summary`() {
         mockStrings()
         val app1 = createApp(enabled = true, archived = false, apkSize = 0)
@@ -129,6 +173,30 @@ class SummaryCalculatorTest {
         assertEquals(1, result?.buckets?.get("Last month"))
         assertEquals(1, result?.buckets?.get("Last 3 months"))
         assertEquals(1, result?.buckets?.get("Last 6 months"))
+        assertEquals(1, result?.buckets?.get("Older"))
+    }
+
+    @Test
+    fun `calculateDateSummary handles boundary cases correctly`() {
+        mockStrings()
+        val now = System.currentTimeMillis()
+        val dayMs = 24L * 60 * 60 * 1000
+
+        val apps = listOf(
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now), // Last month
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs + 1000), // Last month
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs - 1000), // Last 3 months
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs + 1000), // Last 3 months
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs - 1000), // Last 6 months
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs + 1000), // Last 6 months
+            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs - 1000) // Older
+        )
+
+        val result = calculator.calculate(apps, AppInfoField.FIRST_INSTALLED)
+
+        assertEquals(2, result?.buckets?.get("Last month"))
+        assertEquals(2, result?.buckets?.get("Last 3 months"))
+        assertEquals(2, result?.buckets?.get("Last 6 months"))
         assertEquals(1, result?.buckets?.get("Older"))
     }
 
