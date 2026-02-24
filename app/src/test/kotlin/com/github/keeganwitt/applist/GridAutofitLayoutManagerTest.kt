@@ -95,20 +95,6 @@ class GridAutofitLayoutManagerTest {
     }
 
     @Test
-    fun `given column width, when setColumnWidth called with new value, then updates span count`() {
-        layoutManager = GridAutofitLayoutManager(context, 100)
-        recyclerView.layoutManager = layoutManager
-
-        triggerLayout(400, 1000)
-        assertEquals(4, layoutManager.spanCount)
-
-        layoutManager.setColumnWidth(200)
-        triggerLayout(400, 1000)
-
-        assertEquals(2, layoutManager.spanCount)
-    }
-
-    @Test
     fun `given layout done, when resized, then updates span count`() {
         layoutManager = GridAutofitLayoutManager(context, 100)
         recyclerView.layoutManager = layoutManager
@@ -185,23 +171,6 @@ class GridAutofitLayoutManagerTest {
     }
 
     @Test
-    fun `given same column width, when setColumnWidth called, then does not update column width`() {
-        layoutManager = spyk(GridAutofitLayoutManager(context, 100))
-        layoutManager.setColumnWidth(100)
-
-        verify(exactly = 0) { layoutManager.requestLayout() }
-    }
-
-    @Test
-    fun `given non-positive column width, when setColumnWidth called, then does not update column width`() {
-        layoutManager = spyk(GridAutofitLayoutManager(context, 100))
-        layoutManager.setColumnWidth(0)
-        layoutManager.setColumnWidth(-1)
-
-        verify(exactly = 0) { layoutManager.requestLayout() }
-    }
-
-    @Test
     fun `given layout done, when onLayoutChildren called again with same dimensions, then setSpanCount is not called again`() {
         val spyLayoutManager = spyk(GridAutofitLayoutManager(context, 100))
         recyclerView.layoutManager = spyLayoutManager
@@ -212,19 +181,6 @@ class GridAutofitLayoutManagerTest {
         triggerLayout(400, 1000)
         // Should still be exactly 1 call to setSpanCount(4)
         verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
-    }
-
-    @Test
-    fun `given layout done, when setColumnWidth called with new value and layout triggered again, then setSpanCount is called again`() {
-        val spyLayoutManager = spyk(GridAutofitLayoutManager(context, 100))
-        recyclerView.layoutManager = spyLayoutManager
-
-        triggerLayout(400, 1000)
-        verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
-
-        spyLayoutManager.setColumnWidth(200)
-        triggerLayout(400, 1000)
-        verify(exactly = 1) { spyLayoutManager.setSpanCount(2) }
     }
 
     private fun triggerLayout(

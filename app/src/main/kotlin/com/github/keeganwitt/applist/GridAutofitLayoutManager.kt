@@ -7,15 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import kotlin.math.max
 
-class GridAutofitLayoutManager : GridLayoutManager {
-    private var columnWidth = 0
-    private var isColumnWidthChanged = true
+class GridAutofitLayoutManager(context: Context, columnWidth: Int) : GridLayoutManager(context, 1) {
+    private val columnWidth = getValidColumnWidth(context, columnWidth)
     private var lastWidth = 0
     private var lastHeight = 0
-
-    constructor(context: Context, columnWidth: Int) : super(context, 1) {
-        this.columnWidth = getValidColumnWidth(context, columnWidth)
-    }
 
     private fun getValidColumnWidth(
         context: Context,
@@ -32,21 +27,13 @@ class GridAutofitLayoutManager : GridLayoutManager {
             columnWidth
         }
 
-    fun setColumnWidth(newColumnWidth: Int) {
-        if (newColumnWidth > 0 && newColumnWidth != columnWidth) {
-            columnWidth = newColumnWidth
-            isColumnWidthChanged = true
-            requestLayout()
-        }
-    }
-
     override fun onLayoutChildren(
         recycler: Recycler,
         state: RecyclerView.State,
     ) {
         val width = getWidth()
         val height = getHeight()
-        if (columnWidth > 0 && width > 0 && height > 0 && (isColumnWidthChanged || lastWidth != width || lastHeight != height)) {
+        if (columnWidth > 0 && width > 0 && height > 0 && (lastWidth != width || lastHeight != height)) {
             val totalSpace: Int =
                 if (orientation == VERTICAL) {
                     width - paddingRight - paddingLeft
@@ -55,7 +42,6 @@ class GridAutofitLayoutManager : GridLayoutManager {
                 }
             val spanCount = max(1, totalSpace / columnWidth)
             setSpanCount(spanCount)
-            isColumnWidthChanged = false
         }
         lastWidth = width
         lastHeight = height
