@@ -5,6 +5,20 @@ import android.util.Xml
 import java.io.Writer
 
 class ExportFormatter {
+    fun write(
+        format: ExportFormat,
+        writer: Writer,
+        apps: List<App>,
+        includeUsageStats: Boolean,
+    ) {
+        when (format) {
+            ExportFormat.XML -> writeXml(writer, apps, includeUsageStats)
+            ExportFormat.HTML -> writeHtml(writer, apps, includeUsageStats)
+            ExportFormat.CSV -> writeCsv(writer, apps, includeUsageStats)
+            ExportFormat.TSV -> writeTsv(writer, apps, includeUsageStats)
+        }
+    }
+
     fun writeXml(
         writer: Writer,
         apps: List<App>,
