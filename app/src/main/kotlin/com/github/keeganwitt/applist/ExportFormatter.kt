@@ -2,19 +2,9 @@ package com.github.keeganwitt.applist
 
 import android.text.TextUtils
 import android.util.Xml
-import java.io.StringWriter
 import java.io.Writer
 
 class ExportFormatter {
-    fun toXml(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeXml(sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
     fun writeXml(
         writer: Writer,
         apps: List<App>,
@@ -50,15 +40,6 @@ class ExportFormatter {
         serializer.endTag(null, "apps")
         serializer.text("\n")
         serializer.endDocument()
-    }
-
-    fun toHtml(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeHtml(sw, apps, includeUsageStats)
-        return sw.toString()
     }
 
     fun writeHtml(
@@ -104,15 +85,6 @@ class ExportFormatter {
             .append("</html>\n")
     }
 
-    fun toCsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeCsv(sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
     fun writeCsv(
         writer: Writer,
         apps: List<App>,
@@ -133,15 +105,6 @@ class ExportFormatter {
             }
             writer.append("\n")
         }
-    }
-
-    fun toTsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeTsv(sw, apps, includeUsageStats)
-        return sw.toString()
     }
 
     fun writeTsv(

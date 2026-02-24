@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import java.io.StringWriter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -11,12 +12,14 @@ class ExportFormatterTest {
     private val formatter = ExportFormatter()
 
     @Test
-    fun `given empty list, when toXml called, then return empty xml`() {
+    fun `given empty list, when writeXml called, then return empty xml`() {
         // Given
         val apps = emptyList<App>()
 
         // When
-        val result = formatter.toXml(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeXml(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         assertTrue(result.contains("<?xml version='1.0' encoding='UTF-8' ?>"))
@@ -24,7 +27,7 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given list of apps, when toXml called, then return correct xml with all fields`() {
+    fun `given list of apps, when writeXml called, then return correct xml with all fields`() {
         // Given
         val apps =
             listOf(
@@ -36,7 +39,9 @@ class ExportFormatterTest {
             )
 
         // When
-        val result = formatter.toXml(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeXml(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         assertTrue(result.contains("<appName>App 1</appName>"))
@@ -60,7 +65,9 @@ class ExportFormatterTest {
             )
 
         // When
-        val result = formatter.toCsv(apps, includeUsageStats = true)
+        val sw = StringWriter()
+        formatter.writeCsv(sw, apps, includeUsageStats = true)
+        val result = sw.toString()
 
         // Then
         val lines = result.trim().split("\n")
@@ -80,7 +87,9 @@ class ExportFormatterTest {
         val apps = listOf(createTestApp("com.example.app1", "App 1"))
 
         // When
-        val result = formatter.toCsv(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeCsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         val header = result.trim().split("\n")[0]
@@ -89,7 +98,7 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given list of apps, when toTsv called, then return wide format tsv`() {
+    fun `given list of apps, when writeTsv called, then return wide format tsv`() {
         // Given
         val apps =
             listOf(
@@ -101,7 +110,9 @@ class ExportFormatterTest {
             )
 
         // When
-        val result = formatter.toTsv(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeTsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         val lines = result.trim().split("\n")
@@ -114,12 +125,14 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given list of apps, when toHtml called, then return html with all fields`() {
+    fun `given list of apps, when writeHtml called, then return html with all fields`() {
         // Given
         val apps = listOf(createTestApp("com.example.app1", "App 1"))
 
         // When
-        val result = formatter.toHtml(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeHtml(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         assertTrue(result.contains("App 1"))
@@ -133,7 +146,9 @@ class ExportFormatterTest {
         val apps = listOf(createTestApp("com.example,pkg", "App \"Name\""))
 
         // When
-        val result = formatter.toCsv(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeCsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         assertTrue(result.contains("\"App \"\"Name\"\"\""))
@@ -141,12 +156,14 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given apps with special characters, when toXml called, then return escaped xml`() {
+    fun `given apps with special characters, when writeXml called, then return escaped xml`() {
         // Given
         val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App <Name> & \"More\""))
 
         // When
-        val result = formatter.toXml(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeXml(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         // XmlSerializer doesn't escape quotes in text content
@@ -154,12 +171,14 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given apps with special characters, when toHtml called, then return escaped html`() {
+    fun `given apps with special characters, when writeHtml called, then return escaped html`() {
         // Given
         val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App <Name> & \"More\" '"))
 
         // When
-        val result = formatter.toHtml(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeHtml(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         // TextUtils.htmlEncode escapes quotes and apostrophes
