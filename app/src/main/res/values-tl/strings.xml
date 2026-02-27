@@ -44,4 +44,9 @@
     <string name="summary_loading">Buod (Naglo-load…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">Noong nakaraang buwan</string>
+    <string name="date_bucket_last_three_months">Nakaraang 3 buwan</string>
+    <string name="date_bucket_last_six_months">Nakaraang 6 na buwan</string>
+    <string name="date_bucket_older">Mas matanda</string>
 </resources>
