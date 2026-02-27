@@ -44,4 +44,9 @@
     <string name="summary_loading">概要 (読み込み中…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">先月</string>
+    <string name="date_bucket_last_three_months">過去3ヶ月</string>
+    <string name="date_bucket_last_six_months">過去6ヶ月</string>
+    <string name="date_bucket_older">それ以前</string>
 </resources>

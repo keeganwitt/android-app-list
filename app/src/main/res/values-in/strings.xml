@@ -44,4 +44,9 @@
     <string name="summary_loading">Ringkasan (Memuat…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">Bulan lalu</string>
+    <string name="date_bucket_last_three_months">3 bulan terakhir</string>
+    <string name="date_bucket_last_six_months">6 bulan terakhir</string>
+    <string name="date_bucket_older">Lebih lama</string>
 </resources>

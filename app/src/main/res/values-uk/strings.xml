@@ -44,4 +44,9 @@
     <string name="summary_loading">Підсумок (завантаження…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">Минулого місяця</string>
+    <string name="date_bucket_last_three_months">Останні 3 місяці</string>
+    <string name="date_bucket_last_six_months">Останні 6 місяців</string>
+    <string name="date_bucket_older">Старіше</string>
 </resources>

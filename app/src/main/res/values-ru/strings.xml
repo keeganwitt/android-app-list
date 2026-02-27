@@ -44,4 +44,9 @@
     <string name="summary_loading">Сводка (загрузка…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">В прошлом месяце</string>
+    <string name="date_bucket_last_three_months">Последние 3 месяца</string>
+    <string name="date_bucket_last_six_months">Последние 6 месяцев</string>
+    <string name="date_bucket_older">Более старые</string>
 </resources>
