@@ -39,7 +39,16 @@ class AndroidAppRepository(
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            val filteredWithBasic = getFilteredApps(showSystemApps)
+            val filteredInfos = getFilteredAppInfos(showSystemApps)
+            val filteredWithBasic =
+                coroutineScope {
+                    filteredInfos
+                        .map { (ai, archived) ->
+                            async {
+                                ai to mapToAppBasic(ai, archived)
+                            }
+                        }.awaitAll()
+                }
             val basicApps = filteredWithBasic.map { it.second }
             emit(sortApps(basicApps, field, descending))
 
@@ -57,7 +66,7 @@ class AndroidAppRepository(
             emit(sortApps(detailedApps, field, descending))
         }
 
-    private fun getFilteredApps(showSystemApps: Boolean): List<Pair<ApplicationInfo, App>> {
+    private fun getFilteredAppInfos(showSystemApps: Boolean): List<Pair<ApplicationInfo, Boolean>> {
         var flags =
             (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
                 .toLong()
@@ -72,7 +81,7 @@ class AndroidAppRepository(
             val isUserInstalled = ai.isUserInstalled
             val hasLaunch = launchablePackages.contains(ai.packageName)
             if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
-                ai to mapToAppBasic(ai, archived)
+                ai to archived
             } else {
                 null
             }
