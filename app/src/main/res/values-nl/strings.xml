@@ -44,4 +44,9 @@
     <string name="summary_loading">Samenvatting (laden…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">Vorige maand</string>
+    <string name="date_bucket_last_three_months">Laatste 3 maanden</string>
+    <string name="date_bucket_last_six_months">Laatste 6 maanden</string>
+    <string name="date_bucket_older">Ouder</string>
 </resources>

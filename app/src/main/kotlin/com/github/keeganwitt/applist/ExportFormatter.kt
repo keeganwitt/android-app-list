@@ -1,18 +1,22 @@
 package com.github.keeganwitt.applist
 
-import android.text.TextUtils
 import android.util.Xml
-import java.io.StringWriter
+import androidx.core.text.htmlEncode
 import java.io.Writer
 
 class ExportFormatter {
-    fun toXml(
+    fun write(
+        format: ExportFormat,
+        writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeXml(sw, apps, includeUsageStats)
-        return sw.toString()
+    ) {
+        when (format) {
+            ExportFormat.XML -> writeXml(writer, apps, includeUsageStats)
+            ExportFormat.HTML -> writeHtml(writer, apps, includeUsageStats)
+            ExportFormat.CSV -> writeCsv(writer, apps, includeUsageStats)
+            ExportFormat.TSV -> writeTsv(writer, apps, includeUsageStats)
+        }
     }
 
     fun writeXml(
@@ -52,15 +56,6 @@ class ExportFormatter {
         serializer.endDocument()
     }
 
-    fun toHtml(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeHtml(sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
     fun writeHtml(
         writer: Writer,
         apps: List<App>,
@@ -81,8 +76,9 @@ class ExportFormatter {
             .append(
                 ".app-item { background: white; border-radius: 8px; padding: 10px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n",
             ).append(".app-name { font-weight: bold; font-size: 1.2em; margin-bottom: 4px; word-wrap: break-word; text-align: center; }\n")
-            .append(".package-name { font-style: italic; font-size: 0.9em; color: #666; margin-bottom: 8px; word-wrap: break-word; text-align: center; }\n")
-            .append(".app-info { margin-top: 2px; font-size: 0.85em; color: #333; word-wrap: break-word; }\n")
+            .append(
+                ".package-name { font-style: italic; font-size: 0.9em; color: #666; margin-bottom: 8px; word-wrap: break-word; text-align: center; }\n",
+            ).append(".app-info { margin-top: 2px; font-size: 0.85em; color: #333; word-wrap: break-word; }\n")
             .append("</style>\n")
             .append("</head>\n")
             .append("<body>\n")
@@ -90,11 +86,15 @@ class ExportFormatter {
             .append("<div class=\"app-grid\">\n")
         apps.forEach { app ->
             writer.append("<div class=\"app-item\">\n")
-            writer.append("<div class=\"app-name\">").append(TextUtils.htmlEncode(app.name)).append("</div>\n")
-            writer.append("<div class=\"package-name\">").append(TextUtils.htmlEncode(app.packageName)).append("</div>\n")
+            writer.append("<div class=\"app-name\">").append(app.name.htmlEncode()).append("</div>\n")
+            writer.append("<div class=\"package-name\">").append(app.packageName.htmlEncode()).append("</div>\n")
             fields.forEach { field ->
-                writer.append("<div class=\"app-info\"><b>").append(field.name).append(":</b> ")
-                    .append(TextUtils.htmlEncode(field.getFormattedValue(app))).append("</div>\n")
+                writer
+                    .append("<div class=\"app-info\"><b>")
+                    .append(field.name)
+                    .append(":</b> ")
+                    .append(field.getFormattedValue(app).htmlEncode())
+                    .append("</div>\n")
             }
             writer.append("</div>\n")
         }
@@ -102,15 +102,6 @@ class ExportFormatter {
             .append("</div>\n")
             .append("</body>\n")
             .append("</html>\n")
-    }
-
-    fun toCsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeCsv(sw, apps, includeUsageStats)
-        return sw.toString()
     }
 
     fun writeCsv(
@@ -135,15 +126,6 @@ class ExportFormatter {
         }
     }
 
-    fun toTsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        writeTsv(sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
     fun writeTsv(
         writer: Writer,
         apps: List<App>,
@@ -157,12 +139,19 @@ class ExportFormatter {
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append(app.name).append("\t")
-            writer.append(app.packageName)
+            writer.append(app.name.escapeTsv()).append("\t")
+            writer.append(app.packageName.escapeTsv())
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app))
+                writer.append("\t").append(field.getFormattedValue(app).escapeTsv())
             }
             writer.append("\n")
         }
     }
+
+    private fun String.escapeTsv(): String =
+        this
+            .replace("\\", "\\\\")
+            .replace("\t", "\\t")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
 }

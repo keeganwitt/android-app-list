@@ -50,15 +50,18 @@ class PermissionUtilsTest {
         val shadowActivity = Shadows.shadowOf(activity)
         val shadowPackageManager = Shadows.shadowOf(activity.packageManager)
 
-        val intentToResolve = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-            data = Uri.fromParts("package", activity.packageName, null)
-        }
-        val resolveInfo = ResolveInfo().apply {
-            activityInfo = android.content.pm.ActivityInfo().apply {
-                packageName = "com.android.settings"
-                name = "Settings"
+        val intentToResolve =
+            Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                data = Uri.fromParts("package", activity.packageName, null)
             }
-        }
+        val resolveInfo =
+            ResolveInfo().apply {
+                activityInfo =
+                    android.content.pm.ActivityInfo().apply {
+                        packageName = "com.android.settings"
+                        name = "Settings"
+                    }
+            }
         shadowPackageManager.addResolveInfoForIntent(intentToResolve, resolveInfo)
 
         PermissionUtils.requestUsageStatsPermission(activity)
@@ -77,12 +80,14 @@ class PermissionUtilsTest {
 
         // Only fallback intent resolves
         val fallbackIntent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS)
-        val resolveInfo = ResolveInfo().apply {
-            activityInfo = android.content.pm.ActivityInfo().apply {
-                packageName = "com.android.settings"
-                name = "Settings"
+        val resolveInfo =
+            ResolveInfo().apply {
+                activityInfo =
+                    android.content.pm.ActivityInfo().apply {
+                        packageName = "com.android.settings"
+                        name = "Settings"
+                    }
             }
-        }
         shadowPackageManager.addResolveInfoForIntent(fallbackIntent, resolveInfo)
 
         PermissionUtils.requestUsageStatsPermission(activity)
@@ -100,7 +105,9 @@ class PermissionUtilsTest {
 
         PermissionUtils.requestUsageStatsPermission(activity)
 
-        val toastText = org.robolectric.shadows.ShadowToast.getTextOfLatestToast()
+        val toastText =
+            org.robolectric.shadows.ShadowToast
+                .getTextOfLatestToast()
         assertTrue(toastText.toString().contains("Please enable Usage Access permission manually in Settings"))
     }
 }

@@ -1,13 +1,9 @@
 package com.github.keeganwitt.applist
 
-import android.app.AppOpsManager
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
-import android.os.Process
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -118,7 +114,10 @@ class MainActivity :
                                 repo,
                                 DefaultDispatcherProvider(),
                                 SummaryCalculator(applicationContext, store),
-                                sizeFormatter = { android.text.format.Formatter.formatFileSize(applicationContext, it) },
+                                sizeFormatter = {
+                                    android.text.format.Formatter
+                                        .formatFileSize(applicationContext, it)
+                                },
                             )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
