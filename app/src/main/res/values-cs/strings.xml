@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_icon_description">Ikona aplikace</string>
+    <string name="search">Hledat</string>
+    <string name="systemAppToggle">Systémové aplikace</string>
+    <string name="appInfoField_apkSize">Velikost APK</string>
+    <string name="appInfoField_appSize">Velikost aplikace</string>
+    <string name="appInfoField_archived">Archivováno</string>
+    <string name="appInfoField_cacheSize">Velikost mezipaměti</string>
+    <string name="appInfoField_dataSize">Velikost dat</string>
+    <string name="appInfoField_enabled">Povoleno</string>
+    <string name="appInfoField_exists_in_app_store">Existuje v obchodě s aplikacemi</string>
+    <string name="appInfoField_externalCacheSize">Velikost externí mezipaměti</string>
+    <string name="appInfoField_firstInstalled">Poprvé nainstalováno</string>
+    <string name="appInfoField_grantedPermissions">Udělená oprávnění</string>
+    <string name="appInfoField_lastUpdated">Naposledy aktualizováno</string>
+    <string name="appInfoField_lastUsed">Naposledy použito</string>
+    <string name="appInfoField_minSdk">Minimální SDK</string>
+    <string name="appInfoField_packageManager">Správce balíčků</string>
+    <string name="appInfoField_requestedPermissions">Vyžadovaná oprávnění</string>
+    <string name="appInfoField_targetSdk">Cílové SDK</string>
+    <string name="appInfoField_totalSize">Celková velikost</string>
+    <string name="appInfoField_version">Verze</string>
+    <string name="enabled">Povoleno</string>
+    <string name="disabled">Zakázáno</string>
+    <string name="installed">Nainstalováno</string>
+    <string name="archived">Archivováno</string>
+    <string name="boolean_true">Pravda</string>
+    <string name="boolean_false">Nepravda</string>
+    <string name="export">Exportovat</string>
+    <string name="export_as">Exportovat jako</string>
+    <string name="export_no_apps">Žádné aplikace k exportu</string>
+    <string name="export_successful">Export byl úspěšný</string>
+    <string name="export_failed">Export selhal: %1$s</string>
+    <string name="settings">Nastavení</string>
+    <string name="crash_reporting_title">Sdílet hlášení o pádech</string>
+    <string name="crash_reporting_summary">Povolit odesílání anonymních hlášení o pádech pro zlepšení aplikace</string>
+    <string name="theme_title">Motiv</string>
+
+    <string name="export_usage_stats_title">Zahrnout pole využití v exportu</string>
+    <string name="export_usage_stats_summary">Zahrnout pole vyžadující oprávnění k využití (např. velikost aplikace, naposledy použito) v exportech</string>
+
+    <string name="theme_entry_light">Světlý</string>
+    <string name="theme_entry_dark">Tmavý</string>
+    <string name="theme_entry_system">Systémový</string>
+    <string name="summary">Souhrn</string>
+    <string name="summary_loading">Souhrn (načítání&#8230;)</string>
+
+    <string name="date_bucket_last_month">Minulý měsíc</string>
+    <string name="date_bucket_last_three_months">Poslední 3 měsíce</string>
+    <string name="date_bucket_last_six_months">Posledních 6 měsíců</string>
+    <string name="date_bucket_older">Starší</string>
+</resources>

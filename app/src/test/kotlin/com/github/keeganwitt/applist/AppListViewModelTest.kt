@@ -20,6 +20,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.text.DateFormat
+import java.util.Date
 
 @ExperimentalCoroutinesApi
 class AppListViewModelTest {
@@ -43,7 +45,7 @@ class AppListViewModelTest {
                 override val main = testDispatcher
                 override val default = testDispatcher
             }
-        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator)
+        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator) { it.toString() }
     }
 
     @After
@@ -260,6 +262,21 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given size field, when mapToItem called, then sizeFormatter is used`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))
+            val mockSizeFormatter: (Long) -> String = { "formatted $it" }
+            val viewModelWithSizeFormatter = AppListViewModel(repository, dispatcherProvider, summaryCalculator, mockSizeFormatter)
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModelWithSizeFormatter.init(AppInfoField.APK_SIZE)
+            advanceUntilIdle()
+
+            val state = viewModelWithSizeFormatter.uiState.value
+            assertEquals("formatted 1024", state.items[0].infoText)
+        }
+
+    @Test
     fun `given apps loaded, when query matches package name, then app is included in filtered results`() =
         runTest {
             val mockApps =
@@ -335,9 +352,9 @@ class AppListViewModelTest {
         }
 
     @Test
-    fun `given apps loaded, when successful, then summary is calculated`() =
+    fun `given detailed apps loaded, when successful, then summary is calculated`() =
         runTest {
-            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
+            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = true))
             val mockSummary = SummaryItem(AppInfoField.ENABLED, mapOf("Enabled" to 1))
             coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
             coEvery { summaryCalculator.calculate(any(), any()) } returns mockSummary
@@ -346,8 +363,24 @@ class AppListViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
+            assertTrue(state.isFullyLoaded)
             assertEquals(mockSummary, state.summary)
             coVerify { summaryCalculator.calculate(mockApps, AppInfoField.ENABLED) }
+        }
+
+    @Test
+    fun `given basic apps loaded, when successful, then summary is not calculated`() =
+        runTest {
+            val mockApps = listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = false))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+
+            viewModel.init(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isFullyLoaded)
+            assertEquals(null, state.summary)
+            coVerify(exactly = 0) { summaryCalculator.calculate(any(), any()) }
         }
 
     @Test
@@ -396,6 +429,146 @@ class AppListViewModelTest {
             assertEquals(1, state.items.size)
             assertEquals("com.test.app1", state.items[0].packageName)
             assertEquals("1.2.3", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given apps loaded, when query matches, then filteredApps is populated`() =
+        runTest {
+            val app1 = createTestApp("com.test.app1", "App One")
+            val app2 = createTestApp("com.test.app2", "App Two")
+            val mockApps = listOf(app1, app2)
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(mockApps)
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            viewModel.setQuery("One")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.filteredApps.size)
+            assertEquals("com.test.app1", state.filteredApps[0].packageName)
+        }
+
+    @Test
+    fun `given apps with all fields, when mapToItem called, then correct info text is generated for each field`() =
+        runTest {
+            val app =
+                App(
+                    packageName = "com.test",
+                    name = "Test App",
+                    versionName = "1.2.3",
+                    archived = true,
+                    minSdk = 21,
+                    targetSdk = 33,
+                    firstInstalled = 1000000L,
+                    lastUpdated = 2000000L,
+                    lastUsed = 3000000L,
+                    sizes =
+                        StorageUsage(
+                            apkBytes = 100L,
+                            appBytes = 200L,
+                            cacheBytes = 300L,
+                            dataBytes = 400L,
+                            externalCacheBytes = 500L,
+                        ),
+                    installerName = "Test Installer",
+                    existsInStore = true,
+                    grantedPermissionsCount = 5,
+                    requestedPermissionsCount = 10,
+                    enabled = true,
+                )
+
+            val expectedMap =
+                mapOf(
+                    AppInfoField.APK_SIZE to "100",
+                    AppInfoField.APP_SIZE to "200",
+                    AppInfoField.CACHE_SIZE to "300",
+                    AppInfoField.DATA_SIZE to "400",
+                    AppInfoField.ENABLED to "true",
+                    AppInfoField.ARCHIVED to "true",
+                    AppInfoField.EXISTS_IN_APP_STORE to "true",
+                    AppInfoField.EXTERNAL_CACHE_SIZE to "500",
+                    AppInfoField.FIRST_INSTALLED to DateFormat.getDateTimeInstance().format(Date(1000000L)),
+                    AppInfoField.LAST_UPDATED to DateFormat.getDateTimeInstance().format(Date(2000000L)),
+                    AppInfoField.LAST_USED to DateFormat.getDateTimeInstance().format(Date(3000000L)),
+                    AppInfoField.MIN_SDK to "21",
+                    AppInfoField.PACKAGE_MANAGER to "Test Installer",
+                    AppInfoField.GRANTED_PERMISSIONS to "5",
+                    AppInfoField.REQUESTED_PERMISSIONS to "10",
+                    AppInfoField.TARGET_SDK to "33",
+                    AppInfoField.TOTAL_SIZE to (200L + 300L + 400L + 500L).toString(),
+                    AppInfoField.VERSION to "1.2.3",
+                )
+
+            for ((field, expectedInfo) in expectedMap) {
+                coEvery { repository.loadApps(field, any(), any(), any()) } returns flowOf(listOf(app))
+                viewModel.init(field)
+                advanceUntilIdle()
+                assertEquals(
+                    "Failed for field $field",
+                    expectedInfo,
+                    viewModel.uiState.value.items[0]
+                        .infoText,
+                )
+            }
+        }
+
+    @Test
+    fun `given apps with null fields, when mapToItem called, then correct default info text is generated`() =
+        runTest {
+            val app =
+                App(
+                    packageName = "com.test",
+                    name = "Test App",
+                    versionName = null,
+                    archived = null,
+                    minSdk = null,
+                    targetSdk = null,
+                    firstInstalled = null,
+                    lastUpdated = null,
+                    lastUsed = null,
+                    sizes = StorageUsage(),
+                    installerName = null,
+                    existsInStore = null,
+                    grantedPermissionsCount = null,
+                    requestedPermissionsCount = null,
+                    enabled = false,
+                )
+
+            val expectedMap =
+                mapOf(
+                    AppInfoField.APK_SIZE to "0",
+                    AppInfoField.APP_SIZE to "0",
+                    AppInfoField.CACHE_SIZE to "0",
+                    AppInfoField.DATA_SIZE to "0",
+                    AppInfoField.ENABLED to "false",
+                    AppInfoField.ARCHIVED to "false",
+                    AppInfoField.EXISTS_IN_APP_STORE to "false",
+                    AppInfoField.EXTERNAL_CACHE_SIZE to "0",
+                    AppInfoField.FIRST_INSTALLED to "",
+                    AppInfoField.LAST_UPDATED to "",
+                    AppInfoField.LAST_USED to "",
+                    AppInfoField.MIN_SDK to "0",
+                    AppInfoField.PACKAGE_MANAGER to "",
+                    AppInfoField.GRANTED_PERMISSIONS to "0",
+                    AppInfoField.REQUESTED_PERMISSIONS to "0",
+                    AppInfoField.TARGET_SDK to "0",
+                    AppInfoField.TOTAL_SIZE to "0",
+                    AppInfoField.VERSION to "",
+                )
+
+            for ((field, expectedInfo) in expectedMap) {
+                coEvery { repository.loadApps(field, any(), any(), any()) } returns flowOf(listOf(app))
+                viewModel.init(field)
+                advanceUntilIdle()
+                assertEquals(
+                    "Failed for field $field",
+                    expectedInfo,
+                    viewModel.uiState.value.items[0]
+                        .infoText,
+                )
+            }
         }
 
     private fun createTestApp(

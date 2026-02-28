@@ -43,10 +43,15 @@
     app</string>
     <string name="theme_title">Theme</string>
 
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size,
+    last used) in exports</string>
+
     <string name="theme_entry_light">Light</string>
     <string name="theme_entry_dark">Dark</string>
     <string name="theme_entry_system">System</string>
     <string name="summary">Summary</string>
+    <string name="summary_loading">Summary (loading&#8230;)</string>
     <string name="size_bucket_small" translatable="false">&lt; 10 MB</string>
     <string name="size_bucket_medium" translatable="false">10 – 50 MB</string>
     <string name="size_bucket_large" translatable="false">50 – 100 MB</string>
@@ -57,5 +62,10 @@
     <string name="perm_bucket_some" translatable="false">6 – 10</string>
     <string name="perm_bucket_many" translatable="false">11 – 20</string>
     <string name="perm_bucket_lots" translatable="false">20+</string>
+
+    <string name="date_bucket_last_month">Last month</string>
+    <string name="date_bucket_last_three_months">Last 3 months</string>
+    <string name="date_bucket_last_six_months">Last 6 months</string>
+    <string name="date_bucket_older">Older</string>
 
 </resources>

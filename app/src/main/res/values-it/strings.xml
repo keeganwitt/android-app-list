@@ -41,4 +41,12 @@
     <string name="theme_entry_system">Sistema</string>
     <string name="summary">Riepilogo</string>
 
+    <string name="summary_loading">Riepilogo (caricamento…)</string>
+    <string name="export_usage_stats_title">Includi i campi di utilizzo nell\'esportazione</string>
+    <string name="export_usage_stats_summary">Includi i campi che richiedono il permesso di utilizzo (es. dimensione app, ultimo utilizzo) nelle esportazioni</string>
+
+    <string name="date_bucket_last_month">Mese scorso</string>
+    <string name="date_bucket_last_three_months">Ultimi 3 mesi</string>
+    <string name="date_bucket_last_six_months">Ultimi 6 mesi</string>
+    <string name="date_bucket_older">Più vecchi</string>
 </resources>

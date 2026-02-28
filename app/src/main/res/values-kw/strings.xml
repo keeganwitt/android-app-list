@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_icon_description">Arvow an App</string>
+    <string name="search">Hwilas</string>
+    <string name="systemAppToggle">Appys an Kevreyth</string>
+    <string name="appInfoField_apkSize">Braster APK</string>
+    <string name="appInfoField_appSize">Braster an App</string>
+    <string name="appInfoField_archived">Archivys</string>
+    <string name="appInfoField_cacheSize">Braster an Gwithva</string>
+    <string name="appInfoField_dataSize">Braster an Kedhlow</string>
+    <string name="appInfoField_enabled">Ilowegys</string>
+    <string name="appInfoField_exists_in_app_store">Eksistya y\'n Shoppa Appys</string>
+    <string name="appInfoField_externalCacheSize">Braster Gwithva a-ves</string>
+    <string name="appInfoField_firstInstalled">Ynstallys kynsa</string>
+    <string name="appInfoField_grantedPermissions">Cumyasow grontys</string>
+    <string name="appInfoField_lastUpdated">Diwedhys diwettha</string>
+    <string name="appInfoField_lastUsed">Devnydhys diwettha</string>
+    <string name="appInfoField_minSdk">SDK lyha</string>
+    <string name="appInfoField_packageManager">Dyghtyer Packys</string>
+    <string name="appInfoField_requestedPermissions">Cumyasow govynnys</string>
+    <string name="appInfoField_targetSdk">SDK degythys</string>
+    <string name="appInfoField_totalSize">Braster sommen</string>
+    <string name="appInfoField_version">Versyon</string>
+    <string name="enabled">Ilowegys</string>
+    <string name="disabled">Dialowegys</string>
+    <string name="installed">Ynstallys</string>
+    <string name="archived">Archivys</string>
+    <string name="boolean_true">Gwir</string>
+    <string name="boolean_false">Gaw</string>
+    <string name="export">Eksportya</string>
+    <string name="export_as">Eksportya avel</string>
+    <string name="export_no_apps">Nyns eus appys dhe eksportya</string>
+    <string name="export_successful">Eksportya sewen</string>
+    <string name="export_failed">Eksportya falllys: %1$s</string>
+    <string name="settings">Settyansow</string>
+    <string name="crash_reporting_title">Kevrenna derivadow droklam</string>
+    <string name="crash_reporting_summary">Gola danvon derivadow droklam dihanow rag gweres gwellhe an app</string>
+    <string name="theme_title">Them</string>
+
+    <string name="export_usage_stats_title">Komprehendya parkow devnydh y\'n eksport</string>
+    <string name="export_usage_stats_summary">Komprehendya parkow hag a reker cumyas devnydh (e.g. braster an app, devnydhys diwettha) yn eksportys</string>
+
+    <string name="theme_entry_light">Golow</string>
+    <string name="theme_entry_dark">Tewl</string>
+    <string name="theme_entry_system">Kevreyth</string>
+    <string name="summary">Sommari</string>
+    <string name="summary_loading">Sommari (ow karga&#8230;)</string>
+
+    <string name="date_bucket_last_month">Mis diwettha</string>
+    <string name="date_bucket_last_three_months">3 mis diwettha</string>
+    <string name="date_bucket_last_six_months">6 mis diwettha</string>
+    <string name="date_bucket_older">Kottha</string>
+</resources>

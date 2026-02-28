@@ -41,4 +41,12 @@
     <string name="theme_entry_system">সিস্টেম</string>
     <string name="summary">সারাংশ</string>
 
+    <string name="summary_loading">সারাংশ (লোড হচ্ছে…)</string>
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">গত মাস</string>
+    <string name="date_bucket_last_three_months">গত ৩ মাস</string>
+    <string name="date_bucket_last_six_months">গত ৬ মাস</string>
+    <string name="date_bucket_older">পুরনো</string>
 </resources>

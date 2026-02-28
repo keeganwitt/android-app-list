@@ -7,14 +7,17 @@ import android.util.Log
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.github.keeganwitt.applist.utils.PermissionUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.io.Writer
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -22,12 +25,13 @@ import java.util.Locale
 
 class AppExporter(
     private val activity: AppCompatActivity,
-    private val itemsProvider: () -> List<AppItemUiModel>,
+    private val appsProvider: () -> List<App>,
     private val formatter: ExportFormatter,
+    private val appSettings: AppSettings,
     private val crashReporter: CrashReporter? = null,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
+    private val registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
-    internal var selectedAppInfoField: AppInfoField? = null
     private var currentExportType: ExportFormat? = null
 
     private val createFileLauncher: ActivityResultLauncher<Intent>
@@ -37,7 +41,7 @@ class AppExporter(
         // safely register at any point in the Activity lifecycle (including after RESUMED),
         // which is especially useful for unit tests that use a fully-started Activity.
         createFileLauncher =
-            activity.activityResultRegistry.register(
+            registry.register(
                 "app_exporter_${System.identityHashCode(this)}",
                 StartActivityForResult(),
             ) { result ->
@@ -66,8 +70,7 @@ class AppExporter(
             }
     }
 
-    fun export(selectedAppInfoField: AppInfoField) {
-        this.selectedAppInfoField = selectedAppInfoField
+    fun export() {
         showExportDialog()
     }
 
@@ -110,8 +113,8 @@ class AppExporter(
     }
 
     internal fun initiateExport(type: ExportFormat) {
-        val items = itemsProvider()
-        if (items.isEmpty()) {
+        val apps = appsProvider()
+        if (apps.isEmpty()) {
             Toast
                 .makeText(
                     activity,
@@ -125,8 +128,7 @@ class AppExporter(
         val timestamp =
             SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
                 .format(Date())
-        val appInfoType = selectedAppInfoField!!.name.lowercase(Locale.getDefault())
-        val fileName = "apps_" + appInfoType + "_" + timestamp + "." + type.extension
+        val fileName = "apps_" + timestamp + "." + type.extension
 
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -137,49 +139,53 @@ class AppExporter(
     }
 
     internal fun writeXmlToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.XML, items) {
-                formatter.toXml(it, field)
+            exportToFile(uri, ExportFormat.XML) {
+                formatter.writeXml(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeCsvToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.CSV, items) {
-                formatter.toCsv(it, field)
+            exportToFile(uri, ExportFormat.CSV) {
+                formatter.writeCsv(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeTsvToFile(uri: Uri) {
-        val items = itemsProvider()
-        val field = selectedAppInfoField!!
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.TSV, items) {
-                formatter.toTsv(it, field)
+            exportToFile(uri, ExportFormat.TSV) {
+                formatter.writeTsv(it, apps, includeUsageStats)
             }
         }
     }
 
     internal fun writeHtmlToFile(uri: Uri) {
-        val items = itemsProvider()
+        val apps = appsProvider()
+        val includeUsageStats = shouldIncludeUsageStats()
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, ExportFormat.HTML, items) {
-                formatter.toHtml(it)
+            exportToFile(uri, ExportFormat.HTML) {
+                formatter.writeHtml(it, apps, includeUsageStats)
             }
         }
     }
 
+    private fun shouldIncludeUsageStats(): Boolean =
+        appSettings.isIncludeUsageStatsInExportEnabled() &&
+            PermissionUtils.hasUsageStatsPermission(activity)
+
     private suspend fun exportToFile(
         uri: Uri,
         format: ExportFormat,
-        items: List<AppItemUiModel>,
-        contentGenerator: (List<AppItemUiModel>) -> String,
+        writeAction: (Writer) -> Unit,
     ) {
         try {
             val outputStream =
@@ -187,8 +193,7 @@ class AppExporter(
                     ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
                 val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
-                val content = contentGenerator(items)
-                writer.write(content)
+                writeAction(writer)
                 writer.flush()
             }
             withContext(dispatchers.main) {

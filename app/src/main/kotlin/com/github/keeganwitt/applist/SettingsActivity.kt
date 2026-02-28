@@ -7,6 +7,7 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.github.keeganwitt.applist.databinding.ActivitySettingsBinding
+import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
 
 class SettingsActivity : AppCompatActivity() {
@@ -60,6 +61,15 @@ class SettingsActivity : AppCompatActivity() {
                     val mode = AppSettings.ThemeMode.valueOf(newValue as String)
                     androidx.appcompat.app.AppCompatDelegate
                         .setDefaultNightMode(mode.nightMode)
+                    true
+                }
+
+            findPreference<SwitchPreferenceCompat>(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT)
+                ?.setOnPreferenceChangeListener { _, newValue ->
+                    val enabled = newValue as Boolean
+                    if (enabled && !PermissionUtils.hasUsageStatsPermission(requireContext())) {
+                        PermissionUtils.requestUsageStatsPermission(requireActivity())
+                    }
                     true
                 }
         }
