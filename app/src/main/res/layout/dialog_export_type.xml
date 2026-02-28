@@ -19,10 +19,10 @@
         android:orientation="vertical">
 
         <RadioButton
-            android:id="@+id/radio_xml"
+            android:id="@+id/radio_csv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/export_xml" />
+            android:text="@string/export_csv" />
 
         <RadioButton
             android:id="@+id/radio_html"
@@ -31,16 +31,16 @@
             android:text="@string/export_html" />
 
         <RadioButton
-            android:id="@+id/radio_csv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export_csv" />
-
-        <RadioButton
             android:id="@+id/radio_tsv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/export_tsv" />
+
+        <RadioButton
+            android:id="@+id/radio_xml"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/export_xml" />
     </RadioGroup>
 
 </LinearLayout>

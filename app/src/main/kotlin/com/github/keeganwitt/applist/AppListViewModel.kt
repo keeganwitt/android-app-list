@@ -13,6 +13,7 @@ class AppListViewModel(
     private val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
     private val summaryCalculator: SummaryCalculator,
+    private val sizeFormatter: (Long) -> String,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -55,7 +56,7 @@ class AppListViewModel(
     private fun loadApps(reload: Boolean) {
         loadJob?.cancel()
         val state = _uiState.value
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true, isFullyLoaded = false, summary = null) }
 
         loadJob =
             viewModelScope.launch(dispatchers.io) {
@@ -71,7 +72,8 @@ class AppListViewModel(
                             val field = _uiState.value.selectedField
                             cachedMappedItems = apps.map { mapToItem(it, field) }
                             cachedMappedItemsField = field
-                            _uiState.update { it.copy(isLoading = false) }
+                            val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
+                            _uiState.update { it.copy(isLoading = false, isFullyLoaded = fullyLoaded) }
                             applyFilterAndEmit()
                         }
                     }
@@ -106,9 +108,15 @@ class AppListViewModel(
                     allApps.filter { app -> app.packageName in filteredPackageNames }
                 }
 
-            val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
-            withContext(dispatchers.main) {
-                _uiState.update { it.copy(summary = summary) }
+            if (state.isFullyLoaded) {
+                val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
+                withContext(dispatchers.main) {
+                    _uiState.update { it.copy(summary = summary, filteredApps = filteredApps) }
+                }
+            } else {
+                withContext(dispatchers.main) {
+                    _uiState.update { it.copy(summary = null, filteredApps = filteredApps) }
+                }
             }
         }
     }
@@ -117,7 +125,13 @@ class AppListViewModel(
         app: App,
         field: AppInfoField,
     ): AppItemUiModel {
-        val info = field.getFormattedValue(app)
+        val rawValue = field.getValue(app)
+        val info =
+            if (field.isSize && rawValue is Long) {
+                sizeFormatter(rawValue)
+            } else {
+                field.getFormattedValue(app)
+            }
         return AppItemUiModel(
             packageName = app.packageName,
             appName = app.name,

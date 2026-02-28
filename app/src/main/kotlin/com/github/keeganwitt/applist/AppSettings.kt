@@ -17,6 +17,10 @@ interface AppSettings {
 
     fun setThemeMode(mode: ThemeMode)
 
+    fun isIncludeUsageStatsInExportEnabled(): Boolean
+
+    fun setIncludeUsageStatsInExportEnabled(enabled: Boolean)
+
     enum class ThemeMode {
         LIGHT,
         DARK,
@@ -27,6 +31,7 @@ interface AppSettings {
         const val KEY_CRASH_REPORTING_ENABLED = "crash_reporting_enabled"
         const val KEY_LAST_DISPLAYED_APP_INFO_FIELD = "last_displayed_app_info_field"
         const val KEY_THEME_MODE = "theme_mode"
+        const val KEY_INCLUDE_USAGE_STATS_IN_EXPORT = "include_usage_stats_in_export"
         const val DEFAULT_PREF_NAME_SUFFIX = "_preferences"
     }
 }
@@ -78,5 +83,12 @@ class SharedPreferencesAppSettings(
 
     override fun setThemeMode(mode: AppSettings.ThemeMode) {
         preferences.edit { putString(AppSettings.KEY_THEME_MODE, mode.name) }
+    }
+
+    override fun isIncludeUsageStatsInExportEnabled(): Boolean =
+        preferences.getBoolean(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT, false)
+
+    override fun setIncludeUsageStatsInExportEnabled(enabled: Boolean) {
+        preferences.edit { putBoolean(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT, enabled) }
     }
 }

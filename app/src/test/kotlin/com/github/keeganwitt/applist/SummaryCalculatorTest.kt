@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import com.github.keeganwitt.applist.services.AppStoreService
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -9,7 +10,8 @@ import org.junit.Test
 
 class SummaryCalculatorTest {
     private val context = mockk<Context>()
-    private val calculator = SummaryCalculator(context)
+    private val store = mockk<AppStoreService>()
+    private val calculator = SummaryCalculator(context, store)
 
     @Test
     fun `calculate returns correct enabled summary`() {
@@ -23,6 +25,52 @@ class SummaryCalculatorTest {
         assertEquals(AppInfoField.ENABLED, result?.field)
         assertEquals(2, result?.buckets?.get("Enabled"))
         assertEquals(1, result?.buckets?.get("Disabled"))
+    }
+
+    @Test
+    fun `calculatePermissionSummary handles boundary cases correctly`() {
+        mockStrings()
+        val apps =
+            listOf(
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0), // None
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 1), // Few
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 5), // Few
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 6), // Some
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 10), // Some
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 11), // Many
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 20), // Many
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 21), // Lots
+            )
+
+        val result = calculator.calculate(apps, AppInfoField.GRANTED_PERMISSIONS)
+
+        assertEquals(1, result?.buckets?.get("None"))
+        assertEquals(2, result?.buckets?.get("Few"))
+        assertEquals(2, result?.buckets?.get("Some"))
+        assertEquals(2, result?.buckets?.get("Many"))
+        assertEquals(1, result?.buckets?.get("Lots"))
+    }
+
+    @Test
+    fun `calculate returns correct size summary for boundary cases`() {
+        mockStrings()
+        val appSmall = createApp(enabled = true, archived = false, apkSize = 10 * 1024 * 1024 - 1)
+        val appMediumBoundary = createApp(enabled = true, archived = false, apkSize = 10 * 1024 * 1024)
+        val appMedium = createApp(enabled = true, archived = false, apkSize = 50 * 1024 * 1024 - 1)
+        val appLargeBoundary = createApp(enabled = true, archived = false, apkSize = 50 * 1024 * 1024)
+        val appLarge = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024 - 1)
+        val appHugeBoundary = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024)
+
+        val result =
+            calculator.calculate(
+                listOf(appSmall, appMediumBoundary, appMedium, appLargeBoundary, appLarge, appHugeBoundary),
+                AppInfoField.APK_SIZE,
+            )
+
+        assertEquals(1, result?.buckets?.get("Small"))
+        assertEquals(2, result?.buckets?.get("Medium"))
+        assertEquals(2, result?.buckets?.get("Large"))
+        assertEquals(1, result?.buckets?.get("Huge"))
     }
 
     @Test
@@ -90,6 +138,102 @@ class SummaryCalculatorTest {
     }
 
     @Test
+    fun `calculate returns correct exists in app store summary`() {
+        mockStrings()
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = true)
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = false)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(existsInStore = true)
+
+        val result = calculator.calculate(listOf(app1, app2, app3), AppInfoField.EXISTS_IN_APP_STORE)
+
+        assertEquals(AppInfoField.EXISTS_IN_APP_STORE, result?.field)
+        assertEquals(2, result?.buckets?.get("True"))
+        assertEquals(1, result?.buckets?.get("False"))
+    }
+
+    @Test
+    fun `calculatePermissionSummary handles requested permissions`() {
+        mockStrings()
+        val app0 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 0)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 3)
+        val app8 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 8)
+        val app15 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 15)
+        val app25 = createApp(enabled = true, archived = false, apkSize = 0).copy(requestedPermissionsCount = 25)
+
+        val result = calculator.calculate(listOf(app0, app3, app8, app15, app25), AppInfoField.REQUESTED_PERMISSIONS)
+
+        assertEquals(AppInfoField.REQUESTED_PERMISSIONS, result?.field)
+        assertEquals(1, result?.buckets?.get("None")) // 0
+        assertEquals(1, result?.buckets?.get("Few")) // 1-5
+        assertEquals(1, result?.buckets?.get("Some")) // 6-10
+        assertEquals(1, result?.buckets?.get("Many")) // 11-20
+        assertEquals(1, result?.buckets?.get("Lots")) // 20+
+    }
+
+    @Test
+    fun `calculateDateSummary buckets correctly`() {
+        mockStrings()
+        val now = System.currentTimeMillis()
+        val oneMonthAgo = now - 15L * 24 * 60 * 60 * 1000
+        val threeMonthsAgo = now - 45L * 24 * 60 * 60 * 1000
+        val sixMonthsAgo = now - 120L * 24 * 60 * 60 * 1000
+        val older = now - 200L * 24 * 60 * 60 * 1000
+
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = oneMonthAgo)
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = threeMonthsAgo)
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = sixMonthsAgo)
+        val app4 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = older)
+
+        val result = calculator.calculate(listOf(app1, app2, app3, app4), AppInfoField.FIRST_INSTALLED)
+
+        assertEquals(1, result?.buckets?.get("Last month"))
+        assertEquals(1, result?.buckets?.get("Last 3 months"))
+        assertEquals(1, result?.buckets?.get("Last 6 months"))
+        assertEquals(1, result?.buckets?.get("Older"))
+    }
+
+    @Test
+    fun `calculateDateSummary handles boundary cases correctly`() {
+        mockStrings()
+        val now = System.currentTimeMillis()
+        val dayMs = 24L * 60 * 60 * 1000
+
+        val apps =
+            listOf(
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now), // Last month
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs + 1000), // Last month
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs - 1000), // Last 3 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs + 1000), // Last 3 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs - 1000), // Last 6 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs + 1000), // Last 6 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs - 1000), // Older
+            )
+
+        val result = calculator.calculate(apps, AppInfoField.FIRST_INSTALLED)
+
+        assertEquals(2, result?.buckets?.get("Last month"))
+        assertEquals(2, result?.buckets?.get("Last 3 months"))
+        assertEquals(2, result?.buckets?.get("Last 6 months"))
+        assertEquals(1, result?.buckets?.get("Older"))
+    }
+
+    @Test
+    fun `calculatePackageManagerSummary groups correctly`() {
+        mockStrings()
+        every { store.installerDisplayName("store1") } returns "Store 1"
+        every { store.installerDisplayName("store2") } returns "Store 2"
+
+        val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store1")
+        val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store1")
+        val app3 = createApp(enabled = true, archived = false, apkSize = 0).copy(installerName = "store2")
+
+        val result = calculator.calculate(listOf(app1, app2, app3), AppInfoField.PACKAGE_MANAGER)
+
+        assertEquals(2, result?.buckets?.get("Store 1"))
+        assertEquals(1, result?.buckets?.get("Store 2"))
+    }
+
+    @Test
     fun `calculate returns null for version field`() {
         val app = createApp(enabled = true, archived = false, apkSize = 0)
         val result = calculator.calculate(listOf(app), AppInfoField.VERSION)
@@ -115,6 +259,11 @@ class SummaryCalculatorTest {
         every { context.getString(R.string.perm_bucket_some) } returns "Some"
         every { context.getString(R.string.perm_bucket_many) } returns "Many"
         every { context.getString(R.string.perm_bucket_lots) } returns "Lots"
+
+        every { context.getString(R.string.date_bucket_last_month) } returns "Last month"
+        every { context.getString(R.string.date_bucket_last_three_months) } returns "Last 3 months"
+        every { context.getString(R.string.date_bucket_last_six_months) } returns "Last 6 months"
+        every { context.getString(R.string.date_bucket_older) } returns "Older"
     }
 
     private fun createApp(

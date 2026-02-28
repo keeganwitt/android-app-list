@@ -41,4 +41,12 @@
     <string name="theme_entry_system">系统</string>
     <string name="summary">摘要</string>
 
+    <string name="summary_loading">摘要 (加载中…)</string>
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">上个月</string>
+    <string name="date_bucket_last_three_months">最近3个月</string>
+    <string name="date_bucket_last_six_months">最近6个月</string>
+    <string name="date_bucket_older">更早</string>
 </resources>

@@ -41,4 +41,12 @@
     <string name="theme_entry_system">Système</string>
     <string name="summary">Résumé</string>
 
+    <string name="summary_loading">Résumé (chargement…)</string>
+    <string name="export_usage_stats_title">Inclure les champs d\'utilisation dans l\'exportation</string>
+    <string name="export_usage_stats_summary">Inclure les champs nécessitant une autorisation d\'utilisation (par ex. taille de l\'application, dernière utilisation) dans les exportations</string>
+
+    <string name="date_bucket_last_month">Le mois dernier</string>
+    <string name="date_bucket_last_three_months">Les 3 derniers mois</string>
+    <string name="date_bucket_last_six_months">Les 6 derniers mois</string>
+    <string name="date_bucket_older">Plus anciens</string>
 </resources>

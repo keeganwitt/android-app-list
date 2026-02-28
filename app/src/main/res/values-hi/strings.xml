@@ -41,4 +41,12 @@
     <string name="theme_entry_system">सिस्टम</string>
     <string name="summary">सारांश</string>
 
+    <string name="summary_loading">सारांश (लोड हो रहा है…)</string>
+    <string name="export_usage_stats_title">Include usage fields in export</string>
+    <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">पिछला महीना</string>
+    <string name="date_bucket_last_three_months">पिछले 3 महीने</string>
+    <string name="date_bucket_last_six_months">पिछले 6 महीने</string>
+    <string name="date_bucket_older">पुराना</string>
 </resources>

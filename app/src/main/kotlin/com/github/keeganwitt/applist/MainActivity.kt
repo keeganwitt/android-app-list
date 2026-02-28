@@ -1,13 +1,9 @@
 package com.github.keeganwitt.applist
 
-import android.app.AppOpsManager
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
-import android.os.Process
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -31,6 +27,7 @@ import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -43,7 +40,6 @@ class MainActivity :
     private lateinit var appInfoFields: List<AppInfoField>
     private lateinit var appAdapter: AppAdapter
     private lateinit var binding: ActivityMainBinding
-    private var showSystemApps = false
     private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
@@ -51,6 +47,7 @@ class MainActivity :
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
     private var shouldRefreshOnResume = false
+    private var ignoreQueryChanges = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,7 +113,11 @@ class MainActivity :
                             AppListViewModel(
                                 repo,
                                 DefaultDispatcherProvider(),
-                                SummaryCalculator(applicationContext),
+                                SummaryCalculator(applicationContext, store),
+                                sizeFormatter = {
+                                    android.text.format.Formatter
+                                        .formatFileSize(applicationContext, it)
+                                },
                             )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
@@ -131,8 +132,9 @@ class MainActivity :
         appExporter =
             AppExporter(
                 this,
-                itemsProvider = { appAdapter.currentList },
+                appsProvider = { latestState.filteredApps },
                 formatter = ExportFormatter(),
+                appSettings = appSettings,
                 crashReporter = crashReporter,
             )
     }
@@ -170,33 +172,53 @@ class MainActivity :
     }
 
     private fun observeViewModel() {
+        latestState = appListViewModel.uiState.value
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 appListViewModel.uiState.collectLatest { state ->
+                    val shouldInvalidate =
+                        latestState.isFullyLoaded != state.isFullyLoaded ||
+                            (latestState.summary == null) != (state.summary == null) ||
+                            latestState.showSystem != state.showSystem
                     latestState = state
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.recyclerView.visibility = if (state.isLoading) View.GONE else View.VISIBLE
-                    invalidateOptionsMenu()
+                    if (shouldInvalidate) {
+                        ignoreQueryChanges = true
+                        invalidateOptionsMenu()
+                    }
                 }
             }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        ignoreQueryChanges = false
         menuInflater.inflate(R.menu.app_menu, menu)
 
-        menu.findItem(R.id.systemAppToggle).isChecked = showSystemApps
+        menu.findItem(R.id.systemAppToggle).isChecked = latestState.showSystem
 
         val summaryItem = menu.findItem(R.id.summary)
-        summaryItem.isEnabled = latestState.summary != null
+        if (!latestState.isFullyLoaded) {
+            summaryItem.isEnabled = false
+            summaryItem.title = getString(R.string.summary_loading)
+        } else {
+            summaryItem.isEnabled = latestState.summary != null
+            summaryItem.title = getString(R.string.summary)
+        }
         val icon = summaryItem.icon
         if (icon != null) {
-            icon.alpha = if (latestState.summary != null) 255 else 128
+            icon.alpha = if (summaryItem.isEnabled) 255 else 128
         }
 
         val searchItem = menu.findItem(R.id.search)
-        (searchItem.actionView as? SearchView)?.setOnQueryTextListener(
+        val searchView = searchItem.actionView as? SearchView
+        if (latestState.query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView?.setQuery(latestState.query, false)
+        }
+        searchView?.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     appListViewModel.setQuery(query ?: "")
@@ -204,6 +226,7 @@ class MainActivity :
                 }
 
                 override fun onQueryTextChange(query: String?): Boolean {
+                    if (ignoreQueryChanges) return true
                     appListViewModel.setQuery(query ?: "")
                     return true
                 }
@@ -263,15 +286,12 @@ class MainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                appExporter.export(latestState.selectedField)
+                appExporter.export()
                 return true
             }
 
             R.id.systemAppToggle -> {
-                item.isChecked = !item.isChecked
-                showSystemApps = item.isChecked
-                updateSystemAppToggleIcon(item)
-                appListViewModel.setShowSystem(showSystemApps)
+                appListViewModel.setShowSystem(!latestState.showSystem)
                 return true
             }
 
@@ -311,52 +331,9 @@ class MainActivity :
             .show()
     }
 
-    private fun updateSystemAppToggleIcon(item: MenuItem) {
-        if (item.isChecked) {
-            item.setIcon(R.drawable.ic_system_apps_on)
-        } else {
-            item.setIcon(R.drawable.ic_system_apps_off)
-        }
-    }
-
     private fun maybeRequestUsagePermission(field: AppInfoField) {
-        if (field.requiresUsageStats && !hasUsageStatsPermission()) {
-            requestUsageStatsPermission()
-        }
-    }
-
-    private fun hasUsageStatsPermission(): Boolean {
-        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode =
-            appOps.checkOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                Process.myUid(),
-                packageName,
-            )
-        return mode == AppOpsManager.MODE_ALLOWED
-    }
-
-    private fun requestUsageStatsPermission() {
-        val intent =
-            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                data = Uri.fromParts("package", packageName, null)
-            }
-
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            val fallbackIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            if (fallbackIntent.resolveActivity(packageManager) != null) {
-                startActivity(fallbackIntent)
-            } else {
-                Log.w(TAG, "No Activity found to handle USAGE_ACCESS_SETTINGS intent.")
-                Toast
-                    .makeText(
-                        this,
-                        "Please enable Usage Access permission manually in Settings",
-                        Toast.LENGTH_LONG,
-                    ).show()
-            }
+        if (field.requiresUsageStats && !PermissionUtils.hasUsageStatsPermission(this)) {
+            PermissionUtils.requestUsageStatsPermission(this)
         }
     }
 

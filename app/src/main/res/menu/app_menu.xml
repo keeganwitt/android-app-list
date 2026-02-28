@@ -21,7 +21,8 @@
     app:showAsAction="ifRoom" />
   <item android:id="@+id/summary"
     android:title="@string/summary"
-    app:showAsAction="never" />
+    android:icon="@drawable/ic_summary"
+    app:showAsAction="ifRoom" />
   <item android:id="@+id/settings"
     android:title="@string/settings"
     app:showAsAction="never" />

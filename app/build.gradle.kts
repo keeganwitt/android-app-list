@@ -19,8 +19,8 @@ android {
         applicationId = "com.github.keeganwitt.applist"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20
-        versionName = "1.7.0"
+        versionCode = 22
+        versionName = "1.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -75,7 +75,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     // Firebase dependencies
-    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     implementation("com.google.firebase:firebase-crashlytics")
 
     // Other dependencies

@@ -121,4 +121,18 @@ class SharedPreferencesAppSettingsTest {
         val mode = appSettings.getThemeMode()
         assertTrue(mode == AppSettings.ThemeMode.SYSTEM)
     }
+
+    @Test
+    fun `isIncludeUsageStatsInExportEnabled returns false by default`() {
+        assertFalse(appSettings.isIncludeUsageStatsInExportEnabled())
+    }
+
+    @Test
+    fun `setIncludeUsageStatsInExportEnabled correctly updates the value`() {
+        appSettings.setIncludeUsageStatsInExportEnabled(true)
+        assertTrue(appSettings.isIncludeUsageStatsInExportEnabled())
+
+        appSettings.setIncludeUsageStatsInExportEnabled(false)
+        assertFalse(appSettings.isIncludeUsageStatsInExportEnabled())
+    }
 }
