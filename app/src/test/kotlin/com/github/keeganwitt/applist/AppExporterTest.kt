@@ -68,7 +68,7 @@ class AppExporterTest {
             AppExporter(activity, { emptyList() }, ExportFormatter(), appSettings, crashReporter, testDispatchers)
 
         Shadows.shadowOf(activity.mainLooper).runPaused {
-            exporter.initiateExport(AppExporter.ExportFormat.XML)
+            exporter.initiateExport(ExportFormat.XML)
         }
 
         val text = ShadowToast.getTextOfLatestToast()
@@ -76,38 +76,38 @@ class AppExporterTest {
     }
 
     @Test
-    fun writeXmlToFile_writesContent_andShowsSuccessToast() {
+    fun writeToFile_withXml_writesContent_andShowsSuccessToast() {
         val formatter = mockk<ExportFormatter>()
         val xmlOutput = "<?xml version=\"1.0\"?><apps></apps>"
-        every { formatter.writeXml(any(), any(), any()) } answers {
-            (args[0] as java.io.Writer).write(xmlOutput)
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } answers {
+            (args[1] as java.io.Writer).write(xmlOutput)
         }
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.writeXml(any(), any(), any()) }
+        verify { formatter.write(ExportFormat.XML, any(), any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue(toast.toString() == activity.getString(R.string.export_successful))
         assertEquals(xmlOutput, file.readText())
     }
 
     @Test
-    fun `writeXmlToFile when setting disabled then includeUsageStats is false`() {
+    fun `writeToFile when setting disabled then includeUsageStats is false`() {
         val formatter = mockk<ExportFormatter>(relaxed = true)
         every { appSettings.isIncludeUsageStatsInExportEnabled() } returns false
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.writeXml(any(), apps, false) }
+        verify { formatter.write(ExportFormat.XML, any(), apps, false) }
     }
 
     @Test
@@ -120,12 +120,12 @@ class AppExporterTest {
 
         val formatter = mockk<ExportFormatter>(relaxed = true)
         val xmlOutput = "xml content"
-        every { formatter.writeXml(any(), any(), any()) } answers {
-            (args[0] as java.io.Writer).write(xmlOutput)
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } answers {
+            (args[1] as java.io.Writer).write(xmlOutput)
         }
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
-        exporter.initiateExport(AppExporter.ExportFormat.XML)
+        exporter.initiateExport(ExportFormat.XML)
 
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
@@ -134,7 +134,7 @@ class AppExporterTest {
 
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.writeXml(any(), any(), any()) }
+        verify { formatter.write(ExportFormat.XML, any(), any(), any()) }
         assertEquals(xmlOutput, file.readText())
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue("Expected successful toast but was: $toast", toast?.toString() == activity.getString(R.string.export_successful))
@@ -150,12 +150,12 @@ class AppExporterTest {
 
         val formatter = mockk<ExportFormatter>(relaxed = true)
         val csvOutput = "csv content"
-        every { formatter.writeCsv(any(), any(), any()) } answers {
-            (args[0] as java.io.Writer).write(csvOutput)
+        every { formatter.write(ExportFormat.CSV, any(), any(), any()) } answers {
+            (args[1] as java.io.Writer).write(csvOutput)
         }
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
-        exporter.initiateExport(AppExporter.ExportFormat.CSV)
+        exporter.initiateExport(ExportFormat.CSV)
 
         val file = File.createTempFile("apps", ".csv").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
@@ -164,21 +164,21 @@ class AppExporterTest {
 
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.writeCsv(any(), any(), any()) }
+        verify { formatter.write(ExportFormat.CSV, any(), any(), any()) }
         assertEquals(csvOutput, file.readText())
     }
 
     @Test
-    fun writeXmlToFile_whenFormatterThrowsIOException_handlesError() {
+    fun writeToFile_whenFormatterThrowsIOException_handlesError() {
         val formatter = mockk<ExportFormatter>()
         val exception = IOException("Disk full")
-        every { formatter.writeXml(any(), any(), any()) } throws exception
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } throws exception
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { crashReporter.recordException(exception, "Error exporting XML") }
@@ -187,13 +187,13 @@ class AppExporterTest {
     }
 
     @Test
-    fun writeXmlToFile_whenOpenOutputStreamReturnsNull_handlesError() {
+    fun writeToFile_whenOpenOutputStreamReturnsNull_handlesError() {
         val authority = "com.github.keeganwitt.applist.test.null"
         Robolectric.setupContentProvider(NullContentProvider::class.java, authority)
         val exporter = AppExporter(activity, { apps }, ExportFormatter(), appSettings, crashReporter, testDispatchers)
         val uri = Uri.parse("content://$authority/file")
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { crashReporter.recordException(any<IOException>(), "Error exporting XML") }
@@ -239,16 +239,16 @@ class AppExporterTest {
     }
 
     @Test
-    fun writeXmlToFile_whenFormatterThrowsSecurityException_handlesError() {
+    fun writeToFile_whenFormatterThrowsSecurityException_handlesError() {
         val formatter = mockk<ExportFormatter>()
         val exception = SecurityException("Permission denied")
-        every { formatter.writeXml(any(), any(), any()) } throws exception
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } throws exception
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { crashReporter.recordException(exception, "Error exporting XML") }
@@ -257,15 +257,15 @@ class AppExporterTest {
     }
 
     @Test
-    fun writeXmlToFile_whenSecurityException_handlesError() {
+    fun writeToFile_whenSecurityException_handlesError() {
         val formatter = mockk<ExportFormatter>()
-        every { formatter.writeXml(any(), any(), any()) } throws SecurityException("Mocked SecurityException")
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } throws SecurityException("Mocked SecurityException")
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { crashReporter.recordException(any<SecurityException>(), any()) }
@@ -274,15 +274,15 @@ class AppExporterTest {
     }
 
     @Test
-    fun writeXmlToFile_whenIOException_handlesError() {
+    fun writeToFile_whenIOException_handlesError() {
         val formatter = mockk<ExportFormatter>()
-        every { formatter.writeXml(any(), any(), any()) } throws IOException("Mocked IOException")
+        every { formatter.write(ExportFormat.XML, any(), any(), any()) } throws IOException("Mocked IOException")
 
         val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
-        exporter.writeXmlToFile(uri)
+        exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { crashReporter.recordException(any<IOException>(), any()) }

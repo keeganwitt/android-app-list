@@ -188,7 +188,13 @@ class ExportFormatterTest {
     @Test
     fun `given apps with tabs and newlines, when writeTsv called, then return escaped tsv`() {
         // Given
-        val apps = listOf(createTestApp(packageName = "com.example.pkg", name = "App\tName\nWith\rNewlines and \\ backslash"))
+        val apps =
+            listOf(
+                createTestApp(
+                    packageName = "com.example.pkg",
+                    name = "App\tName\nWith\rNewlines and \\ backslash",
+                ),
+            )
 
         // When
         val sw = StringWriter()
@@ -201,6 +207,38 @@ class ExportFormatterTest {
 
         // App Name should be escaped
         assertEquals("App\\tName\\nWith\\rNewlines and \\\\ backslash", dataParts[0])
+    }
+
+    @Test
+    fun `when write called with XML, then delegate to writeXml`() {
+        val apps = listOf(createTestApp("com.example.app", "App"))
+        val writer = StringWriter()
+        formatter.write(ExportFormat.XML, writer, apps, false)
+        assertTrue(writer.toString().contains("<apps>"))
+    }
+
+    @Test
+    fun `when write called with CSV, then delegate to writeCsv`() {
+        val apps = listOf(createTestApp("com.example.app", "App"))
+        val writer = StringWriter()
+        formatter.write(ExportFormat.CSV, writer, apps, false)
+        assertTrue(writer.toString().contains("App Name,Package Name"))
+    }
+
+    @Test
+    fun `when write called with TSV, then delegate to writeTsv`() {
+        val apps = listOf(createTestApp("com.example.app", "App"))
+        val writer = StringWriter()
+        formatter.write(ExportFormat.TSV, writer, apps, false)
+        assertTrue(writer.toString().contains("App Name\tPackage Name"))
+    }
+
+    @Test
+    fun `when write called with HTML, then delegate to writeHtml`() {
+        val apps = listOf(createTestApp("com.example.app", "App"))
+        val writer = StringWriter()
+        formatter.write(ExportFormat.HTML, writer, apps, false)
+        assertTrue(writer.toString().contains("<!DOCTYPE html>"))
     }
 
     private fun createTestApp(
