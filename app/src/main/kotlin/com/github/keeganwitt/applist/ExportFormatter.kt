@@ -2,46 +2,9 @@ package com.github.keeganwitt.applist
 
 import android.util.Xml
 import androidx.core.text.htmlEncode
-import java.io.StringWriter
 import java.io.Writer
 
 class ExportFormatter {
-    fun toXml(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        write(ExportFormat.XML, sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
-    fun toHtml(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        write(ExportFormat.HTML, sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
-    fun toCsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        write(ExportFormat.CSV, sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
-    fun toTsv(
-        apps: List<App>,
-        includeUsageStats: Boolean,
-    ): String {
-        val sw = StringWriter()
-        write(ExportFormat.TSV, sw, apps, includeUsageStats)
-        return sw.toString()
-    }
-
     fun write(
         format: ExportFormat,
         writer: Writer,
