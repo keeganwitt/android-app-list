@@ -8,6 +8,7 @@ import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -62,7 +63,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Google Play"
-            every { appStoreService.existsInAppStore(any(), any()) } returns true
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns true
 
             val flow =
                 repository.loadApps(
@@ -96,7 +97,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -127,7 +128,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -182,7 +183,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -241,7 +242,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns mapOf("com.test.app" to lastUsedTime)
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -275,7 +276,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -310,7 +311,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -341,7 +342,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             repository
                 .loadApps(
@@ -368,7 +369,7 @@ class AppRepositoryTest {
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            every { appStoreService.existsInAppStore(any(), any()) } returns null
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val flow =
                 repository.loadApps(

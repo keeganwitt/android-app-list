@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist.services
 
 import android.util.Log
+import com.github.keeganwitt.applist.utils.await
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -38,7 +39,7 @@ interface AppStoreService {
             else -> "Unknown ($installerPackageName)"
         }
 
-    fun existsInAppStore(
+    suspend fun existsInAppStore(
         packageName: String,
         installerPackageName: String?,
     ): Boolean?
@@ -51,7 +52,7 @@ class PlayStoreService(
 ) : AppStoreService {
     private val cache = mutableMapOf<String, Boolean?>()
 
-    override fun existsInAppStore(
+    override suspend fun existsInAppStore(
         packageName: String,
         installerPackageName: String?,
     ): Boolean? {
@@ -61,7 +62,7 @@ class PlayStoreService(
         val request = Request.Builder().url(url).build()
         val result =
             try {
-                httpClient.newCall(request).execute().use { response ->
+                httpClient.newCall(request).await().use { response ->
                     response.isSuccessful
                 }
             } catch (e: Exception) {
