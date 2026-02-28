@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import java.text.DateFormat
 import java.util.Date
+import java.util.Locale
 
 enum class AppInfoField(
     val titleResId: Int,
@@ -76,5 +77,24 @@ enum class AppInfoField(
         }
     }
 
-    private fun formatDate(timestamp: Long?): String = timestamp?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: ""
+    protected fun formatDate(timestamp: Long?): String = timestamp?.let {
+        val currentLocale = Locale.getDefault()
+        var cache = dateFormatCache.get()!!
+        if (cache.locale != currentLocale) {
+            cache = DateFormatCache(currentLocale, DateFormat.getDateTimeInstance())
+            dateFormatCache.set(cache)
+        }
+        cache.dateFormat.format(Date(it))
+    } ?: ""
+
+    private class DateFormatCache(val locale: Locale, val dateFormat: DateFormat)
+
+    companion object {
+        private val dateFormatCache = object : ThreadLocal<DateFormatCache>() {
+            override fun initialValue(): DateFormatCache {
+                val locale = Locale.getDefault()
+                return DateFormatCache(locale, DateFormat.getDateTimeInstance())
+            }
+        }
+    }
 }

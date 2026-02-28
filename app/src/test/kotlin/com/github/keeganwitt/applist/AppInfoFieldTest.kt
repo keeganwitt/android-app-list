@@ -5,6 +5,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import java.text.DateFormat
 import java.util.Date
+import java.util.Locale
 
 class AppInfoFieldTest {
     @Test
@@ -374,5 +375,62 @@ class AppInfoFieldTest {
         assertEquals(false, AppInfoField.GRANTED_PERMISSIONS.isSize)
         assertEquals(false, AppInfoField.REQUESTED_PERMISSIONS.isSize)
         assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.isSize)
+    }
+
+    @Test
+    fun `given date field, when locale changes, then format is updated`() {
+        val originalLocale = Locale.getDefault()
+        try {
+            val app = App(
+                packageName = "com.test",
+                name = "Test App",
+                versionName = "1.0",
+                archived = false,
+                minSdk = 24,
+                targetSdk = 33,
+                firstInstalled = 1000L,
+                lastUpdated = 2000L,
+                lastUsed = 3000L,
+                sizes = StorageUsage(),
+                installerName = "Installer",
+                existsInStore = true,
+                grantedPermissionsCount = 0,
+                requestedPermissionsCount = 0,
+                enabled = true
+            )
+
+            Locale.setDefault(Locale.US)
+            val usFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.US)
+            assertEquals(usFormat.format(Date(1000L)), AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
+
+            Locale.setDefault(Locale.FRANCE)
+            val frFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.FRANCE)
+            assertEquals(frFormat.format(Date(1000L)), AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
+        } finally {
+            Locale.setDefault(originalLocale)
+        }
+    }
+
+    @Test
+    fun `given date field, when value is null, then empty string is returned`() {
+        val app = App(
+            packageName = "com.test",
+            name = "Test App",
+            versionName = null,
+            archived = null,
+            minSdk = null,
+            targetSdk = null,
+            firstInstalled = null,
+            lastUpdated = null,
+            lastUsed = null,
+            sizes = StorageUsage(),
+            installerName = null,
+            existsInStore = null,
+            grantedPermissionsCount = null,
+            requestedPermissionsCount = null,
+            enabled = true
+        )
+
+        assertEquals("", AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
     }
 }
