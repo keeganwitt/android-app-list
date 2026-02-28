@@ -145,4 +145,9 @@ class AppStoreServiceTest {
         assertEquals("Droid-ify", service.installerDisplayName("com.looker.droidify"))
         assertEquals("Neo Store", service.installerDisplayName("com.machaiv3lli.fdroid"))
     }
+
+    @Test
+    fun `can instantiate with default constructor`() {
+        PlayStoreService()
+    }
 }
