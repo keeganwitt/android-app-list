@@ -30,16 +30,17 @@ class SummaryCalculatorTest {
     @Test
     fun `calculatePermissionSummary handles boundary cases correctly`() {
         mockStrings()
-        val apps = listOf(
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0), // None
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 1), // Few
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 5), // Few
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 6), // Some
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 10), // Some
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 11), // Many
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 20), // Many
-            createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 21) // Lots
-        )
+        val apps =
+            listOf(
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 0), // None
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 1), // Few
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 5), // Few
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 6), // Some
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 10), // Some
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 11), // Many
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 20), // Many
+                createApp(enabled = true, archived = false, apkSize = 0).copy(grantedPermissionsCount = 21), // Lots
+            )
 
         val result = calculator.calculate(apps, AppInfoField.GRANTED_PERMISSIONS)
 
@@ -60,10 +61,11 @@ class SummaryCalculatorTest {
         val appLarge = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024 - 1)
         val appHugeBoundary = createApp(enabled = true, archived = false, apkSize = 100 * 1024 * 1024)
 
-        val result = calculator.calculate(
-            listOf(appSmall, appMediumBoundary, appMedium, appLargeBoundary, appLarge, appHugeBoundary),
-            AppInfoField.APK_SIZE
-        )
+        val result =
+            calculator.calculate(
+                listOf(appSmall, appMediumBoundary, appMedium, appLargeBoundary, appLarge, appHugeBoundary),
+                AppInfoField.APK_SIZE,
+            )
 
         assertEquals(1, result?.buckets?.get("Small"))
         assertEquals(2, result?.buckets?.get("Medium"))
@@ -196,15 +198,16 @@ class SummaryCalculatorTest {
         val now = System.currentTimeMillis()
         val dayMs = 24L * 60 * 60 * 1000
 
-        val apps = listOf(
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now), // Last month
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs + 1000), // Last month
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs - 1000), // Last 3 months
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs + 1000), // Last 3 months
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs - 1000), // Last 6 months
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs + 1000), // Last 6 months
-            createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs - 1000) // Older
-        )
+        val apps =
+            listOf(
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now), // Last month
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs + 1000), // Last month
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 30L * dayMs - 1000), // Last 3 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs + 1000), // Last 3 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 90L * dayMs - 1000), // Last 6 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs + 1000), // Last 6 months
+                createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = now - 180L * dayMs - 1000), // Older
+            )
 
         val result = calculator.calculate(apps, AppInfoField.FIRST_INSTALLED)
 

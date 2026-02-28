@@ -1,11 +1,11 @@
 package com.github.keeganwitt.applist
 
-import java.io.StringWriter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.StringWriter
 
 @RunWith(RobolectricTestRunner::class)
 class ExportFormatterTest {
@@ -186,7 +186,7 @@ class ExportFormatterTest {
     }
 
     @Test
-    fun `given apps with tabs and newlines, when toTsv called, then return escaped tsv`() {
+    fun `given apps with tabs and newlines, when writeTsv called, then return escaped tsv`() {
         // Given
         val apps =
             listOf(
@@ -197,7 +197,9 @@ class ExportFormatterTest {
             )
 
         // When
-        val result = formatter.toTsv(apps, includeUsageStats = false)
+        val sw = StringWriter()
+        formatter.writeTsv(sw, apps, includeUsageStats = false)
+        val result = sw.toString()
 
         // Then
         val lines = result.trim().split("\n")

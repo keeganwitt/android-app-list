@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_icon_description">Қолданба белгішесі</string>
+    <string name="search">Іздеу</string>
+    <string name="systemAppToggle">Жүйелік қолданбалар</string>
+    <string name="appInfoField_apkSize">APK өлшемі</string>
+    <string name="appInfoField_appSize">Қолданба өлшемі</string>
+    <string name="appInfoField_archived">Архивтелген</string>
+    <string name="appInfoField_cacheSize">Кэш өлшемі</string>
+    <string name="appInfoField_dataSize">Деректер өлшемі</string>
+    <string name="appInfoField_enabled">Қосулы</string>
+    <string name="appInfoField_exists_in_app_store">Қолданбалар дүкенінде бар</string>
+    <string name="appInfoField_externalCacheSize">Сыртқы кэш өлшемі</string>
+    <string name="appInfoField_firstInstalled">Алғаш орнатылған</string>
+    <string name="appInfoField_grantedPermissions">Берілген рұқсаттар</string>
+    <string name="appInfoField_lastUpdated">Соңғы рет жаңартылған</string>
+    <string name="appInfoField_lastUsed">Соңғы рет пайдаланылған</string>
+    <string name="appInfoField_minSdk">Минималды SDK</string>
+    <string name="appInfoField_packageManager">Пакет менеджері</string>
+    <string name="appInfoField_requestedPermissions">Сұралған рұқсаттар</string>
+    <string name="appInfoField_targetSdk">Мақсатты SDK</string>
+    <string name="appInfoField_totalSize">Жалпы өлшем</string>
+    <string name="appInfoField_version">Нұсқа</string>
+    <string name="enabled">Қосулы</string>
+    <string name="disabled">Өшірулі</string>
+    <string name="installed">Орнатылған</string>
+    <string name="archived">Архивтелген</string>
+    <string name="boolean_true">Ақиқат</string>
+    <string name="boolean_false">Жалған</string>
+    <string name="export">Экспорттау</string>
+    <string name="export_as">Келесі форматта экспорттау</string>
+    <string name="export_no_apps">Экспортталатын қолданбалар жоқ</string>
+    <string name="export_successful">Экспорт сәтті аяқталды</string>
+    <string name="export_failed">Экспорт сәтсіз аяқталды: %1$s</string>
+    <string name="settings">Параметрлер</string>
+    <string name="crash_reporting_title">Қателер туралы есептерді жіберу</string>
+    <string name="crash_reporting_summary">Қолданбаны жақсартуға көмектесу үшін анонимді қателер туралы есептерді жіберуге рұқсат беру</string>
+    <string name="theme_title">Тақырып</string>
+
+    <string name="export_usage_stats_title">Экспортқа пайдалану өрістерін қосу</string>
+    <string name="export_usage_stats_summary">Экспорттарға пайдалану рұқсатын қажет ететін өрістерді (мысалы, қолданба өлшемі, соңғы рет пайдаланылған) қосу</string>
+
+    <string name="theme_entry_light">Ашық</string>
+    <string name="theme_entry_dark">Қараңғы</string>
+    <string name="theme_entry_system">Жүйелік</string>
+    <string name="summary">Жиынтық</string>
+    <string name="summary_loading">Жиынтық (жүктелуде&#8230;)</string>
+
+    <string name="date_bucket_last_month">Өткен айда</string>
+    <string name="date_bucket_last_three_months">Соңғы 3 айда</string>
+    <string name="date_bucket_last_six_months">Соңғы 6 айда</string>
+    <string name="date_bucket_older">Ескілеу</string>
+</resources>

@@ -44,4 +44,9 @@
     <string name="summary_loading">Podsumowanie (ładowanie…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">W zeszłym miesiącu</string>
+    <string name="date_bucket_last_three_months">Ostatnie 3 miesiące</string>
+    <string name="date_bucket_last_six_months">Ostatnie 6 miesięcy</string>
+    <string name="date_bucket_older">Starsze</string>
 </resources>

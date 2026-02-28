@@ -3,6 +3,10 @@
 [![Android CI](https://github.com/keeganwitt/android-app-list/actions/workflows/android.yml/badge.svg)](https://github.com/keeganwitt/android-app-list/actions/workflows/android.yml)
 [![codecov](https://codecov.io/github/keeganwitt/android-app-list/graph/badge.svg?token=O4K7X7MEQG)](https://codecov.io/github/keeganwitt/android-app-list)
 
+https://play.google.com/store/apps/details?id=com.github.keeganwitt.applist
+
+https://www.amazon.com/dp/B0GQJLMX38
+
 This app lists a selected piece of application info across all apps, to see that information at a glance.
 Some of the useful things that can be displayed are
 

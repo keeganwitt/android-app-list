@@ -1,7 +1,7 @@
 package com.github.keeganwitt.applist
 
-import android.text.TextUtils
 import android.util.Xml
+import androidx.core.text.htmlEncode
 import java.io.StringWriter
 import java.io.Writer
 
@@ -113,8 +113,9 @@ class ExportFormatter {
             .append(
                 ".app-item { background: white; border-radius: 8px; padding: 10px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n",
             ).append(".app-name { font-weight: bold; font-size: 1.2em; margin-bottom: 4px; word-wrap: break-word; text-align: center; }\n")
-            .append(".package-name { font-style: italic; font-size: 0.9em; color: #666; margin-bottom: 8px; word-wrap: break-word; text-align: center; }\n")
-            .append(".app-info { margin-top: 2px; font-size: 0.85em; color: #333; word-wrap: break-word; }\n")
+            .append(
+                ".package-name { font-style: italic; font-size: 0.9em; color: #666; margin-bottom: 8px; word-wrap: break-word; text-align: center; }\n",
+            ).append(".app-info { margin-top: 2px; font-size: 0.85em; color: #333; word-wrap: break-word; }\n")
             .append("</style>\n")
             .append("</head>\n")
             .append("<body>\n")
@@ -122,11 +123,15 @@ class ExportFormatter {
             .append("<div class=\"app-grid\">\n")
         apps.forEach { app ->
             writer.append("<div class=\"app-item\">\n")
-            writer.append("<div class=\"app-name\">").append(TextUtils.htmlEncode(app.name)).append("</div>\n")
-            writer.append("<div class=\"package-name\">").append(TextUtils.htmlEncode(app.packageName)).append("</div>\n")
+            writer.append("<div class=\"app-name\">").append(app.name.htmlEncode()).append("</div>\n")
+            writer.append("<div class=\"package-name\">").append(app.packageName.htmlEncode()).append("</div>\n")
             fields.forEach { field ->
-                writer.append("<div class=\"app-info\"><b>").append(field.name).append(":</b> ")
-                    .append(TextUtils.htmlEncode(field.getFormattedValue(app))).append("</div>\n")
+                writer
+                    .append("<div class=\"app-info\"><b>")
+                    .append(field.name)
+                    .append(":</b> ")
+                    .append(field.getFormattedValue(app).htmlEncode())
+                    .append("</div>\n")
             }
             writer.append("</div>\n")
         }
@@ -180,10 +185,10 @@ class ExportFormatter {
         }
     }
 
-    private fun String.escapeTsv(): String {
-        return this.replace("\\", "\\\\")
+    private fun String.escapeTsv(): String =
+        this
+            .replace("\\", "\\\\")
             .replace("\t", "\\t")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
-    }
 }

@@ -44,4 +44,9 @@
     <string name="summary_loading">Özet (yükleniyor…)</string>
     <string name="export_usage_stats_title">Include usage fields in export</string>
     <string name="export_usage_stats_summary">Include fields that require usage permission (e.g. app size, last used) in exports</string>
+
+    <string name="date_bucket_last_month">Geçen ay</string>
+    <string name="date_bucket_last_three_months">Son 3 ay</string>
+    <string name="date_bucket_last_six_months">Son 6 ay</string>
+    <string name="date_bucket_older">Daha eski</string>
 </resources>
