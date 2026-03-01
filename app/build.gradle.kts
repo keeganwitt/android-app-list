@@ -6,6 +6,12 @@ plugins {
     id("jacoco")
 }
 
+val googleServicesJson = file("google-services.json")
+if (!googleServicesJson.exists()) {
+    println("google-services.json not found, creating from template")
+    file("google-services.json.template").copyTo(googleServicesJson)
+}
+
 kotlin {
     jvmToolchain(21)
 }
