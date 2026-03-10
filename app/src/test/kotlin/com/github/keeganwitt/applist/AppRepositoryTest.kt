@@ -505,6 +505,33 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `given storage service throws exception, when loadApps called, then app remains in list with basic info`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.error")
+            every { packageService.loadLabel(any()) } returns "Error App"
+
+            val exception = RuntimeException("Storage Error")
+            every { storageService.getStorageUsage(any()) } throws exception
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(1, result.size)
+            assertEquals("com.test.error", result[0].packageName)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(exception, "AndroidAppRepository.loadApps failed for com.test.error") }
+        }
+
+    @Test
     fun `given default constructor, when loadApps called, then it works`() =
         runTest {
             val repoDefault =
