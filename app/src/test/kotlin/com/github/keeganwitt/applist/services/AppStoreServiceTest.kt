@@ -1,10 +1,13 @@
 package com.github.keeganwitt.applist.services
 
+import android.util.Log
 import com.github.keeganwitt.applist.utils.await
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -144,6 +147,35 @@ class AppStoreServiceTest {
         assertEquals("Vivo App Store", service.installerDisplayName("com.vivo.appstore"))
         assertEquals("Droid-ify", service.installerDisplayName("com.looker.droidify"))
         assertEquals("Neo Store", service.installerDisplayName("com.machaiv3lli.fdroid"))
+    }
+
+    @Test
+    fun `given Google Play installer and unexpected exception, when existsInAppStore called, then returns null and logs warning`() = runBlocking {
+        mockkStatic(Log::class)
+        mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
+        try {
+            val call = mockk<Call>()
+            val exception = RuntimeException("Unexpected error")
+
+            coEvery { call.await() } throws exception
+            every { httpClient.newCall(any()) } returns call
+            every { Log.w(any(), any<String>(), any()) } returns 0
+
+            val packageName = "com.test.app"
+            val result = service.existsInAppStore(packageName, "com.android.vending")
+
+            assertNull(result)
+            verify {
+                Log.w(
+                    "AppStoreService",
+                    "Unable to make HTTP request to https://play.google.com/store/apps/details?id=$packageName",
+                    exception
+                )
+            }
+        } finally {
+            unmockkStatic(Log::class)
+            unmockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
+        }
     }
 
     @Test
