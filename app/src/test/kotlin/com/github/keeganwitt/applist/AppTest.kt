@@ -43,7 +43,7 @@ class AppTest {
         assertEquals(1000000L, app.firstInstalled)
         assertEquals(2000000L, app.lastUpdated)
         assertEquals(3000000L, app.lastUsed)
-        assertEquals(1500L, app.sizes.totalBytes)
+        assertEquals(1500L, app.sizes?.totalBytes)
         assertEquals("Google Play", app.installerName)
         assertTrue(app.existsInStore!!)
         assertEquals(5, app.grantedPermissionsCount)
@@ -90,7 +90,7 @@ class AppTest {
                 firstInstalled = null,
                 lastUpdated = null,
                 lastUsed = null,
-                sizes = StorageUsage(),
+                sizes = null,
                 installerName = null,
                 existsInStore = null,
                 grantedPermissionsCount = null,
@@ -107,7 +107,7 @@ class AppTest {
         assertEquals(null, app.firstInstalled)
         assertEquals(null, app.lastUpdated)
         assertEquals(null, app.lastUsed)
-        assertNotNull(app.sizes)
+        assertEquals(null, app.sizes)
         assertEquals(null, app.installerName)
         assertEquals(null, app.existsInStore)
         assertEquals(null, app.grantedPermissionsCount)
