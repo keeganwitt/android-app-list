@@ -121,7 +121,7 @@ class StorageServiceTest {
     }
 
     @Test
-    fun `given queryStatsForPackage throws exception, when getStorageUsage called, then returns partial results`() {
+    fun `given queryStatsForPackage throws SecurityException, when getStorageUsage called, then returns partial results`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val storageVolume = mockk<StorageVolume>()
         val testUuid = UUID.randomUUID()
@@ -134,6 +134,50 @@ class StorageServiceTest {
         val result = service.getStorageUsage(appInfo)
 
         assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
+    fun `given queryStatsForPackage throws generic exception, when getStorageUsage called, then returns partial results`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Something went wrong")
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
+    fun `given multiple volumes and one throws generic exception, when getStorageUsage called, then returns results from other volumes`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val volume1 = mockk<StorageVolume>()
+        val volume2 = mockk<StorageVolume>()
+        val stats2 = mockk<StorageStats>()
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+
+        every { volume1.state } returns Environment.MEDIA_MOUNTED
+        every { volume1.uuid } returns uuid1.toString()
+        every { volume2.state } returns Environment.MEDIA_MOUNTED
+        every { volume2.uuid } returns uuid2.toString()
+        every { storageManager.storageVolumes } returns listOf(volume1, volume2)
+
+        every { storageStatsManager.queryStatsForPackage(uuid1, "com.test.app", any()) } throws RuntimeException("Error on volume 1")
+        every { stats2.appBytes } returns 1000L
+        every { stats2.cacheBytes } returns 2000L
+        every { stats2.dataBytes } returns 3000L
+        every { storageStatsManager.queryStatsForPackage(uuid2, "com.test.app", any()) } returns stats2
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(1000L, result.appBytes)
+        assertEquals(2000L, result.cacheBytes)
+        assertEquals(3000L, result.dataBytes)
     }
 
     @Test
