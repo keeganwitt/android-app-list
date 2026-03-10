@@ -7,34 +7,7 @@ import okhttp3.Request
 
 interface AppStoreService {
     fun installerDisplayName(installerPackageName: String?): String =
-        when (installerPackageName) {
-            "com.amazon.venezia" -> "Amazon Appstore"
-            "com.google.android.packageinstaller" -> "APK"
-            "cm.aptoide.pt" -> "Aptoide"
-            "org.fdroid.fdroid" -> "F-Droid"
-            "net.rim.bb.appworld" -> "Blackberry World"
-            "com.farsitel.bazaar" -> "Cafe Bazaar"
-            "com.sec.android.app.samsungapps" -> "Galaxy Store"
-            "com.android.vending" -> "Google Play"
-            "com.huawei.appmarket" -> "Huawei App Gallery"
-            "com.xiaomi.market" -> "Mi Store"
-            "com.oneplus.backuprestore" -> "OnePlus Clone Phone"
-            "com.sec.android.easyMover" -> "Samsung Smart Switch"
-            "com.slideme.sam.manager" -> "SlideME Marketplace"
-            "com.tencent.android.qqdownloader" -> "Tencent Appstore"
-            "com.yandex.store" -> "Yandex Appstore"
-            "com.aurora.store" -> "Aurora Store"
-            "com.qooapp" -> "QooApp"
-            "com.qooapp.qoohelper" -> "QooApp"
-            "com.taptap" -> "TapTap"
-            "com.taptap.global" -> "TapTap"
-            "com.apkpure.aegon" -> "APKPure"
-            "com.uptodown.android.marketplace" -> "Uptodown"
-            "com.heytap.market" -> "HeyTap"
-            "com.oppo.market" -> "OPPO App Market"
-            "com.vivo.appstore" -> "Vivo App Store"
-            "com.looker.droidify" -> "Droid-ify"
-            "com.machaiv3lli.fdroid" -> "Neo Store"
+        installerPackageName?.let { INSTALLER_NAMES[it] } ?: when (installerPackageName) {
             null -> "Unknown"
             else -> "Unknown ($installerPackageName)"
         }
@@ -45,6 +18,39 @@ interface AppStoreService {
     ): Boolean?
 
     fun appStoreLink(packageName: String): String
+
+    companion object {
+        private val INSTALLER_NAMES =
+            mapOf(
+                "com.amazon.venezia" to "Amazon Appstore",
+                "com.google.android.packageinstaller" to "APK",
+                "cm.aptoide.pt" to "Aptoide",
+                "org.fdroid.fdroid" to "F-Droid",
+                "net.rim.bb.appworld" to "Blackberry World",
+                "com.farsitel.bazaar" to "Cafe Bazaar",
+                "com.sec.android.app.samsungapps" to "Galaxy Store",
+                "com.android.vending" to "Google Play",
+                "com.huawei.appmarket" to "Huawei App Gallery",
+                "com.xiaomi.market" to "Mi Store",
+                "com.oneplus.backuprestore" to "OnePlus Clone Phone",
+                "com.sec.android.easyMover" to "Samsung Smart Switch",
+                "com.slideme.sam.manager" to "SlideME Marketplace",
+                "com.tencent.android.qqdownloader" to "Tencent Appstore",
+                "com.yandex.store" to "Yandex Appstore",
+                "com.aurora.store" to "Aurora Store",
+                "com.qooapp" to "QooApp",
+                "com.qooapp.qoohelper" to "QooApp",
+                "com.taptap" to "TapTap",
+                "com.taptap.global" to "TapTap",
+                "com.apkpure.aegon" to "APKPure",
+                "com.uptodown.android.marketplace" to "Uptodown",
+                "com.heytap.market" to "HeyTap",
+                "com.oppo.market" to "OPPO App Market",
+                "com.vivo.appstore" to "Vivo App Store",
+                "com.looker.droidify" to "Droid-ify",
+                "com.machaiv3lli.fdroid" to "Neo Store",
+            )
+    }
 }
 
 class PlayStoreService(
