@@ -271,4 +271,39 @@ class PackageServiceTest {
 
         assertNull(result)
     }
+
+    @Test
+    @Config(sdk = [30])
+    fun `given SDK 30+, when getInstallSourceInfo throws NameNotFoundException, then getInstallerPackageName returns null`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getInstallSourceInfo("com.test.app") } throws PackageManager.NameNotFoundException()
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertNull(result)
+    }
+
+    @Test
+    @Config(sdk = [30])
+    fun `given SDK 30+, when getInstallerPackageName called, then returns installer package name`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val installSourceInfo = mockk<android.content.pm.InstallSourceInfo>()
+        every { installSourceInfo.installingPackageName } returns "com.android.vending"
+        every { packageManager.getInstallSourceInfo("com.test.app") } returns installSourceInfo
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertEquals("com.android.vending", result)
+    }
+
+    @Test
+    @Config(sdk = [29])
+    fun `given legacy SDK, when getInstallerPackageName called, then returns installer package name`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getInstallerPackageName("com.test.app") } returns "com.android.vending"
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertEquals("com.android.vending", result)
+    }
 }
