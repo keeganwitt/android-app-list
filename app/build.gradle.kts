@@ -126,6 +126,7 @@ val fileFilter =
     )
 
 tasks.withType<Test> {
+    maxHeapSize = "2g"
     configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
