@@ -34,6 +34,30 @@ class AppStoreServiceTest {
     }
 
     @Test
+    fun `given Google Play installer and newCall throws exception, when existsInAppStore called, then returns null and logs warning`() = runBlocking {
+        mockkStatic(Log::class)
+        try {
+            val exception = RuntimeException("newCall error")
+            every { httpClient.newCall(any()) } throws exception
+            every { Log.w(any(), any<String>(), any()) } returns 0
+
+            val packageName = "com.test.app"
+            val result = service.existsInAppStore(packageName, "com.android.vending")
+
+            assertNull(result)
+            verify {
+                Log.w(
+                    "AppStoreService",
+                    "Unable to make HTTP request to https://play.google.com/store/apps/details?id=$packageName",
+                    exception
+                )
+            }
+        } finally {
+            unmockkStatic(Log::class)
+        }
+    }
+
+    @Test
     fun `given Google Play installer, when installerDisplayName called, then returns Google Play`() {
         val result = service.installerDisplayName("com.android.vending")
         assertEquals("Google Play", result)
@@ -129,12 +153,20 @@ class AppStoreServiceTest {
     @Test
     fun `given known installers, when installerDisplayName called, then returns expected name`() {
         assertEquals("Amazon Appstore", service.installerDisplayName("com.amazon.venezia"))
-        assertEquals("F-Droid", service.installerDisplayName("org.fdroid.fdroid"))
         assertEquals("APK", service.installerDisplayName("com.google.android.packageinstaller"))
+        assertEquals("Aptoide", service.installerDisplayName("cm.aptoide.pt"))
+        assertEquals("F-Droid", service.installerDisplayName("org.fdroid.fdroid"))
+        assertEquals("Blackberry World", service.installerDisplayName("net.rim.bb.appworld"))
+        assertEquals("Cafe Bazaar", service.installerDisplayName("com.farsitel.bazaar"))
         assertEquals("Galaxy Store", service.installerDisplayName("com.sec.android.app.samsungapps"))
+        assertEquals("Google Play", service.installerDisplayName("com.android.vending"))
         assertEquals("Huawei App Gallery", service.installerDisplayName("com.huawei.appmarket"))
-        assertEquals("Samsung Smart Switch", service.installerDisplayName("com.sec.android.easyMover"))
+        assertEquals("Mi Store", service.installerDisplayName("com.xiaomi.market"))
         assertEquals("OnePlus Clone Phone", service.installerDisplayName("com.oneplus.backuprestore"))
+        assertEquals("Samsung Smart Switch", service.installerDisplayName("com.sec.android.easyMover"))
+        assertEquals("SlideME Marketplace", service.installerDisplayName("com.slideme.sam.manager"))
+        assertEquals("Tencent Appstore", service.installerDisplayName("com.tencent.android.qqdownloader"))
+        assertEquals("Yandex Appstore", service.installerDisplayName("com.yandex.store"))
         assertEquals("Aurora Store", service.installerDisplayName("com.aurora.store"))
         assertEquals("QooApp", service.installerDisplayName("com.qooapp"))
         assertEquals("QooApp", service.installerDisplayName("com.qooapp.qoohelper"))
