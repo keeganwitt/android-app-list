@@ -137,6 +137,72 @@ class StorageServiceTest {
     }
 
     @Test
+    fun `given queryStatsForPackage throws generic Exception, when getStorageUsage called, then returns partial results`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Something went wrong")
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
+    fun `given multiple volumes where one fails, when getStorageUsage called, then returns results from successful volume`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume1 = mockk<StorageVolume>()
+        val storageVolume2 = mockk<StorageVolume>()
+        val storageStats2 = mockk<StorageStats>()
+        val testUuid1 = UUID.randomUUID()
+        val testUuid2 = UUID.randomUUID()
+
+        every { storageVolume1.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume1.uuid } returns testUuid1.toString()
+        every { storageVolume2.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume2.uuid } returns testUuid2.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume1, storageVolume2)
+
+        every { storageStatsManager.queryStatsForPackage(testUuid1, "com.test.app", any()) } throws SecurityException("No permission")
+
+        every { storageStats2.appBytes } returns 1000L
+        every { storageStats2.cacheBytes } returns 0L
+        every { storageStats2.dataBytes } returns 0L
+        every { storageStatsManager.queryStatsForPackage(testUuid2, "com.test.app", any()) } returns storageStats2
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(1000L, result.appBytes)
+    }
+
+    @Test
+    fun `given apkBytes is set and queryStatsForPackage fails, when getStorageUsage called, then returns apkBytes`() {
+        val tempFile = tempFolder.newFile("test.apk")
+        tempFile.writeBytes(ByteArray(1234))
+        val appInfo =
+            ApplicationInfo().apply {
+                packageName = "com.test.app"
+                publicSourceDir = tempFile.absolutePath
+            }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws SecurityException("No permission")
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(1234L, result.apkBytes)
+        assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
     fun `given queryStatsForPackage throws generic exception, when getStorageUsage called, then returns partial results`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val storageVolume = mockk<StorageVolume>()
