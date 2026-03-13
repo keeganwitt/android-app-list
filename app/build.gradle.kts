@@ -114,8 +114,6 @@ val fileFilter =
         "**/*Binding.class",
         "**/BR.class",
         // application classes
-        "**/AndroidStorageService*.class",
-        "**/AndroidUsageStatsService*.class",
         "**/AppAdapter*.class",
         "**/AppListApplication.class",
         "**/AppSettings.class",
