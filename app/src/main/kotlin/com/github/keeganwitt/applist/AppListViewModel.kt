@@ -52,6 +52,7 @@ class AppListViewModel(
     }
 
     private var loadJob: kotlinx.coroutines.Job? = null
+    private var filterJob: kotlinx.coroutines.Job? = null
 
     private fun loadApps(reload: Boolean) {
         loadJob?.cancel()
@@ -82,43 +83,59 @@ class AppListViewModel(
 
     private fun applyFilterAndEmit() {
         val state = _uiState.value
-        if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
-            cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
-            cachedMappedItemsField = state.selectedField
+        val field = state.selectedField
+        val query = state.query
+
+        if (cachedMappedItems == null || cachedMappedItemsField != field) {
+            cachedMappedItems = allApps.map { mapToItem(it, field) }
+            cachedMappedItemsField = field
         }
-        val list = cachedMappedItems ?: emptyList()
-        val filtered =
-            if (state.query.isBlank()) {
-                list
+
+        val items = cachedMappedItems ?: emptyList()
+        val apps = allApps
+
+        val filteredIndices = mutableListOf<Int>()
+        val filteredItems =
+            if (query.isBlank()) {
+                items
             } else {
-                list.filter { item ->
-                    item.appName.contains(state.query, ignoreCase = true) ||
-                        item.packageName.contains(state.query, ignoreCase = true) ||
-                        item.infoText.contains(state.query, ignoreCase = true)
+                val list = mutableListOf<AppItemUiModel>()
+                for (i in items.indices) {
+                    val item = items[i]
+                    if (item.appName.contains(query, ignoreCase = true) ||
+                        item.packageName.contains(query, ignoreCase = true) ||
+                        item.infoText.contains(query, ignoreCase = true)
+                    ) {
+                        list.add(item)
+                        filteredIndices.add(i)
+                    }
                 }
+                list
             }
-        _uiState.update { it.copy(items = filtered) }
 
-        viewModelScope.launch(dispatchers.default) {
-            val filteredApps =
-                if (state.query.isBlank()) {
-                    allApps
-                } else {
-                    val filteredPackageNames = filtered.map { it.packageName }.toSet()
-                    allApps.filter { app -> app.packageName in filteredPackageNames }
-                }
+        _uiState.update { it.copy(items = filteredItems) }
 
-            if (state.isFullyLoaded) {
-                val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
+        filterJob?.cancel()
+        filterJob =
+            viewModelScope.launch(dispatchers.default) {
+                val filteredApps =
+                    if (query.isBlank()) {
+                        apps
+                    } else {
+                        filteredIndices.map { apps[it] }
+                    }
+
+                val summary =
+                    if (state.isFullyLoaded) {
+                        summaryCalculator.calculate(filteredApps, field)
+                    } else {
+                        null
+                    }
+
                 withContext(dispatchers.main) {
                     _uiState.update { it.copy(summary = summary, filteredApps = filteredApps) }
                 }
-            } else {
-                withContext(dispatchers.main) {
-                    _uiState.update { it.copy(summary = null, filteredApps = filteredApps) }
-                }
             }
-        }
     }
 
     private fun mapToItem(
