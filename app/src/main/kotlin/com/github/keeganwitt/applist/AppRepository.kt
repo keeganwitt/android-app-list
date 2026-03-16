@@ -96,18 +96,18 @@ class AndroidAppRepository(
         return App(
             packageName = packageName,
             name = packageService.loadLabel(ai),
-            versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
+            versionName = null, // TODO: Load lazily/later if slow, or now if fast. PackageInfo might be slow?
             archived = archived,
             minSdk = ai.minSdkVersion,
             targetSdk = ai.targetSdkVersion,
-            firstInstalled = 0,
-            lastUpdated = 0,
-            lastUsed = 0,
-            sizes = StorageUsage(), // Empty for now
-            installerName = "",
-            existsInStore = false,
-            grantedPermissionsCount = 0,
-            requestedPermissionsCount = 0,
+            firstInstalled = null,
+            lastUpdated = null,
+            lastUsed = null,
+            sizes = null,
+            installerName = null,
+            existsInStore = null,
+            grantedPermissionsCount = null,
+            requestedPermissionsCount = null,
             enabled = ai.enabled,
             isDetailed = false,
         )
