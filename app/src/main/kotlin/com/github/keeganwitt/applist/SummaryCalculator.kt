@@ -20,6 +20,7 @@ import com.github.keeganwitt.applist.AppInfoField.TARGET_SDK
 import com.github.keeganwitt.applist.AppInfoField.TOTAL_SIZE
 import com.github.keeganwitt.applist.AppInfoField.VERSION
 import com.github.keeganwitt.applist.services.AppStoreService
+import java.util.concurrent.TimeUnit
 
 data class SummaryItem(
     val field: AppInfoField,
@@ -218,9 +219,9 @@ class SummaryCalculator(
         orderedBuckets[older] = 0
 
         val now = System.currentTimeMillis()
-        val oneMonthAgo = now - 30L * 24 * 60 * 60 * 1000
-        val threeMonthsAgo = now - 90L * 24 * 60 * 60 * 1000
-        val sixMonthsAgo = now - 180L * 24 * 60 * 60 * 1000
+        val oneMonthAgo = now - TimeUnit.DAYS.toMillis(30)
+        val threeMonthsAgo = now - TimeUnit.DAYS.toMillis(90)
+        val sixMonthsAgo = now - TimeUnit.DAYS.toMillis(180)
 
         timestamps.forEach { timestamp ->
             val key =

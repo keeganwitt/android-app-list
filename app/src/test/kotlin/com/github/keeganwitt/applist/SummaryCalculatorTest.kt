@@ -4,6 +4,7 @@ import android.content.Context
 import com.github.keeganwitt.applist.services.AppStoreService
 import io.mockk.every
 import io.mockk.mockk
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -174,10 +175,10 @@ class SummaryCalculatorTest {
     fun `calculateDateSummary buckets correctly`() {
         mockStrings()
         val now = System.currentTimeMillis()
-        val oneMonthAgo = now - 15L * 24 * 60 * 60 * 1000
-        val threeMonthsAgo = now - 45L * 24 * 60 * 60 * 1000
-        val sixMonthsAgo = now - 120L * 24 * 60 * 60 * 1000
-        val older = now - 200L * 24 * 60 * 60 * 1000
+        val oneMonthAgo = now - TimeUnit.DAYS.toMillis(15)
+        val threeMonthsAgo = now - TimeUnit.DAYS.toMillis(45)
+        val sixMonthsAgo = now - TimeUnit.DAYS.toMillis(120)
+        val older = now - TimeUnit.DAYS.toMillis(200)
 
         val app1 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = oneMonthAgo)
         val app2 = createApp(enabled = true, archived = false, apkSize = 0).copy(firstInstalled = threeMonthsAgo)
@@ -196,7 +197,7 @@ class SummaryCalculatorTest {
     fun `calculateDateSummary handles boundary cases correctly`() {
         mockStrings()
         val now = System.currentTimeMillis()
-        val dayMs = 24L * 60 * 60 * 1000
+        val dayMs = TimeUnit.DAYS.toMillis(1)
 
         val apps =
             listOf(
