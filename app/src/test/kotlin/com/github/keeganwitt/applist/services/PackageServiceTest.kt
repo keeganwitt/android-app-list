@@ -306,4 +306,56 @@ class PackageServiceTest {
 
         assertEquals("com.android.vending", result)
     }
+
+    @Test
+    @Config(sdk = [29])
+    fun `given legacy SDK, when getInstallerPackageName throws NameNotFoundException, then returns null`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getInstallerPackageName("com.test.app") } throws PackageManager.NameNotFoundException()
+
+        val result = service.getInstallerPackageName(appInfo)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `given any SDK, when getApplicationIcon throws unexpected Exception, then returns null`() {
+        every { packageManager.getApplicationIcon("com.test.app") } throws RuntimeException("Unexpected error")
+
+        val result = service.getApplicationIcon("com.test.app")
+
+        assertNull(result)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `given legacy SDK, when getPackageInfo called with invalid package, then throws NameNotFoundException`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.invalid.app" }
+        every { packageManager.getPackageInfo(eq("com.invalid.app"), any<Int>()) } throws PackageManager.NameNotFoundException()
+
+        try {
+            service.getPackageInfo(appInfo)
+            assertTrue("Expected NameNotFoundException to be thrown", false)
+        } catch (e: PackageManager.NameNotFoundException) {
+            // Success
+        }
+    }
+
+    @Test
+    @Config(sdk = [35])
+    fun `getPackageInfo on API 35 includes archived packages flag`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo()
+        val flagsSlot = slot<PackageManager.PackageInfoFlags>()
+
+        every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
+
+        service.getPackageInfo(appInfo)
+
+        val flags = flagsSlot.captured.value
+        assertTrue(
+            "Expected MATCH_ARCHIVED_PACKAGES flag to be present",
+            (flags and PackageManager.MATCH_ARCHIVED_PACKAGES) != 0L,
+        )
+    }
 }
