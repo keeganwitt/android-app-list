@@ -39,6 +39,49 @@ class StorageServiceTest {
     }
 
     @Test
+    fun `given multiple volumes where one has invalid UUID, when getStorageUsage called, then returns results from successful volume`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val volume1 = mockk<StorageVolume>()
+        val volume2 = mockk<StorageVolume>()
+        val stats2 = mockk<StorageStats>()
+        val uuid2 = UUID.randomUUID()
+
+        every { volume1.state } returns Environment.MEDIA_MOUNTED
+        every { volume1.uuid } returns "invalid-uuid"
+        every { volume2.state } returns Environment.MEDIA_MOUNTED
+        every { volume2.uuid } returns uuid2.toString()
+        every { storageManager.storageVolumes } returns listOf(volume1, volume2)
+
+        every { stats2.appBytes } returns 1000L
+        every { stats2.cacheBytes } returns 2000L
+        every { stats2.dataBytes } returns 3000L
+        every { storageStatsManager.queryStatsForPackage(uuid2, "com.test.app", any()) } returns stats2
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(1000L, result.appBytes)
+        assertEquals(2000L, result.cacheBytes)
+        assertEquals(3000L, result.dataBytes)
+    }
+
+    @Test
+    fun `given multiple volumes with invalid UUIDs, when getStorageUsage called, then returns zero total bytes`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val volume1 = mockk<StorageVolume>()
+        val volume2 = mockk<StorageVolume>()
+
+        every { volume1.state } returns Environment.MEDIA_MOUNTED
+        every { volume1.uuid } returns "invalid-uuid-1"
+        every { volume2.state } returns Environment.MEDIA_MOUNTED
+        every { volume2.uuid } returns "invalid-uuid-2"
+        every { storageManager.storageVolumes } returns listOf(volume1, volume2)
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertEquals(0L, result.totalBytes)
+    }
+
+    @Test
     fun `given no mounted volumes, when getStorageUsage called, then returns empty storage usage`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         every { storageManager.storageVolumes } returns emptyList()
