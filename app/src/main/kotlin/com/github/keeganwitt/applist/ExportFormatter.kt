@@ -148,10 +148,20 @@ class ExportFormatter {
         }
     }
 
-    private fun String.escapeTsv(): String =
-        this
-            .replace("\\", "\\\\")
-            .replace("\t", "\\t")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
+    private fun String.escapeTsv(): String {
+        if (none { it == '\\' || it == '\t' || it == '\n' || it == '\r' }) {
+            return this
+        }
+        val sb = StringBuilder(length + 16)
+        for (char in this) {
+            when (char) {
+                '\\' -> sb.append("\\\\")
+                '\t' -> sb.append("\\t")
+                '\n' -> sb.append("\\n")
+                '\r' -> sb.append("\\r")
+                else -> sb.append(char)
+            }
+        }
+        return sb.toString()
+    }
 }
