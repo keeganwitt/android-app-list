@@ -89,8 +89,12 @@ class AndroidPackageService(
                 null
             }
         } else {
-            @Suppress("DEPRECATION")
-            pm.getInstallerPackageName(applicationInfo.packageName)
+            try {
+                @Suppress("DEPRECATION")
+                pm.getInstallerPackageName(applicationInfo.packageName)
+            } catch (_: PackageManager.NameNotFoundException) {
+                null
+            }
         }
 
     override fun getApplicationIcon(packageName: String): Drawable? =
