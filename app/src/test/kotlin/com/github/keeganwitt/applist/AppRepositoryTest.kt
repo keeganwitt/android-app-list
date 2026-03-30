@@ -424,6 +424,109 @@ class AppRepositoryTest {
             assertEquals("Error App", finalDocs[0].name)
             // Verify it is still marked as detailed because the process finished (even if it failed)
             assertTrue(finalDocs[0].isDetailed)
+            verify { crashReporter.recordException(any(), any()) }
+        }
+
+    @Test
+    fun `given storage usage fetch fails, when loadApps called, then app remains in list with basic info`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.storage.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.storage.error")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } throws RuntimeException("Storage Error")
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(any(), any()) }
+        }
+
+    @Test
+    fun `given installer package name fetch fails, when loadApps called, then app remains in list with basic info`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.installer.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.installer.error")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { packageService.getInstallerPackageName(any()) } throws RuntimeException("Installer Error")
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(any(), any()) }
+        }
+
+    @Test
+    fun `given installer display name fetch fails, when loadApps called, then app remains in list with basic info`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.displayname.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.displayname.error")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
+            every { appStoreService.installerDisplayName(any()) } throws RuntimeException("Display Name Error")
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(any(), any()) }
+        }
+
+    @Test
+    fun `given exists in app store fetch fails, when loadApps called, then app remains in list with basic info`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.exists.error")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.exists.error")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
+            every { appStoreService.installerDisplayName(any()) } returns "Google Play"
+            coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Exists In Store Error")
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(any(), any()) }
         }
 
     @Test
