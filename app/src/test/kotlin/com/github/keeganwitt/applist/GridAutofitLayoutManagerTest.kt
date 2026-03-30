@@ -1,9 +1,13 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import android.content.res.Resources
+import android.util.DisplayMetrics
 import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import io.mockk.every
+import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
@@ -12,7 +16,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import kotlin.math.roundToInt
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestAppListApplication::class)
@@ -64,7 +67,7 @@ class GridAutofitLayoutManagerTest {
                     TypedValue.COMPLEX_UNIT_DIP,
                     48f,
                     context.resources.displayMetrics,
-                ).roundToInt()
+                ).toInt()
 
         // Use a width that is clearly divisible or test logic
         // E.g. 5 * expectedWidth
@@ -86,7 +89,7 @@ class GridAutofitLayoutManagerTest {
                     TypedValue.COMPLEX_UNIT_DIP,
                     48f,
                     context.resources.displayMetrics,
-                ).roundToInt()
+                ).toInt()
 
         val testWidth = expectedWidth * 3
         triggerLayout(testWidth, 1000)
@@ -112,6 +115,19 @@ class GridAutofitLayoutManagerTest {
         recyclerView.layoutManager = layoutManager
 
         triggerLayout(100, 1000)
+
+        assertEquals(1, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given padding equal to width, when layout happens, then span count is 1`() {
+        layoutManager = GridAutofitLayoutManager(context, 100)
+        recyclerView.layoutManager = layoutManager
+
+        // 400 total width - 200 padding left - 200 padding right = 0 available
+        // max(1, 0 / 100) = 1
+        recyclerView.setPadding(200, 0, 200, 0)
+        triggerLayout(400, 1000)
 
         assertEquals(1, layoutManager.spanCount)
     }
@@ -181,6 +197,57 @@ class GridAutofitLayoutManagerTest {
         triggerLayout(400, 1000)
         // Should still be exactly 1 call to setSpanCount(4)
         verify(exactly = 1) { spyLayoutManager.setSpanCount(4) }
+    }
+
+    @Test
+    fun `given zero column width, when getValidColumnWidth called, then uses mocked default width`() {
+        val mockContext = mockk<Context>()
+        val mockResources = mockk<Resources>()
+        val mockDisplayMetrics = DisplayMetrics()
+        mockDisplayMetrics.density = 2.0f
+        every { mockContext.resources } returns mockResources
+        every { mockResources.displayMetrics } returns mockDisplayMetrics
+
+        // GridAutofitLayoutManager calls getValidColumnWidth in init
+        layoutManager = GridAutofitLayoutManager(mockContext, 0)
+        recyclerView.layoutManager = layoutManager
+
+        // Default width is 48dp. With density 2.0, it should be 96px.
+        // 48 * 2 = 96
+        triggerLayout(384, 1000) // 384 / 96 = 4
+
+        assertEquals(4, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given excessive padding, when layout happens, then span count is 1`() {
+        layoutManager = GridAutofitLayoutManager(context, 100)
+        recyclerView.layoutManager = layoutManager
+
+        // 400 total width - 250 padding left - 250 padding right = -100 available
+        // max(1, -100 / 100) = 1
+        recyclerView.setPadding(250, 0, 250, 0)
+        triggerLayout(400, 1000)
+
+        assertEquals(1, layoutManager.spanCount)
+    }
+
+    @Test
+    fun `given zero column width and zero density, when layout happens, then span count is not updated`() {
+        val mockContext = mockk<Context>()
+        val mockResources = mockk<Resources>()
+        val mockDisplayMetrics = DisplayMetrics()
+        mockDisplayMetrics.density = 0.0f
+        every { mockContext.resources } returns mockResources
+        every { mockResources.displayMetrics } returns mockDisplayMetrics
+
+        layoutManager = GridAutofitLayoutManager(mockContext, 0)
+        val initialSpanCount = layoutManager.spanCount
+        recyclerView.layoutManager = layoutManager
+
+        triggerLayout(400, 1000)
+
+        assertEquals(initialSpanCount, layoutManager.spanCount)
     }
 
     private fun triggerLayout(
