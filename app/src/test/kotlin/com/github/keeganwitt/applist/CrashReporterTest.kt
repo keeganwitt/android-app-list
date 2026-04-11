@@ -7,7 +7,10 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class CrashReporterTest {
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var crashReporter: FirebaseCrashReporter

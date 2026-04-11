@@ -3,7 +3,6 @@ package com.github.keeganwitt.applist
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -171,7 +170,6 @@ class AppExporter(
         format: ExportFormat,
     ) {
         val message = "Error exporting ${format.displayName}"
-        Log.e(TAG, message, e)
         crashReporter?.recordException(e, message)
         withContext(dispatchers.main) {
             Toast
@@ -182,9 +180,4 @@ class AppExporter(
                 ).show()
         }
     }
-
-    companion object {
-        private val TAG = AppExporter::class.java.simpleName
-    }
-
 }

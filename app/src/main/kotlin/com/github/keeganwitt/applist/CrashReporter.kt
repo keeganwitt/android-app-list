@@ -22,7 +22,10 @@ class FirebaseCrashReporter : CrashReporter {
         throwable: Throwable,
         message: String?,
     ) {
-        message?.let { crashlytics.log(it) }
+        message?.let {
+            android.util.Log.e("CrashReporter", it, throwable)
+            crashlytics.log(it)
+        }
         crashlytics.recordException(throwable)
     }
 }

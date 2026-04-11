@@ -66,17 +66,17 @@ class AndroidPackageService(
     override fun loadLabel(applicationInfo: ApplicationInfo): String = applicationInfo.loadLabel(pm).toString()
 
     override fun getPackageInfo(applicationInfo: ApplicationInfo): PackageInfo {
-        var flags = PackageManager.GET_PERMISSIONS.toLong()
+        var flags = (PackageManager.GET_PERMISSIONS or PackageManager.GET_META_DATA).toLong()
 
         if (Build.VERSION.SDK_INT >= 35) {
             flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
         }
-        // Also match disabled/uninstalled just in case
         flags = flags or (PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
 
         return if (Build.VERSION.SDK_INT >= 33) {
             Api33Impl.getPackageInfo(pm, applicationInfo.packageName, flags)
         } else {
+            @Suppress("DEPRECATION")
             pm.getPackageInfo(applicationInfo.packageName, flags.toInt())
         }
     }

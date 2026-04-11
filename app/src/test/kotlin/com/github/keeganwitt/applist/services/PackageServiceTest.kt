@@ -358,4 +358,23 @@ class PackageServiceTest {
             (flags and PackageManager.MATCH_ARCHIVED_PACKAGES) != 0L,
         )
     }
+
+    @Test
+    fun `getPackageInfo includes GET_META_DATA and match flags`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val packageInfo = PackageInfo()
+        val flagsSlot = slot<PackageManager.PackageInfoFlags>()
+
+        every { packageManager.getPackageInfo(eq("com.test.app"), capture(flagsSlot)) } returns packageInfo
+
+        service.getPackageInfo(appInfo)
+
+        val flags = flagsSlot.captured.value
+        val expectedFlags = (PackageManager.GET_PERMISSIONS or
+            PackageManager.GET_META_DATA or
+            PackageManager.MATCH_UNINSTALLED_PACKAGES or
+            PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
+
+        assertTrue("Missing essential flags in getPackageInfo", (flags and expectedFlags) == expectedFlags)
+    }
 }
