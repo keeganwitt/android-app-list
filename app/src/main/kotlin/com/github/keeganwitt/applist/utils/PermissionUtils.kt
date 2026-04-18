@@ -10,6 +10,7 @@ import android.os.Process
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 object PermissionUtils {
     private const val TAG = "PermissionUtils"
@@ -47,5 +48,22 @@ object PermissionUtils {
                     ).show()
             }
         }
+    }
+
+    fun showUsageStatsPermissionDialog(
+        activity: Activity,
+        onConfirm: () -> Unit,
+        onCancel: () -> Unit,
+    ) {
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(com.github.keeganwitt.applist.R.string.usage_stats_permission_title)
+            .setMessage(com.github.keeganwitt.applist.R.string.usage_stats_permission_description)
+            .setPositiveButton(com.github.keeganwitt.applist.R.string.settings) { _, _ ->
+                onConfirm()
+            }.setNegativeButton(android.R.string.cancel) { _, _ ->
+                onCancel()
+            }.setOnCancelListener {
+                onCancel()
+            }.show()
     }
 }

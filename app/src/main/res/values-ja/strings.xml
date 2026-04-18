@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">過去3ヶ月</string>
     <string name="date_bucket_last_six_months">過去6ヶ月</string>
     <string name="date_bucket_older">それ以前</string>
+    <string name="usage_stats_permission_title">使用状況へのアクセス許可が必要です</string>
+    <string name="usage_stats_permission_description">このアプリは、アプリのサイズや最終使用時間などの情報を取得するために、使用状況へのアクセス許可が必要です。今すぐ設定でこの許可を与えますか？</string>
+    <string name="unknown">不明</string>
+    <string name="loading_failed">⚠ 読み込み失敗</string>
 </resources>

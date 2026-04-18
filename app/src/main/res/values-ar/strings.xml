@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">آخر 3 أشهر</string>
     <string name="date_bucket_last_six_months">آخر 6 أشهر</string>
     <string name="date_bucket_older">أقدم</string>
+    <string name="usage_stats_permission_title">مطلوب إذن الوصول إلى الاستخدام</string>
+    <string name="usage_stats_permission_description">يحتاج هذا التطبيق إلى إذن الوصول إلى الاستخدام لاسترداد معلومات مثل أحجام التطبيقات وأوقات آخر استخدام. هل ترغب في منح هذا الإذن في الإعدادات الآن؟</string>
+    <string name="unknown">غير معروف</string>
+    <string name="loading_failed">⚠ فشل التحميل</string>
 </resources>

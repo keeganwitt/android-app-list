@@ -50,4 +50,8 @@
     <string name="date_bucket_last_three_months">Соңғы 3 айда</string>
     <string name="date_bucket_last_six_months">Соңғы 6 айда</string>
     <string name="date_bucket_older">Ескілеу</string>
+    <string name="usage_stats_permission_title">Пайдалануға қол жеткізу рұқсаты қажет</string>
+    <string name="usage_stats_permission_description">Бұл қолданбаға қолданба өлшемдері мен соңғы пайдаланылған уақыт сияқты ақпаратты алу үшін Пайдалануға қол жеткізу рұқсаты қажет. Бұл рұқсатты қазір Параметрлерде бергіңіз келе ме؟</string>
+    <string name="unknown">Белгісіз</string>
+    <string name="loading_failed">⚠ Жүктеу сәтсіз аяқталды</string>
 </resources>

@@ -10,12 +10,13 @@ class ExportFormatter {
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
+        loadingFailedValue: String,
     ) {
         when (format) {
-            ExportFormat.XML -> writeXml(writer, apps, includeUsageStats)
-            ExportFormat.HTML -> writeHtml(writer, apps, includeUsageStats)
-            ExportFormat.CSV -> writeCsv(writer, apps, includeUsageStats)
-            ExportFormat.TSV -> writeTsv(writer, apps, includeUsageStats)
+            ExportFormat.XML -> writeXml(writer, apps, includeUsageStats, loadingFailedValue)
+            ExportFormat.HTML -> writeHtml(writer, apps, includeUsageStats, loadingFailedValue)
+            ExportFormat.CSV -> writeCsv(writer, apps, includeUsageStats, loadingFailedValue)
+            ExportFormat.TSV -> writeTsv(writer, apps, includeUsageStats, loadingFailedValue)
         }
     }
 
@@ -23,6 +24,7 @@ class ExportFormatter {
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
+        loadingFailedValue: String = "",
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
         val serializer = Xml.newSerializer()
@@ -44,7 +46,7 @@ class ExportFormatter {
             serializer.text("\n")
             fields.forEach { field ->
                 serializer.startTag(null, field.name)
-                serializer.text(field.getFormattedValue(app))
+                serializer.text(field.getFormattedValue(app, loadingFailedValue = loadingFailedValue))
                 serializer.endTag(null, field.name)
                 serializer.text("\n")
             }
@@ -60,6 +62,7 @@ class ExportFormatter {
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
+        loadingFailedValue: String = "",
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
         writer
@@ -93,7 +96,7 @@ class ExportFormatter {
                     .append("<div class=\"app-info\"><b>")
                     .append(field.name)
                     .append(":</b> ")
-                    .append(field.getFormattedValue(app).htmlEncode())
+                    .append(field.getFormattedValue(app, loadingFailedValue = loadingFailedValue).htmlEncode())
                     .append("</div>\n")
             }
             writer.append("</div>\n")
@@ -108,6 +111,7 @@ class ExportFormatter {
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
+        loadingFailedValue: String = "",
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
         writer.append("App Name,Package Name")
@@ -120,7 +124,11 @@ class ExportFormatter {
             writer.append("\"").append(app.name.replace("\"", "\"\"")).append("\",")
             writer.append("\"").append(app.packageName.replace("\"", "\"\"")).append("\"")
             fields.forEach { field ->
-                writer.append(",\"").append(field.getFormattedValue(app).replace("\"", "\"\"")).append("\"")
+                writer
+                    .append(
+                        ",\"",
+                    ).append(field.getFormattedValue(app, loadingFailedValue = loadingFailedValue).replace("\"", "\"\""))
+                    .append("\"")
             }
             writer.append("\n")
         }
@@ -130,6 +138,7 @@ class ExportFormatter {
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
+        loadingFailedValue: String = "",
     ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
         writer.append("App Name\tPackage Name")
@@ -142,7 +151,7 @@ class ExportFormatter {
             writer.append(app.name.escapeTsv()).append("\t")
             writer.append(app.packageName.escapeTsv())
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app).escapeTsv())
+                writer.append("\t").append(field.getFormattedValue(app, loadingFailedValue = loadingFailedValue).escapeTsv())
             }
             writer.append("\n")
         }

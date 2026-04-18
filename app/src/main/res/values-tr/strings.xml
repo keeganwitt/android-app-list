@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Son 3 ay</string>
     <string name="date_bucket_last_six_months">Son 6 ay</string>
     <string name="date_bucket_older">Daha eski</string>
+    <string name="usage_stats_permission_title">Kullanım Erişimi İzni Gerekiyor</string>
+    <string name="usage_stats_permission_description">Bu uygulama, uygulama boyutları ve son kullanım süreleri gibi bilgileri almak için Kullanım Erişimi iznine ihtiyaç duyuyor. Bu izni şimdi Ayarlar\'da vermek ister misiniz?</string>
+    <string name="unknown">Bilinmiyor</string>
+    <string name="loading_failed">⚠ Yükleme başarısız</string>
 </resources>

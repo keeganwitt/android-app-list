@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">पिछले 3 महीने</string>
     <string name="date_bucket_last_six_months">पिछले 6 महीने</string>
     <string name="date_bucket_older">पुराना</string>
+    <string name="usage_stats_permission_title">उपयोग पहुंच अनुमति आवश्यक है</string>
+    <string name="usage_stats_permission_description">ऐप आकार और अंतिम उपयोग समय जैसी जानकारी प्राप्त करने के लिए इस ऐप को उपयोग पहुंच अनुमति की आवश्यकता है। क्या आप अभी सेटिंग में यह अनुमति देना चाहेंगे?</string>
+    <string name="unknown">अज्ञात</string>
+    <string name="loading_failed">⚠ लोड करने में विफल</string>
 </resources>

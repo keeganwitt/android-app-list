@@ -1,26 +1,16 @@
 package com.github.keeganwitt.applist
 
 import android.content.DialogInterface
-import android.content.Intent
 import android.net.Uri
 import android.widget.RadioGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.github.keeganwitt.applist.utils.PermissionUtils
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.io.OutputStreamWriter
-import java.io.Writer
-import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class AppExporter(
     private val activity: AppCompatActivity,
@@ -31,92 +21,42 @@ class AppExporter(
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
     private val registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
-    private var currentExportType: ExportFormat? = null
+    private var pendingExportFormat: ExportFormat? = null
 
-    private val createFileLauncher: ActivityResultLauncher<Intent>
-
-    init {
-        // Register the result launcher directly with the ActivityResultRegistry so we can
-        // safely register at any point in the Activity lifecycle (including after RESUMED),
-        // which is especially useful for unit tests that use a fully-started Activity.
-        createFileLauncher =
-            registry.register(
-                "app_exporter_${System.identityHashCode(this)}",
-                StartActivityForResult(),
-            ) { result ->
-                if (result.resultCode == AppCompatActivity.RESULT_OK && result.data != null) {
-                    val uri = result.data?.data ?: return@register
-                    currentExportType?.let { writeToFile(uri, it) }
-                }
+    private val exportLauncher =
+        registry.register(
+            "app_exporter_${System.identityHashCode(this)}",
+            activity,
+            ActivityResultContracts.CreateDocument("text/plain"),
+        ) { uri ->
+            uri?.let {
+                val format = pendingExportFormat ?: ExportFormat.XML
+                pendingExportFormat = null
+                writeToFile(it, format)
             }
-    }
+        }
 
     fun export() {
-        showExportDialog()
-    }
+        val view = activity.layoutInflater.inflate(R.layout.dialog_export_type, null)
+        val radioGroup = view.findViewById<RadioGroup>(R.id.export_radio_group)
 
-    private fun showExportDialog() {
-        val builder = AlertDialog.Builder(activity)
-        val inflater = activity.layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_export_type, null)
-        builder.setView(dialogView)
-
-        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.export_radio_group)
-
-        builder.setPositiveButton(
-            R.string.export,
-        ) { dialog: DialogInterface?, which: Int ->
-            val selectedId = radioGroup.checkedRadioButtonId
-            when (selectedId) {
-                R.id.radio_xml -> {
-                    initiateExport(ExportFormat.XML)
-                }
-
-                R.id.radio_html -> {
-                    initiateExport(ExportFormat.HTML)
-                }
-
-                R.id.radio_csv -> {
-                    initiateExport(ExportFormat.CSV)
-                }
-
-                R.id.radio_tsv -> {
-                    initiateExport(ExportFormat.TSV)
-                }
-            }
-        }
-        builder.setNegativeButton(
-            android.R.string.cancel,
-        ) { dialog: DialogInterface?, which: Int -> dialog!!.dismiss() }
-
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    internal fun initiateExport(type: ExportFormat) {
-        val apps = appsProvider()
-        if (apps.isEmpty()) {
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_no_apps),
-                    Toast.LENGTH_SHORT,
-                ).show()
-            return
-        }
-
-        currentExportType = type
-        val timestamp =
-            SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
-                .format(Date())
-        val fileName = "apps_" + timestamp + "." + type.extension
-
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.setType(type.mimeType)
-        intent.putExtra(Intent.EXTRA_TITLE, fileName)
-
-        createFileLauncher.launch(intent)
+        AlertDialog
+            .Builder(activity)
+            .setTitle(R.string.export_as)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                val format =
+                    when (radioGroup.checkedRadioButtonId) {
+                        R.id.radio_xml -> ExportFormat.XML
+                        R.id.radio_html -> ExportFormat.HTML
+                        R.id.radio_csv -> ExportFormat.CSV
+                        R.id.radio_tsv -> ExportFormat.TSV
+                        else -> ExportFormat.XML
+                    }
+                pendingExportFormat = format
+                exportLauncher.launch("app-list." + format.extension)
+            }.setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     internal fun writeToFile(
@@ -125,32 +65,28 @@ class AppExporter(
     ) {
         val apps = appsProvider()
         val includeUsageStats = shouldIncludeUsageStats()
+        val loadingFailedValue = activity.getString(R.string.export_loading_failed)
         activity.lifecycleScope.launch(dispatchers.io) {
             exportToFile(uri, format) {
-                formatter.write(format, it, apps, includeUsageStats)
+                formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
             }
         }
     }
 
-    private fun shouldIncludeUsageStats(): Boolean =
-        appSettings.isIncludeUsageStatsInExportEnabled() &&
-            PermissionUtils.hasUsageStatsPermission(activity)
+    private fun shouldIncludeUsageStats(): Boolean = appSettings.isIncludeUsageStatsInExportEnabled()
 
-    private suspend fun exportToFile(
+    private fun exportToFile(
         uri: Uri,
         format: ExportFormat,
-        writeAction: (Writer) -> Unit,
+        writeBlock: (java.io.Writer) -> Unit,
     ) {
         try {
-            val outputStream =
-                activity.contentResolver.openOutputStream(uri)
-                    ?: throw IOException("Failed to open output stream")
-            outputStream.use { stream ->
-                val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
-                writeAction(writer)
-                writer.flush()
-            }
-            withContext(dispatchers.main) {
+            activity.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.bufferedWriter().use { writer ->
+                    writeBlock(writer)
+                }
+            } ?: throw IOException("Failed to open output stream")
+            activity.runOnUiThread {
                 Toast
                     .makeText(
                         activity,
@@ -158,26 +94,18 @@ class AppExporter(
                         Toast.LENGTH_SHORT,
                     ).show()
             }
-        } catch (e: IOException) {
-            handleExportError(e, format)
-        } catch (e: SecurityException) {
-            handleExportError(e, format)
-        }
-    }
-
-    private suspend fun handleExportError(
-        e: Exception,
-        format: ExportFormat,
-    ) {
-        val message = "Error exporting ${format.displayName}"
-        crashReporter?.recordException(e, message)
-        withContext(dispatchers.main) {
-            Toast
-                .makeText(
-                    activity,
-                    activity.getString(R.string.export_failed, e.message),
-                    Toast.LENGTH_SHORT,
-                ).show()
+        } catch (e: Exception) {
+            if (e !is IOException && e !is SecurityException) {
+                crashReporter?.recordException(e, "Error exporting ${format.name}")
+            }
+            activity.runOnUiThread {
+                Toast
+                    .makeText(
+                        activity,
+                        activity.getString(R.string.export_failed, e.message),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+            }
         }
     }
 }

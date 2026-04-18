@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">最近3个月</string>
     <string name="date_bucket_last_six_months">最近6个月</string>
     <string name="date_bucket_older">更早</string>
+    <string name="usage_stats_permission_title">需要使用情况访问权限</string>
+    <string name="usage_stats_permission_description">此应用需要“使用情况访问”权限才能检索应用大小和上次使用时间等信息。您想现在去设置中授予此权限吗？</string>
+    <string name="unknown">未知</string>
+    <string name="loading_failed">⚠ 加载失败</string>
 </resources>

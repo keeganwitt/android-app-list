@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.provider.Settings
+import android.text.format.Formatter
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -12,7 +13,9 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
@@ -80,7 +83,7 @@ class MainActivity :
 
     private fun setupTheme() {
         val themeMode = appSettings.getThemeMode()
-        androidx.appcompat.app.AppCompatDelegate
+        AppCompatDelegate
             .setDefaultNightMode(themeMode.nightMode)
     }
 
@@ -98,9 +101,9 @@ class MainActivity :
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         val pkg = AndroidPackageService(applicationContext)
-                        val usage = AndroidUsageStatsService(applicationContext)
-                        val storage = AndroidStorageService(applicationContext)
-                        val store = PlayStoreService()
+                        val usage = AndroidUsageStatsService(applicationContext, crashReporter = crashReporter)
+                        val storage = AndroidStorageService(applicationContext, crashReporter = crashReporter)
+                        val store = PlayStoreService(crashReporter = crashReporter)
                         val repo =
                             AndroidAppRepository(
                                 pkg,
@@ -115,9 +118,11 @@ class MainActivity :
                                 DefaultDispatcherProvider(),
                                 SummaryCalculator(applicationContext, store),
                                 sizeFormatter = {
-                                    android.text.format.Formatter
+                                    Formatter
                                         .formatFileSize(applicationContext, it)
                                 },
+                                unknownValue = getString(R.string.unknown),
+                                loadingFailedValue = getString(R.string.loading_failed),
                             )
                         @Suppress("UNCHECKED_CAST")
                         return vm as T
@@ -152,14 +157,25 @@ class MainActivity :
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinner.adapter = arrayAdapter
 
-        // initial selection to VERSION
         val lastDisplayedField = appSettings.getLastDisplayedAppInfoField()
-        val initialLabel =
-            fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
-        val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
-        binding.spinner.setSelection(initialIndex, false)
-        binding.spinner.onItemSelectedListener = this
-        appListViewModel.init(lastDisplayedField)
+        if (lastDisplayedField.requiresUsageStats && !PermissionUtils.hasUsageStatsPermission(this)) {
+            val initialLabel = getString(R.string.appInfoField_version)
+            val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
+            binding.spinner.setSelection(initialIndex, false)
+            binding.spinner.onItemSelectedListener = this
+            appListViewModel.init(AppInfoField.VERSION)
+            maybeRequestUsagePermission(lastDisplayedField) {
+                appListViewModel.updateSelectedField(lastDisplayedField)
+                appSettings.setLastDisplayedAppInfoField(lastDisplayedField)
+            }
+        } else {
+            val initialLabel =
+                fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
+            val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
+            binding.spinner.setSelection(initialIndex, false)
+            binding.spinner.onItemSelectedListener = this
+            appListViewModel.init(lastDisplayedField)
+        }
     }
 
     private fun setupListeners() {
@@ -254,9 +270,10 @@ class MainActivity :
     ) {
         val label = parent.getItemAtPosition(position) as String
         val field = labelToFieldMap[label] ?: AppInfoField.VERSION
-        appListViewModel.updateSelectedField(field)
-        appSettings.setLastDisplayedAppInfoField(field)
-        maybeRequestUsagePermission(field)
+        maybeRequestUsagePermission(field) {
+            appListViewModel.updateSelectedField(field)
+            appSettings.setLastDisplayedAppInfoField(field)
+        }
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -323,7 +340,7 @@ class MainActivity :
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         recyclerView.adapter = SummaryAdapter(summary.buckets.toList())
 
-        androidx.appcompat.app.AlertDialog
+        AlertDialog
             .Builder(this)
             .setTitle(R.string.summary)
             .setView(view)
@@ -331,9 +348,33 @@ class MainActivity :
             .show()
     }
 
-    private fun maybeRequestUsagePermission(field: AppInfoField) {
+    private fun maybeRequestUsagePermission(
+        field: AppInfoField,
+        onAllowed: () -> Unit,
+    ) {
         if (field.requiresUsageStats && !PermissionUtils.hasUsageStatsPermission(this)) {
-            PermissionUtils.requestUsageStatsPermission(this)
+            PermissionUtils.showUsageStatsPermissionDialog(
+                this,
+                onConfirm = {
+                    PermissionUtils.requestUsageStatsPermission(this)
+                    onAllowed()
+                },
+                onCancel = {
+                    val versionText = getString(R.string.appInfoField_version)
+                    val adapter = binding.spinner.adapter
+                    val versionIndex =
+                        (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
+                    if (versionIndex != null) {
+                        binding.spinner.setSelection(versionIndex)
+                    }
+                    if (appListViewModel.uiState.value.selectedField != AppInfoField.VERSION) {
+                        appListViewModel.updateSelectedField(AppInfoField.VERSION)
+                        appSettings.setLastDisplayedAppInfoField(AppInfoField.VERSION)
+                    }
+                },
+            )
+        } else {
+            onAllowed()
         }
     }
 

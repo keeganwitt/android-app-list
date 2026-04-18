@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.github.keeganwitt.applist.services.AndroidPackageService
@@ -21,7 +22,7 @@ open class AppListApplication :
         }
 
         val themeMode = appSettings.getThemeMode()
-        androidx.appcompat.app.AppCompatDelegate
+        AppCompatDelegate
             .setDefaultNightMode(themeMode.nightMode)
     }
 

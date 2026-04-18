@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">গত ৩ মাস</string>
     <string name="date_bucket_last_six_months">গত ৬ মাস</string>
     <string name="date_bucket_older">পুরনো</string>
+    <string name="usage_stats_permission_title">ব্যবহারের অ্যাক্সেস অনুমতির প্রয়োজন</string>
+    <string name="usage_stats_permission_description">অ্যাপের আকার এবং সর্বশেষ ব্যবহারের সময়ের মতো তথ্য পুনরুদ্ধার করতে এই অ্যাপটির ব্যবহারের অ্যাক্সেس অনুমতি প্রয়োজন। আপনি কি এখন সেটিংসে এই অনুমতি দিতে চান?</string>
+    <string name="unknown">অজানা</string>
+    <string name="loading_failed">⚠ লোড করতে ব্যর্থ</string>
 </resources>

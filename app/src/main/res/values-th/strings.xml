@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">3 เดือนที่ผ่านมา</string>
     <string name="date_bucket_last_six_months">6 เดือนที่ผ่านมา</string>
     <string name="date_bucket_older">เก่ากว่า</string>
+    <string name="usage_stats_permission_title">จำเป็นต้องได้รับอนุญาตการเข้าถึงการใช้งาน</string>
+    <string name="usage_stats_permission_description">แอปนี้ต้องได้รับอนุญาตการเข้าถึงการใช้งานเพื่อเรียกข้อมูล เช่น ขนาดแอปและเวลาที่ใช้งานล่าสุด คุณต้องการให้สิทธิ์นี้ในการตั้งค่าตอนนี้หรือไม่?</string>
+    <string name="unknown">ไม่ทราบ</string>
+    <string name="loading_failed">⚠ โหลดล้มเหลว</string>
 </resources>

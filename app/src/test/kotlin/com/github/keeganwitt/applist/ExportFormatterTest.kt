@@ -213,7 +213,7 @@ class ExportFormatterTest {
     fun `when write called with XML, then delegate to writeXml`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
         val writer = StringWriter()
-        formatter.write(ExportFormat.XML, writer, apps, false)
+        formatter.write(ExportFormat.XML, writer, apps, false, "")
         assertTrue(writer.toString().contains("<apps>"))
     }
 
@@ -221,7 +221,7 @@ class ExportFormatterTest {
     fun `when write called with CSV, then delegate to writeCsv`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
         val writer = StringWriter()
-        formatter.write(ExportFormat.CSV, writer, apps, false)
+        formatter.write(ExportFormat.CSV, writer, apps, false, "")
         assertTrue(writer.toString().contains("App Name,Package Name"))
     }
 
@@ -229,7 +229,7 @@ class ExportFormatterTest {
     fun `when write called with TSV, then delegate to writeTsv`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
         val writer = StringWriter()
-        formatter.write(ExportFormat.TSV, writer, apps, false)
+        formatter.write(ExportFormat.TSV, writer, apps, false, "")
         assertTrue(writer.toString().contains("App Name\tPackage Name"))
     }
 
@@ -237,7 +237,7 @@ class ExportFormatterTest {
     fun `when write called with HTML, then delegate to writeHtml`() {
         val apps = listOf(createTestApp("com.example.app", "App"))
         val writer = StringWriter()
-        formatter.write(ExportFormat.HTML, writer, apps, false)
+        formatter.write(ExportFormat.HTML, writer, apps, false, "")
         assertTrue(writer.toString().contains("<!DOCTYPE html>"))
     }
 

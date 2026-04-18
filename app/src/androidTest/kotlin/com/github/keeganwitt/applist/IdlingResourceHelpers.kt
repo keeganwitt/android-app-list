@@ -2,6 +2,8 @@ package com.github.keeganwitt.applist
 
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.matcher.ViewMatchers
 
 fun waitFor(delay: Long) {
     val idlingResource = ElapsedTimeIdlingResource(delay)
@@ -9,10 +11,10 @@ fun waitFor(delay: Long) {
         IdlingRegistry.getInstance().register(idlingResource)
         Espresso
             .onView(
-                androidx.test.espresso.matcher.ViewMatchers
+                ViewMatchers
                     .withId(android.R.id.content),
             ).perform(
-                androidx.test.espresso.action.ViewActions
+                ViewActions
                     .swipeUp(),
             )
     } finally {

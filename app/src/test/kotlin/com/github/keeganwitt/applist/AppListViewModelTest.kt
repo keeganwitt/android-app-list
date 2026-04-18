@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -45,7 +46,7 @@ class AppListViewModelTest {
                 override val main = testDispatcher
                 override val default = testDispatcher
             }
-        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator) { it.toString() }
+        viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator, { it.toString() }, "Unknown", "⚠ Failed to load")
     }
 
     @After
@@ -266,7 +267,8 @@ class AppListViewModelTest {
         runTest {
             val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))
             val mockSizeFormatter: (Long) -> String = { "formatted $it" }
-            val viewModelWithSizeFormatter = AppListViewModel(repository, dispatcherProvider, summaryCalculator, mockSizeFormatter)
+            val viewModelWithSizeFormatter =
+                AppListViewModel(repository, dispatcherProvider, summaryCalculator, mockSizeFormatter, "Unknown", "⚠ Failed to load")
             coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
 
             viewModelWithSizeFormatter.init(AppInfoField.APK_SIZE)
@@ -538,24 +540,24 @@ class AppListViewModelTest {
 
             val expectedMap =
                 mapOf(
-                    AppInfoField.APK_SIZE to "0",
-                    AppInfoField.APP_SIZE to "0",
-                    AppInfoField.CACHE_SIZE to "0",
-                    AppInfoField.DATA_SIZE to "0",
+                    AppInfoField.APK_SIZE to "Unknown",
+                    AppInfoField.APP_SIZE to "Unknown",
+                    AppInfoField.CACHE_SIZE to "Unknown",
+                    AppInfoField.DATA_SIZE to "Unknown",
                     AppInfoField.ENABLED to "false",
-                    AppInfoField.ARCHIVED to "false",
-                    AppInfoField.EXISTS_IN_APP_STORE to "false",
-                    AppInfoField.EXTERNAL_CACHE_SIZE to "0",
-                    AppInfoField.FIRST_INSTALLED to "",
-                    AppInfoField.LAST_UPDATED to "",
-                    AppInfoField.LAST_USED to "",
-                    AppInfoField.MIN_SDK to "0",
-                    AppInfoField.PACKAGE_MANAGER to "",
-                    AppInfoField.GRANTED_PERMISSIONS to "0",
-                    AppInfoField.REQUESTED_PERMISSIONS to "0",
-                    AppInfoField.TARGET_SDK to "0",
-                    AppInfoField.TOTAL_SIZE to "0",
-                    AppInfoField.VERSION to "",
+                    AppInfoField.ARCHIVED to "Unknown",
+                    AppInfoField.EXISTS_IN_APP_STORE to "Unknown",
+                    AppInfoField.EXTERNAL_CACHE_SIZE to "Unknown",
+                    AppInfoField.FIRST_INSTALLED to "Unknown",
+                    AppInfoField.LAST_UPDATED to "Unknown",
+                    AppInfoField.LAST_USED to "Unknown",
+                    AppInfoField.MIN_SDK to "Unknown",
+                    AppInfoField.PACKAGE_MANAGER to "Unknown",
+                    AppInfoField.GRANTED_PERMISSIONS to "Unknown",
+                    AppInfoField.REQUESTED_PERMISSIONS to "Unknown",
+                    AppInfoField.TARGET_SDK to "Unknown",
+                    AppInfoField.TOTAL_SIZE to "Unknown",
+                    AppInfoField.VERSION to "Unknown",
                 )
 
             for ((field, expectedInfo) in expectedMap) {
@@ -596,4 +598,59 @@ class AppListViewModelTest {
             enabled = enabled,
             isDetailed = isDetailed,
         )
+
+    @Test
+    fun `given apps loaded, when field changes and search query set, then cache is rebuilt for new field`() =
+        runTest {
+            val app = createTestApp("com.test", "App One", versionName = "1.2.3")
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            // Change field without query
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            advanceUntilIdle()
+
+            // Set query - should trigger cache rebuild because cachedMappedItemsField != state.selectedField
+            viewModel.setQuery("test")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(1, state.items.size)
+            assertEquals("true", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given apps not fully loaded, when applyFilterAndEmit called, then summary is null`() =
+        runTest {
+            val app = createTestApp("com.test", "App", isDetailed = false)
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.isFullyLoaded)
+            assertNull(viewModel.uiState.value.summary)
+
+            viewModel.setQuery("test")
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.summary)
+        }
+
+    @Test
+    fun `given size field with zero value, when mapToItem called, then field getFormattedValue is used`() =
+        runTest {
+            val app = createTestApp("com.test", "App").copy(sizes = StorageUsage(apkBytes = 0))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.APK_SIZE)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            // If rawValue is 0L, it falls to else: field.getFormattedValue(app, unknownValue)
+            // Long.getFormattedValue for size field returns "Unknown" if it's 0 or null (usually)
+            assertEquals("Unknown", state.items[0].infoText)
+        }
 }

@@ -49,7 +49,11 @@ class SummaryCalculator(
                 val archivedMap =
                     apps
                         .groupingBy {
-                            if (it.archived == true) context.getString(R.string.archived) else context.getString(R.string.installed)
+                            when (it.archived) {
+                                true -> context.getString(R.string.archived)
+                                false -> context.getString(R.string.installed)
+                                null -> context.getString(R.string.unknown)
+                            }
                         }.eachCount()
                 SummaryItem(ARCHIVED, archivedMap)
             }
@@ -58,12 +62,10 @@ class SummaryCalculator(
                 val existsMap =
                     apps
                         .groupingBy {
-                            if (it.existsInStore ==
-                                true
-                            ) {
-                                context.getString(R.string.boolean_true)
-                            } else {
-                                context.getString(R.string.boolean_false)
+                            when (it.existsInStore) {
+                                true -> context.getString(R.string.boolean_true)
+                                false -> context.getString(R.string.boolean_false)
+                                null -> context.getString(R.string.unknown)
                             }
                         }.eachCount()
                 SummaryItem(EXISTS_IN_APP_STORE, existsMap)
@@ -94,31 +96,31 @@ class SummaryCalculator(
             }
 
             TARGET_SDK -> {
-                calculateSdkSummary(TARGET_SDK, apps.mapNotNull { it.targetSdk })
+                calculateSdkSummary(TARGET_SDK, apps.map { it.targetSdk })
             }
 
             MIN_SDK -> {
-                calculateSdkSummary(MIN_SDK, apps.mapNotNull { it.minSdk })
+                calculateSdkSummary(MIN_SDK, apps.map { it.minSdk })
             }
 
             GRANTED_PERMISSIONS -> {
-                calculatePermissionSummary(GRANTED_PERMISSIONS, apps.mapNotNull { it.grantedPermissionsCount })
+                calculatePermissionSummary(GRANTED_PERMISSIONS, apps.map { it.grantedPermissionsCount })
             }
 
             REQUESTED_PERMISSIONS -> {
-                calculatePermissionSummary(REQUESTED_PERMISSIONS, apps.mapNotNull { it.requestedPermissionsCount })
+                calculatePermissionSummary(REQUESTED_PERMISSIONS, apps.map { it.requestedPermissionsCount })
             }
 
             FIRST_INSTALLED -> {
-                calculateDateSummary(FIRST_INSTALLED, apps.mapNotNull { it.firstInstalled })
+                calculateDateSummary(FIRST_INSTALLED, apps.map { it.firstInstalled })
             }
 
             LAST_UPDATED -> {
-                calculateDateSummary(LAST_UPDATED, apps.mapNotNull { it.lastUpdated })
+                calculateDateSummary(LAST_UPDATED, apps.map { it.lastUpdated })
             }
 
             LAST_USED -> {
-                calculateDateSummary(LAST_USED, apps.mapNotNull { it.lastUsed })
+                calculateDateSummary(LAST_USED, apps.map { it.lastUsed })
             }
 
             PACKAGE_MANAGER -> {
@@ -132,48 +134,60 @@ class SummaryCalculator(
 
     private fun calculateSizeSummary(
         field: AppInfoField,
-        sizes: List<Long>,
+        sizes: List<Long?>,
     ): SummaryItem {
         val orderedBuckets = linkedMapOf<String, Int>()
-        val small = context.getString(R.string.size_bucket_small)
-        val medium = context.getString(R.string.size_bucket_medium)
-        val large = context.getString(R.string.size_bucket_large)
-        val huge = context.getString(R.string.size_bucket_huge)
+        val sSmall = context.getString(R.string.size_bucket_small)
+        val sMedium = context.getString(R.string.size_bucket_medium)
+        val sLarge = context.getString(R.string.size_bucket_large)
+        val sHuge = context.getString(R.string.size_bucket_huge)
+        val unknown = context.getString(R.string.unknown)
 
-        orderedBuckets[small] = 0
-        orderedBuckets[medium] = 0
-        orderedBuckets[large] = 0
-        orderedBuckets[huge] = 0
+        orderedBuckets[sSmall] = 0
+        orderedBuckets[sMedium] = 0
+        orderedBuckets[sLarge] = 0
+        orderedBuckets[sHuge] = 0
+        orderedBuckets[unknown] = 0
 
+        val mb = 1024 * 1024
         sizes.forEach { size ->
             val key =
                 when {
-                    size < 10 * 1024 * 1024 -> small
-                    size < 50 * 1024 * 1024 -> medium
-                    size < 100 * 1024 * 1024 -> large
-                    else -> huge
+                    size == null -> unknown
+                    size < 10 * mb -> sSmall
+                    size < 50 * mb -> sMedium
+                    size < 100 * mb -> sLarge
+                    else -> sHuge
                 }
             orderedBuckets[key] = orderedBuckets[key]!! + 1
         }
+
+        if (orderedBuckets[unknown] == 0) orderedBuckets.remove(unknown)
 
         return SummaryItem(field, orderedBuckets)
     }
 
     private fun calculateSdkSummary(
         field: AppInfoField,
-        sdks: List<Int>,
+        sdks: List<Int?>,
     ): SummaryItem {
+        val unknown = context.getString(R.string.unknown)
         val buckets =
             sdks
-                .groupingBy { it.toString() }
+                .groupingBy { it?.toString() ?: unknown }
                 .eachCount()
-                .toSortedMap(compareByDescending { it.toIntOrNull() ?: 0 })
+                .toSortedMap { a, b ->
+                    if (a == b) return@toSortedMap 0
+                    if (a == unknown) return@toSortedMap 1
+                    if (b == unknown) return@toSortedMap -1
+                    (b.toIntOrNull() ?: 0).compareTo(a.toIntOrNull() ?: 0)
+                }
         return SummaryItem(field, buckets)
     }
 
     private fun calculatePermissionSummary(
         field: AppInfoField,
-        counts: List<Int>,
+        counts: List<Int?>,
     ): SummaryItem {
         val orderedBuckets = linkedMapOf<String, Int>()
         val sNone = context.getString(R.string.perm_bucket_none)
@@ -181,16 +195,19 @@ class SummaryCalculator(
         val sSome = context.getString(R.string.perm_bucket_some)
         val sMany = context.getString(R.string.perm_bucket_many)
         val sLots = context.getString(R.string.perm_bucket_lots)
+        val unknown = context.getString(R.string.unknown)
 
         orderedBuckets[sNone] = 0
         orderedBuckets[sFew] = 0
         orderedBuckets[sSome] = 0
         orderedBuckets[sMany] = 0
         orderedBuckets[sLots] = 0
+        orderedBuckets[unknown] = 0
 
         counts.forEach { count ->
             val key =
                 when {
+                    count == null -> unknown
                     count == 0 -> sNone
                     count <= 5 -> sFew
                     count <= 10 -> sSome
@@ -200,23 +217,27 @@ class SummaryCalculator(
             orderedBuckets[key] = orderedBuckets[key]!! + 1
         }
 
+        if (orderedBuckets[unknown] == 0) orderedBuckets.remove(unknown)
+
         return SummaryItem(field, orderedBuckets)
     }
 
     private fun calculateDateSummary(
         field: AppInfoField,
-        timestamps: List<Long>,
+        timestamps: List<Long?>,
     ): SummaryItem {
         val orderedBuckets = linkedMapOf<String, Int>()
         val lastMonth = context.getString(R.string.date_bucket_last_month)
         val lastThreeMonths = context.getString(R.string.date_bucket_last_three_months)
         val lastSixMonths = context.getString(R.string.date_bucket_last_six_months)
         val older = context.getString(R.string.date_bucket_older)
+        val unknown = context.getString(R.string.unknown)
 
         orderedBuckets[lastMonth] = 0
         orderedBuckets[lastThreeMonths] = 0
         orderedBuckets[lastSixMonths] = 0
         orderedBuckets[older] = 0
+        orderedBuckets[unknown] = 0
 
         val now = System.currentTimeMillis()
         val oneMonthAgo = now - TimeUnit.DAYS.toMillis(30)
@@ -226,6 +247,7 @@ class SummaryCalculator(
         timestamps.forEach { timestamp ->
             val key =
                 when {
+                    timestamp == null || timestamp == 0L -> unknown
                     timestamp > oneMonthAgo -> lastMonth
                     timestamp > threeMonthsAgo -> lastThreeMonths
                     timestamp > sixMonthsAgo -> lastSixMonths
@@ -233,6 +255,8 @@ class SummaryCalculator(
                 }
             orderedBuckets[key] = orderedBuckets[key]!! + 1
         }
+
+        if (orderedBuckets[unknown] == 0) orderedBuckets.remove(unknown)
 
         return SummaryItem(field, orderedBuckets)
     }

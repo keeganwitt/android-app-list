@@ -67,5 +67,10 @@
     <string name="date_bucket_last_three_months">Last 3 months</string>
     <string name="date_bucket_last_six_months">Last 6 months</string>
     <string name="date_bucket_older">Older</string>
+    <string name="usage_stats_permission_title">Usage Access Permission Required</string>
+    <string name="usage_stats_permission_description">This app needs Usage Access permission to retrieve information like app sizes and last used times. Would you like to grant this permission in Settings now?</string>
 
+    <string name="unknown">Unknown</string>
+    <string name="loading_failed">⚠ Failed to load</string>
+    <string name="export_loading_failed" translatable="false">ERROR</string>
 </resources>
