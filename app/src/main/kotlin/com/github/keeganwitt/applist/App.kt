@@ -10,7 +10,7 @@ data class App(
     val firstInstalled: Long?,
     val lastUpdated: Long?,
     val lastUsed: Long?,
-    val sizes: StorageUsage,
+    val sizes: StorageUsage?,
     val installerName: String?,
     val existsInStore: Boolean?,
     val grantedPermissionsCount: Int?,

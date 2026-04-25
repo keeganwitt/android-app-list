@@ -383,10 +383,10 @@ class AppRepositoryTest {
 
             assertEquals(2, results.size)
 
-            // First emission: Basic info (versionName should be empty as defined in mapToAppBasic)
+            // First emission: Basic info (versionName should be null as defined in mapToAppBasic)
             val firstEmission = results[0]
             assertEquals(1, firstEmission.size)
-            assertEquals("", firstEmission[0].versionName)
+            assertEquals(null, firstEmission[0].versionName)
             assertFalse(firstEmission[0].isDetailed)
 
             // Second emission: Detailed info

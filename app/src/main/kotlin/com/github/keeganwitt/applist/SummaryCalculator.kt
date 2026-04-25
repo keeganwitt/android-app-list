@@ -70,27 +70,27 @@ class SummaryCalculator(
             }
 
             APK_SIZE -> {
-                calculateSizeSummary(APK_SIZE, apps.map { it.sizes.apkBytes })
+                calculateSizeSummary(APK_SIZE, apps.mapNotNull { it.sizes?.apkBytes })
             }
 
             APP_SIZE -> {
-                calculateSizeSummary(APP_SIZE, apps.map { it.sizes.appBytes })
+                calculateSizeSummary(APP_SIZE, apps.mapNotNull { it.sizes?.appBytes })
             }
 
             DATA_SIZE -> {
-                calculateSizeSummary(DATA_SIZE, apps.map { it.sizes.dataBytes })
+                calculateSizeSummary(DATA_SIZE, apps.mapNotNull { it.sizes?.dataBytes })
             }
 
             CACHE_SIZE -> {
-                calculateSizeSummary(CACHE_SIZE, apps.map { it.sizes.cacheBytes })
+                calculateSizeSummary(CACHE_SIZE, apps.mapNotNull { it.sizes?.cacheBytes })
             }
 
             EXTERNAL_CACHE_SIZE -> {
-                calculateSizeSummary(EXTERNAL_CACHE_SIZE, apps.map { it.sizes.externalCacheBytes })
+                calculateSizeSummary(EXTERNAL_CACHE_SIZE, apps.mapNotNull { it.sizes?.externalCacheBytes })
             }
 
             TOTAL_SIZE -> {
-                calculateSizeSummary(TOTAL_SIZE, apps.map { it.sizes.totalBytes })
+                calculateSizeSummary(TOTAL_SIZE, apps.mapNotNull { it.sizes?.totalBytes })
             }
 
             TARGET_SDK -> {
