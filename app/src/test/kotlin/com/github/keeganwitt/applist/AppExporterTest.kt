@@ -137,7 +137,7 @@ class AppExporterTest {
         verify { formatter.write(ExportFormat.XML, any(), any(), any()) }
         assertEquals(xmlOutput, file.readText())
         val toast = ShadowToast.getTextOfLatestToast()
-        assertTrue("Expected successful toast but was: $toast", toast?.toString() == activity.getString(R.string.export_successful))
+        assertTrue("Expected successful toast but was: $toast", toast == activity.getString(R.string.export_successful))
     }
 
     @Test
@@ -270,7 +270,7 @@ class AppExporterTest {
 
         verify { crashReporter.recordException(any<SecurityException>(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
-        assertTrue("Toast was: $toast", toast?.toString()?.contains("Mocked SecurityException") == true)
+        assertTrue("Toast was: $toast", toast?.contains("Mocked SecurityException") == true)
     }
 
     @Test
@@ -287,7 +287,7 @@ class AppExporterTest {
 
         verify { crashReporter.recordException(any<IOException>(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
-        assertTrue("Toast was: $toast", toast?.toString()?.contains("Mocked IOException") == true)
+        assertTrue("Toast was: $toast", toast?.contains("Mocked IOException") == true)
     }
 
     private fun createTestApp(

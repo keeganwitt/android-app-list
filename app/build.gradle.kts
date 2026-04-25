@@ -13,12 +13,12 @@ kotlin {
 android {
     namespace = "com.github.keeganwitt.applist"
 
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.github.keeganwitt.applist"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 24
         versionName = "1.10.1"
 
