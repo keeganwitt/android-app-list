@@ -45,6 +45,7 @@ class PermissionUtilsTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `requestUsageStatsPermission starts activity when intent resolves`() {
         val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         val shadowActivity = Shadows.shadowOf(activity)
@@ -73,6 +74,7 @@ class PermissionUtilsTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `requestUsageStatsPermission starts fallback activity when primary intent does not resolve`() {
         val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         val shadowActivity = Shadows.shadowOf(activity)

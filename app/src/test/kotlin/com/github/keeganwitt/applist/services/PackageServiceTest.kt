@@ -169,6 +169,7 @@ class PackageServiceTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `getPackageInfo on API 33+ does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
@@ -184,6 +185,7 @@ class PackageServiceTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.O])
+    @Suppress("DEPRECATION")
     fun `getPackageInfo on O does not include signatures flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
@@ -298,6 +300,7 @@ class PackageServiceTest {
 
     @Test
     @Config(sdk = [29])
+    @Suppress("DEPRECATION")
     fun `given legacy SDK, when getInstallerPackageName called, then returns installer package name`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         every { packageManager.getInstallerPackageName("com.test.app") } returns "com.android.vending"
@@ -309,6 +312,7 @@ class PackageServiceTest {
 
     @Test
     @Config(sdk = [29])
+    @Suppress("DEPRECATION")
     fun `given legacy SDK, when getInstallerPackageName throws NameNotFoundException, then returns null`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         every { packageManager.getInstallerPackageName("com.test.app") } throws PackageManager.NameNotFoundException()
