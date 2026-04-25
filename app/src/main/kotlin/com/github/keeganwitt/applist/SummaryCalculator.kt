@@ -1,24 +1,13 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
-import com.github.keeganwitt.applist.AppInfoField.APK_SIZE
-import com.github.keeganwitt.applist.AppInfoField.APP_SIZE
-import com.github.keeganwitt.applist.AppInfoField.ARCHIVED
-import com.github.keeganwitt.applist.AppInfoField.CACHE_SIZE
-import com.github.keeganwitt.applist.AppInfoField.DATA_SIZE
-import com.github.keeganwitt.applist.AppInfoField.ENABLED
-import com.github.keeganwitt.applist.AppInfoField.EXISTS_IN_APP_STORE
-import com.github.keeganwitt.applist.AppInfoField.EXTERNAL_CACHE_SIZE
-import com.github.keeganwitt.applist.AppInfoField.FIRST_INSTALLED
-import com.github.keeganwitt.applist.AppInfoField.GRANTED_PERMISSIONS
-import com.github.keeganwitt.applist.AppInfoField.LAST_UPDATED
-import com.github.keeganwitt.applist.AppInfoField.LAST_USED
-import com.github.keeganwitt.applist.AppInfoField.MIN_SDK
-import com.github.keeganwitt.applist.AppInfoField.PACKAGE_MANAGER
-import com.github.keeganwitt.applist.AppInfoField.REQUESTED_PERMISSIONS
-import com.github.keeganwitt.applist.AppInfoField.TARGET_SDK
-import com.github.keeganwitt.applist.AppInfoField.TOTAL_SIZE
-import com.github.keeganwitt.applist.AppInfoField.VERSION
+import com.github.keeganwitt.applist.SummaryType.BOOLEAN
+import com.github.keeganwitt.applist.SummaryType.DATE
+import com.github.keeganwitt.applist.SummaryType.NONE
+import com.github.keeganwitt.applist.SummaryType.PACKAGE_MANAGER
+import com.github.keeganwitt.applist.SummaryType.PERMISSION
+import com.github.keeganwitt.applist.SummaryType.SDK
+import com.github.keeganwitt.applist.SummaryType.SIZE
 import com.github.keeganwitt.applist.services.AppStoreService
 import java.util.concurrent.TimeUnit
 
@@ -35,97 +24,39 @@ class SummaryCalculator(
         apps: List<App>,
         field: AppInfoField,
     ): SummaryItem? =
-        when (field) {
-            ENABLED -> {
-                val enabledMap =
+        when (field.summaryType) {
+            BOOLEAN, PACKAGE_MANAGER -> {
+                val map =
                     apps
                         .groupingBy {
-                            if (it.enabled) context.getString(R.string.enabled) else context.getString(R.string.disabled)
+                            field.getSummaryKey(it, context, appStoreService) ?: ""
                         }.eachCount()
-                SummaryItem(ENABLED, enabledMap)
+                val sortedMap =
+                    if (field.summaryType == PACKAGE_MANAGER) {
+                        map.toSortedMap()
+                    } else {
+                        map
+                    }
+                SummaryItem(field, sortedMap)
             }
 
-            ARCHIVED -> {
-                val archivedMap =
-                    apps
-                        .groupingBy {
-                            if (it.archived == true) context.getString(R.string.archived) else context.getString(R.string.installed)
-                        }.eachCount()
-                SummaryItem(ARCHIVED, archivedMap)
+            SIZE -> {
+                calculateSizeSummary(field, apps.map { field.getValue(it) as Long })
             }
 
-            EXISTS_IN_APP_STORE -> {
-                val existsMap =
-                    apps
-                        .groupingBy {
-                            if (it.existsInStore ==
-                                true
-                            ) {
-                                context.getString(R.string.boolean_true)
-                            } else {
-                                context.getString(R.string.boolean_false)
-                            }
-                        }.eachCount()
-                SummaryItem(EXISTS_IN_APP_STORE, existsMap)
+            SDK -> {
+                calculateSdkSummary(field, apps.mapNotNull { field.getValue(it) as? Int })
             }
 
-            APK_SIZE -> {
-                calculateSizeSummary(APK_SIZE, apps.map { it.sizes.apkBytes })
+            PERMISSION -> {
+                calculatePermissionSummary(field, apps.mapNotNull { field.getValue(it) as? Int })
             }
 
-            APP_SIZE -> {
-                calculateSizeSummary(APP_SIZE, apps.map { it.sizes.appBytes })
+            DATE -> {
+                calculateDateSummary(field, apps.mapNotNull { field.getValue(it) as? Long })
             }
 
-            DATA_SIZE -> {
-                calculateSizeSummary(DATA_SIZE, apps.map { it.sizes.dataBytes })
-            }
-
-            CACHE_SIZE -> {
-                calculateSizeSummary(CACHE_SIZE, apps.map { it.sizes.cacheBytes })
-            }
-
-            EXTERNAL_CACHE_SIZE -> {
-                calculateSizeSummary(EXTERNAL_CACHE_SIZE, apps.map { it.sizes.externalCacheBytes })
-            }
-
-            TOTAL_SIZE -> {
-                calculateSizeSummary(TOTAL_SIZE, apps.map { it.sizes.totalBytes })
-            }
-
-            TARGET_SDK -> {
-                calculateSdkSummary(TARGET_SDK, apps.mapNotNull { it.targetSdk })
-            }
-
-            MIN_SDK -> {
-                calculateSdkSummary(MIN_SDK, apps.mapNotNull { it.minSdk })
-            }
-
-            GRANTED_PERMISSIONS -> {
-                calculatePermissionSummary(GRANTED_PERMISSIONS, apps.mapNotNull { it.grantedPermissionsCount })
-            }
-
-            REQUESTED_PERMISSIONS -> {
-                calculatePermissionSummary(REQUESTED_PERMISSIONS, apps.mapNotNull { it.requestedPermissionsCount })
-            }
-
-            FIRST_INSTALLED -> {
-                calculateDateSummary(FIRST_INSTALLED, apps.mapNotNull { it.firstInstalled })
-            }
-
-            LAST_UPDATED -> {
-                calculateDateSummary(LAST_UPDATED, apps.mapNotNull { it.lastUpdated })
-            }
-
-            LAST_USED -> {
-                calculateDateSummary(LAST_USED, apps.mapNotNull { it.lastUsed })
-            }
-
-            PACKAGE_MANAGER -> {
-                calculatePackageManagerSummary(apps)
-            }
-
-            VERSION -> {
+            NONE -> {
                 null
             }
         }
@@ -235,15 +166,5 @@ class SummaryCalculator(
         }
 
         return SummaryItem(field, orderedBuckets)
-    }
-
-    private fun calculatePackageManagerSummary(apps: List<App>): SummaryItem {
-        val packageManagerMap =
-            apps
-                .groupingBy {
-                    appStoreService.installerDisplayName(it.installerName)
-                }.eachCount()
-                .toSortedMap()
-        return SummaryItem(PACKAGE_MANAGER, packageManagerMap)
     }
 }
