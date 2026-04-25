@@ -19,12 +19,19 @@ class ExportFormatter {
         }
     }
 
+    private fun getFields(includeUsageStats: Boolean): List<AppInfoField> =
+        if (includeUsageStats) {
+            allFields
+        } else {
+            fieldsWithoutUsageStats
+        }
+
     fun writeXml(
         writer: Writer,
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = getFields(includeUsageStats)
         val serializer = Xml.newSerializer()
         serializer.setOutput(writer)
         serializer.startDocument("UTF-8", null)
@@ -61,7 +68,7 @@ class ExportFormatter {
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = getFields(includeUsageStats)
         writer
             .append("<!DOCTYPE html>\n")
             .append("<html>\n")
@@ -109,7 +116,7 @@ class ExportFormatter {
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = getFields(includeUsageStats)
         writer.append("App Name,Package Name")
         fields.forEach { field ->
             writer.append(",").append(field.name)
@@ -131,7 +138,7 @@ class ExportFormatter {
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = getFields(includeUsageStats)
         writer.append("App Name\tPackage Name")
         fields.forEach { field ->
             writer.append("\t").append(field.name)
@@ -154,4 +161,11 @@ class ExportFormatter {
             .replace("\t", "\\t")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
+
+    companion object {
+        private val allFields: List<AppInfoField> by lazy { AppInfoField.entries.toList() }
+        private val fieldsWithoutUsageStats: List<AppInfoField> by lazy {
+            AppInfoField.entries.filter { !it.requiresUsageStats }
+        }
+    }
 }
