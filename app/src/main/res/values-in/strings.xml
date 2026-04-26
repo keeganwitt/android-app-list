@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">3 bulan terakhir</string>
     <string name="date_bucket_last_six_months">6 bulan terakhir</string>
     <string name="date_bucket_older">Lebih lama</string>
+    <string name="usage_stats_permission_title">Diperlukan Izin Akses Penggunaan</string>
+    <string name="usage_stats_permission_description">Aplikasi ini memerlukan izin Akses Penggunaan untuk mengambil informasi seperti ukuran aplikasi dan waktu terakhir digunakan. Apakah Anda ingin memberikan izin ini di Pengaturan sekarang?</string>
+    <string name="unknown">Tidak diketahui</string>
+    <string name="loading_failed">⚠ Gagal memuat</string>
 </resources>

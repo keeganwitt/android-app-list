@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Últimos 3 meses</string>
     <string name="date_bucket_last_six_months">Últimos 6 meses</string>
     <string name="date_bucket_older">Más antiguos</string>
+    <string name="usage_stats_permission_title">Se requiere permiso de acceso de uso</string>
+    <string name="usage_stats_permission_description">Esta aplicación necesita el permiso de acceso de uso para recuperar información como el tamaño de las aplicaciones y los tiempos de último uso. ¿Desea otorgar este permiso en los Ajustes ahora?</string>
+    <string name="unknown">Desconocido</string>
+    <string name="loading_failed">⚠ Error al cargar</string>
 </resources>

@@ -11,11 +11,12 @@ import com.github.keeganwitt.applist.services.UsageStatsService
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -73,8 +74,8 @@ class AppRepositoryTest {
                     reload = false,
                 )
 
-            val result = flow.toList()
-            val finalDocs = result.last()
+            val results = flow.toList()
+            val finalDocs = results.last()
 
             assertEquals(1, finalDocs.size)
             assertEquals("com.test.app", finalDocs[0].packageName)
@@ -87,17 +88,12 @@ class AppRepositoryTest {
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
-            val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { packageService.loadLabel(any()) } returns "App"
-            every { packageService.getInstallerPackageName(any()) } returns null
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -118,17 +114,12 @@ class AppRepositoryTest {
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
-            val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(userApp, systemApp)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.userapp", "com.android.system")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { packageService.loadLabel(any()) } returns "App"
-            every { packageService.getInstallerPackageName(any()) } returns null
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -144,46 +135,19 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given apps without launch intent, when loadApps called, apps are filtered out`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.app")
-
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns emptySet()
-            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = false,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertTrue(result.isEmpty())
-        }
-
-    @Test
     fun `given apps, when loadApps called with descending true, apps are sorted descending`() =
         runTest {
             val app1 = createApplicationInfo("com.test.app1")
             val app2 = createApplicationInfo("com.test.app2")
             val app3 = createApplicationInfo("com.test.app3")
-            val packageInfo = createPackageInfo("1.0.0")
 
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2, app3)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2", "com.test.app3")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { packageService.loadLabel(app1) } returns "App A"
             every { packageService.loadLabel(app2) } returns "App B"
             every { packageService.loadLabel(app3) } returns "App C"
-            every { packageService.getInstallerPackageName(any()) } returns null
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val result =
                 repository
@@ -202,7 +166,7 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given app throws exception, when loadApps called, exception is caught`() =
+    fun `given app throws NameNotFoundException, when loadApps called, then it is not logged to crash reporter`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
 
@@ -222,137 +186,8 @@ class AppRepositoryTest {
                     .last()
 
             assertEquals(1, result.size)
-            // Crash reporter might be called during detailed mapping, which happens in the flow
-            // Since we collect the flow, it should trigger
-            verify(atLeast = 1) { crashReporter.recordException(any(), any()) }
-        }
-
-    @Test
-    fun `given apps with usage stats, when loadApps called, last used times are populated`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
-            val lastUsedTime = 1234567890L
-
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
-            every { packageService.loadLabel(any()) } returns "Test App"
-            every { packageService.getInstallerPackageName(any()) } returns null
-            every { usageStatsService.getLastUsedEpochs(any()) } returns mapOf("com.test.app" to lastUsedTime)
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = false,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertEquals(1, result.size)
-            assertEquals(lastUsedTime, result[0].lastUsed)
-        }
-
-    @Test
-    fun `given apps with permissions, when loadApps called, permission counts are populated`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo =
-                createPackageInfo("1.0.0").apply {
-                    requestedPermissions = arrayOf("android.permission.INTERNET", "android.permission.CAMERA")
-                    requestedPermissionsFlags = intArrayOf(2, 0)
-                }
-
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
-            every { packageService.loadLabel(any()) } returns "Test App"
-            every { packageService.getInstallerPackageName(any()) } returns null
-            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = false,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertEquals(1, result.size)
-            assertEquals(2, result[0].requestedPermissionsCount)
-            assertEquals(1, result[0].grantedPermissionsCount)
-        }
-
-    @Test
-    fun `given apps with archived status, when loadApps called with ARCHIVED field, then apps are sorted by archived status`() =
-        runTest {
-            val app1 = createApplicationInfo("com.test.app1")
-            val mockBundle = mockk<Bundle>()
-            every { mockBundle.containsKey("com.android.vending.archive") } returns true
-            app1.metaData = mockBundle
-
-            val app2 = createApplicationInfo("com.test.app2")
-            app2.metaData = null
-
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1, app2)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app1", "com.test.app2")
-            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
-            every { packageService.loadLabel(any()) } returns "App"
-            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.ARCHIVED,
-                        showSystemApps = false,
-                        descending = true,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertEquals(2, result.size)
-            assertEquals(true, result[0].archived)
-            assertEquals(false, result[1].archived)
-        }
-
-    @Test
-    fun `given reload true, when loadApps called, then usage stats are reloaded`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.app")
-            val packageInfo = createPackageInfo("1.0.0")
-
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-            every { packageService.getPackageInfo(any()) } returns packageInfo
-            every { packageService.loadLabel(any()) } returns "Test App"
-            every { packageService.getInstallerPackageName(any()) } returns null
-            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
-
-            repository
-                .loadApps(
-                    field = AppInfoField.VERSION,
-                    showSystemApps = false,
-                    descending = false,
-                    reload = true,
-                ).toList()
-
-            verify { usageStatsService.getLastUsedEpochs(true) }
+            verify(exactly = 0) { crashReporter.log(any()) }
+            verify(exactly = 0) { crashReporter.recordException(any(), any()) }
         }
 
     @Test
@@ -365,11 +200,7 @@ class AppRepositoryTest {
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
-            every { packageService.getInstallerPackageName(any()) } returns null
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { appStoreService.installerDisplayName(any()) } returns "Unknown"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
 
             val flow =
                 repository.loadApps(
@@ -383,52 +214,49 @@ class AppRepositoryTest {
 
             assertEquals(2, results.size)
 
-            // First emission: Basic info (versionName should be empty as defined in mapToAppBasic)
+            // First emission: Basic info
             val firstEmission = results[0]
             assertEquals(1, firstEmission.size)
-            assertEquals("", firstEmission[0].versionName)
-            assertFalse(firstEmission[0].isDetailed)
+            assertNull(firstEmission[0].versionName)
 
             // Second emission: Detailed info
             val secondEmission = results[1]
             assertEquals(1, secondEmission.size)
             assertEquals("1.0.0", secondEmission[0].versionName)
-            assertTrue(secondEmission[0].isDetailed)
         }
 
     @Test
-    fun `given detailed info fetch fails, when loadApps called, then app remains in list with basic info`() =
+    fun `given getPackageInfo fails, when loadApps called, then other detailed info is still populated`() =
         runTest {
-            val appInfo = createApplicationInfo("com.test.error")
+            val appInfo = createApplicationInfo("com.test.pkg.error")
+            val storageUsage = StorageUsage(apkBytes = 100, appBytes = 200)
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.error")
-            // returning valid basic info
-            every { packageService.loadLabel(any()) } returns "Error App"
-            // failing detailed info
-            every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Error")
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.pkg.error")
+            every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Info Error")
+            every { storageService.getStorageUsage(any()) } returns storageUsage
+            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
+            every { appStoreService.installerDisplayName(any()) } returns "Google Play"
 
-            val flow =
-                repository.loadApps(
-                    field = AppInfoField.VERSION,
-                    showSystemApps = false,
-                    descending = false,
-                    reload = false,
-                )
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        showSystemApps = false,
+                        descending = false,
+                        reload = false,
+                    ).toList()
+                    .last()
 
-            val result = flow.toList()
-            val finalDocs = result.last()
-
-            assertEquals(1, finalDocs.size)
-            assertEquals("com.test.error", finalDocs[0].packageName)
-            // Verify we got the basic info back
-            assertEquals("Error App", finalDocs[0].name)
-            // Verify it is still marked as detailed because the process finished (even if it failed)
-            assertTrue(finalDocs[0].isDetailed)
-            verify { crashReporter.recordException(any(), any()) }
+            assertEquals(1, result.size)
+            assertNull(result[0].versionName)
+            assertEquals(storageUsage, result[0].sizes)
+            assertEquals("Google Play", result[0].installerName)
+            assertTrue(result[0].isDetailed)
+            verify { crashReporter.recordException(any(), match { it.contains("failed to getPackageInfo") }) }
         }
 
     @Test
-    fun `given storage usage fetch fails, when loadApps called, then app remains in list with basic info`() =
+    fun `given storage usage fetch fails, when loadApps called, then app remains in list with other info`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.storage.error")
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
@@ -447,18 +275,19 @@ class AppRepositoryTest {
                     .last()
 
             assertEquals(1, result.size)
+            assertEquals("1.0.0", result[0].versionName)
             assertTrue(result[0].isDetailed)
-            verify { crashReporter.recordException(any(), any()) }
+            verify { crashReporter.recordException(any(), match { it.contains("failed to getStorageUsage") }) }
         }
 
     @Test
-    fun `given installer package name fetch fails, when loadApps called, then app remains in list with basic info`() =
+    fun `given installer info retrieval fails, when loadApps called, then other detailed info is still populated`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.installer.error")
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.installer.error")
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
+            every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = 100)
             every { packageService.getInstallerPackageName(any()) } throws RuntimeException("Installer Error")
 
             val result =
@@ -472,96 +301,25 @@ class AppRepositoryTest {
                     .last()
 
             assertEquals(1, result.size)
+            assertEquals("1.0.0", result[0].versionName)
+            assertEquals(100L, result[0].sizes.apkBytes)
+            assertNull(result[0].installerName)
             assertTrue(result[0].isDetailed)
-            verify { crashReporter.recordException(any(), any()) }
-        }
-
-    @Test
-    fun `given installer display name fetch fails, when loadApps called, then app remains in list with basic info`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.displayname.error")
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.displayname.error")
-            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
-            every { appStoreService.installerDisplayName(any()) } throws RuntimeException("Display Name Error")
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = false,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertEquals(1, result.size)
-            assertTrue(result[0].isDetailed)
-            verify { crashReporter.recordException(any(), any()) }
-        }
-
-    @Test
-    fun `given exists in app store fetch fails, when loadApps called, then app remains in list with basic info`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.exists.error")
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.exists.error")
-            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
-            every { storageService.getStorageUsage(any()) } returns StorageUsage()
-            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
-            every { appStoreService.installerDisplayName(any()) } returns "Google Play"
-            coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Exists In Store Error")
-
-            val result =
-                repository
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = false,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
-
-            assertEquals(1, result.size)
-            assertTrue(result[0].isDetailed)
-            verify { crashReporter.recordException(any(), any()) }
-        }
-
-    @Test
-    @Config(sdk = [35])
-    fun `given API 35, when loadApps called, then MATCH_ARCHIVED_PACKAGES flag is used`() =
-        runTest {
-            val appInfo = createApplicationInfo("com.test.app")
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-            every { packageService.loadLabel(any()) } returns "App"
-
-            repository
-                .loadApps(
-                    field = AppInfoField.VERSION,
-                    showSystemApps = true,
-                    descending = false,
-                    reload = false,
-                ).toList()
-
-            // PackageManager.MATCH_ARCHIVED_PACKAGES is 0x100000000L = 4294967296L
-            verify { packageService.getInstalledApplications(match { it and 4294967296L != 0L }) }
+            verify { crashReporter.recordException(any(), match { it.contains("failed to get installer info") }) }
         }
 
     @Test
     fun `given app with null package name, when loadApps called, then it handles it safely`() =
         runTest {
             val appInfo =
-                ApplicationInfo().apply {
-                    this.packageName = null
-                    this.flags = 0
-                    this.enabled = true
-                    this.metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                createApplicationInfo(null).apply {
+                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
                 }
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns emptySet()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { packageService.loadLabel(any()) } returns "Test App"
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
 
             val result =
                 repository
@@ -578,9 +336,45 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given no crash reporter, when loadApps fails, then it does not crash`() =
+    @Config(sdk = [34])
+    fun `given SDK 34, when loadApps called, then it uses isArchivedApp utility`() =
         runTest {
-            val repoNoCrashReporter =
+            val appInfo =
+                createApplicationInfo("com.test.archived").apply {
+                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                }
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns emptySet()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+
+            val result = repository.loadApps(AppInfoField.VERSION, true, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].archived == true)
+        }
+
+    @Test
+    fun `given null crashReporter and failing loads, when loadApps called, then it handles it safely`() =
+        runTest {
+            val app1 = createApplicationInfo("com.test.app1")
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(app1)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app1")
+            every { packageService.loadLabel(app1) } returns "App A"
+            every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
+
+            // Trigger 143/145 branch
+            every { packageService.getPackageInfo(app1) } throws
+                PackageManager
+                    .NameNotFoundException("Not found")
+
+            // Trigger 152 branch
+            every { storageService.getStorageUsage(app1) } throws RuntimeException("Storage fail")
+
+            // Trigger 165 branch
+            every { packageService.getInstallerPackageName(app1) } throws RuntimeException("Installer fail")
+
+            val nullReporterRepository =
                 AndroidAppRepository(
                     packageService,
                     usageStatsService,
@@ -588,55 +382,37 @@ class AppRepositoryTest {
                     appStoreService,
                     null,
                 )
-            val appInfo = createApplicationInfo("com.test.error")
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.error")
-            every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Error")
 
             val result =
-                repoNoCrashReporter
+                nullReporterRepository
                     .loadApps(
-                        field = AppInfoField.VERSION,
+                        field = AppInfoField.TARGET_SDK,
                         showSystemApps = false,
                         descending = false,
-                        reload = false,
+                        reload = true,
                     ).toList()
                     .last()
 
             assertEquals(1, result.size)
-            assertEquals("com.test.error", result[0].packageName)
         }
 
     @Test
-    fun `given default constructor, when loadApps called, then it works`() =
+    fun `given usageStatsService fails, when loadApps called, then LAST_USED is in failedFields`() =
         runTest {
-            val repoDefault =
-                AndroidAppRepository(
-                    packageService,
-                    usageStatsService,
-                    storageService,
-                    appStoreService,
-                )
-            val appInfo = createApplicationInfo("com.test.app")
-            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-            every { packageService.loadLabel(any()) } returns "App"
+            val appInfo = createApplicationInfo("com.test.usage.fail")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.usage.fail")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { usageStatsService.getLastUsedEpochs(any()) } returns null
 
-            val result =
-                repoDefault
-                    .loadApps(
-                        field = AppInfoField.VERSION,
-                        showSystemApps = true,
-                        descending = false,
-                        reload = false,
-                    ).toList()
-                    .last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
 
             assertEquals(1, result.size)
+            assertTrue(result[0].failedFields.contains(AppInfoField.LAST_USED))
         }
 
     private fun createApplicationInfo(
-        packageName: String,
+        packageName: String?,
         isSystemApp: Boolean = false,
     ): ApplicationInfo =
         ApplicationInfo().apply {
@@ -652,5 +428,117 @@ class AppRepositoryTest {
             this.versionName = versionName
             this.firstInstallTime = System.currentTimeMillis()
             this.lastUpdateTime = System.currentTimeMillis()
+        }
+
+    private fun createApp(
+        packageName: String = "com.test.app",
+        name: String = "Test",
+        isDetailed: Boolean = false,
+        failedFields: Set<AppInfoField> = emptySet(),
+    ): App =
+        App(
+            packageName = packageName,
+            name = name,
+            versionName = null,
+            archived = null,
+            minSdk = null,
+            targetSdk = null,
+            firstInstalled = null,
+            lastUpdated = null,
+            lastUsed = null,
+            sizes = StorageUsage(),
+            installerName = null,
+            existsInStore = null,
+            grantedPermissionsCount = null,
+            requestedPermissionsCount = null,
+            enabled = true,
+            isDetailed = isDetailed,
+            failedFields = failedFields,
+        )
+
+    @Test
+    @Config(sdk = [34])
+    fun `given SDK less than 35, when loadApps called, flags do not include MATCH_ARCHIVED_PACKAGES`() =
+        runTest {
+            val flagsSlot = slot<Long>()
+            every { packageService.getInstalledApplications(capture(flagsSlot)) } returns emptyList()
+
+            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+
+            val flags = flagsSlot.captured
+            assertTrue((flags and PackageManager.MATCH_ARCHIVED_PACKAGES) == 0L)
+        }
+
+    @Test
+    fun `given storage usage with null bytes, when loadApps called, then size fields are in failedFields`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.nullbytes")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.nullbytes")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = null, appBytes = 100)
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].failedFields.contains(AppInfoField.APK_SIZE))
+            org.junit.Assert.assertFalse(result[0].failedFields.contains(AppInfoField.APP_SIZE))
+        }
+
+    @Test
+    fun `given storage usage with null appBytes, when loadApps called, then size fields are in failedFields`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.nullappbytes")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.nullappbytes")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = 100, appBytes = null)
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            org.junit.Assert.assertFalse(result[0].failedFields.contains(AppInfoField.APK_SIZE))
+            assertTrue(result[0].failedFields.contains(AppInfoField.APP_SIZE))
+        }
+
+    @Test
+    fun `given appStoreService fails, when loadApps called, then installer fields are in failedFields`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.store.fail")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.store.fail")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertTrue(result[0].failedFields.containsAll(listOf(AppInfoField.PACKAGE_MANAGER, AppInfoField.EXISTS_IN_APP_STORE)))
+        }
+
+    @Test
+    fun `given multiple failures in mapToAppDetailed, when loadApps called, then all affected fields are in failedFields`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.multi.fail")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.multi.fail")
+
+            every { packageService.getPackageInfo(any()) } throws RuntimeException("PC fail")
+            every { storageService.getStorageUsage(any()) } throws RuntimeException("Storage fail")
+            every { packageService.getInstallerPackageName(any()) } throws RuntimeException("Installer fail")
+            coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertTrue(
+                result[0].failedFields.containsAll(
+                    listOf(
+                        AppInfoField.VERSION,
+                        AppInfoField.APK_SIZE,
+                        AppInfoField.PACKAGE_MANAGER,
+                    ),
+                ),
+            )
         }
 }

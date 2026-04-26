@@ -14,6 +14,8 @@ class AppListViewModel(
     private val dispatchers: DispatcherProvider,
     private val summaryCalculator: SummaryCalculator,
     private val sizeFormatter: (Long) -> String,
+    private val unknownValue: String,
+    private val loadingFailedValue: String,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -127,10 +129,14 @@ class AppListViewModel(
     ): AppItemUiModel {
         val rawValue = field.getValue(app)
         val info =
-            if (field.isSize && rawValue is Long) {
+            if (field in app.failedFields) {
+                loadingFailedValue
+            } else if (field.isSize && rawValue is Long &&
+                (rawValue > 0 || (field != AppInfoField.APK_SIZE && field != AppInfoField.TOTAL_SIZE))
+            ) {
                 sizeFormatter(rawValue)
             } else {
-                field.getFormattedValue(app)
+                field.getFormattedValue(app, unknownValue, null)
             }
         return AppItemUiModel(
             packageName = app.packageName,

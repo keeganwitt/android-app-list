@@ -49,6 +49,7 @@ interface AppStoreService {
 
 class PlayStoreService(
     private val httpClient: OkHttpClient = OkHttpClient(),
+    private val crashReporter: com.github.keeganwitt.applist.CrashReporter? = null,
 ) : AppStoreService {
     private val cache = mutableMapOf<String, Boolean?>()
 
@@ -68,6 +69,9 @@ class PlayStoreService(
             } catch (e: Exception) {
                 val message = "Unable to make HTTP request to $url"
                 Log.w(TAG, message, e)
+                if (e !is java.io.IOException) {
+                    crashReporter?.recordException(e, message)
+                }
                 null
             }
         cache[packageName] = result

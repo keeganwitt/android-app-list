@@ -3,6 +3,7 @@ package com.github.keeganwitt.applist
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -59,7 +60,7 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<ListPreference>(AppSettings.KEY_THEME_MODE)
                 ?.setOnPreferenceChangeListener { _, newValue ->
                     val mode = AppSettings.ThemeMode.valueOf(newValue as String)
-                    androidx.appcompat.app.AppCompatDelegate
+                    AppCompatDelegate
                         .setDefaultNightMode(mode.nightMode)
                     true
                 }

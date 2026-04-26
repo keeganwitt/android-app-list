@@ -50,4 +50,8 @@
     <string name="date_bucket_last_three_months">Poslední 3 měsíce</string>
     <string name="date_bucket_last_six_months">Posledních 6 měsíců</string>
     <string name="date_bucket_older">Starší</string>
+    <string name="usage_stats_permission_title">Je vyžadováno oprávnění k přístupu k využití</string>
+    <string name="usage_stats_permission_description">Tato aplikace potřebuje oprávnění k přístupu k využití, aby mohla získat informace, jako jsou velikosti aplikací a časy posledního použití. Chcete toto oprávnění nyní udělit v Nastavení?</string>
+    <string name="unknown">Neznámý</string>
+    <string name="loading_failed">⚠ Načítání selhalo</string>
 </resources>

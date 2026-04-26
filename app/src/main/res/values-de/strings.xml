@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Letzte 3 Monate</string>
     <string name="date_bucket_last_six_months">Letzte 6 Monate</string>
     <string name="date_bucket_older">Älter</string>
+    <string name="usage_stats_permission_title">Nutzungszugriffsberechtigung erforderlich</string>
+    <string name="usage_stats_permission_description">Diese App benötigt die Nutzungszugriffsberechtigung, um Informationen wie App-Größen und die Zeit der letzten Nutzung abzurufen. Möchten Sie diese Berechtigung jetzt in den Einstellungen erteilen?</string>
+    <string name="unknown">Unbekannt</string>
+    <string name="loading_failed">⚠ Laden fehlgeschlagen</string>
 </resources>

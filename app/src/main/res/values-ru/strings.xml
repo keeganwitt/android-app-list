@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Последние 3 месяца</string>
     <string name="date_bucket_last_six_months">Последние 6 месяцев</string>
     <string name="date_bucket_older">Более старые</string>
+    <string name="usage_stats_permission_title">Требуется разрешение на доступ к данным об использовании</string>
+    <string name="usage_stats_permission_description">Этому приложению требуется разрешение на доступ к данным об использовании для получения такой информации, как размер приложений и время последнего использования. Хотите предоставить это разрешение в Настройках сейчас?</string>
+    <string name="unknown">Неизвестно</string>
+    <string name="loading_failed">⚠ Ошибка загрузки</string>
 </resources>

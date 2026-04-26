@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">پچھلے 3 ماہ</string>
     <string name="date_bucket_last_six_months">پچھلے 6 ماہ</string>
     <string name="date_bucket_older">پرانا</string>
+    <string name="usage_stats_permission_title">استعمال تک رسائی کی اجازت درکار ہے۔</string>
+    <string name="usage_stats_permission_description">اس ایپ کو ایپ کے سائز اور آخری بار استعمال شدہ اوقات جیسی معلومات حاصل کرنے کے لیے استعمال تک رسائی کی اجازت درکار ہے۔ کیا آپ ابھی سیٹنگز میں یہ اجازت دینا چاہیں گے؟</string>
+    <string name="unknown">نامعلوم</string>
+    <string name="loading_failed">⚠ لوڈ کرنے میں ناکامی</string>
 </resources>

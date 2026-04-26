@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">3 tháng qua</string>
     <string name="date_bucket_last_six_months">6 tháng qua</string>
     <string name="date_bucket_older">Cũ hơn</string>
+    <string name="usage_stats_permission_title">Cần có quyền truy cập sử dụng</string>
+    <string name="usage_stats_permission_description">Ứng dụng này cần có quyền Truy cập sử dụng để truy xuất thông tin như kích thước ứng dụng và thời gian sử dụng lần cuối. Bạn có muốn cấp quyền này trong Cài đặt ngay bây giờ không?</string>
+    <string name="unknown">Không xác định</string>
+    <string name="loading_failed">⚠ Tải thất bại</string>
 </resources>

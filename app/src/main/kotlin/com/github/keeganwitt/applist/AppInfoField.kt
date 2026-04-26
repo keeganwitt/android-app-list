@@ -17,7 +17,7 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.sizes.appBytes
     },
     ARCHIVED(R.string.appInfoField_archived) {
-        override fun getValue(app: App) = app.archived ?: false
+        override fun getValue(app: App) = app.archived
     },
     CACHE_SIZE(R.string.appInfoField_cacheSize, requiresUsageStats = true, isSize = true) {
         override fun getValue(app: App) = app.sizes.cacheBytes
@@ -29,7 +29,7 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.enabled
     },
     EXISTS_IN_APP_STORE(R.string.appInfoField_exists_in_app_store) {
-        override fun getValue(app: App) = app.existsInStore ?: false
+        override fun getValue(app: App) = app.existsInStore
     },
     EXTERNAL_CACHE_SIZE(R.string.appInfoField_externalCacheSize, requiresUsageStats = true, isSize = true) {
         override fun getValue(app: App) = app.sizes.externalCacheBytes
@@ -38,7 +38,7 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.firstInstalled
     },
     GRANTED_PERMISSIONS(R.string.appInfoField_grantedPermissions) {
-        override fun getValue(app: App) = app.grantedPermissionsCount ?: 0
+        override fun getValue(app: App) = app.grantedPermissionsCount
     },
     LAST_UPDATED(R.string.appInfoField_lastUpdated, isDate = true) {
         override fun getValue(app: App) = app.lastUpdated
@@ -47,54 +47,82 @@ enum class AppInfoField(
         override fun getValue(app: App) = app.lastUsed
     },
     MIN_SDK(R.string.appInfoField_minSdk) {
-        override fun getValue(app: App) = app.minSdk ?: 0
+        override fun getValue(app: App) = app.minSdk
     },
     PACKAGE_MANAGER(R.string.appInfoField_packageManager) {
-        override fun getValue(app: App) = app.installerName ?: ""
+        override fun getValue(app: App) = app.installerName
     },
     REQUESTED_PERMISSIONS(R.string.appInfoField_requestedPermissions) {
-        override fun getValue(app: App) = app.requestedPermissionsCount ?: 0
+        override fun getValue(app: App) = app.requestedPermissionsCount
     },
     TARGET_SDK(R.string.appInfoField_targetSdk) {
-        override fun getValue(app: App) = app.targetSdk ?: 0
+        override fun getValue(app: App) = app.targetSdk
     },
     TOTAL_SIZE(R.string.appInfoField_totalSize, requiresUsageStats = true, isSize = true) {
         override fun getValue(app: App) = app.sizes.totalBytes
     },
     VERSION(R.string.appInfoField_version) {
-        override fun getValue(app: App) = app.versionName ?: ""
+        override fun getValue(app: App) = app.versionName
     },
     ;
 
     abstract fun getValue(app: App): Comparable<*>?
 
-    open fun getFormattedValue(app: App): String {
+    open fun getFormattedValue(
+        app: App,
+        unknownValue: String = "",
+        loadingFailedValue: String? = null,
+    ): String {
+        if (loadingFailedValue != null && this in app.failedFields) return loadingFailedValue
         val value = getValue(app)
-        return if (isDate) {
-            formatDate(value as? Long)
-        } else {
-            value?.toString() ?: ""
+        return when {
+            isDate -> {
+                val timestamp = value as? Long
+                if (timestamp == null || timestamp == 0L) {
+                    unknownValue
+                } else {
+                    formatDate(timestamp)
+                }
+            }
+
+            isSize -> {
+                val size = value as? Long
+                if (size == null || (size == 0L && (this == APK_SIZE || this == TOTAL_SIZE))) {
+                    unknownValue
+                } else {
+                    size.toString()
+                }
+            }
+
+            else -> {
+                value?.toString() ?: unknownValue
+            }
         }
     }
 
-    protected fun formatDate(timestamp: Long?): String = timestamp?.let {
-        val currentLocale = Locale.getDefault()
-        var cache = dateFormatCache.get()!!
-        if (cache.locale != currentLocale) {
-            cache = DateFormatCache(currentLocale, DateFormat.getDateTimeInstance())
-            dateFormatCache.set(cache)
-        }
-        cache.dateFormat.format(Date(it))
-    } ?: ""
+    protected fun formatDate(timestamp: Long?): String =
+        timestamp?.let {
+            val currentLocale = Locale.getDefault()
+            var cache = dateFormatCache.get()!!
+            if (cache.locale != currentLocale) {
+                cache = DateFormatCache(currentLocale, DateFormat.getDateTimeInstance())
+                dateFormatCache.set(cache)
+            }
+            cache.dateFormat.format(Date(it))
+        } ?: ""
 
-    private class DateFormatCache(val locale: Locale, val dateFormat: DateFormat)
+    private class DateFormatCache(
+        val locale: Locale,
+        val dateFormat: DateFormat,
+    )
 
     companion object {
-        private val dateFormatCache = object : ThreadLocal<DateFormatCache>() {
-            override fun initialValue(): DateFormatCache {
-                val locale = Locale.getDefault()
-                return DateFormatCache(locale, DateFormat.getDateTimeInstance())
+        private val dateFormatCache =
+            object : ThreadLocal<DateFormatCache>() {
+                override fun initialValue(): DateFormatCache {
+                    val locale = Locale.getDefault()
+                    return DateFormatCache(locale, DateFormat.getDateTimeInstance())
+                }
             }
-        }
     }
 }

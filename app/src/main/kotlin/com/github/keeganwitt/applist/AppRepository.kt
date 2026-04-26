@@ -45,7 +45,7 @@ class AndroidAppRepository(
                     filteredInfos
                         .map { (ai, archived) ->
                             async {
-                                ai to mapToAppBasic(ai, archived)
+                                ai to mapToAppBasic(ai)
                             }
                         }.awaitAll()
                 }
@@ -88,26 +88,29 @@ class AndroidAppRepository(
         }
     }
 
-    private fun mapToAppBasic(
-        ai: ApplicationInfo,
-        archived: Boolean,
-    ): App {
+    private fun mapToAppBasic(ai: ApplicationInfo): App {
+        val archived =
+            if (Build.VERSION.SDK_INT >= 35) {
+                ai.isArchived
+            } else {
+                ai.isArchivedApp
+            }
         val packageName = ai.packageName ?: ""
         return App(
             packageName = packageName,
             name = packageService.loadLabel(ai),
-            versionName = "", // Load lazily/later if slow, or now if fast. PackageInfo might be slow?
+            versionName = null,
             archived = archived,
             minSdk = ai.minSdkVersion,
             targetSdk = ai.targetSdkVersion,
-            firstInstalled = 0,
-            lastUpdated = 0,
-            lastUsed = 0,
-            sizes = StorageUsage(), // Empty for now
-            installerName = "",
-            existsInStore = false,
-            grantedPermissionsCount = 0,
-            requestedPermissionsCount = 0,
+            firstInstalled = null,
+            lastUpdated = null,
+            lastUsed = null,
+            sizes = StorageUsage(),
+            installerName = null,
+            existsInStore = null,
+            grantedPermissionsCount = null,
+            requestedPermissionsCount = null,
             enabled = ai.enabled,
             isDetailed = false,
         )
@@ -116,36 +119,94 @@ class AndroidAppRepository(
     private suspend fun mapToAppDetailed(
         ai: ApplicationInfo,
         basicApp: App,
-        lastUsedEpochs: Map<String, Long>,
-    ): App =
+        lastUsedEpochs: Map<String, Long>?,
+    ): App {
+        var app = basicApp
+        val failedFields = mutableSetOf<AppInfoField>()
+
+        if (lastUsedEpochs == null) {
+            failedFields.add(AppInfoField.LAST_USED)
+        }
+
         try {
             val pkgInfo = packageService.getPackageInfo(ai)
-            val storage = storageService.getStorageUsage(ai)
-            val installerPackage = packageService.getInstallerPackageName(ai)
-            val installerName = appStoreService.installerDisplayName(installerPackage)
-            val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
             val flagsArr = pkgInfo.requestedPermissionsFlags
             val grantedCount =
                 flagsArr?.count { flags -> (flags and PACKAGEINFO_REQUESTED_PERMISSION_GRANTED) != 0 }
                     ?: 0
             val requestedCount = pkgInfo.requestedPermissions?.size ?: 0
 
-            basicApp.copy(
-                versionName = pkgInfo.versionName,
-                firstInstalled = pkgInfo.firstInstallTime,
-                lastUpdated = pkgInfo.lastUpdateTime,
-                lastUsed = lastUsedEpochs[ai.packageName] ?: 0L,
-                sizes = storage,
-                installerName = installerName,
-                existsInStore = existsInStore,
-                grantedPermissionsCount = grantedCount,
-                requestedPermissionsCount = requestedCount,
-                isDetailed = true,
-            )
+            app =
+                app.copy(
+                    versionName = pkgInfo.versionName,
+                    firstInstalled = pkgInfo.firstInstallTime,
+                    lastUpdated = pkgInfo.lastUpdateTime,
+                    grantedPermissionsCount = grantedCount,
+                    requestedPermissionsCount = requestedCount,
+                )
+        } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+            android.util.Log.w("AndroidAppRepository", "App uninstalled during load: ${ai.packageName}")
         } catch (e: Exception) {
-            crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed for ${ai.packageName}")
-            basicApp.copy(isDetailed = true)
+            crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to getPackageInfo for ${ai.packageName}")
+            failedFields.addAll(
+                listOf(
+                    AppInfoField.VERSION,
+                    AppInfoField.FIRST_INSTALLED,
+                    AppInfoField.LAST_UPDATED,
+                    AppInfoField.GRANTED_PERMISSIONS,
+                    AppInfoField.REQUESTED_PERMISSIONS,
+                ),
+            )
         }
+
+        try {
+            val storage = storageService.getStorageUsage(ai)
+            app = app.copy(sizes = storage)
+            if (storage.apkBytes == null) failedFields.add(AppInfoField.APK_SIZE)
+            if (storage.appBytes == null) failedFields.add(AppInfoField.APP_SIZE)
+            if (storage.cacheBytes == null) failedFields.add(AppInfoField.CACHE_SIZE)
+            if (storage.dataBytes == null) failedFields.add(AppInfoField.DATA_SIZE)
+            if (storage.externalCacheBytes == null) failedFields.add(AppInfoField.EXTERNAL_CACHE_SIZE)
+            if (storage.totalBytes == null) failedFields.add(AppInfoField.TOTAL_SIZE)
+        } catch (e: Exception) {
+            crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to getStorageUsage for ${ai.packageName}")
+            failedFields.addAll(
+                listOf(
+                    AppInfoField.APK_SIZE,
+                    AppInfoField.APP_SIZE,
+                    AppInfoField.CACHE_SIZE,
+                    AppInfoField.DATA_SIZE,
+                    AppInfoField.EXTERNAL_CACHE_SIZE,
+                    AppInfoField.TOTAL_SIZE,
+                ),
+            )
+        }
+
+        try {
+            val installerPackage = packageService.getInstallerPackageName(ai)
+            val installerName = appStoreService.installerDisplayName(installerPackage)
+            val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
+            app =
+                app.copy(
+                    installerName = installerName,
+                    existsInStore = existsInStore,
+                )
+        } catch (e: Exception) {
+            crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to get installer info for ${ai.packageName}")
+            failedFields.addAll(
+                listOf(
+                    AppInfoField.PACKAGE_MANAGER,
+                    AppInfoField.EXISTS_IN_APP_STORE,
+                ),
+            )
+        }
+
+        return app.copy(
+            lastUsed = lastUsedEpochs?.get(ai.packageName) ?: 0L,
+            isDetailed = true,
+            failedFields = basicApp.failedFields + failedFields,
+        )
+    }
 
     private fun sortApps(
         apps: List<App>,

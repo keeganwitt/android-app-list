@@ -3,10 +3,16 @@ package com.github.keeganwitt.applist.services
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.util.Log
+import com.github.keeganwitt.applist.CrashReporter
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -17,17 +23,26 @@ import java.time.ZoneId
 class UsageStatsServiceTest {
     private lateinit var context: Context
     private lateinit var usageStatsManager: UsageStatsManager
+    private lateinit var crashReporter: CrashReporter
     private lateinit var service: AndroidUsageStatsService
     private lateinit var clock: Clock
 
     @Before
     fun setup() {
+        mockkStatic(Log::class)
+        every { Log.w(any(), any<String>(), any()) } returns 0
         context = mockk(relaxed = true)
         usageStatsManager = mockk(relaxed = true)
+        crashReporter = mockk(relaxed = true)
         // Fixed time: 2023-01-01 12:00:00 UTC
         val fixedInstant = Instant.parse("2023-01-01T12:00:00Z")
         clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
-        service = AndroidUsageStatsService(context, usageStatsManager, clock)
+        service = AndroidUsageStatsService(context, usageStatsManager, clock, crashReporter)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(Log::class)
     }
 
     @Test
@@ -45,12 +60,34 @@ class UsageStatsServiceTest {
     }
 
     @Test
+    fun `given queryAndAggregateUsageStats throws SecurityException, when getLastUsedEpochs called, then returns null and does not log to crash reporter`() {
+        every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } throws SecurityException("No permission")
+
+        val result = service.getLastUsedEpochs(reload = false)
+
+        assertNull(result)
+        verify(exactly = 0) { crashReporter.log(any()) }
+        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+    }
+
+    @Test
+    fun `given queryAndAggregateUsageStats throws generic Exception, when getLastUsedEpochs called, then records exception to crash reporter and returns null`() {
+        val exception = RuntimeException("Something went wrong")
+        every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } throws exception
+
+        val result = service.getLastUsedEpochs(reload = false)
+
+        assertNull(result)
+        verify { crashReporter.recordException(exception, match { it.contains("getLastUsedEpochs failed") }) }
+    }
+
+    @Test
     fun `given no usage stats, when getLastUsedEpochs called, then returns empty map`() {
         every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } returns emptyMap()
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertTrue(result.isEmpty())
+        assertTrue(result!!.isEmpty())
     }
 
     @Test
@@ -69,7 +106,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(2, result.size)
+        assertEquals(2, result!!.size)
         assertEquals(1000L, result["com.test.app1"])
         assertEquals(2000L, result["com.test.app2"])
     }
@@ -113,7 +150,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(5, result.size)
+        assertEquals(5, result!!.size)
         assertEquals(1000L, result["com.test.app1"])
         assertEquals(5000L, result["com.test.app5"])
     }
@@ -127,7 +164,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(1, result.size)
+        assertEquals(1, result!!.size)
         assertEquals(0L, result["com.test.app"])
     }
 
@@ -140,7 +177,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(1, result.size)
+        assertEquals(1, result!!.size)
         assertEquals(-1L, result["com.test.app"])
     }
 
@@ -153,7 +190,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = true)
 
-        assertEquals(1, result.size)
+        assertEquals(1, result!!.size)
         assertEquals(1000L, result["com.test.app"])
         verify(exactly = 1) { usageStatsManager.queryAndAggregateUsageStats(any(), any()) }
     }
@@ -172,8 +209,8 @@ class UsageStatsServiceTest {
         val firstResult = service.getLastUsedEpochs(reload = false)
         val secondResult = service.getLastUsedEpochs(reload = true)
 
-        assertEquals(1000L, firstResult["com.test.app"])
-        assertEquals(2000L, secondResult["com.test.app"])
+        assertEquals(1000L, firstResult!!["com.test.app"])
+        assertEquals(2000L, secondResult!!["com.test.app"])
     }
 
     @Test
@@ -189,7 +226,7 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(100, result.size)
+        assertEquals(100, result!!.size)
         assertEquals(1000L, result["com.test.app1"])
         assertEquals(100000L, result["com.test.app100"])
     }
@@ -210,8 +247,30 @@ class UsageStatsServiceTest {
 
         val result = service.getLastUsedEpochs(reload = false)
 
-        assertEquals(2, result.size)
+        assertEquals(2, result!!.size)
         assertEquals(5000L, result["com.test.app1"])
         assertEquals(5000L, result["com.test.app2"])
+    }
+
+    @Test
+    fun `given null crash reporter and exception, when getLastUsedEpochs called, then it returns null`() {
+        val serviceWithNullReporter = AndroidUsageStatsService(context, usageStatsManager, clock, null)
+        val exception = RuntimeException("Something went wrong")
+        every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } throws exception
+
+        val result = serviceWithNullReporter.getLastUsedEpochs(reload = false)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `given default services and null crash reporter, when managers not injected, then it resolves from context`() {
+        every { context.getSystemService(Context.USAGE_STATS_SERVICE) } returns usageStatsManager
+        every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } returns emptyMap()
+
+        val defaultService = AndroidUsageStatsService(context)
+        val result = defaultService.getLastUsedEpochs(reload = false)
+
+        assertTrue(result!!.isEmpty())
     }
 }

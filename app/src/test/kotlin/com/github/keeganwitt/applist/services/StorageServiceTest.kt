@@ -7,9 +7,12 @@ import android.content.pm.ApplicationInfo
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
+import com.github.keeganwitt.applist.CrashReporter
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +31,7 @@ class StorageServiceTest {
     private lateinit var context: Context
     private lateinit var storageManager: StorageManager
     private lateinit var storageStatsManager: StorageStatsManager
+    private lateinit var crashReporter: CrashReporter
     private lateinit var service: AndroidStorageService
 
     @Before
@@ -35,7 +39,8 @@ class StorageServiceTest {
         context = mockk(relaxed = true)
         storageManager = mockk(relaxed = true)
         storageStatsManager = mockk(relaxed = true)
-        service = AndroidStorageService(context, storageManager, storageStatsManager)
+        crashReporter = mockk(relaxed = true)
+        service = AndroidStorageService(context, storageManager, storageStatsManager, crashReporter)
     }
 
     @Test
@@ -65,7 +70,7 @@ class StorageServiceTest {
     }
 
     @Test
-    fun `given multiple volumes with invalid UUIDs, when getStorageUsage called, then returns zero total bytes`() {
+    fun `given multiple volumes with invalid UUIDs, when getStorageUsage called, then returns null total bytes`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val volume1 = mockk<StorageVolume>()
         val volume2 = mockk<StorageVolume>()
@@ -78,20 +83,20 @@ class StorageServiceTest {
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertNull(result.totalBytes)
     }
 
     @Test
-    fun `given no mounted volumes, when getStorageUsage called, then returns empty storage usage`() {
+    fun `given no mounted volumes, when getStorageUsage called, then returns null storage usage`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         every { storageManager.storageVolumes } returns emptyList()
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.appBytes)
-        assertEquals(0L, result.cacheBytes)
-        assertEquals(0L, result.dataBytes)
-        assertEquals(0L, result.externalCacheBytes)
+        assertNull(result.appBytes)
+        assertNull(result.cacheBytes)
+        assertNull(result.dataBytes)
+        assertNull(result.externalCacheBytes)
     }
 
     @Test
@@ -114,7 +119,7 @@ class StorageServiceTest {
         assertEquals(1000L, result.appBytes)
         assertEquals(2000L, result.cacheBytes)
         assertEquals(3000L, result.dataBytes)
-        assertEquals(0L, result.externalCacheBytes)
+        assertNull(result.externalCacheBytes)
     }
 
     @Test
@@ -147,7 +152,7 @@ class StorageServiceTest {
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertNull(result.totalBytes)
     }
 
     @Test
@@ -160,11 +165,11 @@ class StorageServiceTest {
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertNull(result.totalBytes)
     }
 
     @Test
-    fun `given queryStatsForPackage throws SecurityException, when getStorageUsage called, then returns partial results`() {
+    fun `given queryStatsForPackage throws SecurityException, when getStorageUsage called, then returns empty results and does not log to crash reporter`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val storageVolume = mockk<StorageVolume>()
         val testUuid = UUID.randomUUID()
@@ -176,11 +181,13 @@ class StorageServiceTest {
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertNull(result.totalBytes)
+        verify(exactly = 0) { crashReporter.log(any()) }
+        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
     }
 
     @Test
-    fun `given queryStatsForPackage throws generic Exception, when getStorageUsage called, then returns partial results`() {
+    fun `given queryStatsForPackage throws generic Exception, when getStorageUsage called, then records exception to crash reporter`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val storageVolume = mockk<StorageVolume>()
         val testUuid = UUID.randomUUID()
@@ -188,11 +195,13 @@ class StorageServiceTest {
         every { storageVolume.state } returns Environment.MEDIA_MOUNTED
         every { storageVolume.uuid } returns testUuid.toString()
         every { storageManager.storageVolumes } returns listOf(storageVolume)
-        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Something went wrong")
+        val exception = RuntimeException("Something went wrong")
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws exception
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertNull(result.totalBytes)
+        verify { crashReporter.recordException(exception, match { it.contains("Unable to process storage usage") }) }
     }
 
     @Test
@@ -242,51 +251,7 @@ class StorageServiceTest {
         val result = service.getStorageUsage(appInfo)
 
         assertEquals(1234L, result.apkBytes)
-        assertEquals(0L, result.totalBytes)
-    }
-
-    @Test
-    fun `given queryStatsForPackage throws generic exception, when getStorageUsage called, then returns partial results`() {
-        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
-        val storageVolume = mockk<StorageVolume>()
-        val testUuid = UUID.randomUUID()
-
-        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
-        every { storageVolume.uuid } returns testUuid.toString()
-        every { storageManager.storageVolumes } returns listOf(storageVolume)
-        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Something went wrong")
-
-        val result = service.getStorageUsage(appInfo)
-
-        assertEquals(0L, result.totalBytes)
-    }
-
-    @Test
-    fun `given multiple volumes and one throws generic exception, when getStorageUsage called, then returns results from other volumes`() {
-        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
-        val volume1 = mockk<StorageVolume>()
-        val volume2 = mockk<StorageVolume>()
-        val stats2 = mockk<StorageStats>()
-        val uuid1 = UUID.randomUUID()
-        val uuid2 = UUID.randomUUID()
-
-        every { volume1.state } returns Environment.MEDIA_MOUNTED
-        every { volume1.uuid } returns uuid1.toString()
-        every { volume2.state } returns Environment.MEDIA_MOUNTED
-        every { volume2.uuid } returns uuid2.toString()
-        every { storageManager.storageVolumes } returns listOf(volume1, volume2)
-
-        every { storageStatsManager.queryStatsForPackage(uuid1, "com.test.app", any()) } throws RuntimeException("Error on volume 1")
-        every { stats2.appBytes } returns 1000L
-        every { stats2.cacheBytes } returns 2000L
-        every { stats2.dataBytes } returns 3000L
-        every { storageStatsManager.queryStatsForPackage(uuid2, "com.test.app", any()) } returns stats2
-
-        val result = service.getStorageUsage(appInfo)
-
-        assertEquals(1000L, result.appBytes)
-        assertEquals(2000L, result.cacheBytes)
-        assertEquals(3000L, result.dataBytes)
+        assertNull(result.appBytes)
     }
 
     @Test
@@ -323,11 +288,64 @@ class StorageServiceTest {
 
     @Test
     @Config(sdk = [25])
-    fun `given SDK below O, when getStorageUsage called, then returns empty storage usage`() {
-        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+    fun `given SDK below O, when getStorageUsage called, then returns only apk bytes if present`() {
+        val tempFile = tempFolder.newFile("test.apk")
+        tempFile.writeBytes(ByteArray(1234))
+        val appInfo =
+            ApplicationInfo().apply {
+                packageName = "com.test.app"
+                publicSourceDir = tempFile.absolutePath
+            }
 
         val result = service.getStorageUsage(appInfo)
 
-        assertEquals(0L, result.totalBytes)
+        assertEquals(1234L, result.apkBytes)
+        assertNull(result.appBytes)
+    }
+
+    @Test
+    fun `given SecurityException and null crash reporter, when getStorageUsage called, then handles safely`() {
+        val serviceNoCrashReporter = AndroidStorageService(context, storageManager, storageStatsManager, null)
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws SecurityException("No permission")
+
+        val result = serviceNoCrashReporter.getStorageUsage(appInfo)
+        assertNull(result.totalBytes)
+    }
+
+    @Test
+    fun `given generic Exception and null crash reporter, when getStorageUsage called, then handles safely`() {
+        val serviceNoCrashReporter = AndroidStorageService(context, storageManager, storageStatsManager, null)
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        val storageVolume = mockk<StorageVolume>()
+        val testUuid = UUID.randomUUID()
+
+        every { storageVolume.state } returns Environment.MEDIA_MOUNTED
+        every { storageVolume.uuid } returns testUuid.toString()
+        every { storageManager.storageVolumes } returns listOf(storageVolume)
+        every { storageStatsManager.queryStatsForPackage(testUuid, "com.test.app", any()) } throws RuntimeException("Error")
+
+        val result = serviceNoCrashReporter.getStorageUsage(appInfo)
+        assertNull(result.totalBytes)
+    }
+
+    @Test
+    fun `given null publicSourceDir, when getStorageUsage called, then it handles it safely`() {
+        // new File(null) throws NullPointerException, which should be caught by the try-catch block
+        val appInfo =
+            ApplicationInfo().apply {
+                packageName = "com.test.app"
+                publicSourceDir = null
+            }
+
+        val result = service.getStorageUsage(appInfo)
+
+        assertNull(result.apkBytes)
     }
 }

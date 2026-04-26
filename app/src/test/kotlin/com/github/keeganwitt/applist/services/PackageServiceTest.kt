@@ -170,7 +170,7 @@ class PackageServiceTest {
 
     @Test
     @Suppress("DEPRECATION")
-    fun `getPackageInfo on API 33+ does not include signatures flag`() {
+    fun `getPackageInfo on API 33+ does not include signing certificates flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
         val flagsSlot = slot<PackageManager.PackageInfoFlags>()
@@ -180,13 +180,16 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.value
-        assertTrue("Expected GET_SIGNATURES flag to be absent", (flags and PackageManager.GET_SIGNATURES.toLong()) == 0L)
+        assertTrue(
+            "Expected GET_SIGNING_CERTIFICATES flag to be absent",
+            (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L,
+        )
     }
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.O])
     @Suppress("DEPRECATION")
-    fun `getPackageInfo on O does not include signatures flag`() {
+    fun `getPackageInfo on O does not include signing certificates flag`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val packageInfo = PackageInfo()
         val flagsSlot = slot<Int>()
@@ -196,7 +199,10 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.toLong()
-        assertTrue("Expected GET_SIGNATURES flag to be absent", (flags and PackageManager.GET_SIGNATURES.toLong()) == 0L)
+        assertTrue(
+            "Expected GET_SIGNING_CERTIFICATES flag to be absent",
+            (flags and PackageManager.GET_SIGNING_CERTIFICATES.toLong()) == 0L,
+        )
     }
 
     @Test
@@ -303,6 +309,7 @@ class PackageServiceTest {
     @Suppress("DEPRECATION")
     fun `given legacy SDK, when getInstallerPackageName called, then returns installer package name`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        @Suppress("DEPRECATION")
         every { packageManager.getInstallerPackageName("com.test.app") } returns "com.android.vending"
 
         val result = service.getInstallerPackageName(appInfo)
@@ -315,6 +322,7 @@ class PackageServiceTest {
     @Suppress("DEPRECATION")
     fun `given legacy SDK, when getInstallerPackageName throws NameNotFoundException, then returns null`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        @Suppress("DEPRECATION")
         every { packageManager.getInstallerPackageName("com.test.app") } throws PackageManager.NameNotFoundException()
 
         val result = service.getInstallerPackageName(appInfo)
@@ -374,11 +382,73 @@ class PackageServiceTest {
         service.getPackageInfo(appInfo)
 
         val flags = flagsSlot.captured.value
-        val expectedFlags = (PackageManager.GET_PERMISSIONS or
-            PackageManager.GET_META_DATA or
-            PackageManager.MATCH_UNINSTALLED_PACKAGES or
-            PackageManager.MATCH_DISABLED_COMPONENTS).toLong()
+        val expectedFlags =
+            (
+                PackageManager.GET_PERMISSIONS or
+                    PackageManager.GET_META_DATA or
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES or
+                    PackageManager.MATCH_DISABLED_COMPONENTS
+            ).toLong()
 
         assertTrue("Missing essential flags in getPackageInfo", (flags and expectedFlags) == expectedFlags)
+    }
+
+    @Test
+    fun `given valid package, when getApplicationInfo called on API 33+, then returns application info`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getApplicationInfo(eq("com.test.app"), any<PackageManager.ApplicationInfoFlags>()) } returns appInfo
+
+        val result = service.getApplicationInfo("com.test.app", 0L)
+
+        assertNotNull(result)
+        assertEquals("com.test.app", result?.packageName)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `given valid package, when getApplicationInfo called on legacy API, then returns application info`() {
+        val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
+        every { packageManager.getApplicationInfo(eq("com.test.app"), any<Int>()) } returns appInfo
+
+        val result = service.getApplicationInfo("com.test.app", 0L)
+
+        assertNotNull(result)
+        assertEquals("com.test.app", result?.packageName)
+    }
+
+    @Test
+    fun `given invalid package, when getApplicationInfo called, then returns null`() {
+        every { packageManager.getApplicationInfo(eq("com.invalid.app"), any<PackageManager.ApplicationInfoFlags>()) } throws
+            PackageManager.NameNotFoundException()
+
+        val result = service.getApplicationInfo("com.invalid.app", 0L)
+
+        assertNull(result)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O])
+    fun `when getLaunchablePackages called on legacy API, then returns set of package names`() {
+        val resolveInfo = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.legacy.app" } }
+        every { packageManager.queryIntentActivities(any<Intent>(), any<Int>()) } returns listOf(resolveInfo)
+
+        val result = service.getLaunchablePackages()
+
+        assertEquals(1, result.size)
+        assertTrue(result.contains("com.legacy.app"))
+    }
+
+    @Test
+    fun `given resolve info with null activity info, when getLaunchablePackages called, then filters it out`() {
+        val resolveInfoNull = ResolveInfo().apply { activityInfo = null }
+        val resolveInfoValid = ResolveInfo().apply { activityInfo = ActivityInfo().apply { packageName = "com.valid.app" } }
+
+        every { packageManager.queryIntentActivities(any<Intent>(), any<PackageManager.ResolveInfoFlags>()) } returns
+            listOf(resolveInfoNull, resolveInfoValid)
+
+        val result = service.getLaunchablePackages()
+
+        assertEquals(1, result.size)
+        assertTrue(result.contains("com.valid.app"))
     }
 }

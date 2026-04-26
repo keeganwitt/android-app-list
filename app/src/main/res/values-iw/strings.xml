@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">3 החודשים האחרונים</string>
     <string name="date_bucket_last_six_months">6 החודשים האחרונים</string>
     <string name="date_bucket_older">ישן יותר</string>
+    <string name="usage_stats_permission_title">נדרשת הרשאת גישה לשימוש</string>
+    <string name="usage_stats_permission_description">אפליקציה זו זקוקה להרשאת גישה לשימוש כדי לאחזר מידע כמו גדלי אפליקציות וזמני שימוש אחרונים. האם תרצה להעניק הרשאה זו בהגדרות כעת?</string>
+    <string name="unknown">לא ידוע</string>
+    <string name="loading_failed">⚠ הטעינה נכשלה</string>
 </resources>

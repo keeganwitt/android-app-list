@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Nakaraang 3 buwan</string>
     <string name="date_bucket_last_six_months">Nakaraang 6 na buwan</string>
     <string name="date_bucket_older">Mas matanda</string>
+    <string name="usage_stats_permission_title">Kinakailangan ang Pahintulot sa Access sa Paggamit</string>
+    <string name="usage_stats_permission_description">Kinakailangan ng app na ito ang pahintulot sa Access sa Paggamit para kumuha ng impormasyon gaya ng mga laki ng app at huling beses na ginamit. Gusto mo bang ibigay ang pahintulot na ito sa Mga Setting ngayon?</string>
+    <string name="unknown">Hindi alam</string>
+    <string name="loading_failed">⚠ Nabigo ang paglo-load</string>
 </resources>

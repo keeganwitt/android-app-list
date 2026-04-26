@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">۳ ماه گذشته</string>
     <string name="date_bucket_last_six_months">۶ ماه گذشته</string>
     <string name="date_bucket_older">قدیمی‌تر</string>
+    <string name="usage_stats_permission_title">اجازه دسترسی به استفاده لازم است</string>
+    <string name="usage_stats_permission_description">این برنامه برای بازیابی اطلاعاتی مانند اندازه برنامه و زمان آخرین استفاده به اجازه دسترسی به استفاده نیاز دارد. آیا می خواهید اکنون این اجازه را در تنظیمات بدهید؟</string>
+    <string name="unknown">نامعلوم</string>
+    <string name="loading_failed">⚠ بارگذاری ناموفق</string>
 </resources>

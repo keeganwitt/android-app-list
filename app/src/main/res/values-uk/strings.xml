@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Останні 3 місяці</string>
     <string name="date_bucket_last_six_months">Останні 6 місяців</string>
     <string name="date_bucket_older">Старіше</string>
+    <string name="usage_stats_permission_title">Потрібен дозвіл на доступ до даних про використання</string>
+    <string name="usage_stats_permission_description">Цьому додатку потрібен дозвіл на доступ до даних про використання для отримання такої інформації, як розмір додатків і час останнього використання. Бажаєте надати цей дозвіл у Налаштуваннях зараз?</string>
+    <string name="unknown">Невідомо</string>
+    <string name="loading_failed">⚠ Завантаження не вдалося</string>
 </resources>

@@ -63,6 +63,7 @@ class PermissionUtilsTest {
                         name = "Settings"
                     }
             }
+        @Suppress("DEPRECATION")
         shadowPackageManager.addResolveInfoForIntent(intentToResolve, resolveInfo)
 
         PermissionUtils.requestUsageStatsPermission(activity)
@@ -90,6 +91,7 @@ class PermissionUtilsTest {
                         name = "Settings"
                     }
             }
+        @Suppress("DEPRECATION")
         shadowPackageManager.addResolveInfoForIntent(fallbackIntent, resolveInfo)
 
         PermissionUtils.requestUsageStatsPermission(activity)
@@ -101,15 +103,65 @@ class PermissionUtilsTest {
     }
 
     @Test
-    fun `requestUsageStatsPermission shows toast when no activity resolves`() {
-        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
-        // No resolve info added
+    fun `showUsageStatsPermissionDialog shows dialog and handles confirm`() {
+        var confirmed = false
+        val activity = Robolectric.buildActivity(androidx.appcompat.app.AppCompatActivity::class.java).setup().get()
 
-        PermissionUtils.requestUsageStatsPermission(activity)
+        PermissionUtils.showUsageStatsPermissionDialog(
+            activity,
+            onConfirm = { confirmed = true },
+            onCancel = {},
+        )
+        Shadows.shadowOf(activity.mainLooper).idle()
 
-        val toastText =
-            org.robolectric.shadows.ShadowToast
-                .getTextOfLatestToast()
-        assertTrue(toastText.toString().contains("Please enable Usage Access permission manually in Settings"))
+        val dialog =
+            org.robolectric.shadows.ShadowDialog
+                .getLatestDialog() as androidx.appcompat.app.AlertDialog
+        assertNotNull(dialog)
+        assertTrue(dialog.isShowing)
+
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+        assertTrue(confirmed)
+    }
+
+    @Test
+    fun `showUsageStatsPermissionDialog calls onCancel when negative button clicked`() {
+        var cancelled = false
+        val activity = Robolectric.buildActivity(androidx.appcompat.app.AppCompatActivity::class.java).setup().get()
+
+        PermissionUtils.showUsageStatsPermissionDialog(
+            activity,
+            onConfirm = {},
+            onCancel = { cancelled = true },
+        )
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        val dialog =
+            org.robolectric.shadows.ShadowDialog
+                .getLatestDialog() as androidx.appcompat.app.AlertDialog
+        dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).performClick()
+        Shadows.shadowOf(activity.mainLooper).idle()
+        assertTrue(cancelled)
+    }
+
+    @Test
+    fun `showUsageStatsPermissionDialog calls onCancel when dialog is cancelled`() {
+        var cancelled = false
+        val activity = Robolectric.buildActivity(androidx.appcompat.app.AppCompatActivity::class.java).setup().get()
+
+        PermissionUtils.showUsageStatsPermissionDialog(
+            activity,
+            onConfirm = {},
+            onCancel = { cancelled = true },
+        )
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        val dialog =
+            org.robolectric.shadows.ShadowDialog
+                .getLatestDialog() as androidx.appcompat.app.AlertDialog
+        dialog.cancel()
+        Shadows.shadowOf(activity.mainLooper).idle()
+        assertTrue(cancelled)
     }
 }

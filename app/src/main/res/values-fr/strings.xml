@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Les 3 derniers mois</string>
     <string name="date_bucket_last_six_months">Les 6 derniers mois</string>
     <string name="date_bucket_older">Plus anciens</string>
+    <string name="usage_stats_permission_title">Autorisation d\'accès à l\'utilisation requise</string>
+    <string name="usage_stats_permission_description">Cette application a besoin de l\'autorisation d\'accès à l\'utilisation pour récupérer des informations telles que la taille des applications et les heures de dernière utilisation. Souhaitez-vous accorder cette autorisation dans les Paramètres maintenant ?</string>
+    <string name="unknown">Inconnu</string>
+    <string name="loading_failed">⚠ Échec du chargement</string>
 </resources>

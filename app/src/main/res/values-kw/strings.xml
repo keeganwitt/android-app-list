@@ -50,4 +50,8 @@
     <string name="date_bucket_last_three_months">3 mis diwettha</string>
     <string name="date_bucket_last_six_months">6 mis diwettha</string>
     <string name="date_bucket_older">Kottha</string>
+    <string name="usage_stats_permission_title">Res yw Kummyas Kerth Devnydh</string>
+    <string name="usage_stats_permission_description">An app ma a\'s teves edhom a gummyas Kerth Devnydh rag hwilas derivadow kepar ha mynsow app ha termynyow devnydh diwettha. A vynnowgh hwi ri an kummyas ma y\'n Settinyow lemmyn?</string>
+    <string name="unknown">Ansellys</string>
+    <string name="loading_failed">⚠ Fyllel dhe luske</string>
 </resources>

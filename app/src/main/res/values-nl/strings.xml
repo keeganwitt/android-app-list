@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Laatste 3 maanden</string>
     <string name="date_bucket_last_six_months">Laatste 6 maanden</string>
     <string name="date_bucket_older">Ouder</string>
+    <string name="usage_stats_permission_title">Gebruikstoegangsmachtiging vereist</string>
+    <string name="usage_stats_permission_description">Deze app heeft de machtiging Gebruikstoegang nodig om informatie op te halen zoals app-groottes en tijden van het laatste gebruik. Wilt u deze machtiging nu verlenen in de Instellingen?</string>
+    <string name="unknown">Onbekend</string>
+    <string name="loading_failed">⚠ Laden mislukt</string>
 </resources>

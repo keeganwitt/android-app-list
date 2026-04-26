@@ -24,6 +24,11 @@ interface PackageService {
     fun getInstallerPackageName(applicationInfo: ApplicationInfo): String?
 
     fun getApplicationIcon(packageName: String): Drawable?
+
+    fun getApplicationInfo(
+        packageName: String,
+        flags: Long,
+    ): ApplicationInfo?
 }
 
 class AndroidPackageService(
@@ -110,6 +115,21 @@ class AndroidPackageService(
             null
         }
 
+    override fun getApplicationInfo(
+        packageName: String,
+        flags: Long,
+    ): ApplicationInfo? =
+        try {
+            if (Build.VERSION.SDK_INT >= 33) {
+                Api33Impl.getApplicationInfo(pm, packageName, flags)
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getApplicationInfo(packageName, flags.toInt())
+            }
+        } catch (_: PackageManager.NameNotFoundException) {
+            null
+        }
+
     @RequiresApi(33)
     private object Api33Impl {
         fun getInstalledApplications(
@@ -128,6 +148,12 @@ class AndroidPackageService(
             intent: Intent,
             flags: Long,
         ): List<android.content.pm.ResolveInfo> = pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(flags))
+
+        fun getApplicationInfo(
+            pm: PackageManager,
+            packageName: String,
+            flags: Long,
+        ): ApplicationInfo = pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(flags))
     }
 
     @RequiresApi(35)

@@ -49,4 +49,8 @@
     <string name="date_bucket_last_three_months">Ostatnie 3 miesiące</string>
     <string name="date_bucket_last_six_months">Ostatnie 6 miesięcy</string>
     <string name="date_bucket_older">Starsze</string>
+    <string name="usage_stats_permission_title">Wymagane uprawnienie do dostępu do danych o użyciu</string>
+    <string name="usage_stats_permission_description">Ta aplikacja wymaga uprawnienia do dostępu do danych o użyciu, aby pobierać informacje takie jak rozmiary aplikacji i czas ostatniego użycia. Czy chcesz teraz nadać to uprawnienie w Ustawieniach?</string>
+    <string name="unknown">Nieznany</string>
+    <string name="loading_failed">⚠ Błąd ładowania</string>
 </resources>

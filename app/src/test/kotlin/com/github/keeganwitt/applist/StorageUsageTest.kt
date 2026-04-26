@@ -1,24 +1,30 @@
 package com.github.keeganwitt.applist
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class StorageUsageTest {
     @Test
-    fun `given new instance, when created with defaults, then all values are zero`() {
-        val storageUsage = StorageUsage()
-
-        assertEquals(0L, storageUsage.apkBytes)
-        assertEquals(0L, storageUsage.appBytes)
-        assertEquals(0L, storageUsage.cacheBytes)
-        assertEquals(0L, storageUsage.dataBytes)
-        assertEquals(0L, storageUsage.externalCacheBytes)
-        assertEquals(0L, storageUsage.totalBytes)
+    fun `given new instance, when created with defaults, then all values are null`() {
+        val usage = StorageUsage()
+        assertNull(usage.apkBytes)
+        assertNull(usage.appBytes)
+        assertNull(usage.cacheBytes)
+        assertNull(usage.dataBytes)
+        assertNull(usage.externalCacheBytes)
+        assertNull(usage.totalBytes)
     }
 
     @Test
-    fun `given values, when created, then properties match values`() {
-        val storageUsage =
+    fun `given instance with some nulls, when totalBytes called, then returns sum of non-nulls`() {
+        val usage = StorageUsage(appBytes = 100L, cacheBytes = null, dataBytes = 200L)
+        assertEquals(300L, usage.totalBytes)
+    }
+
+    @Test
+    fun `given instance with all values, when totalBytes called, then returns sum`() {
+        val usage =
             StorageUsage(
                 apkBytes = 100L,
                 appBytes = 200L,
@@ -26,35 +32,26 @@ class StorageUsageTest {
                 dataBytes = 400L,
                 externalCacheBytes = 500L,
             )
-
-        assertEquals(100L, storageUsage.apkBytes)
-        assertEquals(200L, storageUsage.appBytes)
-        assertEquals(300L, storageUsage.cacheBytes)
-        assertEquals(400L, storageUsage.dataBytes)
-        assertEquals(500L, storageUsage.externalCacheBytes)
+        assertEquals(1400L, usage.totalBytes)
     }
 
     @Test
-    fun `given values, when totalBytes accessed, then returns correct sum`() {
-        val storageUsage =
+    fun `given instance with zero values, when totalBytes called, then returns zero`() {
+        val usage =
             StorageUsage(
-                apkBytes = 100L, // Should not be included in total
-                appBytes = 1000L,
-                cacheBytes = 500L,
-                dataBytes = 2000L,
-                externalCacheBytes = 300L,
+                appBytes = 0L,
+                cacheBytes = 0L,
+                dataBytes = 0L,
+                externalCacheBytes = 0L,
             )
-
-        assertEquals(3800L, storageUsage.totalBytes)
+        assertEquals(0L, usage.totalBytes)
     }
 
     @Test
     fun `given instance, when copy called with new value, then new instance has updated value`() {
-        val storageUsage = StorageUsage(appBytes = 1000L)
-        val newStorageUsage = storageUsage.copy(appBytes = 2000L)
-
-        assertEquals(1000L, storageUsage.appBytes)
-        assertEquals(2000L, newStorageUsage.appBytes)
-        assertEquals(0L, newStorageUsage.cacheBytes) // Check other fields remain default
+        val usage = StorageUsage(apkBytes = 100L)
+        val newUsage = usage.copy(apkBytes = 200L)
+        assertEquals(200L, newUsage.apkBytes)
+        assertNull(newUsage.appBytes)
     }
 }

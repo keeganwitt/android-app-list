@@ -217,17 +217,17 @@ class AppInfoFieldTest {
                 enabled = false,
             )
 
-        assertEquals(false, AppInfoField.ARCHIVED.getValue(app))
-        assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.getValue(app))
+        assertEquals(null, AppInfoField.ARCHIVED.getValue(app))
+        assertEquals(null, AppInfoField.EXISTS_IN_APP_STORE.getValue(app))
 
-        assertEquals(0, AppInfoField.MIN_SDK.getValue(app))
-        assertEquals(0, AppInfoField.TARGET_SDK.getValue(app))
+        assertEquals(null, AppInfoField.MIN_SDK.getValue(app))
+        assertEquals(null, AppInfoField.TARGET_SDK.getValue(app))
 
-        assertEquals("", AppInfoField.PACKAGE_MANAGER.getValue(app))
-        assertEquals("", AppInfoField.VERSION.getValue(app))
+        assertEquals(null, AppInfoField.PACKAGE_MANAGER.getValue(app))
+        assertEquals(null, AppInfoField.VERSION.getValue(app))
 
-        assertEquals(0, AppInfoField.GRANTED_PERMISSIONS.getValue(app))
-        assertEquals(0, AppInfoField.REQUESTED_PERMISSIONS.getValue(app))
+        assertEquals(null, AppInfoField.GRANTED_PERMISSIONS.getValue(app))
+        assertEquals(null, AppInfoField.REQUESTED_PERMISSIONS.getValue(app))
     }
 
     @Test
@@ -303,26 +303,26 @@ class AppInfoFieldTest {
                 enabled = false,
             )
 
-        assertEquals("0", AppInfoField.APK_SIZE.getFormattedValue(app))
-        assertEquals("0", AppInfoField.APP_SIZE.getFormattedValue(app))
-        assertEquals("0", AppInfoField.CACHE_SIZE.getFormattedValue(app))
-        assertEquals("0", AppInfoField.DATA_SIZE.getFormattedValue(app))
-        assertEquals("0", AppInfoField.EXTERNAL_CACHE_SIZE.getFormattedValue(app))
-        assertEquals("0", AppInfoField.TOTAL_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.APK_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.APP_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.CACHE_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.DATA_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.EXTERNAL_CACHE_SIZE.getFormattedValue(app))
+        assertEquals("", AppInfoField.TOTAL_SIZE.getFormattedValue(app))
 
-        assertEquals("false", AppInfoField.ARCHIVED.getFormattedValue(app)) // false.toString()
-        assertEquals("false", AppInfoField.EXISTS_IN_APP_STORE.getFormattedValue(app)) // false.toString()
+        assertEquals("", AppInfoField.ARCHIVED.getFormattedValue(app))
+        assertEquals("", AppInfoField.EXISTS_IN_APP_STORE.getFormattedValue(app))
 
-        assertEquals("0", AppInfoField.MIN_SDK.getFormattedValue(app))
-        assertEquals("0", AppInfoField.TARGET_SDK.getFormattedValue(app))
+        assertEquals("", AppInfoField.MIN_SDK.getFormattedValue(app))
+        assertEquals("", AppInfoField.TARGET_SDK.getFormattedValue(app))
         assertEquals("", AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
         assertEquals("", AppInfoField.LAST_UPDATED.getFormattedValue(app))
         assertEquals("", AppInfoField.LAST_USED.getFormattedValue(app))
         assertEquals("", AppInfoField.PACKAGE_MANAGER.getFormattedValue(app))
         assertEquals("", AppInfoField.VERSION.getFormattedValue(app))
 
-        assertEquals("0", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
-        assertEquals("0", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
+        assertEquals("", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
+        assertEquals("", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
     }
 
     @Test
@@ -381,23 +381,24 @@ class AppInfoFieldTest {
     fun `given date field, when locale changes, then format is updated`() {
         val originalLocale = Locale.getDefault()
         try {
-            val app = App(
-                packageName = "com.test",
-                name = "Test App",
-                versionName = "1.0",
-                archived = false,
-                minSdk = 24,
-                targetSdk = 33,
-                firstInstalled = 1000L,
-                lastUpdated = 2000L,
-                lastUsed = 3000L,
-                sizes = StorageUsage(),
-                installerName = "Installer",
-                existsInStore = true,
-                grantedPermissionsCount = 0,
-                requestedPermissionsCount = 0,
-                enabled = true
-            )
+            val app =
+                App(
+                    packageName = "com.test",
+                    name = "Test App",
+                    versionName = "1.0",
+                    archived = false,
+                    minSdk = 24,
+                    targetSdk = 33,
+                    firstInstalled = 1000L,
+                    lastUpdated = 2000L,
+                    lastUsed = 3000L,
+                    sizes = StorageUsage(),
+                    installerName = "Installer",
+                    existsInStore = true,
+                    grantedPermissionsCount = 0,
+                    requestedPermissionsCount = 0,
+                    enabled = true,
+                )
 
             Locale.setDefault(Locale.US)
             val usFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.US)
@@ -412,25 +413,99 @@ class AppInfoFieldTest {
     }
 
     @Test
-    fun `given date field, when value is null, then empty string is returned`() {
-        val app = App(
-            packageName = "com.test",
-            name = "Test App",
-            versionName = null,
-            archived = null,
-            minSdk = null,
-            targetSdk = null,
-            firstInstalled = null,
-            lastUpdated = null,
-            lastUsed = null,
-            sizes = StorageUsage(),
-            installerName = null,
-            existsInStore = null,
-            grantedPermissionsCount = null,
-            requestedPermissionsCount = null,
-            enabled = true
-        )
+    fun `given size field, when value is null, then unknownValue is returned`() {
+        val app =
+            App(
+                packageName = "com.test",
+                name = "Test App",
+                versionName = null,
+                archived = null,
+                minSdk = null,
+                targetSdk = null,
+                firstInstalled = null,
+                lastUpdated = null,
+                lastUsed = null,
+                sizes = StorageUsage(apkBytes = 0), // totalBytes will be 0
+                installerName = null,
+                existsInStore = null,
+                grantedPermissionsCount = null,
+                requestedPermissionsCount = null,
+                enabled = true,
+            )
 
-        assertEquals("", AppInfoField.FIRST_INSTALLED.getFormattedValue(app))
+        assertEquals("Unknown", AppInfoField.APK_SIZE.getFormattedValue(app, "Unknown"))
+        assertEquals("Unknown", AppInfoField.TOTAL_SIZE.getFormattedValue(app, "Unknown"))
+    }
+
+    @Test
+    fun `given size field, when value is not 0, then string value is returned`() {
+        val app =
+            App(
+                packageName = "com.test",
+                name = "Test App",
+                versionName = null,
+                archived = null,
+                minSdk = null,
+                targetSdk = null,
+                firstInstalled = null,
+                lastUpdated = null,
+                lastUsed = null,
+                sizes = StorageUsage(apkBytes = 1024),
+                installerName = null,
+                existsInStore = null,
+                grantedPermissionsCount = null,
+                requestedPermissionsCount = null,
+                enabled = true,
+            )
+
+        assertEquals("1024", AppInfoField.APK_SIZE.getFormattedValue(app, "Unknown"))
+    }
+
+    @Test
+    fun `given date field, when value is 0L, then unknownValue is returned`() {
+        val app =
+            App(
+                packageName = "com.test",
+                name = "Test App",
+                versionName = null,
+                archived = null,
+                minSdk = null,
+                targetSdk = null,
+                firstInstalled = 0L,
+                lastUpdated = null,
+                lastUsed = null,
+                sizes = StorageUsage(),
+                installerName = null,
+                existsInStore = null,
+                grantedPermissionsCount = null,
+                requestedPermissionsCount = null,
+                enabled = true,
+            )
+
+        assertEquals("Unknown", AppInfoField.FIRST_INSTALLED.getFormattedValue(app, "Unknown"))
+    }
+
+    @Test
+    fun `given non-size non-date field, when value is null, then unknownValue is returned`() {
+        val app =
+            App(
+                packageName = "com.test",
+                name = "Test App",
+                versionName = null,
+                archived = null,
+                minSdk = null,
+                targetSdk = null,
+                firstInstalled = null,
+                lastUpdated = null,
+                lastUsed = null,
+                sizes = StorageUsage(),
+                installerName = null,
+                existsInStore = null,
+                grantedPermissionsCount = null,
+                requestedPermissionsCount = null,
+                enabled = true,
+            )
+
+        assertEquals("Unknown", AppInfoField.VERSION.getFormattedValue(app, "Unknown"))
     }
 }

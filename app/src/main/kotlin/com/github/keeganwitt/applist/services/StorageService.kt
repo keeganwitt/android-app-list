@@ -20,11 +20,15 @@ class AndroidStorageService(
     private val context: Context,
     private val storageManager: StorageManager? = null,
     private val storageStatsManager: StorageStatsManager? = null,
+    private val crashReporter: com.github.keeganwitt.applist.CrashReporter? = null,
 ) : StorageService {
     override fun getStorageUsage(applicationInfo: ApplicationInfo): StorageUsage {
-        var apkBytes: Long = 0
+        var apkBytes: Long? = null
         try {
-            apkBytes = File(applicationInfo.publicSourceDir).length()
+            val file = File(applicationInfo.publicSourceDir)
+            if (file.exists()) {
+                apkBytes = file.length()
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Unable to get APK size for ${applicationInfo.packageName}", e)
         }
@@ -33,10 +37,10 @@ class AndroidStorageService(
             return StorageUsage(apkBytes = apkBytes)
         }
 
-        var appBytes: Long = 0
-        var cacheBytes: Long = 0
-        var dataBytes: Long = 0
-        var externalCacheBytes: Long = 0
+        var appBytes: Long? = null
+        var cacheBytes: Long? = null
+        var dataBytes: Long? = null
+        var externalCacheBytes: Long? = null
 
         val actualStorageManager = storageManager ?: (context.getSystemService(Context.STORAGE_SERVICE) as StorageManager)
         val actualStorageStatsManager =
@@ -57,21 +61,23 @@ class AndroidStorageService(
                             applicationInfo.packageName,
                             Process.myUserHandle(),
                         )
-                    appBytes += storageStats.appBytes
-                    cacheBytes += storageStats.cacheBytes
-                    dataBytes += storageStats.dataBytes
+                    appBytes = (appBytes ?: 0L) + storageStats.appBytes
+                    cacheBytes = (cacheBytes ?: 0L) + storageStats.cacheBytes
+                    dataBytes = (dataBytes ?: 0L) + storageStats.dataBytes
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        externalCacheBytes += storageStats.externalCacheBytes
+                        externalCacheBytes = (externalCacheBytes ?: 0L) + storageStats.externalCacheBytes
                     }
                 } catch (e: SecurityException) {
-                    val message = "Missing storage permission"
+                    val message = "Missing storage permission for ${applicationInfo.packageName}"
                     Log.w(TAG, message, e)
                 } catch (e: Exception) {
-                    val message = "Unable to process storage usage"
-                    Log.w(TAG, message + " for ${applicationInfo.packageName} on $uuid", e)
+                    val message = "Unable to process storage usage for ${applicationInfo.packageName} on $uuid"
+                    Log.w(TAG, message, e)
+                    crashReporter?.recordException(e, message)
                 }
             }
         }
+
         return StorageUsage(
             apkBytes = apkBytes,
             appBytes = appBytes,
