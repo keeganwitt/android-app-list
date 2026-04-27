@@ -2,7 +2,9 @@
 <resources>
     <string name="app_icon_description">ऐप आइकन</string>
     <string name="search">खोजें</string>
-    <string name="systemAppToggle">सिस्टम ऐप्स</string>
+    <string name="systemAppToggle">सिस्टम ऐप</string>
+    <string name="appInfoField_appName">ऐप का नाम</string>
+    <string name="appInfoField_packageName">पैकेज का नाम</string>
     <string name="appInfoField_apkSize">APK फ़ाइल आकार</string>
     <string name="appInfoField_appSize">ऐप का आकार</string>
     <string name="appInfoField_cacheSize">कैश का आकार</string>

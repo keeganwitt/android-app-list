@@ -653,4 +653,95 @@ class AppListViewModelTest {
             // Long.getFormattedValue for size field returns "Unknown" if it's 0 or null (usually)
             assertEquals("Unknown", state.items[0].infoText)
         }
+
+    @Test
+    fun `given app name field, when mapToItem called, then info text is empty`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App")
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.APP_NAME)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given package name field, when mapToItem called, then info text is empty`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App")
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.PACKAGE_NAME)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given field in failedFields, when mapToItem called, then loadingFailedValue is used`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(failedFields = setOf(AppInfoField.VERSION))
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("⚠ Failed to load", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given query set before load finishes, when field changes, then cache is rebuilt with new field`() =
+        runTest {
+            val app = createTestApp("com.test", "App One", versionName = "1.2.3")
+            val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flow
+
+            viewModel.init(AppInfoField.VERSION)
+            runCurrent()
+
+            flow.emit(listOf(app))
+            advanceUntilIdle()
+
+            assertEquals("1.2.3", viewModel.uiState.value.items[0].infoText)
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+
+            viewModel.setQuery("App")
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("true", state.items[0].infoText)
+        }
+
+    @Test
+    fun `given no apps, when loadApps completes, then isFullyLoaded is true`() =
+        runTest {
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flowOf(emptyList())
+
+            viewModel.init(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(true, state.isFullyLoaded)
+        }
+
+    @Test
+    fun `given multiple loads, when new load started, then previous load job is cancelled`() =
+        runTest {
+            val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
+            coEvery { repository.loadApps(any(), any(), any(), any()) } returns flow
+
+            viewModel.init(AppInfoField.VERSION)
+            runCurrent()
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+
+            coVerify(exactly = 2) { repository.loadApps(any(), any(), any(), any()) }
+        }
 }

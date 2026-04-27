@@ -129,7 +129,9 @@ class AppListViewModel(
     ): AppItemUiModel {
         val rawValue = field.getValue(app)
         val info =
-            if (field in app.failedFields) {
+            if (field == AppInfoField.APP_NAME || field == AppInfoField.PACKAGE_NAME) {
+                ""
+            } else if (field in app.failedFields) {
                 loadingFailedValue
             } else if (field.isSize && rawValue is Long &&
                 (rawValue > 0 || (field != AppInfoField.APK_SIZE && field != AppInfoField.TOTAL_SIZE))

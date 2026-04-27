@@ -3,6 +3,8 @@
     <string name="app_icon_description">أيقونة التطبيق</string>
     <string name="search">بحث</string>
     <string name="systemAppToggle">تطبيقات النظام</string>
+    <string name="appInfoField_appName">اسم التطبيق</string>
+    <string name="appInfoField_packageName">اسم الحزمة</string>
     <string name="appInfoField_apkSize">حجم ملف APK</string>
     <string name="appInfoField_appSize">حجم التطبيق</string>
     <string name="appInfoField_archived">مؤرشف</string>

@@ -46,6 +46,7 @@ class AppAdapter(
         binding.appName.text = item.appName
         binding.appInfo.movementMethod = LinkMovementMethod.getInstance()
         binding.appInfo.text = item.infoText
+        binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
     }
 
     interface OnClickListener {
