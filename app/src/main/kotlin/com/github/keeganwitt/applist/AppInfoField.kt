@@ -9,7 +9,14 @@ enum class AppInfoField(
     val requiresUsageStats: Boolean = false,
     val isSize: Boolean = false,
     private val isDate: Boolean = false,
+    val isExportable: Boolean = true,
 ) {
+    APP_NAME(R.string.appInfoField_appName, isExportable = false) {
+        override fun getValue(app: App) = null
+    },
+    PACKAGE_NAME(R.string.appInfoField_packageName, isExportable = false) {
+        override fun getValue(app: App) = app.packageName
+    },
     APK_SIZE(R.string.appInfoField_apkSize, isSize = true) {
         override fun getValue(app: App) = app.sizes.apkBytes
     },

@@ -12,7 +12,7 @@ class AppInfoFieldTest {
     fun `given AppInfoField enum, when entries accessed, then all fields are present`() {
         val entries = AppInfoField.entries
 
-        assertEquals(18, entries.size)
+        assertEquals(20, entries.size)
     }
 
     @Test
@@ -21,6 +21,22 @@ class AppInfoFieldTest {
 
         assertNotNull(field.titleResId)
         assertEquals(R.string.appInfoField_version, field.titleResId)
+    }
+
+    @Test
+    fun `given APP_NAME field, when accessed, then has correct resource id`() {
+        val field = AppInfoField.APP_NAME
+
+        assertNotNull(field.titleResId)
+        assertEquals(R.string.appInfoField_appName, field.titleResId)
+    }
+
+    @Test
+    fun `given PACKAGE_NAME field, when accessed, then has correct resource id`() {
+        val field = AppInfoField.PACKAGE_NAME
+
+        assertNotNull(field.titleResId)
+        assertEquals(R.string.appInfoField_packageName, field.titleResId)
     }
 
     @Test
@@ -191,6 +207,8 @@ class AppInfoFieldTest {
 
         assertEquals("Installer", AppInfoField.PACKAGE_MANAGER.getValue(app))
         assertEquals("1.0", AppInfoField.VERSION.getValue(app))
+        assertEquals(null, AppInfoField.APP_NAME.getValue(app))
+        assertEquals("com.test", AppInfoField.PACKAGE_NAME.getValue(app))
 
         assertEquals(5, AppInfoField.GRANTED_PERMISSIONS.getValue(app))
         assertEquals(10, AppInfoField.REQUESTED_PERMISSIONS.getValue(app))
@@ -225,6 +243,8 @@ class AppInfoFieldTest {
 
         assertEquals(null, AppInfoField.PACKAGE_MANAGER.getValue(app))
         assertEquals(null, AppInfoField.VERSION.getValue(app))
+        assertEquals(null, AppInfoField.APP_NAME.getValue(app))
+        assertEquals("com.test", AppInfoField.PACKAGE_NAME.getValue(app))
 
         assertEquals(null, AppInfoField.GRANTED_PERMISSIONS.getValue(app))
         assertEquals(null, AppInfoField.REQUESTED_PERMISSIONS.getValue(app))
@@ -273,6 +293,8 @@ class AppInfoFieldTest {
         assertEquals("33", AppInfoField.TARGET_SDK.getFormattedValue(app))
         assertEquals("Installer", AppInfoField.PACKAGE_MANAGER.getFormattedValue(app))
         assertEquals("1.0", AppInfoField.VERSION.getFormattedValue(app))
+        assertEquals("", AppInfoField.APP_NAME.getFormattedValue(app))
+        assertEquals("com.test", AppInfoField.PACKAGE_NAME.getFormattedValue(app))
         assertEquals("5", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
         assertEquals("10", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
 
@@ -320,6 +342,8 @@ class AppInfoFieldTest {
         assertEquals("", AppInfoField.LAST_USED.getFormattedValue(app))
         assertEquals("", AppInfoField.PACKAGE_MANAGER.getFormattedValue(app))
         assertEquals("", AppInfoField.VERSION.getFormattedValue(app))
+        assertEquals("", AppInfoField.APP_NAME.getFormattedValue(app))
+        assertEquals("com.test", AppInfoField.PACKAGE_NAME.getFormattedValue(app))
 
         assertEquals("", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
         assertEquals("", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
@@ -338,6 +362,8 @@ class AppInfoFieldTest {
     @Test
     fun `given field not requiring usage stats, when accessed, then requiresUsageStats is false`() {
         assertEquals(false, AppInfoField.APK_SIZE.requiresUsageStats)
+        assertEquals(false, AppInfoField.APP_NAME.requiresUsageStats)
+        assertEquals(false, AppInfoField.PACKAGE_NAME.requiresUsageStats)
         assertEquals(false, AppInfoField.ARCHIVED.requiresUsageStats)
         assertEquals(false, AppInfoField.ENABLED.requiresUsageStats)
         assertEquals(false, AppInfoField.EXISTS_IN_APP_STORE.requiresUsageStats)
@@ -364,6 +390,8 @@ class AppInfoFieldTest {
     @Test
     fun `given non-size fields, when accessed, then isSize is false`() {
         assertEquals(false, AppInfoField.VERSION.isSize)
+        assertEquals(false, AppInfoField.APP_NAME.isSize)
+        assertEquals(false, AppInfoField.PACKAGE_NAME.isSize)
         assertEquals(false, AppInfoField.TARGET_SDK.isSize)
         assertEquals(false, AppInfoField.MIN_SDK.isSize)
         assertEquals(false, AppInfoField.ENABLED.isSize)

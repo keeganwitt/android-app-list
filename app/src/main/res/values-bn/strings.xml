@@ -3,6 +3,8 @@
     <string name="app_icon_description">অ্যাপ আইকন</string>
     <string name="search">অনুসন্ধান</string>
     <string name="systemAppToggle">সিস্টেম অ্যাপ</string>
+    <string name="appInfoField_appName">অ্যাপের নাম</string>
+    <string name="appInfoField_packageName">প্যাকেজের নাম</string>
     <string name="appInfoField_apkSize">APK ফাইলের আকার</string>
     <string name="appInfoField_appSize">অ্যাপের আকার</string>
     <string name="appInfoField_archived">আর্কাইভ করা হয়েছে</string>

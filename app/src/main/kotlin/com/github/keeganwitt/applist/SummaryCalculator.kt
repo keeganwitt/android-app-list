@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.content.Context
 import com.github.keeganwitt.applist.AppInfoField.APK_SIZE
+import com.github.keeganwitt.applist.AppInfoField.APP_NAME
 import com.github.keeganwitt.applist.AppInfoField.APP_SIZE
 import com.github.keeganwitt.applist.AppInfoField.ARCHIVED
 import com.github.keeganwitt.applist.AppInfoField.CACHE_SIZE
@@ -15,6 +16,7 @@ import com.github.keeganwitt.applist.AppInfoField.LAST_UPDATED
 import com.github.keeganwitt.applist.AppInfoField.LAST_USED
 import com.github.keeganwitt.applist.AppInfoField.MIN_SDK
 import com.github.keeganwitt.applist.AppInfoField.PACKAGE_MANAGER
+import com.github.keeganwitt.applist.AppInfoField.PACKAGE_NAME
 import com.github.keeganwitt.applist.AppInfoField.REQUESTED_PERMISSIONS
 import com.github.keeganwitt.applist.AppInfoField.TARGET_SDK
 import com.github.keeganwitt.applist.AppInfoField.TOTAL_SIZE
@@ -127,7 +129,7 @@ class SummaryCalculator(
                 calculatePackageManagerSummary(apps)
             }
 
-            VERSION -> {
+            APP_NAME, PACKAGE_NAME, VERSION -> {
                 null
             }
         }
