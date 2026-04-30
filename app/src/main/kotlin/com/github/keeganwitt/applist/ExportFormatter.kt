@@ -26,7 +26,7 @@ class ExportFormatter {
         includeUsageStats: Boolean,
         loadingFailedValue: String = "",
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = AppInfoField.entries.filter { (includeUsageStats || !it.requiresUsageStats) && it.isExportable }
         val serializer = Xml.newSerializer()
         serializer.setOutput(writer)
         serializer.startDocument("UTF-8", null)
@@ -64,7 +64,7 @@ class ExportFormatter {
         includeUsageStats: Boolean,
         loadingFailedValue: String = "",
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = AppInfoField.entries.filter { (includeUsageStats || !it.requiresUsageStats) && it.isExportable }
         writer
             .append("<!DOCTYPE html>\n")
             .append("<html>\n")
@@ -113,7 +113,7 @@ class ExportFormatter {
         includeUsageStats: Boolean,
         loadingFailedValue: String = "",
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = AppInfoField.entries.filter { (includeUsageStats || !it.requiresUsageStats) && it.isExportable }
         writer.append("App Name,Package Name")
         fields.forEach { field ->
             writer.append(",").append(field.name)
@@ -140,7 +140,7 @@ class ExportFormatter {
         includeUsageStats: Boolean,
         loadingFailedValue: String = "",
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
+        val fields = AppInfoField.entries.filter { (includeUsageStats || !it.requiresUsageStats) && it.isExportable }
         writer.append("App Name\tPackage Name")
         fields.forEach { field ->
             writer.append("\t").append(field.name)

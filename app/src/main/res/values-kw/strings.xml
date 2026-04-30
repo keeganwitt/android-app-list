@@ -2,7 +2,9 @@
 <resources>
     <string name="app_icon_description">Arvow an App</string>
     <string name="search">Hwilas</string>
-    <string name="systemAppToggle">Appys an Kevreyth</string>
+    <string name="systemAppToggle">System Apps</string>
+    <string name="appInfoField_appName">App Name</string>
+    <string name="appInfoField_packageName">Package Name</string>
     <string name="appInfoField_apkSize">Braster APK</string>
     <string name="appInfoField_appSize">Braster an App</string>
     <string name="appInfoField_archived">Archivys</string>

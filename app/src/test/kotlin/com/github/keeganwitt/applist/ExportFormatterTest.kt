@@ -241,6 +241,104 @@ class ExportFormatterTest {
         assertTrue(writer.toString().contains("<!DOCTYPE html>"))
     }
 
+    @Test
+    fun `given empty list, when writeHtml called, then return html with no apps`() {
+        val sw = StringWriter()
+        formatter.writeHtml(sw, emptyList(), includeUsageStats = false)
+        val result = sw.toString()
+        assertTrue(result.contains("<div class=\"app-grid\">\n</div>"))
+    }
+
+    @Test
+    fun `given empty list, when writeCsv called, then return header only`() {
+        val sw = StringWriter()
+        formatter.writeCsv(sw, emptyList(), includeUsageStats = false)
+        val result = sw.toString()
+        assertTrue(result.startsWith("App Name,Package Name"))
+        assertEquals(1, result.trim().split("\n").size)
+    }
+
+    @Test
+    fun `given empty list, when writeTsv called, then return header only`() {
+        val sw = StringWriter()
+        formatter.writeTsv(sw, emptyList(), includeUsageStats = false)
+        val result = sw.toString()
+        assertTrue(result.startsWith("App Name\tPackage Name"))
+        assertEquals(1, result.trim().split("\n").size)
+    }
+
+    @Test
+    fun `given app with failed fields, when writeXml called, then return loadingFailedValue`() {
+        // Given
+        val app = createTestApp("com.pkg", "App").copy(failedFields = setOf(AppInfoField.APK_SIZE))
+        val loadingFailedValue = "FAIL"
+
+        // When
+        val sw = StringWriter()
+        formatter.writeXml(sw, listOf(app), includeUsageStats = false, loadingFailedValue = loadingFailedValue)
+        val result = sw.toString()
+
+        // Then
+        assertTrue(result.contains("<APK_SIZE>$loadingFailedValue</APK_SIZE>"))
+    }
+
+    @Test
+    fun `given includeUsageStats true, when writeXml called, then include usage fields`() {
+        val apps = listOf(createTestApp("com.pkg", "App"))
+        val sw = StringWriter()
+        formatter.writeXml(sw, apps, includeUsageStats = true)
+        val result = sw.toString()
+        assertTrue(result.contains("<APP_SIZE>"))
+    }
+
+    @Test
+    fun `given includeUsageStats true, when writeHtml called, then include usage fields`() {
+        val apps = listOf(createTestApp("com.pkg", "App"))
+        val sw = StringWriter()
+        formatter.writeHtml(sw, apps, includeUsageStats = true)
+        val result = sw.toString()
+        assertTrue(result.contains("<b>APP_SIZE:</b>"))
+    }
+
+    @Test
+    fun `given includeUsageStats true, when writeTsv called, then include usage fields`() {
+        val apps = listOf(createTestApp("com.pkg", "App"))
+        val sw = StringWriter()
+        formatter.writeTsv(sw, apps, includeUsageStats = true)
+        val result = sw.toString()
+        assertTrue(result.contains("\tAPP_SIZE"))
+    }
+
+    @Test
+    fun `given app with failed fields, when writeHtml called, then return loadingFailedValue`() {
+        val app = createTestApp("com.pkg", "App").copy(failedFields = setOf(AppInfoField.APK_SIZE))
+        val loadingFailedValue = "FAIL"
+        val sw = StringWriter()
+        formatter.writeHtml(sw, listOf(app), includeUsageStats = false, loadingFailedValue = loadingFailedValue)
+        val result = sw.toString()
+        assertTrue(result.contains("<b>APK_SIZE:</b> FAIL"))
+    }
+
+    @Test
+    fun `given app with failed fields, when writeCsv called, then return loadingFailedValue`() {
+        val app = createTestApp("com.pkg", "App").copy(failedFields = setOf(AppInfoField.APK_SIZE))
+        val loadingFailedValue = "FAIL"
+        val sw = StringWriter()
+        formatter.writeCsv(sw, listOf(app), includeUsageStats = false, loadingFailedValue = loadingFailedValue)
+        val result = sw.toString()
+        assertTrue(result.contains(",\"FAIL\""))
+    }
+
+    @Test
+    fun `given app with failed fields, when writeTsv called, then return loadingFailedValue`() {
+        val app = createTestApp("com.pkg", "App").copy(failedFields = setOf(AppInfoField.APK_SIZE))
+        val loadingFailedValue = "FAIL"
+        val sw = StringWriter()
+        formatter.writeTsv(sw, listOf(app), includeUsageStats = false, loadingFailedValue = loadingFailedValue)
+        val result = sw.toString()
+        assertTrue(result.contains("\tFAIL"))
+    }
+
     private fun createTestApp(
         packageName: String,
         name: String,
