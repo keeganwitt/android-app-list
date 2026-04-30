@@ -3,6 +3,8 @@
     <string name="app_icon_description">Icon ng app</string>
     <string name="search">Maghanap</string>
     <string name="systemAppToggle">Mga app ng sistema</string>
+    <string name="appInfoField_appName">Pangalan ng App</string>
+    <string name="appInfoField_packageName">Pangalan ng Package</string>
     <string name="appInfoField_apkSize">Laki ng APK</string>
     <string name="appInfoField_appSize">Laki ng app</string>
     <string name="appInfoField_archived">Naka-archive</string>

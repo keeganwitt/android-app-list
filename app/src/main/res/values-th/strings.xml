@@ -2,7 +2,9 @@
 <resources>
     <string name="app_icon_description">ไอคอนแอป</string>
     <string name="search">ค้นหา</string>
-    <string name="systemAppToggle">แอปของระบบ</string>
+    <string name="systemAppToggle">แอปพลิเคชันระบบ</string>
+    <string name="appInfoField_appName">ชื่อแอป</string>
+    <string name="appInfoField_packageName">ชื่อแพ็กเกจ</string>
     <string name="appInfoField_apkSize">ขนาด APK</string>
     <string name="appInfoField_appSize">ขนาดแอป</string>
     <string name="appInfoField_archived">เก็บถาวร</string>

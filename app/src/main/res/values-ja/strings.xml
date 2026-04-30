@@ -3,6 +3,8 @@
     <string name="app_icon_description">アプリアイコン</string>
     <string name="search">検索</string>
     <string name="systemAppToggle">システムアプリ</string>
+    <string name="appInfoField_appName">アプリ名</string>
+    <string name="appInfoField_packageName">パッケージ名</string>
     <string name="appInfoField_apkSize">APK サイズ</string>
     <string name="appInfoField_appSize">アプリのサイズ</string>
     <string name="appInfoField_cacheSize">キャッシュサイズ</string>

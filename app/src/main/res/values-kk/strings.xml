@@ -3,6 +3,8 @@
     <string name="app_icon_description">Қолданба белгішесі</string>
     <string name="search">Іздеу</string>
     <string name="systemAppToggle">Жүйелік қолданбалар</string>
+    <string name="appInfoField_appName">Қолданба атауы</string>
+    <string name="appInfoField_packageName">Пакет атауы</string>
     <string name="appInfoField_apkSize">APK өлшемі</string>
     <string name="appInfoField_appSize">Қолданба өлшемі</string>
     <string name="appInfoField_archived">Архивтелген</string>

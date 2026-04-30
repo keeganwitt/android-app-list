@@ -2,7 +2,9 @@
 <resources>
     <string name="app_icon_description">Значок приложения</string>
     <string name="search">Поиск</string>
-    <string name="systemAppToggle">системные приложения</string>
+    <string name="systemAppToggle">Системные приложения</string>
+    <string name="appInfoField_appName">Название приложения</string>
+    <string name="appInfoField_packageName">Имя пакета</string>
     <string name="appInfoField_apkSize">Размер APK</string>
     <string name="appInfoField_appSize">размер приложения</string>
     <string name="appInfoField_cacheSize">размер кэша</string>

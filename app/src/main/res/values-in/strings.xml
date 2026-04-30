@@ -3,6 +3,8 @@
     <string name="app_icon_description">Ikon aplikasi</string>
     <string name="search">Cari</string>
     <string name="systemAppToggle">Aplikasi sistem</string>
+    <string name="appInfoField_appName">Nama Aplikasi</string>
+    <string name="appInfoField_packageName">Nama Paket</string>
     <string name="appInfoField_apkSize">Ukuran APK</string>
     <string name="appInfoField_appSize">Ukuran aplikasi</string>
     <string name="appInfoField_archived">Diarsipkan</string>
