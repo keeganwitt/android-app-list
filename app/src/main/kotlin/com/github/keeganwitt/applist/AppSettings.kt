@@ -21,6 +21,18 @@ interface AppSettings {
 
     fun setIncludeUsageStatsInExportEnabled(enabled: Boolean)
 
+    fun isShowSystemAppsEnabled(): Boolean
+
+    fun setShowSystemAppsEnabled(enabled: Boolean)
+
+    fun isShowArchivedAppsEnabled(): Boolean
+
+    fun setShowArchivedAppsEnabled(enabled: Boolean)
+
+    fun isDescending(): Boolean
+
+    fun setDescending(descending: Boolean)
+
     enum class ThemeMode {
         LIGHT,
         DARK,
@@ -32,6 +44,9 @@ interface AppSettings {
         const val KEY_LAST_DISPLAYED_APP_INFO_FIELD = "last_displayed_app_info_field"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_INCLUDE_USAGE_STATS_IN_EXPORT = "include_usage_stats_in_export"
+        const val KEY_SHOW_SYSTEM_APPS = "show_system_apps"
+        const val KEY_SHOW_ARCHIVED_APPS = "show_archived_apps"
+        const val KEY_IS_DESCENDING = "is_descending"
         const val DEFAULT_PREF_NAME_SUFFIX = "_preferences"
     }
 }
@@ -90,5 +105,26 @@ class SharedPreferencesAppSettings(
 
     override fun setIncludeUsageStatsInExportEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT, enabled) }
+    }
+
+    override fun isShowSystemAppsEnabled(): Boolean =
+        preferences.getBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, false)
+
+    override fun setShowSystemAppsEnabled(enabled: Boolean) {
+        preferences.edit { putBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, enabled) }
+    }
+
+    override fun isShowArchivedAppsEnabled(): Boolean =
+        preferences.getBoolean(AppSettings.KEY_SHOW_ARCHIVED_APPS, false)
+
+    override fun setShowArchivedAppsEnabled(enabled: Boolean) {
+        preferences.edit { putBoolean(AppSettings.KEY_SHOW_ARCHIVED_APPS, enabled) }
+    }
+
+    override fun isDescending(): Boolean =
+        preferences.getBoolean(AppSettings.KEY_IS_DESCENDING, false)
+
+    override fun setDescending(descending: Boolean) {
+        preferences.edit { putBoolean(AppSettings.KEY_IS_DESCENDING, descending) }
     }
 }

@@ -3,6 +3,7 @@
     <string name="app_icon_description">App-pictogram</string>
     <string name="search">Zoeken</string>
     <string name="systemAppToggle">Systeem-apps</string>
+    <string name="archivedAppToggle">Gearchiveerde apps</string>
     <string name="appInfoField_appName">App-naam</string>
     <string name="appInfoField_packageName">Pakketnaam</string>
     <string name="appInfoField_apkSize">APK-grootte</string>

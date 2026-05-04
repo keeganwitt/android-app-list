@@ -15,6 +15,13 @@
       android:icon="@drawable/system_apps_toggle_selector"
       android:checkable="true"
       app:showAsAction="ifRoom" />
+  <item
+      android:id="@+id/archivedAppToggle"
+      android:title="@string/archivedAppToggle"
+      android:icon="@drawable/archived_apps_toggle_selector"
+      android:checkable="true"
+      app:showAsAction="ifRoom" />
+
   <item android:id="@+id/export"
     android:title="@string/export"
     android:icon="@android:drawable/ic_menu_save"

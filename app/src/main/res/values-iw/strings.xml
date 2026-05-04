@@ -3,6 +3,7 @@
     <string name="app_icon_description">סמל האפליקציה</string>
     <string name="search">חיפוש</string>
     <string name="systemAppToggle">אפליקציות מערכת</string>
+    <string name="archivedAppToggle">אפליקציות בארכיון</string>
     <string name="appInfoField_appName">שם אפליקציה</string>
     <string name="appInfoField_packageName">שם חבילה</string>
     <string name="appInfoField_apkSize">גודל קובץ APK</string>

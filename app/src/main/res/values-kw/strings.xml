@@ -3,6 +3,7 @@
     <string name="app_icon_description">Arvow an App</string>
     <string name="search">Hwilas</string>
     <string name="systemAppToggle">System Apps</string>
+    <string name="archivedAppToggle">Appys archivys</string>
     <string name="appInfoField_appName">App Name</string>
     <string name="appInfoField_packageName">Package Name</string>
     <string name="appInfoField_apkSize">Braster APK</string>

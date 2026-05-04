@@ -3,6 +3,7 @@
     <string name="app_icon_description">آیکون برنامه</string>
     <string name="search">جست‌وجو</string>
     <string name="systemAppToggle">برنامه‌های سیستمی</string>
+    <string name="archivedAppToggle">برنامه‌های بایگانی شده</string>
     <string name="appInfoField_appName">نام برنامه</string>
     <string name="appInfoField_packageName">نام بسته</string>
     <string name="appInfoField_apkSize">حجم فایل APK</string>

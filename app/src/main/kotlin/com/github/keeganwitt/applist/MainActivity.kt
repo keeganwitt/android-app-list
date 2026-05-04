@@ -163,7 +163,12 @@ class MainActivity :
             val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
             binding.spinner.setSelection(initialIndex, false)
             binding.spinner.onItemSelectedListener = this
-            appListViewModel.init(AppInfoField.VERSION)
+            appListViewModel.init(
+                AppInfoField.VERSION,
+                appSettings.isShowSystemAppsEnabled(),
+                appSettings.isShowArchivedAppsEnabled(),
+                appSettings.isDescending(),
+            )
             maybeRequestUsagePermission(lastDisplayedField) {
                 appListViewModel.updateSelectedField(lastDisplayedField)
                 appSettings.setLastDisplayedAppInfoField(lastDisplayedField)
@@ -174,12 +179,21 @@ class MainActivity :
             val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
             binding.spinner.setSelection(initialIndex, false)
             binding.spinner.onItemSelectedListener = this
-            appListViewModel.init(lastDisplayedField)
+            appListViewModel.init(
+                lastDisplayedField,
+                appSettings.isShowSystemAppsEnabled(),
+                appSettings.isShowArchivedAppsEnabled(),
+                appSettings.isDescending(),
+            )
         }
     }
 
     private fun setupListeners() {
-        binding.toggleButton.setOnCheckedChangeListener { _, _ -> appListViewModel.toggleDescending() }
+        binding.toggleButton.isChecked = appSettings.isDescending()
+        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
+            appListViewModel.setDescending(isChecked)
+            appSettings.setDescending(isChecked)
+        }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             appListViewModel.refresh()
@@ -195,7 +209,9 @@ class MainActivity :
                     val shouldInvalidate =
                         latestState.isFullyLoaded != state.isFullyLoaded ||
                             (latestState.summary == null) != (state.summary == null) ||
-                            latestState.showSystem != state.showSystem
+                            latestState.showSystem != state.showSystem ||
+                            latestState.showArchived != state.showArchived ||
+                            latestState.selectedField != state.selectedField
                     latestState = state
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
@@ -214,6 +230,11 @@ class MainActivity :
         menuInflater.inflate(R.menu.app_menu, menu)
 
         menu.findItem(R.id.systemAppToggle).isChecked = latestState.showSystem
+
+        val archivedToggle = menu.findItem(R.id.archivedAppToggle)
+        val isArchivedFieldSelected = latestState.selectedField == AppInfoField.ARCHIVED
+        archivedToggle.isChecked = latestState.showArchived || isArchivedFieldSelected
+        archivedToggle.isEnabled = !isArchivedFieldSelected
 
         val summaryItem = menu.findItem(R.id.summary)
         if (!latestState.isFullyLoaded) {
@@ -308,7 +329,16 @@ class MainActivity :
             }
 
             R.id.systemAppToggle -> {
-                appListViewModel.setShowSystem(!latestState.showSystem)
+                val newValue = !latestState.showSystem
+                appListViewModel.setShowSystem(newValue)
+                appSettings.setShowSystemAppsEnabled(newValue)
+                return true
+            }
+
+            R.id.archivedAppToggle -> {
+                val newValue = !latestState.showArchived
+                appListViewModel.setShowArchived(newValue)
+                appSettings.setShowArchivedAppsEnabled(newValue)
                 return true
             }
 

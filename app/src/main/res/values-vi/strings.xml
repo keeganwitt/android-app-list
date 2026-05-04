@@ -3,6 +3,7 @@
     <string name="app_icon_description">Biểu tượng ứng dụng</string>
     <string name="search">Tìm kiếm</string>
     <string name="systemAppToggle">Ứng dụng hệ thống</string>
+    <string name="archivedAppToggle">Ứng dụng đã lưu trữ</string>
     <string name="appInfoField_appName">Tên ứng dụng</string>
     <string name="appInfoField_packageName">Tên gói</string>
     <string name="appInfoField_apkSize">Kích thước APK</string>

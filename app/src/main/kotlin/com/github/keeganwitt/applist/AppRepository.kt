@@ -20,6 +20,7 @@ interface AppRepository {
     fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
+        showArchivedApps: Boolean,
         descending: Boolean,
         reload: Boolean,
     ): Flow<List<App>>
@@ -35,11 +36,12 @@ class AndroidAppRepository(
     override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
+        showArchivedApps: Boolean,
         descending: Boolean,
         reload: Boolean,
     ): Flow<List<App>> =
         flow {
-            val filteredInfos = getFilteredAppInfos(showSystemApps)
+            val filteredInfos = getFilteredAppInfos(showSystemApps, showArchivedApps)
             val filteredWithBasic =
                 coroutineScope {
                     filteredInfos
@@ -66,7 +68,10 @@ class AndroidAppRepository(
             emit(sortApps(detailedApps, field, descending))
         }
 
-    private fun getFilteredAppInfos(showSystemApps: Boolean): List<Pair<ApplicationInfo, Boolean>> {
+    private fun getFilteredAppInfos(
+        showSystemApps: Boolean,
+        showArchivedApps: Boolean,
+    ): List<Pair<ApplicationInfo, Boolean>> {
         var flags =
             (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
                 .toLong()
@@ -80,7 +85,8 @@ class AndroidAppRepository(
             val archived = ai.isArchivedApp
             val isUserInstalled = ai.isUserInstalled
             val hasLaunch = launchablePackages.contains(ai.packageName)
-            if ((showSystemApps || isUserInstalled) && (archived || hasLaunch)) {
+            val isVisible = if (archived) showArchivedApps else hasLaunch
+            if ((showSystemApps || isUserInstalled) && isVisible) {
                 ai to archived
             } else {
                 null

@@ -3,6 +3,7 @@
     <string name="app_icon_description">Ikona aplikace</string>
     <string name="search">Hledat</string>
     <string name="systemAppToggle">Systémové aplikace</string>
+    <string name="archivedAppToggle">Archivované aplikace</string>
     <string name="appInfoField_appName">Název aplikace</string>
     <string name="appInfoField_packageName">Název balíčku</string>
     <string name="appInfoField_apkSize">Velikost APK</string>
