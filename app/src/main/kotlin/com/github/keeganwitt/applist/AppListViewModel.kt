@@ -24,8 +24,20 @@ class AppListViewModel(
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null
 
-    fun init(initialField: AppInfoField) {
-        _uiState.update { it.copy(selectedField = initialField) }
+    fun init(
+        initialField: AppInfoField,
+        initialShowSystem: Boolean,
+        initialShowArchived: Boolean,
+        initialDescending: Boolean,
+    ) {
+        _uiState.update {
+            it.copy(
+                selectedField = initialField,
+                showSystem = initialShowSystem,
+                showArchived = initialShowArchived,
+                descending = initialDescending,
+            )
+        }
         loadApps(reload = false)
     }
 
@@ -34,13 +46,22 @@ class AppListViewModel(
         loadApps(reload = false)
     }
 
-    fun toggleDescending() {
-        _uiState.update { it.copy(descending = !it.descending) }
+    fun setDescending(descending: Boolean) {
+        _uiState.update { it.copy(descending = descending) }
         loadApps(reload = false)
+    }
+
+    fun toggleDescending() {
+        setDescending(!_uiState.value.descending)
     }
 
     fun setShowSystem(show: Boolean) {
         _uiState.update { it.copy(showSystem = show) }
+        loadApps(reload = true)
+    }
+
+    fun setShowArchived(show: Boolean) {
+        _uiState.update { it.copy(showArchived = show) }
         loadApps(reload = true)
     }
 
@@ -66,6 +87,7 @@ class AppListViewModel(
                     .loadApps(
                         field = state.selectedField,
                         showSystemApps = state.showSystem,
+                        showArchivedApps = state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
                         descending = state.descending,
                         reload = reload,
                     ).collect { apps ->

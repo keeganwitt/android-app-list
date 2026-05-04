@@ -3,6 +3,7 @@
     <string name="app_icon_description">Значок програми</string>
     <string name="search">Пошук</string>
     <string name="systemAppToggle">Системні додатки</string>
+    <string name="archivedAppToggle">Архівовані додатки</string>
     <string name="appInfoField_appName">Назва програми</string>
     <string name="appInfoField_packageName">Назва пакета</string>
     <string name="appInfoField_apkSize">Розмір APK</string>

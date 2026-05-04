@@ -3,6 +3,7 @@
     <string name="app_icon_description">应用图标</string>
     <string name="search">搜索</string>
     <string name="systemAppToggle">系统应用</string>
+    <string name="archivedAppToggle">已归档的应用</string>
     <string name="appInfoField_appName">应用名称</string>
     <string name="appInfoField_packageName">包名</string>
     <string name="appInfoField_apkSize">APK 大小</string>

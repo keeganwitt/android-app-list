@@ -17,8 +17,7 @@ val ApplicationInfo.isArchivedApp: Boolean
         if (Build.VERSION.SDK_INT >= 35 && isArchived) {
             return true
         }
-        val meta = metaData
-        return meta != null && meta.containsKey("com.android.vending.archive")
+        return metaData?.getBoolean("com.android.vending.archive") == true
     }
 
 /**

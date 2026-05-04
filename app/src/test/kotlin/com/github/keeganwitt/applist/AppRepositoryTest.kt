@@ -70,6 +70,7 @@ class AppRepositoryTest {
                 repository.loadApps(
                     field = AppInfoField.VERSION,
                     showSystemApps = false,
+                    showArchivedApps = false,
                     descending = false,
                     reload = false,
                 )
@@ -100,6 +101,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -126,6 +128,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = true,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -154,6 +157,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = true,
                         reload = false,
                     ).toList()
@@ -180,6 +184,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -206,6 +211,7 @@ class AppRepositoryTest {
                 repository.loadApps(
                     field = AppInfoField.VERSION,
                     showSystemApps = false,
+                    showArchivedApps = false,
                     descending = false,
                     reload = false,
                 )
@@ -242,6 +248,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -269,6 +276,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -295,6 +303,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -326,6 +335,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.VERSION,
                         showSystemApps = true,
+                        showArchivedApps = true,
                         descending = false,
                         reload = false,
                     ).toList()
@@ -347,7 +357,7 @@ class AppRepositoryTest {
             every { packageService.getLaunchablePackages() } returns emptySet()
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
 
-            val result = repository.loadApps(AppInfoField.VERSION, true, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, true, true, false, false).toList().last()
 
             assertEquals(1, result.size)
             assertTrue(result[0].archived == true)
@@ -388,6 +398,7 @@ class AppRepositoryTest {
                     .loadApps(
                         field = AppInfoField.TARGET_SDK,
                         showSystemApps = false,
+                        showArchivedApps = false,
                         descending = false,
                         reload = true,
                     ).toList()
@@ -405,7 +416,7 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { usageStatsService.getLastUsedEpochs(any()) } returns null
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.contains(AppInfoField.LAST_USED))
@@ -463,7 +474,7 @@ class AppRepositoryTest {
             val flagsSlot = slot<Long>()
             every { packageService.getInstalledApplications(capture(flagsSlot)) } returns emptyList()
 
-            repository.loadApps(AppInfoField.VERSION, false, false, false).toList()
+            repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList()
 
             val flags = flagsSlot.captured
             assertTrue((flags and PackageManager.MATCH_ARCHIVED_PACKAGES) == 0L)
@@ -478,7 +489,7 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = null, appBytes = 100)
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.contains(AppInfoField.APK_SIZE))
@@ -494,7 +505,7 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = 100, appBytes = null)
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
 
             assertEquals(1, result.size)
             org.junit.Assert.assertFalse(result[0].failedFields.contains(AppInfoField.APK_SIZE))
@@ -510,7 +521,7 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.containsAll(listOf(AppInfoField.PACKAGE_MANAGER, AppInfoField.EXISTS_IN_APP_STORE)))
@@ -528,7 +539,7 @@ class AppRepositoryTest {
             every { packageService.getInstallerPackageName(any()) } throws RuntimeException("Installer fail")
             coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false).toList().last()
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
 
             assertEquals(1, result.size)
             assertTrue(
@@ -541,4 +552,37 @@ class AppRepositoryTest {
                 ),
             )
         }
+
+    @Test
+    fun `given archived app, when loadApps called with showArchivedApps false, it is filtered out`() =
+        runTest {
+            val archivedApp = createApplicationInfo("com.test.archived").apply {
+                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+            }
+            every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
+            every { packageService.getLaunchablePackages() } returns emptySet()
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+
+            assertEquals(0, result.size)
+        }
+
+    @Test
+    fun `given archived app, when loadApps called with showArchivedApps true, it is included`() =
+        runTest {
+            val archivedApp = createApplicationInfo("com.test.archived").apply {
+                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+            }
+            every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
+            every { packageService.getLaunchablePackages() } returns emptySet()
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+
+            val result = repository.loadApps(AppInfoField.VERSION, false, true, false, false).toList().last()
+
+            assertEquals(1, result.size)
+            assertEquals("com.test.archived", result[0].packageName)
+        }
 }
+
+
+

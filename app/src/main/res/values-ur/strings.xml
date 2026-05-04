@@ -3,6 +3,7 @@
     <string name="app_icon_description">ایپ کا آئیکن</string>
     <string name="search">تلاش</string>
     <string name="systemAppToggle">سسٹم ایپس</string>
+    <string name="archivedAppToggle">آرکائیو شدہ ایپس</string>
     <string name="appInfoField_appName">ایپ کا نام</string>
     <string name="appInfoField_packageName">پیکیج کا نام</string>
     <string name="appInfoField_apkSize">APK کا سائز</string>
