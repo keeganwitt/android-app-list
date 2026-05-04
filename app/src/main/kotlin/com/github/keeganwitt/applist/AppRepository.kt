@@ -95,12 +95,7 @@ class AndroidAppRepository(
     }
 
     private fun mapToAppBasic(ai: ApplicationInfo): App {
-        val archived =
-            if (Build.VERSION.SDK_INT >= 35) {
-                ai.isArchived
-            } else {
-                ai.isArchivedApp
-            }
+        val archived = ai.isArchivedApp
         val packageName = ai.packageName ?: ""
         return App(
             packageName = packageName,
