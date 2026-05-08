@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -37,6 +38,7 @@ class AppExporterTest {
     private lateinit var apps: List<App>
     private lateinit var crashReporter: CrashReporter
     private lateinit var appSettings: AppSettings
+    private lateinit var repository: AppRepository
     private lateinit var formatter: ExportFormatter
     private val testDispatchers =
         object : DispatcherProvider {
@@ -59,6 +61,10 @@ class AppExporterTest {
             )
         crashReporter = mockk(relaxed = true)
         appSettings = mockk(relaxed = true)
+        repository = mockk(relaxed = true)
+        // AppExporter.writeToFile uses refreshCache + getCachedApps (both suspend)
+        coEvery { repository.refreshCache(any()) } returns Unit
+        coEvery { repository.getCachedApps() } returns apps
         every { appSettings.isIncludeUsageStatsInExportEnabled() } returns true
         formatter = mockk(relaxed = true)
     }
@@ -72,9 +78,15 @@ class AppExporterTest {
         }
 
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                formatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -92,9 +104,15 @@ class AppExporterTest {
         val formatter = mockk<ExportFormatter>(relaxed = true)
         every { appSettings.isIncludeUsageStatsInExportEnabled() } returns false
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                formatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -107,30 +125,31 @@ class AppExporterTest {
     @Test
     fun onActivityResult_withXml_exportsXml() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val callbackSlot = slot<ActivityResultCallback<android.net.Uri?>>()
+        val callbackSlot = slot<ActivityResultCallback<Uri?>>()
         every {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
 
-        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val localFormatter = mockk<ExportFormatter>(relaxed = true)
         val xmlOutput = "xml content"
-        every { formatter.write(ExportFormat.XML, any(), any(), any(), any()) } answers {
+        every { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) } answers {
             (args[1] as java.io.Writer).write(xmlOutput)
         }
 
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
+        // Construction triggers registry.register, capturing the callback
+        AppExporter(activity, repository, localFormatter, appSettings, crashReporter, testDispatchers, registry)
         callbackSlot.captured.onActivityResult(uri)
 
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.write(ExportFormat.XML, any(), any(), any(), any()) }
+        verify { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) }
         assertEquals(xmlOutput, file.readText())
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue("Expected successful toast but was: $toast", toast == activity.getString(R.string.export_successful))
@@ -139,23 +158,23 @@ class AppExporterTest {
     @Test
     fun onActivityResult_withCsv_exportsCsv() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val callbackSlot = slot<ActivityResultCallback<android.net.Uri?>>()
+        val callbackSlot = slot<ActivityResultCallback<Uri?>>()
         every {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
 
-        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val localFormatter = mockk<ExportFormatter>(relaxed = true)
         val csvOutput = "csv content"
-        every { formatter.write(ExportFormat.CSV, any(), any(), any(), any()) } answers {
+        every { localFormatter.write(ExportFormat.CSV, any(), any(), any(), any()) } answers {
             (args[1] as java.io.Writer).write(csvOutput)
         }
 
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
+        val exporter = AppExporter(activity, repository, localFormatter, appSettings, crashReporter, testDispatchers, registry)
         val file = File.createTempFile("apps", ".csv").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -172,20 +191,26 @@ class AppExporterTest {
 
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.write(ExportFormat.CSV, any(), any(), any(), any()) }
+        verify { localFormatter.write(ExportFormat.CSV, any(), any(), any(), any()) }
         assertEquals(csvOutput, file.readText())
     }
 
     @Test
     fun writeToFile_whenFormatterThrowsIOException_handlesError() {
-        val formatter = mockk<ExportFormatter>()
+        val localFormatter = mockk<ExportFormatter>()
         val exception = IOException("Disk full")
-        every { formatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws exception
+        every { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws exception
 
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                localFormatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -202,9 +227,15 @@ class AppExporterTest {
         val authority = "com.github.keeganwitt.applist.test.null"
         Robolectric.setupContentProvider(NullContentProvider::class.java, authority)
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, ExportFormatter(), appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                ExportFormatter(),
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val uri = Uri.parse("content://$authority/file")
 
         exporter.writeToFile(uri, ExportFormat.XML)
@@ -254,14 +285,20 @@ class AppExporterTest {
 
     @Test
     fun writeToFile_whenFormatterThrowsSecurityException_handlesError() {
-        val formatter = mockk<ExportFormatter>()
+        val localFormatter = mockk<ExportFormatter>()
         val exception = SecurityException("Permission denied")
-        every { formatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws exception
+        every { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws exception
 
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                localFormatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -275,13 +312,19 @@ class AppExporterTest {
 
     @Test
     fun writeToFile_whenSecurityException_handlesError() {
-        val formatter = mockk<ExportFormatter>()
-        every { formatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws SecurityException("Mocked SecurityException")
+        val localFormatter = mockk<ExportFormatter>()
+        every { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws SecurityException("Mocked SecurityException")
 
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                localFormatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -295,13 +338,19 @@ class AppExporterTest {
 
     @Test
     fun writeToFile_whenIOException_handlesError() {
-        val formatter = mockk<ExportFormatter>()
-        every { formatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws IOException("Mocked IOException")
+        val localFormatter = mockk<ExportFormatter>()
+        every { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) } throws IOException("Mocked IOException")
 
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, formatter, appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                localFormatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
         val uri = Uri.fromFile(file)
 
@@ -318,9 +367,15 @@ class AppExporterTest {
         val authority = "com.github.keeganwitt.applist.test.security"
         Robolectric.setupContentProvider(SecurityExceptionContentProvider::class.java, authority)
         val exporter =
-            AppExporter(activity, {
-                apps
-            }, ExportFormatter(), appSettings, crashReporter, testDispatchers, mockk<ActivityResultRegistry>(relaxed = true))
+            AppExporter(
+                activity,
+                repository,
+                ExportFormatter(),
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
         val uri = Uri.parse("content://$authority/file")
 
         exporter.writeToFile(uri, ExportFormat.XML)
@@ -365,7 +420,7 @@ class AppExporterTest {
         override fun openFile(
             uri: Uri,
             mode: String,
-        ): android.os.ParcelFileDescriptor? = throw SecurityException("Permission denied")
+        ): android.os.ParcelFileDescriptor = throw SecurityException("Permission denied")
     }
 
     private fun createTestApp(
@@ -394,39 +449,39 @@ class AppExporterTest {
     @Test
     fun onActivityResult_withNullUri_doesNothing() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val callbackSlot = slot<ActivityResultCallback<android.net.Uri?>>()
+        val callbackSlot = slot<ActivityResultCallback<Uri?>>()
         every {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
 
-        val formatter = mockk<ExportFormatter>(relaxed = true)
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
+        val localFormatter = mockk<ExportFormatter>(relaxed = true)
 
+        AppExporter(activity, repository, localFormatter, appSettings, crashReporter, testDispatchers, registry)
         callbackSlot.captured.onActivityResult(null)
 
-        verify(exactly = 0) { formatter.write(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { localFormatter.write(any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun onActivityResult_withUnknownMimeType_defaultsToXml() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val callbackSlot = slot<ActivityResultCallback<android.net.Uri?>>()
+        val callbackSlot = slot<ActivityResultCallback<Uri?>>()
         every {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
 
-        val formatter = mockk<ExportFormatter>(relaxed = true)
-        val uri = android.net.Uri.parse("content://dummy/unknown")
+        val localFormatter = mockk<ExportFormatter>(relaxed = true)
+        val uri = Uri.parse("content://dummy/unknown")
         val contentResolver = mockk<android.content.ContentResolver>()
         every { contentResolver.getType(uri) } returns "application/octet-stream"
         every { contentResolver.openOutputStream(uri) } answers { java.io.ByteArrayOutputStream() }
@@ -435,24 +490,21 @@ class AppExporterTest {
         every { spyActivity.contentResolver } returns contentResolver
         every { spyActivity.runOnUiThread(any()) } answers { (args[0] as Runnable).run() }
 
-        val exporter = AppExporter(spyActivity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
-
+        AppExporter(spyActivity, repository, localFormatter, appSettings, crashReporter, testDispatchers, registry)
         callbackSlot.captured.onActivityResult(uri)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { formatter.write(ExportFormat.XML, any(), any(), any(), any()) }
+        verify { localFormatter.write(ExportFormat.XML, any(), any(), any(), any()) }
     }
 
     @Test
     fun export_showsDialog() {
-        val formatter = mockk<ExportFormatter>(relaxed = true)
+        val localFormatter = mockk<ExportFormatter>(relaxed = true)
         val exporter =
-            AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, mockk(relaxed = true))
+            AppExporter(activity, repository, localFormatter, appSettings, crashReporter, testDispatchers, mockk(relaxed = true))
 
         exporter.export()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         val dialog =
             org.robolectric.shadows.ShadowDialog
@@ -465,22 +517,19 @@ class AppExporterTest {
     fun export_selectsCsv_launchesCsvPicker() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
         val launcher = mockk<ActivityResultLauncher<String>>(relaxed = true)
-        // Match the specific contract type used in AppExporter
         every {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 any(),
             )
         } returns launcher
 
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
+        val exporter = AppExporter(activity, repository, formatter, appSettings, crashReporter, testDispatchers, registry)
 
         exporter.export()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         val dialog =
             org.robolectric.shadows.ShadowDialog
@@ -489,9 +538,7 @@ class AppExporterTest {
         radioCsv?.isChecked = true
 
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { launcher.launch(match { it.endsWith(".csv") }) }
     }
@@ -504,17 +551,15 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 any(),
             )
         } returns launcher
 
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
+        val exporter = AppExporter(activity, repository, formatter, appSettings, crashReporter, testDispatchers, registry)
 
         exporter.export()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         val dialog =
             org.robolectric.shadows.ShadowDialog
@@ -523,9 +568,7 @@ class AppExporterTest {
         radioHtml?.isChecked = true
 
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { launcher.launch(match { it.endsWith(".html") }) }
     }
@@ -538,17 +581,15 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<androidx.activity.result.contract.ActivityResultContract<String, android.net.Uri?>>(),
+                any<ActivityResultContract<String, Uri?>>(),
                 any(),
             )
         } returns launcher
 
-        val exporter = AppExporter(activity, { apps }, formatter, appSettings, crashReporter, testDispatchers, registry)
+        val exporter = AppExporter(activity, repository, formatter, appSettings, crashReporter, testDispatchers, registry)
 
         exporter.export()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         val dialog =
             org.robolectric.shadows.ShadowDialog
@@ -557,9 +598,7 @@ class AppExporterTest {
         radioTsv?.isChecked = true
 
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
-        org.robolectric.Shadows
-            .shadowOf(activity.mainLooper)
-            .idle()
+        Shadows.shadowOf(activity.mainLooper).idle()
 
         verify { launcher.launch(match { it.endsWith(".tsv") }) }
     }

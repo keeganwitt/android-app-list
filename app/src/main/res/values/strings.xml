@@ -38,7 +38,6 @@
     <string name="export_html" translatable="false">HTML</string>
     <string name="export_csv" translatable="false">CSV</string>
     <string name="export_tsv" translatable="false">TSV</string>
-    <string name="export_no_apps">No apps to export</string>
     <string name="export_successful">Export successful</string>
     <string name="export_failed">Export failed: %1$s</string>
     <string name="settings">Settings</string>
@@ -77,4 +76,6 @@
     <string name="unknown">Unknown</string>
     <string name="loading_failed">⚠ Failed to load</string>
     <string name="export_loading_failed" translatable="false">ERROR</string>
+    <string name="building_initial_cache">Building initial cache…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

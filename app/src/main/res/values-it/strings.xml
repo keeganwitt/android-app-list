@@ -32,7 +32,6 @@
     <string name="boolean_false">Falso</string>
     <string name="export">Esporta</string>
     <string name="export_as">Esporta come</string>
-    <string name="export_no_apps">Nessuna app da esportare</string>
     <string name="export_successful">Esportazione riuscita</string>
     <string name="export_failed">Esportazione non riuscita: %1$s</string>
     <string name="settings">Impostazioni</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Questa app richiede l\'autorizzazione all\'accesso di utilizzo per recuperare informazioni quali le dimensioni dell\'app e gli ultimi orari di utilizzo. Vuoi concedere questa autorizzazione nelle Impostazioni ora?</string>
     <string name="unknown">Sconosciuto</string>
     <string name="loading_failed">⚠ Caricamento non riuscito</string>
+    <string name="building_initial_cache">Creazione della cache iniziale…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

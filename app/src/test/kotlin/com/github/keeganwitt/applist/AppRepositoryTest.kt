@@ -4,16 +4,19 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import com.github.keeganwitt.applist.db.AppDao
+import com.github.keeganwitt.applist.db.toCacheEntity
 import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import kotlinx.coroutines.flow.toList
+import io.mockk.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -23,15 +26,19 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class AppRepositoryTest {
     private lateinit var packageService: PackageService
     private lateinit var usageStatsService: UsageStatsService
     private lateinit var storageService: StorageService
     private lateinit var appStoreService: AppStoreService
+    private lateinit var appDao: AppDao
     private lateinit var crashReporter: CrashReporter
     private lateinit var repository: AndroidAppRepository
+    private val dbFlow = MutableStateFlow<List<com.github.keeganwitt.applist.db.AppCacheEntity>>(emptyList())
 
     @Before
     fun setup() {
@@ -39,15 +46,120 @@ class AppRepositoryTest {
         usageStatsService = mockk(relaxed = true)
         storageService = mockk(relaxed = true)
         appStoreService = mockk(relaxed = true)
+        appDao = mockk(relaxed = true)
         crashReporter = mockk(relaxed = true)
+        dbFlow.value = emptyList()
+        every { appDao.getAllAppsFlow() } returns dbFlow
+        coEvery { appDao.getAllApps() } answers { dbFlow.value }
+        coEvery { appDao.insertApps(any()) } answers {
+            @Suppress("UNCHECKED_CAST")
+            val apps = it.invocation.args[0] as List<com.github.keeganwitt.applist.db.AppCacheEntity>
+            dbFlow.value = apps
+        }
+        coEvery { appDao.deleteApps(any()) } answers {
+            @Suppress("UNCHECKED_CAST")
+            val names = it.invocation.args[0] as List<String>
+            dbFlow.value = dbFlow.value.filter { it.packageName !in names }
+        }
         repository =
             AndroidAppRepository(
                 packageService,
                 usageStatsService,
                 storageService,
                 appStoreService,
+                appDao,
                 crashReporter,
             )
+    }
+
+    @Test
+    fun `given empty cache, when loadApps called, then it triggers sync and returns from DB when sync completes`() = runTest {
+        val appInfo = createApplicationInfo("com.test.app")
+        val packageInfo = createPackageInfo("1.0.0")
+
+        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
+        every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Test App"
+        every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+        every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
+        every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
+        coEvery { appStoreService.existsInAppStore(any<String>(), any<String>()) } returns true
+
+        val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
+        val result = flow.first { it.isNotEmpty() }
+
+        assertEquals(1, result.size)
+        assertEquals("com.test.app", result[0].packageName)
+        coVerify { appDao.insertApps(any()) }
+    }
+
+    @Test
+    fun `given cached apps, when refreshCache called with uninstall, then it deletes from DB`() = runTest {
+        val cachedApp = createAppEntity("com.uninstalled.app")
+        dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
+
+        every { packageService.getInstalledApplications(any<Long>()) } returns emptyList()
+        every { packageService.getLaunchablePackages() } returns emptySet()
+
+        repository.refreshCache()
+
+        coVerify { appDao.deleteApps(listOf("com.uninstalled.app")) }
+        assertTrue(dbFlow.value.isEmpty())
+    }
+
+    @Test
+    fun `given stale cache, when refreshCache called, then it updates DB`() = runTest {
+        val staleTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)
+        val cachedApp = createAppEntity("com.test.app").copy(lastCachedAt = staleTime)
+        dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
+
+        val appInfo = createApplicationInfo("com.test.app")
+        val packageInfo = createPackageInfo("1.0.0")
+        packageInfo.lastUpdateTime = System.currentTimeMillis()
+
+        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
+        every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Updated App"
+
+        repository.refreshCache()
+
+        coVerify { appDao.insertApps(any<List<com.github.keeganwitt.applist.db.AppCacheEntity>>()) }
+        assertEquals("Updated App", dbFlow.value[0].name)
+    }
+
+    @Test
+    fun `given sync in progress, then syncState reflects progress`() = runTest {
+        val appInfo1 = createApplicationInfo("com.app1")
+        val appInfo2 = createApplicationInfo("com.app2")
+        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo1, appInfo2)
+        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+
+        val states = mutableListOf<SyncState>()
+        val job = launch {
+            repository.getSyncState().collect { states.add(it) }
+        }
+        yield()
+        runCurrent()
+
+        repository.refreshCache()
+        yield()
+
+        assertTrue(states.any { it is SyncState.BuildingInitial })
+        assertTrue(states.last() is SyncState.Idle)
+        job.cancel()
+    }
+
+    @Test
+    fun `given cached apps, then getCachedApps returns them`() = runTest {
+        val entity1 = createAppEntity("pkg1")
+        val entity2 = createAppEntity("pkg2")
+        coEvery { appDao.getAllApps() } returns listOf(entity1, entity2)
+
+        val result = repository.getCachedApps()
+
+        assertEquals(2, result.size)
+        assertEquals("pkg1", result[0].packageName)
+        assertEquals("pkg2", result[1].packageName)
     }
 
     @Test
@@ -75,13 +187,12 @@ class AppRepositoryTest {
                     reload = false,
                 )
 
-            val results = flow.toList()
-            val finalDocs = results.last()
+            val result = flow.first { it.isNotEmpty() }
 
-            assertEquals(1, finalDocs.size)
-            assertEquals("com.test.app", finalDocs[0].packageName)
-            assertEquals("Test App", finalDocs[0].name)
-            assertEquals("1.0.0", finalDocs[0].versionName)
+            assertEquals(1, result.size)
+            assertEquals("com.test.app", result[0].packageName)
+            assertEquals("Test App", result[0].name)
+            assertEquals("1.0.0", result[0].versionName)
         }
 
     @Test
@@ -104,8 +215,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertEquals("com.test.userapp", result[0].packageName)
@@ -131,8 +241,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(2, result.size)
         }
@@ -160,8 +269,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = true,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(3, result.size)
             assertEquals("App C", result[0].name)
@@ -187,8 +295,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             verify(exactly = 0) { crashReporter.log(any()) }
@@ -196,7 +303,7 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given apps, when loadApps called, then emits basic info first then detailed info`() =
+    fun `given apps, when loadApps called, then emits synced info`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.app")
             val packageInfo = createPackageInfo("1.0.0")
@@ -216,19 +323,10 @@ class AppRepositoryTest {
                     reload = false,
                 )
 
-            val results = flow.toList()
+            val result = flow.first { it.isNotEmpty() }
 
-            assertEquals(2, results.size)
-
-            // First emission: Basic info
-            val firstEmission = results[0]
-            assertEquals(1, firstEmission.size)
-            assertNull(firstEmission[0].versionName)
-
-            // Second emission: Detailed info
-            val secondEmission = results[1]
-            assertEquals(1, secondEmission.size)
-            assertEquals("1.0.0", secondEmission[0].versionName)
+            assertEquals(1, result.size)
+            assertEquals("1.0.0", result[0].versionName)
         }
 
     @Test
@@ -251,8 +349,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertNull(result[0].versionName)
@@ -279,8 +376,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertEquals("1.0.0", result[0].versionName)
@@ -306,8 +402,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertEquals("1.0.0", result[0].versionName)
@@ -338,8 +433,7 @@ class AppRepositoryTest {
                         showArchivedApps = true,
                         descending = false,
                         reload = false,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertEquals("", result[0].packageName)
@@ -357,7 +451,15 @@ class AppRepositoryTest {
             every { packageService.getLaunchablePackages() } returns emptySet()
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
 
-            val result = repository.loadApps(AppInfoField.VERSION, true, true, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = true,
+                        showArchivedApps = true,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertTrue(result[0].archived == true)
@@ -390,6 +492,7 @@ class AppRepositoryTest {
                     usageStatsService,
                     storageService,
                     appStoreService,
+                    appDao,
                     null,
                 )
 
@@ -401,8 +504,7 @@ class AppRepositoryTest {
                         showArchivedApps = false,
                         descending = false,
                         reload = true,
-                    ).toList()
-                    .last()
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
         }
@@ -416,7 +518,15 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { usageStatsService.getLastUsedEpochs(any()) } returns null
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.contains(AppInfoField.LAST_USED))
@@ -474,7 +584,14 @@ class AppRepositoryTest {
             val flagsSlot = slot<Long>()
             every { packageService.getInstalledApplications(capture(flagsSlot)) } returns emptyList()
 
-            repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList()
+            repository
+                .loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    showArchivedApps = false,
+                    descending = false,
+                    reload = false,
+                ).first()
 
             val flags = flagsSlot.captured
             assertTrue((flags and PackageManager.MATCH_ARCHIVED_PACKAGES) == 0L)
@@ -489,7 +606,15 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = null, appBytes = 100)
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.contains(AppInfoField.APK_SIZE))
@@ -505,7 +630,15 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             every { storageService.getStorageUsage(any()) } returns StorageUsage(apkBytes = 100, appBytes = null)
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             org.junit.Assert.assertFalse(result[0].failedFields.contains(AppInfoField.APK_SIZE))
@@ -521,7 +654,15 @@ class AppRepositoryTest {
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
             coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertTrue(result[0].failedFields.containsAll(listOf(AppInfoField.PACKAGE_MANAGER, AppInfoField.EXISTS_IN_APP_STORE)))
@@ -539,7 +680,15 @@ class AppRepositoryTest {
             every { packageService.getInstallerPackageName(any()) } throws RuntimeException("Installer fail")
             coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertTrue(
@@ -556,13 +705,22 @@ class AppRepositoryTest {
     @Test
     fun `given archived app, when loadApps called with showArchivedApps false, it is filtered out`() =
         runTest {
-            val archivedApp = createApplicationInfo("com.test.archived").apply {
-                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
-            }
+            val archivedApp =
+                createApplicationInfo("com.test.archived").apply {
+                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                }
             every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
             every { packageService.getLaunchablePackages() } returns emptySet()
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, false, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first()
 
             assertEquals(0, result.size)
         }
@@ -570,19 +728,177 @@ class AppRepositoryTest {
     @Test
     fun `given archived app, when loadApps called with showArchivedApps true, it is included`() =
         runTest {
-            val archivedApp = createApplicationInfo("com.test.archived").apply {
-                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
-            }
+            val archivedApp =
+                createApplicationInfo("com.test.archived").apply {
+                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                }
             every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
             every { packageService.getLaunchablePackages() } returns emptySet()
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
 
-            val result = repository.loadApps(AppInfoField.VERSION, false, true, false, false).toList().last()
+            val result =
+                repository
+                    .loadApps(
+                        AppInfoField.VERSION,
+                        showSystemApps = false,
+                        showArchivedApps = true,
+                        descending = false,
+                        reload = false,
+                    ).first { it.isNotEmpty() }
 
             assertEquals(1, result.size)
             assertEquals("com.test.archived", result[0].packageName)
         }
+
+    @Test
+    fun `when app uninstalled, refreshCache removes it from DB`() =
+        runTest {
+            // Initial state with 1 app in DB
+            val entity = createApp("com.old").toCacheEntity(System.currentTimeMillis())
+            dbFlow.value = listOf(entity)
+
+            // PackageManager returns empty
+            every { packageService.getInstalledApplications(any()) } returns emptyList()
+            every { packageService.getLaunchablePackages() } returns emptySet()
+
+            repository.refreshCache(force = false)
+
+            assertTrue(dbFlow.value.isEmpty())
+        }
+
+    @Test
+    fun `when cache is stale, refreshCache syncs it`() =
+        runTest {
+            // Cache is 2 days old
+            val oldTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)
+            val entity = createApp("com.test").toCacheEntity(oldTime)
+            dbFlow.value = listOf(entity)
+
+            val appInfo = createApplicationInfo("com.test")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test")
+            every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.1.0")
+
+            repository.refreshCache(force = false)
+
+            // Verify it was updated (lastCachedAt should be recent)
+            assertTrue(dbFlow.value[0].lastCachedAt > oldTime)
+            assertEquals("1.1.0", dbFlow.value[0].versionName)
+        }
+
+    private fun createAppEntity(packageName: String): com.github.keeganwitt.applist.db.AppCacheEntity {
+        return com.github.keeganwitt.applist.db.AppCacheEntity(
+            packageName = packageName,
+            name = "Name",
+            versionName = "1.0",
+            archived = false,
+            minSdk = 24,
+            targetSdk = 33,
+            firstInstalled = 1000L,
+            lastUpdated = 1000L,
+            lastUsed = 1000L,
+            sizes = StorageUsage(100, 200, 300, 400, 500),
+            installerName = "com.android.vending",
+            existsInStore = true,
+            grantedPermissionsCount = 5,
+            requestedPermissionsCount = 10,
+            enabled = true,
+            isUserInstalled = true,
+            hasLaunchIntent = true,
+            isDetailed = true,
+            failedFields = emptySet(),
+            lastCachedAt = System.currentTimeMillis()
+        )
+    }
+
+    @Test
+    fun `given non-empty cache, when loadApps called, then it emits from DB immediately`() = runTest {
+        val cachedApp = createAppEntity("com.cached.app")
+        dbFlow.value = listOf(cachedApp)
+
+        val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
+        val result = flow.first()
+
+        assertEquals(1, result.size)
+        assertEquals("com.cached.app", result[0].packageName)
+    }
+
+    @Test
+    fun `given package info retrieval fails during reconciliation, when refreshCache called, then it skips the app`() = runTest {
+        val cachedApp = createAppEntity("com.test.app")
+        dbFlow.value = listOf(cachedApp)
+
+        val appInfo = createApplicationInfo("com.test.app")
+        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+        every { packageService.getPackageInfo(appInfo) } throws RuntimeException("Package Info Error")
+
+        repository.refreshCache()
+
+        coVerify(exactly = 0) { appDao.insertApps(any()) }
+    }
+
+    @Test
+    fun `given app is up to date and not stale, when refreshCache called, then it does not sync the app`() = runTest {
+        val now = System.currentTimeMillis()
+        val cachedApp = createAppEntity("com.test.app").copy(
+            lastUpdated = now,
+            lastCachedAt = now
+        )
+        dbFlow.value = listOf(cachedApp)
+
+        val appInfo = createApplicationInfo("com.test.app")
+        val packageInfo = createPackageInfo("1.0").apply { lastUpdateTime = now }
+        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+        every { packageService.getPackageInfo(appInfo) } returns packageInfo
+
+        repository.refreshCache()
+
+        coVerify(exactly = 0) { appDao.insertApps(any()) }
+    }
+
+    @Test
+    fun `given sync already in progress, when refreshCache called without force, then it returns early`() = runTest {
+        val appInfo = createApplicationInfo("com.app1")
+        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+        coEvery { appDao.getAllApps() } coAnswers {
+            kotlinx.coroutines.delay(1000)
+            emptyList()
+        }
+        
+        // Trigger first sync in background
+        val syncJob = launch {
+            repository.refreshCache()
+        }
+        
+        // Wait for it to start and hit the delayed DAO call
+        yield()
+        runCurrent()
+        
+        // Now try another sync. The first is still in withLock or has already set _syncState.
+        repository.refreshCache(force = false)
+        
+        // Verify only 1 call was made to getInstalledApplications (from the first sync)
+        verify(exactly = 1) { packageService.getInstalledApplications(any()) }
+        
+        syncJob.join()
+    }
+    @Test
+    @Config(sdk = [35])
+    fun `given SDK 35, when loadApps called, flags include MATCH_ARCHIVED_PACKAGES`() =
+        runTest {
+            val flagsSlot = slot<Long>()
+            every { packageService.getInstalledApplications(capture(flagsSlot)) } returns emptyList()
+
+            repository
+                .loadApps(
+                    AppInfoField.VERSION,
+                    showSystemApps = false,
+                    showArchivedApps = false,
+                    descending = false,
+                    reload = false,
+                ).first()
+
+            val flags = flagsSlot.captured
+            assertTrue((flags and PackageManager.MATCH_ARCHIVED_PACKAGES) != 0L)
+        }
 }
-
-
-

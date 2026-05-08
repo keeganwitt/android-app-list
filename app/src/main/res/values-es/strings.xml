@@ -32,7 +32,6 @@
     <string name="boolean_false">Falso</string>
     <string name="export">Exportar</string>
     <string name="export_as">Exportar como</string>
-    <string name="export_no_apps">No hay aplicaciones para exportar</string>
     <string name="export_successful">Exportación correcta</string>
     <string name="export_failed">Error al exportar: %1$s</string>
     <string name="settings">Configuración</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Esta aplicación necesita el permiso de acceso de uso para recuperar información como el tamaño de las aplicaciones y los tiempos de último uso. ¿Desea otorgar este permiso en los Ajustes ahora?</string>
     <string name="unknown">Desconocido</string>
     <string name="loading_failed">⚠ Error al cargar</string>
+    <string name="building_initial_cache">Creando caché inicial…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

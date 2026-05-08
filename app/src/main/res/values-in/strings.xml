@@ -32,7 +32,6 @@
     <string name="boolean_false">Salah</string>
     <string name="export">Ekspor</string>
     <string name="export_as">Ekspor sebagai</string>
-    <string name="export_no_apps">Tidak ada aplikasi untuk diekspor</string>
     <string name="export_successful">Ekspor berhasil</string>
     <string name="export_failed">Ekspor gagal: %1$s</string>
     <string name="settings">Pengaturan</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Aplikasi ini memerlukan izin Akses Penggunaan untuk mengambil informasi seperti ukuran aplikasi dan waktu terakhir digunakan. Apakah Anda ingin memberikan izin ini di Pengaturan sekarang?</string>
     <string name="unknown">Tidak diketahui</string>
     <string name="loading_failed">⚠ Gagal memuat</string>
+    <string name="building_initial_cache">Membangun cache awal…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

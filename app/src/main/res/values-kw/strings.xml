@@ -32,7 +32,6 @@
     <string name="boolean_false">Gaw</string>
     <string name="export">Eksportya</string>
     <string name="export_as">Eksportya avel</string>
-    <string name="export_no_apps">Nyns eus appys dhe eksportya</string>
     <string name="export_successful">Eksportya sewen</string>
     <string name="export_failed">Eksportya falllys: %1$s</string>
     <string name="settings">Settyansow</string>
@@ -57,4 +56,6 @@
     <string name="usage_stats_permission_description">An app ma a\'s teves edhom a gummyas Kerth Devnydh rag hwilas derivadow kepar ha mynsow app ha termynyow devnydh diwettha. A vynnowgh hwi ri an kummyas ma y\'n Settinyow lemmyn?</string>
     <string name="unknown">Ansellys</string>
     <string name="loading_failed">⚠ Fyllel dhe luske</string>
+    <string name="building_initial_cache">O kila kuddhas kynsa…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

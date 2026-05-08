@@ -20,6 +20,14 @@ class AppListViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            repository.getSyncState().collect { state ->
+                _uiState.update { it.copy(syncState = state) }
+            }
+        }
+    }
+
     private var allApps: List<App> = emptyList()
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null

@@ -32,7 +32,6 @@
     <string name="boolean_false">假</string>
     <string name="export">导出</string>
     <string name="export_as">导出为</string>
-    <string name="export_no_apps">没有可导出的应用</string>
     <string name="export_successful">导出成功</string>
     <string name="export_failed">导出失败: %1$s</string>
     <string name="settings">设置</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">此应用需要“使用情况访问”权限才能检索应用大小和上次使用时间等信息。您想现在去设置中授予此权限吗？</string>
     <string name="unknown">未知</string>
     <string name="loading_failed">⚠ 加载失败</string>
+    <string name="building_initial_cache">正在建立初始缓存…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

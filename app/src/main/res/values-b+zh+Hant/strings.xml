@@ -32,7 +32,6 @@
     <string name="boolean_false">否</string>
     <string name="export">匯出</string>
     <string name="export_as">匯出為</string>
-    <string name="export_no_apps">沒有要匯出的應用程式</string>
     <string name="export_successful">匯出成功</string>
     <string name="export_failed">匯出失敗: %1$s</string>
     <string name="settings">設定</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">此應用程式需要「使用情況存取」權限才能檢索應用程式大小和上次使用時間等資訊。您想現在去設定中授予此權限嗎？</string>
     <string name="unknown">未知</string>
     <string name="loading_failed">⚠ 載入失敗</string>
+    <string name="building_initial_cache">正在建立初始快取…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
+import com.github.keeganwitt.applist.db.AppDatabase
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
@@ -45,6 +46,7 @@ class MainActivity :
     private lateinit var binding: ActivityMainBinding
     private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
+    private lateinit var appRepository: AppRepository
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
@@ -104,17 +106,18 @@ class MainActivity :
                         val usage = AndroidUsageStatsService(applicationContext, crashReporter = crashReporter)
                         val storage = AndroidStorageService(applicationContext, crashReporter = crashReporter)
                         val store = PlayStoreService(crashReporter = crashReporter)
-                        val repo =
+                        appRepository =
                             AndroidAppRepository(
                                 pkg,
                                 usage,
                                 storage,
                                 store,
+                                AppDatabase.getDatabase(applicationContext).appDao(),
                                 crashReporter,
                             )
                         val vm =
                             AppListViewModel(
-                                repo,
+                                appRepository,
                                 DefaultDispatcherProvider(),
                                 SummaryCalculator(applicationContext, store),
                                 sizeFormatter = {
@@ -137,7 +140,7 @@ class MainActivity :
         appExporter =
             AppExporter(
                 this,
-                appsProvider = { latestState.filteredApps },
+                repository = appRepository,
                 formatter = ExportFormatter(),
                 appSettings = appSettings,
                 crashReporter = crashReporter,
@@ -220,7 +223,29 @@ class MainActivity :
                         ignoreQueryChanges = true
                         invalidateOptionsMenu()
                     }
+                    updateSyncUi(state.syncState)
                 }
+            }
+        }
+    }
+
+    private fun updateSyncUi(syncState: SyncState) {
+        when (syncState) {
+            is SyncState.BuildingInitial -> {
+                binding.initialSyncOverlay.visibility = View.VISIBLE
+                binding.initialSyncProgressBar.isIndeterminate = syncState.total == 0
+                if (syncState.total > 0) {
+                    binding.initialSyncProgressBar.progress = ((syncState.progress * 100) / syncState.total).coerceIn(0, 100)
+                }
+                binding.initialSyncProgressText.text = getString(R.string.sync_progress, syncState.progress, syncState.total)
+            }
+
+            SyncState.SyncingBackground -> {
+                binding.initialSyncOverlay.visibility = View.GONE
+            }
+
+            SyncState.Idle -> {
+                binding.initialSyncOverlay.visibility = View.GONE
             }
         }
     }

@@ -32,7 +32,6 @@
     <string name="boolean_false">غلط</string>
     <string name="export">برآمد</string>
     <string name="export_as">بطور برآمد کریں</string>
-    <string name="export_no_apps">برآمد کرنے کے لیے کوئی ایپس نہیں ہیں</string>
     <string name="export_successful">برآمد کامیابی سے مکمل ہوا</string>
     <string name="export_failed">برآمد ناکام: %1$s</string>
     <string name="settings">ترتیبات</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">اس ایپ کو ایپ کے سائز اور آخری بار استعمال شدہ اوقات جیسی معلومات حاصل کرنے کے لیے استعمال تک رسائی کی اجازت درکار ہے۔ کیا آپ ابھی سیٹنگز میں یہ اجازت دینا چاہیں گے؟</string>
     <string name="unknown">نامعلوم</string>
     <string name="loading_failed">⚠ لوڈ کرنے میں ناکامی</string>
+    <string name="building_initial_cache">ابتدائی کیشے بنایا جا رہا ہے…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

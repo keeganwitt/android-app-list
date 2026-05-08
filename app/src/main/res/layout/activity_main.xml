@@ -9,42 +9,75 @@
   android:fitsSystemWindows="true"
   tools:context="com.github.keeganwitt.applist.MainActivity">
 
-  <LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
-
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
     <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:orientation="vertical">
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="60dp"
+          android:orientation="horizontal">
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="start"
+            android:layout_weight="1"
+            android:layout_margin="8dp" />
+        <ToggleButton
+            android:id="@+id/toggleButton"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/sort_toggle_selector"
+            android:text=""
+            android:textOff=""
+            android:textOn="" />
+      </LinearLayout>
+
+      <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal">
-      <Spinner
-          android:id="@+id/spinner"
-          android:layout_width="0dp"
-          android:layout_height="match_parent"
-          android:gravity="start"
-          android:layout_weight="1"
-          android:layout_margin="8dp" />
-      <ToggleButton
-          android:id="@+id/toggleButton"
-          android:layout_width="48dp"
-          android:layout_height="match_parent"
-          android:background="@drawable/sort_toggle_selector"
-          android:text=""
-          android:textOff=""
-          android:textOn="" />
+        android:layout_height="match_parent" />
+
     </LinearLayout>
 
-    <ProgressBar
-      android:id="@+id/progress_bar"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center" />
-
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/recycler_view"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent" />
-
-  </LinearLayout>
+    <LinearLayout
+        android:id="@+id/initial_sync_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/colorBackground"
+        android:gravity="center"
+        android:orientation="vertical">
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/building_initial_cache"
+          android:textAppearance="?attr/textAppearanceHeadlineSmall"
+          android:layout_marginBottom="16dp" />
+      <ProgressBar
+          android:id="@+id/initial_sync_progress_bar"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:max="100" />
+      <TextView
+          android:id="@+id/initial_sync_progress_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp" />
+    </LinearLayout>
+  </FrameLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

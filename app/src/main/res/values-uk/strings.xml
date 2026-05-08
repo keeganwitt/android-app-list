@@ -32,7 +32,6 @@
     <string name="boolean_false">Хиба</string>
     <string name="export">Експорт</string>
     <string name="export_as">Експортувати як</string>
-    <string name="export_no_apps">Немає програм для експорту</string>
     <string name="export_successful">Експорт виконано успішно</string>
     <string name="export_failed">Помилка експорту: %1$s</string>
     <string name="settings">Налаштування</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Цьому додатку потрібен дозвіл на доступ до даних про використання для отримання такої інформації, як розмір додатків і час останнього використання. Бажаєте надати цей дозвіл у Налаштуваннях зараз?</string>
     <string name="unknown">Невідомо</string>
     <string name="loading_failed">⚠ Завантаження не вдалося</string>
+    <string name="building_initial_cache">Створення початкового кешу…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

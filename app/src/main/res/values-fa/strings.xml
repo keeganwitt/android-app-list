@@ -32,7 +32,6 @@
     <string name="boolean_false">نادرست</string>
     <string name="export">خروجی</string>
     <string name="export_as">خروجی به‌صورت</string>
-    <string name="export_no_apps">برنامه‌ای برای خروجی وجود ندارد</string>
     <string name="export_successful">خروجی با موفقیت انجام شد</string>
     <string name="export_failed">خروجی ناموفق بود: %1$s</string>
     <string name="settings">تنظیمات</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">این برنامه برای بازیابی اطلاعاتی مانند اندازه برنامه و زمان آخرین استفاده به اجازه دسترسی به استفاده نیاز دارد. آیا می خواهید اکنون این اجازه را در تنظیمات بدهید؟</string>
     <string name="unknown">نامعلوم</string>
     <string name="loading_failed">⚠ بارگذاری ناموفق</string>
+    <string name="building_initial_cache">در حال ساخت کش اولیه…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

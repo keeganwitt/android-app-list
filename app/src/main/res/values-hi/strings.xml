@@ -32,7 +32,6 @@
     <string name="boolean_false">असत्य</string>
     <string name="export">निर्यात</string>
     <string name="export_as">प्रारूप में निर्यात करें</string>
-    <string name="export_no_apps">निर्यात करने के लिए कोई एप्लिकेशन नहीं</string>
     <string name="export_successful">निर्यात सफल</string>
     <string name="export_failed">निर्यात विफल: %1$s</string>
     <string name="settings">सेटिंग्स</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">ऐप आकार और अंतिम उपयोग समय जैसी जानकारी प्राप्त करने के लिए इस ऐप को उपयोग पहुंच अनुमति की आवश्यकता है। क्या आप अभी सेटिंग में यह अनुमति देना चाहेंगे?</string>
     <string name="unknown">अज्ञात</string>
     <string name="loading_failed">⚠ लोड करने में विफल</string>
+    <string name="building_initial_cache">प्रारंभिक कैश बनाया जा रहा है…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>
