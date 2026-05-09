@@ -163,12 +163,12 @@ class MainActivity :
 
         val lastDisplayedField = appSettings.getLastDisplayedAppInfoField()
         if (lastDisplayedField.requiresUsageStats && !PermissionUtils.hasUsageStatsPermission(this)) {
-            val initialLabel = getString(R.string.appInfoField_version)
+            val initialLabel = getString(AppInfoField.DEFAULT.titleResId)
             val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
             binding.spinner.setSelection(initialIndex, false)
             binding.spinner.onItemSelectedListener = this
             appListViewModel.init(
-                AppInfoField.VERSION,
+                AppInfoField.DEFAULT,
                 appSettings.isShowSystemAppsEnabled(),
                 appSettings.isShowArchivedAppsEnabled(),
                 appSettings.isDescending(),
@@ -179,7 +179,7 @@ class MainActivity :
             }
         } else {
             val initialLabel =
-                fieldToLabelMap[lastDisplayedField] ?: getString(R.string.appInfoField_version)
+                fieldToLabelMap[lastDisplayedField] ?: getString(AppInfoField.DEFAULT.titleResId)
             val initialIndex = appInfoFieldStrings.indexOf(initialLabel).coerceAtLeast(0)
             binding.spinner.setSelection(initialIndex, false)
             binding.spinner.onItemSelectedListener = this
@@ -316,7 +316,7 @@ class MainActivity :
         id: Long,
     ) {
         val label = parent.getItemAtPosition(position) as String
-        val field = labelToFieldMap[label] ?: AppInfoField.VERSION
+        val field = labelToFieldMap[label] ?: AppInfoField.DEFAULT
         maybeRequestUsagePermission(field) {
             appListViewModel.updateSelectedField(field)
             appSettings.setLastDisplayedAppInfoField(field)
@@ -324,14 +324,7 @@ class MainActivity :
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
-        val adapter = binding.spinner.adapter
-        val versionText = getString(R.string.appInfoField_version)
-        val versionIndex =
-            (0 until adapter.count).firstOrNull { adapter.getItem(it) == versionText }
-        if (versionIndex != null) {
-            binding.spinner.setSelection(versionIndex)
-        }
-        appListViewModel.updateSelectedField(AppInfoField.VERSION)
+        updateFieldSelection(AppInfoField.DEFAULT)
     }
 
     override fun onResume() {
@@ -340,11 +333,11 @@ class MainActivity :
         val currentField = appListViewModel.uiState.value.selectedField
 
         if (pendingField != null) {
-            val fieldToSelect = if (hasPermission) pendingField!! else AppInfoField.VERSION
+            val fieldToSelect = if (hasPermission) pendingField!! else AppInfoField.DEFAULT
             pendingField = null
             updateFieldSelection(fieldToSelect)
         } else if (currentField.requiresUsageStats && !hasPermission) {
-            updateFieldSelection(AppInfoField.VERSION)
+            updateFieldSelection(AppInfoField.DEFAULT)
         }
 
         if (shouldRefreshOnResume) {
@@ -441,7 +434,7 @@ class MainActivity :
                 },
                 onCancel = {
                     pendingField = null
-                    updateFieldSelection(AppInfoField.VERSION)
+                    updateFieldSelection(AppInfoField.DEFAULT)
                 },
             )
         } else {
