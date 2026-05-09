@@ -32,7 +32,6 @@
     <string name="boolean_false">Nepravda</string>
     <string name="export">Exportovat</string>
     <string name="export_as">Exportovat jako</string>
-    <string name="export_no_apps">Žádné aplikace k exportu</string>
     <string name="export_successful">Export byl úspěšný</string>
     <string name="export_failed">Export selhal: %1$s</string>
     <string name="settings">Nastavení</string>
@@ -57,4 +56,6 @@
     <string name="usage_stats_permission_description">Tato aplikace potřebuje oprávnění k přístupu k využití, aby mohla získat informace, jako jsou velikosti aplikací a časy posledního použití. Chcete toto oprávnění nyní udělit v Nastavení?</string>
     <string name="unknown">Neznámý</string>
     <string name="loading_failed">⚠ Načítání selhalo</string>
+    <string name="building_initial_cache">Vytváření počáteční mezipaměti…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

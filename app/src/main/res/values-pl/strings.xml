@@ -32,7 +32,6 @@
     <string name="boolean_false">Fałsz</string>
     <string name="export">Eksportuj</string>
     <string name="export_as">Eksportuj jako</string>
-    <string name="export_no_apps">Brak aplikacji do wyeksportowania</string>
     <string name="export_successful">Eksport zakończony sukcesem</string>
     <string name="export_failed">Eksport nieudany: %1$s</string>
     <string name="settings">Ustawienia</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Ta aplikacja wymaga uprawnienia do dostępu do danych o użyciu, aby pobierać informacje takie jak rozmiary aplikacji i czas ostatniego użycia. Czy chcesz teraz nadać to uprawnienie w Ustawieniach?</string>
     <string name="unknown">Nieznany</string>
     <string name="loading_failed">⚠ Błąd ładowania</string>
+    <string name="building_initial_cache">Budowanie początkowej pamięci podręcznej…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

@@ -32,7 +32,6 @@
     <string name="boolean_false">เท็จ</string>
     <string name="export">ส่งออก</string>
     <string name="export_as">ส่งออกเป็น</string>
-    <string name="export_no_apps">ไม่มีแอปที่จะส่งออก</string>
     <string name="export_successful">ส่งออกสำเร็จ</string>
     <string name="export_failed">การส่งออกล้มเหลว: %1$s</string>
     <string name="settings">การตั้งค่า</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">แอปนี้ต้องได้รับอนุญาตการเข้าถึงการใช้งานเพื่อเรียกข้อมูล เช่น ขนาดแอปและเวลาที่ใช้งานล่าสุด คุณต้องการให้สิทธิ์นี้ในการตั้งค่าตอนนี้หรือไม่?</string>
     <string name="unknown">ไม่ทราบ</string>
     <string name="loading_failed">⚠ โหลดล้มเหลว</string>
+    <string name="building_initial_cache">กำลังสร้างแคชเริ่มต้น…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

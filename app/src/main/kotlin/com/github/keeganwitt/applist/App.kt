@@ -16,6 +16,8 @@ data class App(
     val grantedPermissionsCount: Int?,
     val requestedPermissionsCount: Int?,
     val enabled: Boolean,
+    val isUserInstalled: Boolean = true,
+    val hasLaunchIntent: Boolean = true,
     val isDetailed: Boolean = false,
     val failedFields: Set<AppInfoField> = emptySet(),
 )

@@ -28,7 +28,7 @@ class PermissionUtilsTest {
 
     @Before
     fun setUp() {
-        context = ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext()
         shadowAppOps = Shadows.shadowOf(context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
     }
 

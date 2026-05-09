@@ -32,7 +32,6 @@
     <string name="boolean_false">偽</string>
     <string name="export">エクスポート</string>
     <string name="export_as">形式を指定してエクスポート</string>
-    <string name="export_no_apps">エクスポートするアプリがありません</string>
     <string name="export_successful">エクスポートに成功しました</string>
     <string name="export_failed">エクスポートに失敗しました: %1$s</string>
     <string name="settings">設定</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">このアプリは、アプリのサイズや最終使用時間などの情報を取得するために、使用状況へのアクセス許可が必要です。今すぐ設定でこの許可を与えますか？</string>
     <string name="unknown">不明</string>
     <string name="loading_failed">⚠ 読み込み失敗</string>
+    <string name="building_initial_cache">初期キャッシュを構築中…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

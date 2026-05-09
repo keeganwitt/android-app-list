@@ -32,7 +32,6 @@
     <string name="boolean_false">거짓</string>
     <string name="export">내보내기</string>
     <string name="export_as">형식으로 내보내기</string>
-    <string name="export_no_apps">내보낼 앱이 없습니다</string>
     <string name="export_successful">내보내기 성공</string>
     <string name="export_failed">내보내기 실패: %1$s</string>
     <string name="settings">설정</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">이 앱은 앱 크기 및 마지막 사용 시간과 같은 정보를 검색하기 위해 사용정보 접근 권한이 필요합니다. 지금 설정에서 이 권한을 허용하시겠습니까?</string>
     <string name="unknown">알 수 없음</string>
     <string name="loading_failed">⚠ 불러오기 실패</string>
+    <string name="building_initial_cache">초기 캐시 구축 중…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

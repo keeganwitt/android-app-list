@@ -32,7 +32,6 @@
     <string name="boolean_false">خطأ</string>
     <string name="export">تصدير</string>
     <string name="export_as">تصدير بصيغة</string>
-    <string name="export_no_apps">لا توجد تطبيقات للتصدير</string>
     <string name="export_successful">تم التصدير بنجاح</string>
     <string name="export_failed">فشل التصدير: %1$s</string>
     <string name="settings">الإعدادات</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">يحتاج هذا التطبيق إلى إذن الوصول إلى الاستخدام لاسترداد معلومات مثل أحجام التطبيقات وأوقات آخر استخدام. هل ترغب في منح هذا الإذن في الإعدادات الآن؟</string>
     <string name="unknown">غير معروف</string>
     <string name="loading_failed">⚠ فشل التحميل</string>
+    <string name="building_initial_cache">جاري بناء ذاكرة التخزين المؤقت الأولية…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

@@ -32,7 +32,6 @@
     <string name="boolean_false">Falso</string>
     <string name="export">Exportar</string>
     <string name="export_as">Exportar como</string>
-    <string name="export_no_apps">Nenhum aplicativo para exportar</string>
     <string name="export_successful">Exportação bem-sucedida</string>
     <string name="export_failed">Falha na exportação: %1$s</string>
     <string name="settings">Configurações</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Este aplicativo precisa da permissão de acesso de uso para recuperar informações como tamanhos de aplicativos e horários de último uso. Deseja conceder esta permissão nas Configurações agora?</string>
     <string name="unknown">Desconhecido</string>
     <string name="loading_failed">⚠ Falha ao carregar</string>
+    <string name="building_initial_cache">Construindo cache inicial…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

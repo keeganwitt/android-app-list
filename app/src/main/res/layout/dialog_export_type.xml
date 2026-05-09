@@ -1,40 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/export_radio_group"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:filterTouchesWhenObscured="true"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <RadioGroup
-        android:id="@+id/export_radio_group"
-        android:layout_width="match_parent"
+    <RadioButton
+        android:id="@+id/radio_csv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="@string/export_csv" />
 
-        <RadioButton
-            android:id="@+id/radio_csv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export_csv" />
+    <RadioButton
+        android:id="@+id/radio_html"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/export_html" />
 
-        <RadioButton
-            android:id="@+id/radio_html"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export_html" />
+    <RadioButton
+        android:id="@+id/radio_tsv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/export_tsv" />
 
-        <RadioButton
-            android:id="@+id/radio_tsv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export_tsv" />
-
-        <RadioButton
-            android:id="@+id/radio_xml"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/export_xml" />
-    </RadioGroup>
-
-</LinearLayout>
+    <RadioButton
+        android:id="@+id/radio_xml"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/export_xml" />
+</RadioGroup>

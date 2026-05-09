@@ -32,7 +32,6 @@
     <string name="boolean_false">Yanlış</string>
     <string name="export">Dışa Aktar</string>
     <string name="export_as">Olarak dışa aktar</string>
-    <string name="export_no_apps">Dışa aktarılacak uygulama yok</string>
     <string name="export_successful">Dışa aktarma başarılı</string>
     <string name="export_failed">Dışa aktarma başarısız: %1$s</string>
     <string name="settings">Ayarlar</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Bu uygulama, uygulama boyutları ve son kullanım süreleri gibi bilgileri almak için Kullanım Erişimi iznine ihtiyaç duyuyor. Bu izni şimdi Ayarlar\'da vermek ister misiniz?</string>
     <string name="unknown">Bilinmiyor</string>
     <string name="loading_failed">⚠ Yükleme başarısız</string>
+    <string name="building_initial_cache">İlk önbellek oluşturuluyor…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

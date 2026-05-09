@@ -32,7 +32,6 @@
     <string name="boolean_false">মিথ্যা</string>
     <string name="export">রপ্তানি</string>
     <string name="export_as">হিসেবে রপ্তানি</string>
-    <string name="export_no_apps">রপ্তানি করার মতো কোনো অ্যাপ নেই</string>
     <string name="export_successful">রপ্তানি সফল হয়েছে</string>
     <string name="export_failed">রপ্তানি ব্যর্থ হয়েছে: %1$s</string>
     <string name="settings">সেটিংস</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">অ্যাপের আকার এবং সর্বশেষ ব্যবহারের সময়ের মতো তথ্য পুনরুদ্ধার করতে এই অ্যাপটির ব্যবহারের অ্যাক্সেس অনুমতি প্রয়োজন। আপনি কি এখন সেটিংসে এই অনুমতি দিতে চান?</string>
     <string name="unknown">অজানা</string>
     <string name="loading_failed">⚠ লোড করতে ব্যর্থ</string>
+    <string name="building_initial_cache">প্রাথমিক ক্যাশ তৈরি হচ্ছে…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

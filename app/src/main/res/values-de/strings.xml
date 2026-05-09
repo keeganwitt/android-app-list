@@ -32,7 +32,6 @@
     <string name="boolean_false">Falsch</string>
     <string name="export">Exportieren</string>
     <string name="export_as">Exportieren als</string>
-    <string name="export_no_apps">Keine Apps zum Exportieren</string>
     <string name="export_successful">Export erfolgreich</string>
     <string name="export_failed">Export fehlgeschlagen: %1$s</string>
     <string name="settings">Einstellungen</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Diese App benötigt die Nutzungszugriffsberechtigung, um Informationen wie App-Größen und die Zeit der letzten Nutzung abzurufen. Möchten Sie diese Berechtigung jetzt in den Einstellungen erteilen?</string>
     <string name="unknown">Unbekannt</string>
     <string name="loading_failed">⚠ Laden fehlgeschlagen</string>
+    <string name="building_initial_cache">Initialer Cache wird aufgebaut…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

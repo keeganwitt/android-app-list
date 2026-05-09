@@ -32,7 +32,6 @@
     <string name="boolean_false">Onwaar</string>
     <string name="export">Exporteren</string>
     <string name="export_as">Exporteren als</string>
-    <string name="export_no_apps">Geen apps om te exporteren</string>
     <string name="export_successful">Exporteren gelukt</string>
     <string name="export_failed">Exporteren mislukt: %1$s</string>
     <string name="settings">Instellingen</string>
@@ -56,4 +55,6 @@
     <string name="usage_stats_permission_description">Deze app heeft de machtiging Gebruikstoegang nodig om informatie op te halen zoals app-groottes en tijden van het laatste gebruik. Wilt u deze machtiging nu verlenen in de Instellingen?</string>
     <string name="unknown">Onbekend</string>
     <string name="loading_failed">⚠ Laden mislukt</string>
+    <string name="building_initial_cache">Eerste cache opbouwen…</string>
+    <string name="sync_progress">%1$d / %2$d</string>
 </resources>

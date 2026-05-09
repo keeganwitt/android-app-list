@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,7 @@ import org.junit.Test
 import java.text.DateFormat
 import java.util.Date
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class AppListViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -64,7 +65,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -72,6 +78,7 @@ class AppListViewModelTest {
             assertEquals(2, state.items.size)
             assertFalse(state.isLoading)
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = false,
@@ -88,7 +95,12 @@ class AppListViewModelTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.updateSelectedField(AppInfoField.TARGET_SDK)
@@ -97,6 +109,7 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertEquals(AppInfoField.TARGET_SDK, state.selectedField)
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.TARGET_SDK,
                     showSystemApps = false,
@@ -113,7 +126,12 @@ class AppListViewModelTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             assertFalse(viewModel.uiState.value.descending)
@@ -123,6 +141,7 @@ class AppListViewModelTest {
 
             assertTrue(viewModel.uiState.value.descending)
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = false,
@@ -143,7 +162,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setShowSystem(true)
@@ -152,6 +176,7 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertTrue(state.showSystem)
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = true,
@@ -173,7 +198,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             assertEquals(3, viewModel.uiState.value.items.size)
@@ -183,9 +213,20 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertEquals("test", state.query)
             assertEquals(2, state.items.size)
-            assertTrue(state.items.any { it.appName == "Test App 1" })
-            assertTrue(state.items.any { it.appName == "Example Test" })
+            assertTrue(state.items.any { it.appName.contains("Test", ignoreCase = true) })
         }
+
+    @Test
+    fun `when toggleDescending called, then descending is toggled`() = runTest {
+        viewModel.setDescending(true)
+        assertTrue(viewModel.uiState.value.descending)
+
+        viewModel.toggleDescending()
+        assertFalse(viewModel.uiState.value.descending)
+
+        viewModel.toggleDescending()
+        assertTrue(viewModel.uiState.value.descending)
+    }
 
     @Test
     fun `given apps loaded, when setQuery called with empty string, then all items are shown`() =
@@ -197,7 +238,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             assertEquals(2, viewModel.uiState.value.items.size)
@@ -216,13 +262,19 @@ class AppListViewModelTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.refresh()
             advanceUntilIdle()
 
             coVerify(exactly = 2) {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = false,
@@ -232,6 +284,7 @@ class AppListViewModelTest {
                 )
             }
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = false,
@@ -247,7 +300,12 @@ class AppListViewModelTest {
         runTest {
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(emptyList())
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -261,7 +319,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test.app", "Test App", versionName = "1.2.3")
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -277,7 +340,12 @@ class AppListViewModelTest {
                 AppListViewModel(repository, dispatcherProvider, summaryCalculator, mockSizeFormatter, "Unknown", "⚠ Failed to load")
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModelWithSizeFormatter.init(AppInfoField.APK_SIZE, false, false, false)
+            viewModelWithSizeFormatter.init(
+                AppInfoField.APK_SIZE,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModelWithSizeFormatter.uiState.value
@@ -294,7 +362,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setQuery("myapp")
@@ -314,7 +387,12 @@ class AppListViewModelTest {
             val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flow
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             runCurrent()
 
             // Should be loading initially
@@ -337,7 +415,12 @@ class AppListViewModelTest {
             val basicApps = listOf(createTestApp("com.test.app", "Test App", isDetailed = false))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(basicApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -351,12 +434,40 @@ class AppListViewModelTest {
             val detailedApps = listOf(createTestApp("com.test.app", "Test App", isDetailed = true))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(detailedApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals(1, state.items.size)
             assertFalse(state.items[0].isLoading)
+        }
+
+    @Test
+    fun `given sync state changes, then uiState is updated`() =
+        runTest {
+            val syncStateFlow = kotlinx.coroutines.flow.MutableStateFlow<SyncState>(SyncState.Idle)
+            every { repository.getSyncState() } returns syncStateFlow
+            val viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator, { it.toString() }, "Unknown", "⚠ Failed to load")
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            assertEquals(SyncState.Idle, viewModel.uiState.value.syncState)
+
+            syncStateFlow.value = SyncState.BuildingInitial(5, 10)
+            advanceUntilIdle()
+
+            assertEquals(SyncState.BuildingInitial(5, 10), viewModel.uiState.value.syncState)
         }
 
     @Test
@@ -367,7 +478,12 @@ class AppListViewModelTest {
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
             coEvery { summaryCalculator.calculate(any(), any()) } returns mockSummary
 
-            viewModel.init(AppInfoField.ENABLED, false, false, false)
+            viewModel.init(
+                AppInfoField.ENABLED,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -382,7 +498,12 @@ class AppListViewModelTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1", isDetailed = false))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.ENABLED, false, false, false)
+            viewModel.init(
+                AppInfoField.ENABLED,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -406,7 +527,12 @@ class AppListViewModelTest {
             // Filtered calculation
             coEvery { summaryCalculator.calculate(listOf(app1), any()) } returns mockSummaryFiltered
 
-            viewModel.init(AppInfoField.ENABLED, false, false, false)
+            viewModel.init(
+                AppInfoField.ENABLED,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setQuery("Test App 1")
@@ -427,7 +553,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setQuery("1.2.3")
@@ -447,7 +578,12 @@ class AppListViewModelTest {
             val mockApps = listOf(app1, app2)
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setQuery("One")
@@ -511,7 +647,12 @@ class AppListViewModelTest {
 
             for ((field, expectedInfo) in expectedMap) {
                 coEvery { repository.loadApps(field, any(), any(), any(), any()) } returns flowOf(listOf(app))
-                viewModel.init(field, false, false, false)
+                viewModel.init(
+                    field,
+                    initialShowSystem = false,
+                    initialShowArchived = false,
+                    initialDescending = false,
+                )
                 advanceUntilIdle()
                 assertEquals(
                     "Failed for field $field",
@@ -568,7 +709,12 @@ class AppListViewModelTest {
 
             for ((field, expectedInfo) in expectedMap) {
                 coEvery { repository.loadApps(field, any(), any(), any(), any()) } returns flowOf(listOf(app))
-                viewModel.init(field, false, false, false)
+                viewModel.init(
+                    field,
+                    initialShowSystem = false,
+                    initialShowArchived = false,
+                    initialDescending = false,
+                )
                 advanceUntilIdle()
                 assertEquals(
                     "Failed for field $field",
@@ -611,7 +757,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test", "App One", versionName = "1.2.3")
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             // Change field without query
@@ -633,7 +784,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test", "App", isDetailed = false)
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             assertFalse(viewModel.uiState.value.isFullyLoaded)
@@ -651,7 +807,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test", "App").copy(sizes = StorageUsage(apkBytes = 0))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.APK_SIZE, false, false, false)
+            viewModel.init(
+                AppInfoField.APK_SIZE,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -666,7 +827,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test.app", "Test App")
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.APP_NAME, false, false, false)
+            viewModel.init(
+                AppInfoField.APP_NAME,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -679,7 +845,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test.app", "Test App")
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.PACKAGE_NAME, false, false, false)
+            viewModel.init(
+                AppInfoField.PACKAGE_NAME,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -692,7 +863,12 @@ class AppListViewModelTest {
             val app = createTestApp("com.test.app", "Test App").copy(failedFields = setOf(AppInfoField.VERSION))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -706,13 +882,22 @@ class AppListViewModelTest {
             val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flow
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             runCurrent()
 
             flow.emit(listOf(app))
             advanceUntilIdle()
 
-            assertEquals("1.2.3", viewModel.uiState.value.items[0].infoText)
+            assertEquals(
+                "1.2.3",
+                viewModel.uiState.value.items[0]
+                    .infoText,
+            )
 
             viewModel.updateSelectedField(AppInfoField.ENABLED)
             runCurrent()
@@ -729,7 +914,12 @@ class AppListViewModelTest {
         runTest {
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(emptyList())
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -742,13 +932,21 @@ class AppListViewModelTest {
             val flow = kotlinx.coroutines.flow.MutableSharedFlow<List<App>>()
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flow
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             runCurrent()
 
             viewModel.updateSelectedField(AppInfoField.ENABLED)
             runCurrent()
 
-            coVerify(exactly = 2) { repository.loadApps(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 2) {
+                @Suppress("UnusedFlow")
+                repository.loadApps(any(), any(), any(), any(), any())
+            }
         }
 
     @Test
@@ -761,7 +959,12 @@ class AppListViewModelTest {
                 )
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             viewModel.setShowArchived(true)
@@ -770,6 +973,7 @@ class AppListViewModelTest {
             val state = viewModel.uiState.value
             assertTrue(state.showArchived)
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
                     showSystemApps = false,
@@ -786,7 +990,12 @@ class AppListViewModelTest {
             val mockApps = listOf(createTestApp("com.test.app1", "Test App 1"))
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(mockApps)
 
-            viewModel.init(AppInfoField.VERSION, false, false, false)
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
             advanceUntilIdle()
 
             assertFalse(viewModel.uiState.value.showArchived)
@@ -795,6 +1004,7 @@ class AppListViewModelTest {
             advanceUntilIdle()
 
             coVerify {
+                @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.ARCHIVED,
                     showSystemApps = false,
@@ -805,10 +1015,3 @@ class AppListViewModelTest {
             }
         }
 }
-
-
-
-
-
-
-

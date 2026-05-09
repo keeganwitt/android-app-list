@@ -10,16 +10,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class AppExporter(
     private val activity: AppCompatActivity,
-    private val appsProvider: () -> List<App>,
+    private val repository: AppRepository,
     private val formatter: ExportFormatter,
     private val appSettings: AppSettings,
     private val crashReporter: CrashReporter? = null,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
-    private val registry: ActivityResultRegistry = activity.activityResultRegistry,
+    registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
     private var pendingExportFormat: ExportFormat? = null
 
@@ -63,12 +64,20 @@ class AppExporter(
         uri: Uri,
         format: ExportFormat,
     ) {
-        val apps = appsProvider()
         val includeUsageStats = shouldIncludeUsageStats()
         val loadingFailedValue = activity.getString(R.string.export_loading_failed)
         activity.lifecycleScope.launch(dispatchers.io) {
-            exportToFile(uri, format) {
-                formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
+            try {
+                // Force refresh cache to ensure export has fresh data
+                repository.refreshCache(force = true)
+                val apps = repository.getCachedApps()
+                exportToFile(uri, format) {
+                    formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
+                }
+            } catch (e: Exception) {
+                withContext(dispatchers.main) {
+                    Toast.makeText(activity, R.string.export_failed, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

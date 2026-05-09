@@ -107,22 +107,19 @@ class SharedPreferencesAppSettings(
         preferences.edit { putBoolean(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT, enabled) }
     }
 
-    override fun isShowSystemAppsEnabled(): Boolean =
-        preferences.getBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, false)
+    override fun isShowSystemAppsEnabled(): Boolean = preferences.getBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, false)
 
     override fun setShowSystemAppsEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, enabled) }
     }
 
-    override fun isShowArchivedAppsEnabled(): Boolean =
-        preferences.getBoolean(AppSettings.KEY_SHOW_ARCHIVED_APPS, false)
+    override fun isShowArchivedAppsEnabled(): Boolean = preferences.getBoolean(AppSettings.KEY_SHOW_ARCHIVED_APPS, false)
 
     override fun setShowArchivedAppsEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(AppSettings.KEY_SHOW_ARCHIVED_APPS, enabled) }
     }
 
-    override fun isDescending(): Boolean =
-        preferences.getBoolean(AppSettings.KEY_IS_DESCENDING, false)
+    override fun isDescending(): Boolean = preferences.getBoolean(AppSettings.KEY_IS_DESCENDING, false)
 
     override fun setDescending(descending: Boolean) {
         preferences.edit { putBoolean(AppSettings.KEY_IS_DESCENDING, descending) }

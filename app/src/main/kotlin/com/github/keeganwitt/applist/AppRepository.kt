@@ -3,6 +3,10 @@ package com.github.keeganwitt.applist
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import com.github.keeganwitt.applist.db.AppCacheEntity
+import com.github.keeganwitt.applist.db.AppDao
+import com.github.keeganwitt.applist.db.toCacheEntity
+import com.github.keeganwitt.applist.db.toDomainModel
 import com.github.keeganwitt.applist.services.AppStoreService
 import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
@@ -13,8 +17,25 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.Collator
+import java.util.concurrent.TimeUnit
+
+sealed class SyncState {
+    data object Idle : SyncState()
+
+    data class BuildingInitial(
+        val progress: Int,
+        val total: Int,
+    ) : SyncState()
+
+    data object SyncingBackground : SyncState()
+}
 
 interface AppRepository {
     fun loadApps(
@@ -24,6 +45,12 @@ interface AppRepository {
         descending: Boolean,
         reload: Boolean,
     ): Flow<List<App>>
+
+    fun getSyncState(): Flow<SyncState>
+
+    suspend fun refreshCache(force: Boolean = false)
+
+    suspend fun getCachedApps(): List<App>
 }
 
 class AndroidAppRepository(
@@ -31,8 +58,14 @@ class AndroidAppRepository(
     private val usageStatsService: UsageStatsService,
     private val storageService: StorageService,
     private val appStoreService: AppStoreService,
+    private val appDao: AppDao,
     private val crashReporter: CrashReporter? = null,
 ) : AppRepository {
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    private val syncMutex = Mutex()
+
+    override fun getSyncState(): Flow<SyncState> = _syncState.asStateFlow()
+
     override fun loadApps(
         field: AppInfoField,
         showSystemApps: Boolean,
@@ -40,61 +73,140 @@ class AndroidAppRepository(
         descending: Boolean,
         reload: Boolean,
     ): Flow<List<App>> =
-        flow {
-            val filteredInfos = getFilteredAppInfos(showSystemApps, showArchivedApps)
-            val filteredWithBasic =
-                coroutineScope {
-                    filteredInfos
-                        .map { (ai, archived) ->
-                            async {
-                                ai to mapToAppBasic(ai)
-                            }
-                        }.awaitAll()
-                }
-            val basicApps = filteredWithBasic.map { it.second }
-            emit(sortApps(basicApps, field, descending))
+        channelFlow {
+            // First emit from DB
+            val initialEntities = appDao.getAllApps()
+            if (initialEntities.isNotEmpty()) {
+                val apps = initialEntities.map { it.toDomainModel() }
+                send(sortAndFilter(apps, field, showSystemApps, showArchivedApps, descending))
+            }
 
-            val lastUsedEpochs = usageStatsService.getLastUsedEpochs(reload)
-            val detailedApps =
-                coroutineScope {
-                    val appsDeferred =
-                        filteredWithBasic.map { (ai, basicApp) ->
-                            async {
-                                mapToAppDetailed(ai, basicApp, lastUsedEpochs)
-                            }
-                        }
-                    appsDeferred.awaitAll()
-                }
-            emit(sortApps(detailedApps, field, descending))
+            // Trigger sync in background if needed or if reload is true
+            launch {
+                refreshCache(force = reload)
+            }
+
+            // Now observe DB for updates
+            appDao.getAllAppsFlow().collect { entities ->
+                val apps = entities.map { it.toDomainModel() }
+                send(sortAndFilter(apps, field, showSystemApps, showArchivedApps, descending))
+            }
         }
 
-    private fun getFilteredAppInfos(
+    private fun sortAndFilter(
+        apps: List<App>,
+        field: AppInfoField,
         showSystemApps: Boolean,
         showArchivedApps: Boolean,
-    ): List<Pair<ApplicationInfo, Boolean>> {
-        var flags =
-            (PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS)
-                .toLong()
-        if (Build.VERSION.SDK_INT >= 35) {
-            flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
-        }
-        val allInstalled = packageService.getInstalledApplications(flags)
-        val launchablePackages = packageService.getLaunchablePackages()
-
-        return allInstalled.mapNotNull { ai ->
-            val archived = ai.isArchivedApp
-            val isUserInstalled = ai.isUserInstalled
-            val hasLaunch = launchablePackages.contains(ai.packageName)
-            val isVisible = if (archived) showArchivedApps else hasLaunch
-            if ((showSystemApps || isUserInstalled) && isVisible) {
-                ai to archived
-            } else {
-                null
+        descending: Boolean,
+    ): List<App> {
+        val filtered =
+            apps.filter { app ->
+                val archived = app.archived == true
+                val isUserInstalled = app.isUserInstalled
+                val hasLaunch = app.hasLaunchIntent
+                val isVisible = if (archived) showArchivedApps else hasLaunch
+                (showSystemApps || isUserInstalled) && isVisible
             }
+        return sortApps(filtered, field, descending)
+    }
+
+    override suspend fun refreshCache(force: Boolean) {
+        if (!force && _syncState.value != SyncState.Idle) return
+
+        val cachedApps: List<AppCacheEntity>
+        val isInitial: Boolean
+
+        syncMutex.withLock {
+            if (!force && _syncState.value != SyncState.Idle) return
+
+            cachedApps = appDao.getAllApps()
+            isInitial = cachedApps.isEmpty()
+
+            if (isInitial) {
+                _syncState.value = SyncState.BuildingInitial(0, 0)
+            } else {
+                _syncState.value = SyncState.SyncingBackground
+            }
+        }
+
+        try {
+            var flags =
+                (
+                    PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or
+                        PackageManager.MATCH_DISABLED_COMPONENTS
+                ).toLong()
+            if (Build.VERSION.SDK_INT >= 35) {
+                flags = flags or PackageManager.MATCH_ARCHIVED_PACKAGES
+            }
+            val allInstalled = packageService.getInstalledApplications(flags)
+            val launchablePackages = packageService.getLaunchablePackages().toSet()
+
+            // Reconciliation
+            val cachedMap = cachedApps.associateBy { it.packageName }
+            val installedPackageNames = allInstalled.map { it.packageName }.toSet()
+
+            // Remove uninstalled
+            val toRemove = cachedApps.filter { it.packageName !in installedPackageNames }.map { it.packageName }
+            if (toRemove.isNotEmpty()) appDao.deleteApps(toRemove)
+
+            // Identify to sync
+            val toSync =
+                allInstalled.filter { ai ->
+                    val cached = cachedMap[ai.packageName]
+                    if (force || cached == null) return@filter true
+
+                    // Check last update time
+                    val pkgInfo =
+                        try {
+                            packageService.getPackageInfo(ai)
+                        } catch (e: Exception) {
+                            return@filter false
+                        }
+                    if (pkgInfo.lastUpdateTime > (cached.lastUpdated ?: 0L)) return@filter true
+
+                    // Check staleness (e.g. 24 hours)
+                    if (System.currentTimeMillis() - cached.lastCachedAt > STALENESS_THRESHOLD) return@filter true
+
+                    false
+                }
+
+            if (toSync.isNotEmpty()) {
+                if (isInitial) _syncState.value = SyncState.BuildingInitial(0, toSync.size)
+
+                val lastUsedEpochs = usageStatsService.getLastUsedEpochs(force)
+
+                var processedCount = 0
+                toSync.chunked(10).forEach { chunk ->
+                    coroutineScope {
+                        val apps =
+                            chunk
+                                .map { ai ->
+                                    async {
+                                        val basic = mapToAppBasic(ai, launchablePackages.contains(ai.packageName))
+                                        mapToAppDetailed(ai, basic, lastUsedEpochs)
+                                    }
+                                }.awaitAll()
+                        appDao.insertApps(apps.map { it.toCacheEntity(System.currentTimeMillis()) })
+                    }
+                    processedCount += chunk.size
+
+                    if (isInitial) {
+                        _syncState.value = SyncState.BuildingInitial(processedCount, toSync.size)
+                    }
+                }
+            }
+        } finally {
+            _syncState.value = SyncState.Idle
         }
     }
 
-    private fun mapToAppBasic(ai: ApplicationInfo): App {
+    override suspend fun getCachedApps(): List<App> = appDao.getAllApps().map { it.toDomainModel() }
+
+    private fun mapToAppBasic(
+        ai: ApplicationInfo,
+        hasLaunchIntent: Boolean,
+    ): App {
         val archived = ai.isArchivedApp
         val packageName = ai.packageName ?: ""
         return App(
@@ -113,6 +225,8 @@ class AndroidAppRepository(
             grantedPermissionsCount = null,
             requestedPermissionsCount = null,
             enabled = ai.enabled,
+            isUserInstalled = ai.isUserInstalled,
+            hasLaunchIntent = hasLaunchIntent,
             isDetailed = false,
         )
     }
@@ -145,7 +259,7 @@ class AndroidAppRepository(
                     grantedPermissionsCount = grantedCount,
                     requestedPermissionsCount = requestedCount,
                 )
-        } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+        } catch (e: PackageManager.NameNotFoundException) {
             android.util.Log.w("AndroidAppRepository", "App uninstalled during load: ${ai.packageName}")
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to getPackageInfo for ${ai.packageName}")
@@ -229,5 +343,6 @@ class AndroidAppRepository(
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
         const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
+        val STALENESS_THRESHOLD = TimeUnit.DAYS.toMillis(1)
     }
 }

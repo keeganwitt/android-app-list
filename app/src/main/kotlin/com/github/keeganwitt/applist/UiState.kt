@@ -11,5 +11,5 @@ data class UiState(
     val items: List<AppItemUiModel> = emptyList(),
     val filteredApps: List<App> = emptyList(),
     val summary: SummaryItem? = null,
+    val syncState: SyncState = SyncState.Idle,
 )
-
