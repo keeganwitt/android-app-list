@@ -317,6 +317,7 @@ class MainActivity :
     ) {
         val label = parent.getItemAtPosition(position) as String
         val field = labelToFieldMap[label] ?: AppInfoField.DEFAULT
+        if (field == appListViewModel.uiState.value.selectedField) return
         maybeRequestUsagePermission(field) {
             appListViewModel.updateSelectedField(field)
             appSettings.setLastDisplayedAppInfoField(field)
@@ -347,15 +348,15 @@ class MainActivity :
     }
 
     private fun updateFieldSelection(field: AppInfoField) {
+        if (appListViewModel.uiState.value.selectedField != field) {
+            appListViewModel.updateSelectedField(field)
+            appSettings.setLastDisplayedAppInfoField(field)
+        }
         val label = fieldToLabelMap[field]
         val adapter = binding.spinner.adapter
         val index = (0 until adapter.count).indexOfFirst { adapter.getItem(it) == label }.coerceAtLeast(0)
         if (binding.spinner.selectedItemPosition != index) {
-            binding.spinner.setSelection(index)
-        }
-        if (appListViewModel.uiState.value.selectedField != field) {
-            appListViewModel.updateSelectedField(field)
-            appSettings.setLastDisplayedAppInfoField(field)
+            binding.spinner.setSelection(index, false)
         }
     }
 
