@@ -72,10 +72,10 @@ class SharedPreferencesAppSettings(
             try {
                 AppInfoField.valueOf(name)
             } catch (e: IllegalArgumentException) {
-                AppInfoField.VERSION
+                AppInfoField.DEFAULT
             }
         } else {
-            AppInfoField.VERSION
+            AppInfoField.DEFAULT
         }
     }
 

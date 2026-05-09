@@ -124,6 +124,8 @@ enum class AppInfoField(
     )
 
     companion object {
+        val DEFAULT = VERSION
+
         private val dateFormatCache =
             object : ThreadLocal<DateFormatCache>() {
                 override fun initialValue(): DateFormatCache {
