@@ -107,7 +107,7 @@ class MainActivity :
                         val usage = AndroidUsageStatsService(applicationContext, crashReporter = crashReporter)
                         val storage = AndroidStorageService(applicationContext, crashReporter = crashReporter)
                         val store = PlayStoreService(crashReporter = crashReporter)
-                        appRepository =
+                        val repository =
                             AndroidAppRepository(
                                 pkg,
                                 usage,
@@ -118,7 +118,7 @@ class MainActivity :
                             )
                         val vm =
                             AppListViewModel(
-                                appRepository,
+                                repository,
                                 DefaultDispatcherProvider(),
                                 SummaryCalculator(applicationContext, store),
                                 sizeFormatter = {
@@ -133,6 +133,7 @@ class MainActivity :
                     }
                 },
             )[AppListViewModel::class.java]
+        appRepository = appListViewModel.repository
         observeViewModel()
     }
 

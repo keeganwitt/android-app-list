@@ -63,4 +63,10 @@ class MainActivityTest {
         waitFor(500)
         onView(withId(R.id.toggleButton)).check(matches(isDisplayed()))
     }
+
+    @Test
+    fun mainActivity_whenRecreated_thenNoCrashOccurs() {
+        scenario.recreate()
+        assertEquals(Lifecycle.State.RESUMED, scenario.state)
+    }
 }
