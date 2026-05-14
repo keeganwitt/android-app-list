@@ -69,9 +69,7 @@ class PlayStoreService(
             } catch (e: Exception) {
                 val message = "Unable to make HTTP request to $url"
                 Log.w(TAG, message, e)
-                if (e !is java.io.IOException) {
-                    crashReporter?.recordException(e, message)
-                }
+                crashReporter?.recordException(e, message)
                 null
             }
         cache[packageName] = result

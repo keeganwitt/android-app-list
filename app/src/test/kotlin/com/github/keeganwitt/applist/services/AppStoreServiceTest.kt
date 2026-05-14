@@ -66,7 +66,7 @@ class AppStoreServiceTest {
                 val result = service.existsInAppStore(packageName, "com.android.vending")
 
                 assertNull(result)
-                verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+                verify { crashReporter.recordException(any(), any()) }
             } finally {
                 unmockkStatic(Log::class)
             }

@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class AppListViewModel(
-    private val repository: AppRepository,
+    val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
     private val summaryCalculator: SummaryCalculator,
     private val sizeFormatter: (Long) -> String,

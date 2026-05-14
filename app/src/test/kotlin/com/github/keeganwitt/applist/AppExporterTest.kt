@@ -217,7 +217,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertEquals(activity.getString(R.string.export_failed, exception.message), toast)
     }
@@ -241,7 +241,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertEquals(activity.getString(R.string.export_failed, "Failed to open output stream"), toast)
     }
@@ -305,7 +305,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertEquals(activity.getString(R.string.export_failed, exception.message), toast)
     }
@@ -331,7 +331,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue("Toast was: $toast", toast?.contains("Mocked SecurityException") == true)
     }
@@ -357,7 +357,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertTrue("Toast was: $toast", toast?.contains("Mocked IOException") == true)
     }
@@ -381,7 +381,7 @@ class AppExporterTest {
         exporter.writeToFile(uri, ExportFormat.XML)
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        verify { crashReporter.recordException(any(), any()) }
         val toast = ShadowToast.getTextOfLatestToast()
         assertEquals(activity.getString(R.string.export_failed, "Permission denied"), toast)
     }

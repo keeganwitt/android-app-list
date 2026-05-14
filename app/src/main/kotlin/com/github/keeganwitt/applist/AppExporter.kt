@@ -104,9 +104,7 @@ class AppExporter(
                     ).show()
             }
         } catch (e: Exception) {
-            if (e !is IOException && e !is SecurityException) {
-                crashReporter?.recordException(e, "Error exporting ${format.name}")
-            }
+            crashReporter?.recordException(e, "Error exporting ${format.name}")
             activity.runOnUiThread {
                 Toast
                     .makeText(
