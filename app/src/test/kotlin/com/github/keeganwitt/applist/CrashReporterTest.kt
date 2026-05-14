@@ -72,4 +72,31 @@ class CrashReporterTest {
         verify { crashlytics.recordException(exception1) }
         verify { crashlytics.recordException(exception2) }
     }
+
+    @Test
+    fun `given CancellationException, when record called, then crashlytics does not record exception`() {
+        val exception = kotlinx.coroutines.CancellationException("Test cancellation")
+
+        crashReporter.recordException(exception)
+
+        verify(exactly = 0) { crashlytics.recordException(exception) }
+    }
+
+    @Test
+    fun `given IOException, when record called, then crashlytics does not record exception`() {
+        val exception = java.io.IOException("Test IO error")
+
+        crashReporter.recordException(exception)
+
+        verify(exactly = 0) { crashlytics.recordException(exception) }
+    }
+
+    @Test
+    fun `given SecurityException, when record called, then crashlytics does not record exception`() {
+        val exception = SecurityException("Test permission error")
+
+        crashReporter.recordException(exception)
+
+        verify(exactly = 0) { crashlytics.recordException(exception) }
+    }
 }

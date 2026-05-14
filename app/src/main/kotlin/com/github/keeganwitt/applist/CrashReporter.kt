@@ -22,6 +22,12 @@ class FirebaseCrashReporter : CrashReporter {
         throwable: Throwable,
         message: String?,
     ) {
+        if (throwable is kotlinx.coroutines.CancellationException ||
+            throwable is java.io.IOException ||
+            throwable is SecurityException
+        ) {
+            return
+        }
         message?.let {
             android.util.Log.e("CrashReporter", it, throwable)
             crashlytics.log(it)
