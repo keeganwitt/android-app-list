@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ โหลดล้มเหลว</string>
     <string name="building_initial_cache">กำลังสร้างแคชเริ่มต้น…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">URL ร้านค้า</string>
 </resources>

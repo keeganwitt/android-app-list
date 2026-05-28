@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ 読み込み失敗</string>
     <string name="building_initial_cache">初期キャッシュを構築中…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">ストアURL</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="export_loading_failed" translatable="false">ERROR</string>
     <string name="building_initial_cache">Building initial cache…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">Store URL</string>
 </resources>

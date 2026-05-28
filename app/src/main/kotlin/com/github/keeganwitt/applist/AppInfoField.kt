@@ -62,6 +62,9 @@ enum class AppInfoField(
     REQUESTED_PERMISSIONS(R.string.appInfoField_requestedPermissions) {
         override fun getValue(app: App) = app.requestedPermissionsCount
     },
+    STORE_URL(R.string.appInfoField_storeUrl) {
+        override fun getValue(app: App) = app.storeUrl
+    },
     TARGET_SDK(R.string.appInfoField_targetSdk) {
         override fun getValue(app: App) = app.targetSdk
     },

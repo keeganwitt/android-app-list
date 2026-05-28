@@ -58,4 +58,5 @@
     <string name="loading_failed">⚠ Fyllel dhe luske</string>
     <string name="building_initial_cache">O kila kuddhas kynsa…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">URL Shoppa</string>
 </resources>

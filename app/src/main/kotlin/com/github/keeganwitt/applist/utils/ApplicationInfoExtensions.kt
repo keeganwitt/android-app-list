@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist.utils
 
 import android.content.pm.ApplicationInfo
 import android.os.Build
+import com.github.keeganwitt.applist.services.AppStoreService
 
 /**
  * Extension properties for [ApplicationInfo].
@@ -17,7 +18,7 @@ val ApplicationInfo.isArchivedApp: Boolean
         if (Build.VERSION.SDK_INT >= 35 && isArchived) {
             return true
         }
-        return metaData?.getBoolean("com.android.vending.archive") == true
+        return metaData?.getBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY) == true
     }
 
 /**

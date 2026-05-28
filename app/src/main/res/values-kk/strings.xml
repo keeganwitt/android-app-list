@@ -58,4 +58,5 @@
     <string name="loading_failed">⚠ Жүктеу сәтсіз аяқталды</string>
     <string name="building_initial_cache">Бастапқы кэш жасалуда…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">Дүкен URL мекенжайы</string>
 </resources>

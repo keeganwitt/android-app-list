@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ Gagal memuat</string>
     <string name="building_initial_cache">Membangun cache awal…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">URL Toko</string>
 </resources>

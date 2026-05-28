@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ লোড করতে ব্যর্থ</string>
     <string name="building_initial_cache">প্রাথমিক ক্যাশ তৈরি হচ্ছে…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">স্টোর ইউআরएल</string>
 </resources>

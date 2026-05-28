@@ -11,13 +11,13 @@ import com.github.keeganwitt.applist.services.PackageService
 import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
 import io.mockk.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -73,94 +73,100 @@ class AppRepositoryTest {
     }
 
     @Test
-    fun `given empty cache, when loadApps called, then it triggers sync and returns from DB when sync completes`() = runTest {
-        val appInfo = createApplicationInfo("com.test.app")
-        val packageInfo = createPackageInfo("1.0.0")
+    fun `given empty cache, when loadApps called, then it triggers sync and returns from DB when sync completes`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            val packageInfo = createPackageInfo("1.0.0")
 
-        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
-        every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Test App"
-        every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
-        every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
-        every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
-        coEvery { appStoreService.existsInAppStore(any<String>(), any<String>()) } returns true
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
+            every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Test App"
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
+            every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
+            coEvery { appStoreService.existsInAppStore(any<String>(), any<String>()) } returns true
 
-        val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
-        val result = flow.first { it.isNotEmpty() }
+            val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
+            val result = flow.first { it.isNotEmpty() }
 
-        assertEquals(1, result.size)
-        assertEquals("com.test.app", result[0].packageName)
-        coVerify { appDao.insertApps(any()) }
-    }
-
-    @Test
-    fun `given cached apps, when refreshCache called with uninstall, then it deletes from DB`() = runTest {
-        val cachedApp = createAppEntity("com.uninstalled.app")
-        dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
-
-        every { packageService.getInstalledApplications(any<Long>()) } returns emptyList()
-        every { packageService.getLaunchablePackages() } returns emptySet()
-
-        repository.refreshCache()
-
-        coVerify { appDao.deleteApps(listOf("com.uninstalled.app")) }
-        assertTrue(dbFlow.value.isEmpty())
-    }
-
-    @Test
-    fun `given stale cache, when refreshCache called, then it updates DB`() = runTest {
-        val staleTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)
-        val cachedApp = createAppEntity("com.test.app").copy(lastCachedAt = staleTime)
-        dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
-
-        val appInfo = createApplicationInfo("com.test.app")
-        val packageInfo = createPackageInfo("1.0.0")
-        packageInfo.lastUpdateTime = System.currentTimeMillis()
-
-        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
-        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
-        every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Updated App"
-
-        repository.refreshCache()
-
-        coVerify { appDao.insertApps(any<List<com.github.keeganwitt.applist.db.AppCacheEntity>>()) }
-        assertEquals("Updated App", dbFlow.value[0].name)
-    }
-
-    @Test
-    fun `given sync in progress, then syncState reflects progress`() = runTest {
-        val appInfo1 = createApplicationInfo("com.app1")
-        val appInfo2 = createApplicationInfo("com.app2")
-        every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo1, appInfo2)
-        every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
-
-        val states = mutableListOf<SyncState>()
-        val job = launch {
-            repository.getSyncState().collect { states.add(it) }
+            assertEquals(1, result.size)
+            assertEquals("com.test.app", result[0].packageName)
+            coVerify { appDao.insertApps(any()) }
         }
-        yield()
-        runCurrent()
-
-        repository.refreshCache()
-        yield()
-
-        assertTrue(states.any { it is SyncState.BuildingInitial })
-        assertTrue(states.last() is SyncState.Idle)
-        job.cancel()
-    }
 
     @Test
-    fun `given cached apps, then getCachedApps returns them`() = runTest {
-        val entity1 = createAppEntity("pkg1")
-        val entity2 = createAppEntity("pkg2")
-        coEvery { appDao.getAllApps() } returns listOf(entity1, entity2)
+    fun `given cached apps, when refreshCache called with uninstall, then it deletes from DB`() =
+        runTest {
+            val cachedApp = createAppEntity("com.uninstalled.app")
+            dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
 
-        val result = repository.getCachedApps()
+            every { packageService.getInstalledApplications(any<Long>()) } returns emptyList()
+            every { packageService.getLaunchablePackages() } returns emptySet()
 
-        assertEquals(2, result.size)
-        assertEquals("pkg1", result[0].packageName)
-        assertEquals("pkg2", result[1].packageName)
-    }
+            repository.refreshCache()
+
+            coVerify { appDao.deleteApps(listOf("com.uninstalled.app")) }
+            assertTrue(dbFlow.value.isEmpty())
+        }
+
+    @Test
+    fun `given stale cache, when refreshCache called, then it updates DB`() =
+        runTest {
+            val staleTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)
+            val cachedApp = createAppEntity("com.test.app").copy(lastCachedAt = staleTime)
+            dbFlow.value = listOf<com.github.keeganwitt.applist.db.AppCacheEntity>(cachedApp)
+
+            val appInfo = createApplicationInfo("com.test.app")
+            val packageInfo = createPackageInfo("1.0.0")
+            packageInfo.lastUpdateTime = System.currentTimeMillis()
+
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns packageInfo
+            every { packageService.loadLabel(any<ApplicationInfo>()) } returns "Updated App"
+
+            repository.refreshCache()
+
+            coVerify { appDao.insertApps(any<List<com.github.keeganwitt.applist.db.AppCacheEntity>>()) }
+            assertEquals("Updated App", dbFlow.value[0].name)
+        }
+
+    @Test
+    fun `given sync in progress, then syncState reflects progress`() =
+        runTest {
+            val appInfo1 = createApplicationInfo("com.app1")
+            val appInfo2 = createApplicationInfo("com.app2")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo1, appInfo2)
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+
+            val states = mutableListOf<SyncState>()
+            val job =
+                launch {
+                    repository.getSyncState().collect { states.add(it) }
+                }
+            yield()
+            runCurrent()
+
+            repository.refreshCache()
+            yield()
+
+            assertTrue(states.any { it is SyncState.BuildingInitial })
+            assertTrue(states.last() is SyncState.Idle)
+            job.cancel()
+        }
+
+    @Test
+    fun `given cached apps, then getCachedApps returns them`() =
+        runTest {
+            val entity1 = createAppEntity("pkg1")
+            val entity2 = createAppEntity("pkg2")
+            coEvery { appDao.getAllApps() } returns listOf(entity1, entity2)
+
+            val result = repository.getCachedApps()
+
+            assertEquals(2, result.size)
+            assertEquals("pkg1", result[0].packageName)
+            assertEquals("pkg2", result[1].packageName)
+        }
 
     @Test
     fun `given installed apps, when loadApps called, then apps are returned`() =
@@ -172,10 +178,12 @@ class AppRepositoryTest {
             every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
             every { packageService.getPackageInfo(any()) } returns packageInfo
             every { packageService.loadLabel(any()) } returns "Test App"
-            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
+            every { packageService.getInstallerPackageName(any()) } returns AppStoreService.GOOGLE_PLAY
             every { usageStatsService.getLastUsedEpochs(any()) } returns emptyMap()
             every { storageService.getStorageUsage(any()) } returns StorageUsage()
             every { appStoreService.installerDisplayName(any()) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test.app", AppStoreService.GOOGLE_PLAY) } returns
+                "https://play.google.com/store/apps/details?id=com.test.app"
             coEvery { appStoreService.existsInAppStore(any(), any()) } returns true
 
             val flow =
@@ -193,6 +201,7 @@ class AppRepositoryTest {
             assertEquals("com.test.app", result[0].packageName)
             assertEquals("Test App", result[0].name)
             assertEquals("1.0.0", result[0].versionName)
+            assertEquals("https://play.google.com/store/apps/details?id=com.test.app", result[0].storeUrl)
         }
 
     @Test
@@ -338,7 +347,7 @@ class AppRepositoryTest {
             every { packageService.getLaunchablePackages() } returns setOf("com.test.pkg.error")
             every { packageService.getPackageInfo(any()) } throws RuntimeException("Package Info Error")
             every { storageService.getStorageUsage(any()) } returns storageUsage
-            every { packageService.getInstallerPackageName(any()) } returns "com.android.vending"
+            every { packageService.getInstallerPackageName(any()) } returns AppStoreService.GOOGLE_PLAY
             every { appStoreService.installerDisplayName(any()) } returns "Google Play"
 
             val result =
@@ -417,7 +426,7 @@ class AppRepositoryTest {
         runTest {
             val appInfo =
                 createApplicationInfo(null).apply {
-                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                    metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns emptySet()
@@ -445,7 +454,7 @@ class AppRepositoryTest {
         runTest {
             val appInfo =
                 createApplicationInfo("com.test.archived").apply {
-                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                    metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns emptySet()
@@ -707,7 +716,7 @@ class AppRepositoryTest {
         runTest {
             val archivedApp =
                 createApplicationInfo("com.test.archived").apply {
-                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                    metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
             every { packageService.getLaunchablePackages() } returns emptySet()
@@ -730,7 +739,7 @@ class AppRepositoryTest {
         runTest {
             val archivedApp =
                 createApplicationInfo("com.test.archived").apply {
-                    metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                    metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any()) } returns listOf(archivedApp)
             every { packageService.getLaunchablePackages() } returns emptySet()
@@ -786,8 +795,8 @@ class AppRepositoryTest {
             assertEquals("1.1.0", dbFlow.value[0].versionName)
         }
 
-    private fun createAppEntity(packageName: String): com.github.keeganwitt.applist.db.AppCacheEntity {
-        return com.github.keeganwitt.applist.db.AppCacheEntity(
+    private fun createAppEntity(packageName: String): com.github.keeganwitt.applist.db.AppCacheEntity =
+        com.github.keeganwitt.applist.db.AppCacheEntity(
             packageName = packageName,
             name = "Name",
             versionName = "1.0",
@@ -798,7 +807,7 @@ class AppRepositoryTest {
             lastUpdated = 1000L,
             lastUsed = 1000L,
             sizes = StorageUsage(100, 200, 300, 400, 500),
-            installerName = "com.android.vending",
+            installerName = AppStoreService.GOOGLE_PLAY,
             existsInStore = true,
             grantedPermissionsCount = 5,
             requestedPermissionsCount = 10,
@@ -807,81 +816,87 @@ class AppRepositoryTest {
             hasLaunchIntent = true,
             isDetailed = true,
             failedFields = emptySet(),
-            lastCachedAt = System.currentTimeMillis()
+            lastCachedAt = System.currentTimeMillis(),
         )
-    }
 
     @Test
-    fun `given non-empty cache, when loadApps called, then it emits from DB immediately`() = runTest {
-        val cachedApp = createAppEntity("com.cached.app")
-        dbFlow.value = listOf(cachedApp)
+    fun `given non-empty cache, when loadApps called, then it emits from DB immediately`() =
+        runTest {
+            val cachedApp = createAppEntity("com.cached.app")
+            dbFlow.value = listOf(cachedApp)
 
-        val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
-        val result = flow.first()
+            val flow = repository.loadApps(AppInfoField.VERSION, false, false, false, false)
+            val result = flow.first()
 
-        assertEquals(1, result.size)
-        assertEquals("com.cached.app", result[0].packageName)
-    }
-
-    @Test
-    fun `given package info retrieval fails during reconciliation, when refreshCache called, then it skips the app`() = runTest {
-        val cachedApp = createAppEntity("com.test.app")
-        dbFlow.value = listOf(cachedApp)
-
-        val appInfo = createApplicationInfo("com.test.app")
-        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
-        every { packageService.getPackageInfo(appInfo) } throws RuntimeException("Package Info Error")
-
-        repository.refreshCache()
-
-        coVerify(exactly = 0) { appDao.insertApps(any()) }
-    }
-
-    @Test
-    fun `given app is up to date and not stale, when refreshCache called, then it does not sync the app`() = runTest {
-        val now = System.currentTimeMillis()
-        val cachedApp = createAppEntity("com.test.app").copy(
-            lastUpdated = now,
-            lastCachedAt = now
-        )
-        dbFlow.value = listOf(cachedApp)
-
-        val appInfo = createApplicationInfo("com.test.app")
-        val packageInfo = createPackageInfo("1.0").apply { lastUpdateTime = now }
-        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
-        every { packageService.getPackageInfo(appInfo) } returns packageInfo
-
-        repository.refreshCache()
-
-        coVerify(exactly = 0) { appDao.insertApps(any()) }
-    }
-
-    @Test
-    fun `given sync already in progress, when refreshCache called without force, then it returns early`() = runTest {
-        val appInfo = createApplicationInfo("com.app1")
-        every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
-        coEvery { appDao.getAllApps() } coAnswers {
-            kotlinx.coroutines.delay(1000)
-            emptyList()
+            assertEquals(1, result.size)
+            assertEquals("com.cached.app", result[0].packageName)
         }
-        
-        // Trigger first sync in background
-        val syncJob = launch {
+
+    @Test
+    fun `given package info retrieval fails during reconciliation, when refreshCache called, then it skips the app`() =
+        runTest {
+            val cachedApp = createAppEntity("com.test.app")
+            dbFlow.value = listOf(cachedApp)
+
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getPackageInfo(appInfo) } throws RuntimeException("Package Info Error")
+
             repository.refreshCache()
+
+            coVerify(exactly = 0) { appDao.insertApps(any()) }
         }
-        
-        // Wait for it to start and hit the delayed DAO call
-        yield()
-        runCurrent()
-        
-        // Now try another sync. The first is still in withLock or has already set _syncState.
-        repository.refreshCache(force = false)
-        
-        // Verify only 1 call was made to getInstalledApplications (from the first sync)
-        verify(exactly = 1) { packageService.getInstalledApplications(any()) }
-        
-        syncJob.join()
-    }
+
+    @Test
+    fun `given app is up to date and not stale, when refreshCache called, then it does not sync the app`() =
+        runTest {
+            val now = System.currentTimeMillis()
+            val cachedApp =
+                createAppEntity("com.test.app").copy(
+                    lastUpdated = now,
+                    lastCachedAt = now,
+                )
+            dbFlow.value = listOf(cachedApp)
+
+            val appInfo = createApplicationInfo("com.test.app")
+            val packageInfo = createPackageInfo("1.0").apply { lastUpdateTime = now }
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getPackageInfo(appInfo) } returns packageInfo
+
+            repository.refreshCache()
+
+            coVerify(exactly = 0) { appDao.insertApps(any()) }
+        }
+
+    @Test
+    fun `given sync already in progress, when refreshCache called without force, then it returns early`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.app1")
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            coEvery { appDao.getAllApps() } coAnswers {
+                kotlinx.coroutines.delay(1000)
+                emptyList()
+            }
+
+            // Trigger first sync in background
+            val syncJob =
+                launch {
+                    repository.refreshCache()
+                }
+
+            // Wait for it to start and hit the delayed DAO call
+            yield()
+            runCurrent()
+
+            // Now try another sync. The first is still in withLock or has already set _syncState.
+            repository.refreshCache(force = false)
+
+            // Verify only 1 call was made to getInstalledApplications (from the first sync)
+            verify(exactly = 1) { packageService.getInstalledApplications(any()) }
+
+            syncJob.join()
+        }
+
     @Test
     @Config(sdk = [35])
     fun `given SDK 35, when loadApps called, flags include MATCH_ARCHIVED_PACKAGES`() =

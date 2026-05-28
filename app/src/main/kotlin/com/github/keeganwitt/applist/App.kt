@@ -20,4 +20,5 @@ data class App(
     val hasLaunchIntent: Boolean = true,
     val isDetailed: Boolean = false,
     val failedFields: Set<AppInfoField> = emptySet(),
+    val storeUrl: String? = null,
 )

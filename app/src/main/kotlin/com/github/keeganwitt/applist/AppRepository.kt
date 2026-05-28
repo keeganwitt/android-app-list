@@ -222,6 +222,7 @@ class AndroidAppRepository(
             sizes = StorageUsage(),
             installerName = null,
             existsInStore = null,
+            storeUrl = null,
             grantedPermissionsCount = null,
             requestedPermissionsCount = null,
             enabled = ai.enabled,
@@ -301,10 +302,12 @@ class AndroidAppRepository(
             val installerPackage = packageService.getInstallerPackageName(ai)
             val installerName = appStoreService.installerDisplayName(installerPackage)
             val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
+            val storeUrl = appStoreService.appStoreLink(ai.packageName ?: "", installerPackage)
             app =
                 app.copy(
                     installerName = installerName,
                     existsInStore = existsInStore,
+                    storeUrl = storeUrl,
                 )
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to get installer info for ${ai.packageName}")

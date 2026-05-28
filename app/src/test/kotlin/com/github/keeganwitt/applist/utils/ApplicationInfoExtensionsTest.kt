@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist.utils
 
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import com.github.keeganwitt.applist.services.AppStoreService
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -32,7 +33,7 @@ class ApplicationInfoExtensionsTest {
             ReflectionHelpers.setField(appInfo, "isArchived", false)
         } catch (e: Throwable) {
         }
-        appInfo.metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+        appInfo.metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
         assertTrue(appInfo.isArchivedApp)
     }
 
@@ -41,7 +42,7 @@ class ApplicationInfoExtensionsTest {
     fun `given SDK 34 and metadata has archive key, then isArchivedApp returns true`() {
         val appInfo =
             ApplicationInfo().apply {
-                metaData = Bundle().apply { putBoolean("com.android.vending.archive", true) }
+                metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
             }
         assertTrue(appInfo.isArchivedApp)
     }

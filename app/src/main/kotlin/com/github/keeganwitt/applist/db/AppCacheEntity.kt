@@ -29,6 +29,7 @@ data class AppCacheEntity(
     val isDetailed: Boolean,
     val failedFields: Set<AppInfoField>,
     val lastCachedAt: Long,
+    val storeUrl: String? = null,
 )
 
 fun AppCacheEntity.toDomainModel(): App =
@@ -52,6 +53,7 @@ fun AppCacheEntity.toDomainModel(): App =
         hasLaunchIntent = hasLaunchIntent,
         isDetailed = isDetailed,
         failedFields = failedFields,
+        storeUrl = storeUrl,
     )
 
 fun App.toCacheEntity(lastCachedAt: Long): AppCacheEntity =
@@ -76,4 +78,5 @@ fun App.toCacheEntity(lastCachedAt: Long): AppCacheEntity =
         isDetailed = isDetailed,
         failedFields = failedFields,
         lastCachedAt = lastCachedAt,
+        storeUrl = storeUrl,
     )
