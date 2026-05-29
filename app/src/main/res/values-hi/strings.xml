@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ लोड करने में विफल</string>
     <string name="building_initial_cache">प्रारंभिक कैश बनाया जा रहा है…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">स्टोर यूआरएल</string>
 </resources>

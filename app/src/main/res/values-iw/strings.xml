@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ הטעינה נכשלה</string>
     <string name="building_initial_cache">בונה מטמון ראשוני…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">כתובת URL של החנות</string>
 </resources>

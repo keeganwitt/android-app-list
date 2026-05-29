@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ 載入失敗</string>
     <string name="building_initial_cache">正在建立初始快取…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">店鋪網址</string>
 </resources>

@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ لوڈ کرنے میں ناکامی</string>
     <string name="building_initial_cache">ابتدائی کیشے بنایا جا رہا ہے…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">اسٹور کا URL</string>
 </resources>

@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ Błąd ładowania</string>
     <string name="building_initial_cache">Budowanie początkowej pamięci podręcznej…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">Adres URL sklepu</string>
 </resources>

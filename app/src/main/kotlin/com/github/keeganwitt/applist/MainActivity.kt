@@ -30,7 +30,7 @@ import com.github.keeganwitt.applist.db.AppDatabase
 import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.AndroidStorageService
 import com.github.keeganwitt.applist.services.AndroidUsageStatsService
-import com.github.keeganwitt.applist.services.PlayStoreService
+import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
 import kotlinx.coroutines.flow.collectLatest
@@ -106,7 +106,7 @@ class MainActivity :
                         val pkg = AndroidPackageService(applicationContext)
                         val usage = AndroidUsageStatsService(applicationContext, crashReporter = crashReporter)
                         val storage = AndroidStorageService(applicationContext, crashReporter = crashReporter)
-                        val store = PlayStoreService(crashReporter = crashReporter)
+                        val store = DefaultAppStoreService(crashReporter = crashReporter)
                         val repository =
                             AndroidAppRepository(
                                 pkg,

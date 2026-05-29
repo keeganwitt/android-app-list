@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ Yükleme başarısız</string>
     <string name="building_initial_cache">İlk önbellek oluşturuluyor…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">Mağaza URL\'si</string>
 </resources>

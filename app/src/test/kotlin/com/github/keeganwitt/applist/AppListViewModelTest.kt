@@ -2,8 +2,8 @@ package com.github.keeganwitt.applist
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -217,16 +217,17 @@ class AppListViewModelTest {
         }
 
     @Test
-    fun `when toggleDescending called, then descending is toggled`() = runTest {
-        viewModel.setDescending(true)
-        assertTrue(viewModel.uiState.value.descending)
+    fun `when toggleDescending called, then descending is toggled`() =
+        runTest {
+            viewModel.setDescending(true)
+            assertTrue(viewModel.uiState.value.descending)
 
-        viewModel.toggleDescending()
-        assertFalse(viewModel.uiState.value.descending)
+            viewModel.toggleDescending()
+            assertFalse(viewModel.uiState.value.descending)
 
-        viewModel.toggleDescending()
-        assertTrue(viewModel.uiState.value.descending)
-    }
+            viewModel.toggleDescending()
+            assertTrue(viewModel.uiState.value.descending)
+        }
 
     @Test
     fun `given apps loaded, when setQuery called with empty string, then all items are shown`() =
@@ -452,7 +453,8 @@ class AppListViewModelTest {
         runTest {
             val syncStateFlow = kotlinx.coroutines.flow.MutableStateFlow<SyncState>(SyncState.Idle)
             every { repository.getSyncState() } returns syncStateFlow
-            val viewModel = AppListViewModel(repository, dispatcherProvider, summaryCalculator, { it.toString() }, "Unknown", "⚠ Failed to load")
+            val viewModel =
+                AppListViewModel(repository, dispatcherProvider, summaryCalculator, { it.toString() }, "Unknown", "⚠ Failed to load")
 
             viewModel.init(
                 AppInfoField.VERSION,

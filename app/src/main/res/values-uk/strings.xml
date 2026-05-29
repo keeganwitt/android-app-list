@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ Завантаження не вдалося</string>
     <string name="building_initial_cache">Створення початкового кешу…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">URL магазину</string>
 </resources>

@@ -12,7 +12,7 @@ class AppInfoFieldTest {
     fun `given AppInfoField enum, when entries accessed, then all fields are present`() {
         val entries = AppInfoField.entries
 
-        assertEquals(20, entries.size)
+        assertEquals(21, entries.size)
     }
 
     @Test
@@ -152,6 +152,14 @@ class AppInfoFieldTest {
     }
 
     @Test
+    fun `given STORE_URL field, when accessed, then has correct resource id`() {
+        val field = AppInfoField.STORE_URL
+
+        assertNotNull(field.titleResId)
+        assertEquals(R.string.appInfoField_storeUrl, field.titleResId)
+    }
+
+    @Test
     fun `given all fields, when accessed, then each has unique resource id`() {
         val resourceIds = AppInfoField.entries.map { it.titleResId }.toSet()
 
@@ -185,6 +193,7 @@ class AppInfoFieldTest {
                 grantedPermissionsCount = 5,
                 requestedPermissionsCount = 10,
                 enabled = true,
+                storeUrl = "https://test.url",
             )
 
         assertEquals(100L, AppInfoField.APK_SIZE.getValue(app))
@@ -212,6 +221,7 @@ class AppInfoFieldTest {
 
         assertEquals(5, AppInfoField.GRANTED_PERMISSIONS.getValue(app))
         assertEquals(10, AppInfoField.REQUESTED_PERMISSIONS.getValue(app))
+        assertEquals("https://test.url", AppInfoField.STORE_URL.getValue(app))
     }
 
     @Test
@@ -277,6 +287,7 @@ class AppInfoFieldTest {
                 grantedPermissionsCount = 5,
                 requestedPermissionsCount = 10,
                 enabled = true,
+                storeUrl = "https://test.url",
             )
 
         assertEquals("100", AppInfoField.APK_SIZE.getFormattedValue(app))
@@ -297,6 +308,7 @@ class AppInfoFieldTest {
         assertEquals("com.test", AppInfoField.PACKAGE_NAME.getFormattedValue(app))
         assertEquals("5", AppInfoField.GRANTED_PERMISSIONS.getFormattedValue(app))
         assertEquals("10", AppInfoField.REQUESTED_PERMISSIONS.getFormattedValue(app))
+        assertEquals("https://test.url", AppInfoField.STORE_URL.getFormattedValue(app))
 
         val dateFormat = DateFormat.getDateTimeInstance()
         assertEquals(dateFormat.format(Date(1000L)), AppInfoField.FIRST_INSTALLED.getFormattedValue(app))

@@ -296,12 +296,12 @@ class PackageServiceTest {
     fun `given SDK 30+, when getInstallerPackageName called, then returns installer package name`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val installSourceInfo = mockk<android.content.pm.InstallSourceInfo>()
-        every { installSourceInfo.installingPackageName } returns "com.android.vending"
+        every { installSourceInfo.installingPackageName } returns AppStoreService.GOOGLE_PLAY
         every { packageManager.getInstallSourceInfo("com.test.app") } returns installSourceInfo
 
         val result = service.getInstallerPackageName(appInfo)
 
-        assertEquals("com.android.vending", result)
+        assertEquals(AppStoreService.GOOGLE_PLAY, result)
     }
 
     @Test
@@ -310,11 +310,11 @@ class PackageServiceTest {
     fun `given legacy SDK, when getInstallerPackageName called, then returns installer package name`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         @Suppress("DEPRECATION")
-        every { packageManager.getInstallerPackageName("com.test.app") } returns "com.android.vending"
+        every { packageManager.getInstallerPackageName("com.test.app") } returns AppStoreService.GOOGLE_PLAY
 
         val result = service.getInstallerPackageName(appInfo)
 
-        assertEquals("com.android.vending", result)
+        assertEquals(AppStoreService.GOOGLE_PLAY, result)
     }
 
     @Test

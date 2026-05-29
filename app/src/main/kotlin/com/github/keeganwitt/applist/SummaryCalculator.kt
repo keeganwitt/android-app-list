@@ -18,6 +18,7 @@ import com.github.keeganwitt.applist.AppInfoField.MIN_SDK
 import com.github.keeganwitt.applist.AppInfoField.PACKAGE_MANAGER
 import com.github.keeganwitt.applist.AppInfoField.PACKAGE_NAME
 import com.github.keeganwitt.applist.AppInfoField.REQUESTED_PERMISSIONS
+import com.github.keeganwitt.applist.AppInfoField.STORE_URL
 import com.github.keeganwitt.applist.AppInfoField.TARGET_SDK
 import com.github.keeganwitt.applist.AppInfoField.TOTAL_SIZE
 import com.github.keeganwitt.applist.AppInfoField.VERSION
@@ -129,7 +130,7 @@ class SummaryCalculator(
                 calculatePackageManagerSummary(apps)
             }
 
-            APP_NAME, PACKAGE_NAME, VERSION -> {
+            APP_NAME, PACKAGE_NAME, VERSION, STORE_URL -> {
                 null
             }
         }

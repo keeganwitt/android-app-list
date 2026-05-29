@@ -57,4 +57,5 @@
     <string name="loading_failed">⚠ Nabigo ang paglo-load</string>
     <string name="building_initial_cache">Binubuo ang initial cache…</string>
     <string name="sync_progress">%1$d / %2$d</string>
+    <string name="appInfoField_storeUrl">URL ng Store</string>
 </resources>
