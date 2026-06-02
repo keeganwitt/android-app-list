@@ -18,7 +18,21 @@ class AppItemUiModelTest {
         assertEquals("com.test.app", model.packageName)
         assertEquals("Test App", model.appName)
         assertEquals("1.0.0", model.infoText)
+        assertEquals(null, model.infoUrl)
         assertFalse(model.isLoading)
+    }
+
+    @Test
+    fun `given AppItemUiModel created with infoUrl, then infoUrl is set`() {
+        val model =
+            AppItemUiModel(
+                packageName = "com.test.app",
+                appName = "Test App",
+                infoText = "https://test.url",
+                infoUrl = "https://test.url",
+            )
+
+        assertEquals("https://test.url", model.infoUrl)
     }
 
     @Test

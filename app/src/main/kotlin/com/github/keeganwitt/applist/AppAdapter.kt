@@ -1,9 +1,13 @@
 package com.github.keeganwitt.applist
 
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -44,13 +48,46 @@ class AppAdapter(
 
         binding.packageName.text = item.packageName
         binding.appName.text = item.appName
-        binding.appInfo.movementMethod = LinkMovementMethod.getInstance()
-        binding.appInfo.text = item.infoText
+        bindAppInfo(binding.appInfo, item)
         binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
+    }
+
+    private fun bindAppInfo(
+        appInfo: TextView,
+        item: AppItemUiModel,
+    ) {
+        val infoUrl = item.infoUrl
+        if (infoUrl == null) {
+            appInfo.text = item.infoText
+            appInfo.movementMethod = null
+            appInfo.linksClickable = false
+            appInfo.isClickable = false
+            return
+        }
+
+        val linkText =
+            SpannableString(item.infoText).apply {
+                setSpan(
+                    object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            onClickListener.onStoreUrlClick(infoUrl)
+                        }
+                    },
+                    0,
+                    item.infoText.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                )
+            }
+        appInfo.text = linkText
+        appInfo.movementMethod = LinkMovementMethod.getInstance()
+        appInfo.linksClickable = true
+        appInfo.isClickable = true
     }
 
     interface OnClickListener {
         fun onClick(position: Int)
+
+        fun onStoreUrlClick(url: String)
     }
 
     inner class AppInfoViewHolder(
