@@ -163,7 +163,8 @@ class AppListViewModel(
                 ""
             } else if (field in app.failedFields) {
                 loadingFailedValue
-            } else if (field.isSize && rawValue is Long &&
+            } else if (field.isSize &&
+                rawValue is Long &&
                 (rawValue > 0 || (field != AppInfoField.APK_SIZE && field != AppInfoField.TOTAL_SIZE))
             ) {
                 sizeFormatter(rawValue)
@@ -174,6 +175,7 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
+            infoUrl = info.takeIf { field == AppInfoField.STORE_URL && it.isNotBlank() },
             isLoading = !app.isDetailed,
         )
     }

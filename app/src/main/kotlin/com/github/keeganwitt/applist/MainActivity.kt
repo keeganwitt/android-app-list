@@ -310,6 +310,10 @@ class MainActivity :
         startActivity(intent)
     }
 
+    override fun onStoreUrlClick(url: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    }
+
     override fun onItemSelected(
         parent: AdapterView<*>,
         view: View?,

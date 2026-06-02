@@ -333,6 +333,26 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given store URL field, when mapToItem called, then info URL is set`() =
+        runTest {
+            val storeUrl = "https://play.google.com/store/apps/details?id=com.test.app"
+            val app = createTestApp("com.test.app", "Test App").copy(storeUrl = storeUrl)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.STORE_URL,
+                initialShowSystem = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val item = viewModel.uiState.value.items[0]
+            assertEquals(storeUrl, item.infoText)
+            assertEquals(storeUrl, item.infoUrl)
+        }
+
+    @Test
     fun `given size field, when mapToItem called, then sizeFormatter is used`() =
         runTest {
             val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))
