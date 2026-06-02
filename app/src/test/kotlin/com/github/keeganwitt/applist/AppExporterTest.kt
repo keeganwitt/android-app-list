@@ -1,7 +1,9 @@
 package com.github.keeganwitt.applist
 
+import android.app.Activity
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import androidx.activity.result.ActivityResultCallback
@@ -130,7 +132,7 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
@@ -163,7 +165,7 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
@@ -454,7 +456,7 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
@@ -475,7 +477,7 @@ class AppExporterTest {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 capture(callbackSlot),
             )
         } returns mockk(relaxed = true)
@@ -514,14 +516,41 @@ class AppExporterTest {
     }
 
     @Test
-    fun export_selectsCsv_launchesCsvPicker() {
+    fun export_createDocumentIntentUsesSelectedFormatMimeTypeAndTitle() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val launcher = mockk<ActivityResultLauncher<String>>(relaxed = true)
+        val contractSlot = slot<ActivityResultContract<ExportFormat, Uri?>>()
         every {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                capture(contractSlot),
+                any(),
+            )
+        } returns mockk<ActivityResultLauncher<ExportFormat>>(relaxed = true)
+
+        AppExporter(activity, repository, formatter, appSettings, crashReporter, testDispatchers, registry)
+
+        ExportFormat.entries.forEach { format ->
+            val intent = contractSlot.captured.createIntent(activity, format)
+            assertEquals(Intent.ACTION_CREATE_DOCUMENT, intent.action)
+            assertTrue(intent.categories?.contains(Intent.CATEGORY_OPENABLE) == true)
+            assertEquals(format.mimeType, intent.type)
+            assertEquals("app-list.${format.extension}", intent.getStringExtra(Intent.EXTRA_TITLE))
+        }
+
+        val uri = Uri.parse("content://dummy/export")
+        assertEquals(uri, contractSlot.captured.parseResult(Activity.RESULT_OK, Intent().setData(uri)))
+    }
+
+    @Test
+    fun export_selectsCsv_launchesCsvPicker() {
+        val registry = mockk<ActivityResultRegistry>(relaxed = true)
+        val launcher = mockk<ActivityResultLauncher<ExportFormat>>(relaxed = true)
+        every {
+            registry.register(
+                any(),
+                any(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 any(),
             )
         } returns launcher
@@ -540,18 +569,18 @@ class AppExporterTest {
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { launcher.launch(match { it.endsWith(".csv") }) }
+        verify { launcher.launch(ExportFormat.CSV) }
     }
 
     @Test
     fun export_selectsHtml_launchesHtmlPicker() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val launcher = mockk<ActivityResultLauncher<String>>(relaxed = true)
+        val launcher = mockk<ActivityResultLauncher<ExportFormat>>(relaxed = true)
         every {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 any(),
             )
         } returns launcher
@@ -570,18 +599,18 @@ class AppExporterTest {
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { launcher.launch(match { it.endsWith(".html") }) }
+        verify { launcher.launch(ExportFormat.HTML) }
     }
 
     @Test
     fun export_selectsTsv_launchesTsvPicker() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
-        val launcher = mockk<ActivityResultLauncher<String>>(relaxed = true)
+        val launcher = mockk<ActivityResultLauncher<ExportFormat>>(relaxed = true)
         every {
             registry.register(
                 any(),
                 any(),
-                any<ActivityResultContract<String, Uri?>>(),
+                any<ActivityResultContract<ExportFormat, Uri?>>(),
                 any(),
             )
         } returns launcher
@@ -600,6 +629,6 @@ class AppExporterTest {
         dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
         Shadows.shadowOf(activity.mainLooper).idle()
 
-        verify { launcher.launch(match { it.endsWith(".tsv") }) }
+        verify { launcher.launch(ExportFormat.TSV) }
     }
 }
