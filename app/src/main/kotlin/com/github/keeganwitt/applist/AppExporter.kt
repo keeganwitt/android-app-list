@@ -1,11 +1,14 @@
 package com.github.keeganwitt.applist
 
+import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
 import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +31,21 @@ class AppExporter(
         registry.register(
             "app_exporter_${System.identityHashCode(this)}",
             activity,
-            ActivityResultContracts.CreateDocument("text/plain"),
+            object : ActivityResultContract<ExportFormat, Uri?>() {
+                override fun createIntent(
+                    context: Context,
+                    input: ExportFormat,
+                ): Intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType(input.mimeType)
+                        .putExtra(Intent.EXTRA_TITLE, "app-list.${input.extension}")
+
+                override fun parseResult(
+                    resultCode: Int,
+                    intent: Intent?,
+                ): Uri? = if (resultCode == Activity.RESULT_OK) intent?.data else null
+            },
         ) { uri ->
             uri?.let {
                 val format = pendingExportFormat ?: ExportFormat.XML
@@ -55,7 +72,7 @@ class AppExporter(
                         else -> ExportFormat.XML
                     }
                 pendingExportFormat = format
-                exportLauncher.launch("app-list." + format.extension)
+                exportLauncher.launch(format)
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
     }
