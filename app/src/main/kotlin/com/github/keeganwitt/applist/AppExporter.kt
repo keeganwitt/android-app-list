@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedWriter
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.io.Writer
@@ -147,7 +148,7 @@ class AppExporter(
                 activity.contentResolver.openOutputStream(uri)
                     ?: throw IOException("Failed to open output stream")
             outputStream.use { stream ->
-                val writer = OutputStreamWriter(stream, StandardCharsets.UTF_8)
+                val writer = BufferedWriter(OutputStreamWriter(stream, StandardCharsets.UTF_8))
                 writeAction(writer)
                 writer.flush()
             }
