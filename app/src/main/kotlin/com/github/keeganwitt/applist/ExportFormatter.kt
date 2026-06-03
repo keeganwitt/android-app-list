@@ -109,20 +109,8 @@ class ExportFormatter {
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
-        val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
-        writer.append("App Name,Package Name")
-        fields.forEach { field ->
-            writer.append(",").append(field.name)
-        }
-        writer.append("\n")
-
-        apps.forEach { app ->
-            writer.append("\"").append(app.name.replace("\"", "\"\"")).append("\",")
-            writer.append("\"").append(app.packageName.replace("\"", "\"\"")).append("\"")
-            fields.forEach { field ->
-                writer.append(",\"").append(field.getFormattedValue(app).replace("\"", "\"\"")).append("\"")
-            }
-            writer.append("\n")
+        writeDelimited(writer, apps, includeUsageStats, ",") { value ->
+            "\"${value.replace("\"", "\"\"")}\""
         }
     }
 
@@ -131,18 +119,28 @@ class ExportFormatter {
         apps: List<App>,
         includeUsageStats: Boolean,
     ) {
+        writeDelimited(writer, apps, includeUsageStats, "\t") { it.escapeTsv() }
+    }
+
+    private fun writeDelimited(
+        writer: Writer,
+        apps: List<App>,
+        includeUsageStats: Boolean,
+        delimiter: String,
+        escape: (String) -> String,
+    ) {
         val fields = AppInfoField.entries.filter { includeUsageStats || !it.requiresUsageStats }
-        writer.append("App Name\tPackage Name")
+        writer.append("App Name").append(delimiter).append("Package Name")
         fields.forEach { field ->
-            writer.append("\t").append(field.name)
+            writer.append(delimiter).append(field.name)
         }
         writer.append("\n")
 
         apps.forEach { app ->
-            writer.append(app.name.escapeTsv()).append("\t")
-            writer.append(app.packageName.escapeTsv())
+            writer.append(escape(app.name)).append(delimiter)
+            writer.append(escape(app.packageName))
             fields.forEach { field ->
-                writer.append("\t").append(field.getFormattedValue(app).escapeTsv())
+                writer.append(delimiter).append(escape(field.getFormattedValue(app)))
             }
             writer.append("\n")
         }
