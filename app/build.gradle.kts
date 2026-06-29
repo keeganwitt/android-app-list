@@ -7,6 +7,12 @@ plugins {
     id("com.google.devtools.ksp") version "2.3.9"
 }
 
+val googleServicesJson = file("google-services.json")
+if (!googleServicesJson.exists()) {
+    println("google-services.json not found, creating from template")
+    file("google-services.json.template").copyTo(googleServicesJson)
+}
+
 kotlin {
     jvmToolchain(21)
 }
