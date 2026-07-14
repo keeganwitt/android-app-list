@@ -40,7 +40,7 @@ sealed class SyncState {
 interface AppRepository {
     fun loadApps(
         field: AppInfoField,
-        showSystemApps: Boolean,
+        systemAppsOnly: Boolean,
         showArchivedApps: Boolean,
         descending: Boolean,
         reload: Boolean,
@@ -68,7 +68,7 @@ class AndroidAppRepository(
 
     override fun loadApps(
         field: AppInfoField,
-        showSystemApps: Boolean,
+        systemAppsOnly: Boolean,
         showArchivedApps: Boolean,
         descending: Boolean,
         reload: Boolean,
@@ -78,7 +78,7 @@ class AndroidAppRepository(
             val initialEntities = appDao.getAllApps()
             if (initialEntities.isNotEmpty()) {
                 val apps = initialEntities.map { it.toDomainModel() }
-                send(sortAndFilter(apps, field, showSystemApps, showArchivedApps, descending))
+                send(sortAndFilter(apps, field, systemAppsOnly, showArchivedApps, descending))
             }
 
             // Trigger sync in background if needed or if reload is true
@@ -89,14 +89,14 @@ class AndroidAppRepository(
             // Now observe DB for updates
             appDao.getAllAppsFlow().collect { entities ->
                 val apps = entities.map { it.toDomainModel() }
-                send(sortAndFilter(apps, field, showSystemApps, showArchivedApps, descending))
+                send(sortAndFilter(apps, field, systemAppsOnly, showArchivedApps, descending))
             }
         }
 
     private fun sortAndFilter(
         apps: List<App>,
         field: AppInfoField,
-        showSystemApps: Boolean,
+        systemAppsOnly: Boolean,
         showArchivedApps: Boolean,
         descending: Boolean,
     ): List<App> {
@@ -106,7 +106,7 @@ class AndroidAppRepository(
                 val isUserInstalled = app.isUserInstalled
                 val hasLaunch = app.hasLaunchIntent
                 val isVisible = if (archived) showArchivedApps else hasLaunch
-                (showSystemApps || isUserInstalled) && isVisible
+                (if (systemAppsOnly) !isUserInstalled else isUserInstalled) && isVisible
             }
         return sortApps(filtered, field, descending)
     }

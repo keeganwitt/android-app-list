@@ -2,6 +2,8 @@ package com.github.keeganwitt.applist
 
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -22,6 +24,13 @@ class MainActivityTest {
 
     @Before
     fun setup() {
+        InstrumentationRegistry
+            .getInstrumentation()
+            .targetContext
+            .getSharedPreferences(
+                InstrumentationRegistry.getInstrumentation().targetContext.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX,
+                android.content.Context.MODE_PRIVATE,
+            ).edit().clear().commit()
         scenario = ActivityScenario.launch(MainActivity::class.java)
         waitFor(3000)
     }
@@ -62,6 +71,29 @@ class MainActivityTest {
         onView(withId(R.id.toggleButton)).perform(click())
         waitFor(500)
         onView(withId(R.id.toggleButton)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun mainActivity_whenSystemAppsToggleClicked_thenCheckedStateAndIconChange() {
+        scenario.onActivity { activity ->
+            val menu = MenuBuilder(activity)
+            activity.onCreateOptionsMenu(menu)
+            val item = menu.findItem(R.id.systemAppToggle)
+
+            assertEquals(false, item.isChecked)
+            assertEquals(
+                activity.getDrawable(R.drawable.ic_system_apps_on)?.constantState,
+                item.icon?.constantState,
+            )
+
+            activity.onOptionsItemSelected(item)
+
+            assertEquals(true, item.isChecked)
+            assertEquals(
+                activity.getDrawable(R.drawable.ic_system_apps_off)?.constantState,
+                item.icon?.constantState,
+            )
+        }
     }
 
     @Test

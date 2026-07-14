@@ -2,7 +2,7 @@ package com.github.keeganwitt.applist
 
 data class UiState(
     val selectedField: AppInfoField = AppInfoField.DEFAULT,
-    val showSystem: Boolean = false,
+    val systemAppsOnly: Boolean = false,
     val showArchived: Boolean = false,
     val descending: Boolean = false,
     val query: String = "",

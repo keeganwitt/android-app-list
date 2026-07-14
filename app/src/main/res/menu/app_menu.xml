@@ -12,7 +12,7 @@
   <item
       android:id="@+id/systemAppToggle"
       android:title="@string/systemAppToggle"
-      android:icon="@drawable/system_apps_toggle_selector"
+      android:icon="@drawable/ic_system_apps_on"
       android:checkable="true"
       app:showAsAction="ifRoom" />
   <item
