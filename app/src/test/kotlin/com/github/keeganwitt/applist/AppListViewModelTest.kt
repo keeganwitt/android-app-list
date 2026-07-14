@@ -67,7 +67,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -81,7 +81,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
@@ -97,7 +97,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -112,7 +112,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.TARGET_SDK,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
@@ -128,7 +128,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -144,7 +144,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = true,
                     reload = false,
@@ -153,7 +153,7 @@ class AppListViewModelTest {
         }
 
     @Test
-    fun `given apps loaded, when setShowSystem called with true, then system apps are shown`() =
+    fun `given apps loaded, when setSystemAppsOnly called with true, then system apps are shown`() =
         runTest {
             val mockApps =
                 listOf(
@@ -164,22 +164,22 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
             advanceUntilIdle()
 
-            viewModel.setShowSystem(true)
+            viewModel.setSystemAppsOnly(true)
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
-            assertTrue(state.showSystem)
+            assertTrue(state.systemAppsOnly)
             coVerify {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = true,
+                    systemAppsOnly = true,
                     showArchivedApps = false,
                     descending = false,
                     reload = true,
@@ -200,7 +200,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -241,7 +241,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -265,7 +265,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -278,7 +278,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = any(),
@@ -288,7 +288,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = true,
@@ -303,7 +303,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -322,7 +322,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -341,7 +341,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.STORE_URL,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -363,7 +363,7 @@ class AppListViewModelTest {
 
             viewModelWithSizeFormatter.init(
                 AppInfoField.APK_SIZE,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -385,7 +385,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -410,7 +410,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -438,7 +438,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -457,7 +457,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -478,7 +478,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -502,7 +502,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.ENABLED,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -522,7 +522,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.ENABLED,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -551,7 +551,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.ENABLED,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -577,7 +577,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -602,7 +602,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -671,7 +671,7 @@ class AppListViewModelTest {
                 coEvery { repository.loadApps(field, any(), any(), any(), any()) } returns flowOf(listOf(app))
                 viewModel.init(
                     field,
-                    initialShowSystem = false,
+                    initialSystemAppsOnly = false,
                     initialShowArchived = false,
                     initialDescending = false,
                 )
@@ -733,7 +733,7 @@ class AppListViewModelTest {
                 coEvery { repository.loadApps(field, any(), any(), any(), any()) } returns flowOf(listOf(app))
                 viewModel.init(
                     field,
-                    initialShowSystem = false,
+                    initialSystemAppsOnly = false,
                     initialShowArchived = false,
                     initialDescending = false,
                 )
@@ -781,7 +781,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -808,7 +808,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -831,7 +831,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.APK_SIZE,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -851,7 +851,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.APP_NAME,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -869,7 +869,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.PACKAGE_NAME,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -887,7 +887,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -906,7 +906,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -938,7 +938,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -956,7 +956,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -983,7 +983,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -998,7 +998,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = true,
                     descending = false,
                     reload = true,
@@ -1014,7 +1014,7 @@ class AppListViewModelTest {
 
             viewModel.init(
                 AppInfoField.VERSION,
-                initialShowSystem = false,
+                initialSystemAppsOnly = false,
                 initialShowArchived = false,
                 initialDescending = false,
             )
@@ -1029,7 +1029,7 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(
                     AppInfoField.ARCHIVED,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = true,
                     descending = false,
                     reload = false,

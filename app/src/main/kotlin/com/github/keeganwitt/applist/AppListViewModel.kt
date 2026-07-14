@@ -34,14 +34,14 @@ class AppListViewModel(
 
     fun init(
         initialField: AppInfoField,
-        initialShowSystem: Boolean,
+        initialSystemAppsOnly: Boolean,
         initialShowArchived: Boolean,
         initialDescending: Boolean,
     ) {
         _uiState.update {
             it.copy(
                 selectedField = initialField,
-                showSystem = initialShowSystem,
+                systemAppsOnly = initialSystemAppsOnly,
                 showArchived = initialShowArchived,
                 descending = initialDescending,
             )
@@ -63,8 +63,8 @@ class AppListViewModel(
         setDescending(!_uiState.value.descending)
     }
 
-    fun setShowSystem(show: Boolean) {
-        _uiState.update { it.copy(showSystem = show) }
+    fun setSystemAppsOnly(enabled: Boolean) {
+        _uiState.update { it.copy(systemAppsOnly = enabled) }
         loadApps(reload = true)
     }
 
@@ -94,7 +94,7 @@ class AppListViewModel(
                 repository
                     .loadApps(
                         field = state.selectedField,
-                        showSystemApps = state.showSystem,
+                        systemAppsOnly = state.systemAppsOnly,
                         showArchivedApps = state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
                         descending = state.descending,
                         reload = reload,

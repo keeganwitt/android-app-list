@@ -11,7 +11,7 @@ class UiStateTest {
         val state = UiState()
 
         assertEquals(AppInfoField.VERSION, state.selectedField)
-        assertFalse(state.showSystem)
+        assertFalse(state.systemAppsOnly)
         assertFalse(state.descending)
         assertEquals("", state.query)
         assertFalse(state.isLoading)
@@ -28,12 +28,12 @@ class UiStateTest {
     }
 
     @Test
-    fun `given UiState, when copy with showSystem, then showSystem is updated`() {
+    fun `given UiState, when copy with systemAppsOnly, then systemAppsOnly is updated`() {
         val state = UiState()
 
-        val newState = state.copy(showSystem = true)
+        val newState = state.copy(systemAppsOnly = true)
 
-        assertTrue(newState.showSystem)
+        assertTrue(newState.systemAppsOnly)
     }
 
     @Test
@@ -88,7 +88,7 @@ class UiStateTest {
         val newState =
             state.copy(
                 selectedField = AppInfoField.MIN_SDK,
-                showSystem = true,
+                systemAppsOnly = true,
                 descending = true,
                 query = "search",
                 isLoading = true,
@@ -96,7 +96,7 @@ class UiStateTest {
             )
 
         assertEquals(AppInfoField.MIN_SDK, newState.selectedField)
-        assertTrue(newState.showSystem)
+        assertTrue(newState.systemAppsOnly)
         assertTrue(newState.descending)
         assertEquals("search", newState.query)
         assertTrue(newState.isLoading)

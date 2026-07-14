@@ -21,9 +21,9 @@ interface AppSettings {
 
     fun setIncludeUsageStatsInExportEnabled(enabled: Boolean)
 
-    fun isShowSystemAppsEnabled(): Boolean
+    fun isSystemAppsOnlyEnabled(): Boolean
 
-    fun setShowSystemAppsEnabled(enabled: Boolean)
+    fun setSystemAppsOnlyEnabled(enabled: Boolean)
 
     fun isShowArchivedAppsEnabled(): Boolean
 
@@ -107,9 +107,9 @@ class SharedPreferencesAppSettings(
         preferences.edit { putBoolean(AppSettings.KEY_INCLUDE_USAGE_STATS_IN_EXPORT, enabled) }
     }
 
-    override fun isShowSystemAppsEnabled(): Boolean = preferences.getBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, false)
+    override fun isSystemAppsOnlyEnabled(): Boolean = preferences.getBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, false)
 
-    override fun setShowSystemAppsEnabled(enabled: Boolean) {
+    override fun setSystemAppsOnlyEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(AppSettings.KEY_SHOW_SYSTEM_APPS, enabled) }
     }
 

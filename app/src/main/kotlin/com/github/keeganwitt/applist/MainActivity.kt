@@ -170,7 +170,7 @@ class MainActivity :
             binding.spinner.onItemSelectedListener = this
             appListViewModel.init(
                 AppInfoField.DEFAULT,
-                appSettings.isShowSystemAppsEnabled(),
+                appSettings.isSystemAppsOnlyEnabled(),
                 appSettings.isShowArchivedAppsEnabled(),
                 appSettings.isDescending(),
             )
@@ -186,7 +186,7 @@ class MainActivity :
             binding.spinner.onItemSelectedListener = this
             appListViewModel.init(
                 lastDisplayedField,
-                appSettings.isShowSystemAppsEnabled(),
+                appSettings.isSystemAppsOnlyEnabled(),
                 appSettings.isShowArchivedAppsEnabled(),
                 appSettings.isDescending(),
             )
@@ -214,7 +214,7 @@ class MainActivity :
                     val shouldInvalidate =
                         latestState.isFullyLoaded != state.isFullyLoaded ||
                             (latestState.summary == null) != (state.summary == null) ||
-                            latestState.showSystem != state.showSystem ||
+                            latestState.systemAppsOnly != state.systemAppsOnly ||
                             latestState.showArchived != state.showArchived ||
                             latestState.selectedField != state.selectedField
                     latestState = state
@@ -256,7 +256,8 @@ class MainActivity :
         ignoreQueryChanges = false
         menuInflater.inflate(R.menu.app_menu, menu)
 
-        menu.findItem(R.id.systemAppToggle).isChecked = latestState.showSystem
+        val systemAppsToggle = menu.findItem(R.id.systemAppToggle)
+        updateSystemAppsToggle(systemAppsToggle, latestState.systemAppsOnly)
 
         val archivedToggle = menu.findItem(R.id.archivedAppToggle)
         val isArchivedFieldSelected = latestState.selectedField == AppInfoField.ARCHIVED
@@ -378,9 +379,10 @@ class MainActivity :
             }
 
             R.id.systemAppToggle -> {
-                val newValue = !latestState.showSystem
-                appListViewModel.setShowSystem(newValue)
-                appSettings.setShowSystemAppsEnabled(newValue)
+                val newValue = !latestState.systemAppsOnly
+                appListViewModel.setSystemAppsOnly(newValue)
+                appSettings.setSystemAppsOnlyEnabled(newValue)
+                updateSystemAppsToggle(item, newValue)
                 return true
             }
 
@@ -425,6 +427,14 @@ class MainActivity :
             .setView(view)
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    private fun updateSystemAppsToggle(
+        item: MenuItem,
+        systemAppsOnly: Boolean,
+    ) {
+        item.isChecked = systemAppsOnly
+        item.setIcon(if (systemAppsOnly) R.drawable.ic_system_apps_off else R.drawable.ic_system_apps_on)
     }
 
     private fun maybeRequestUsagePermission(

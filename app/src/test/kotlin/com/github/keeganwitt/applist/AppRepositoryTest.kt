@@ -189,7 +189,7 @@ class AppRepositoryTest {
             val flow =
                 repository.loadApps(
                     field = AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
@@ -205,7 +205,7 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given system apps, when loadApps called with showSystemApps false, filtered list is returned`() =
+    fun `given system apps, when loadApps called with systemAppsOnly false, filtered list is returned`() =
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
@@ -220,7 +220,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -231,7 +231,7 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given system apps, when loadApps called with showSystemApps true, system apps are included`() =
+    fun `given system apps, when loadApps called with systemAppsOnly true, only system apps are returned`() =
         runTest {
             val userApp = createApplicationInfo("com.test.userapp", isSystemApp = false)
             val systemApp = createApplicationInfo("com.android.system", isSystemApp = true)
@@ -246,13 +246,33 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = true,
+                        systemAppsOnly = true,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
                     ).first { it.isNotEmpty() }
 
-            assertEquals(2, result.size)
+            assertEquals(1, result.size)
+            assertEquals("com.android.system", result[0].packageName)
+        }
+
+    @Test
+    fun `given non-launchable user app, when user apps are selected, then it is filtered out`() =
+        runTest {
+            val app = createApp(packageName = "com.test.nonlaunchable").copy(hasLaunchIntent = false)
+            dbFlow.value = listOf(app.toCacheEntity(System.currentTimeMillis()))
+
+            val result =
+                repository
+                    .loadApps(
+                        field = AppInfoField.VERSION,
+                        systemAppsOnly = false,
+                        showArchivedApps = false,
+                        descending = false,
+                        reload = false,
+                    ).first()
+
+            assertTrue(result.isEmpty())
         }
 
     @Test
@@ -274,7 +294,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = true,
                         reload = false,
@@ -300,7 +320,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -326,7 +346,7 @@ class AppRepositoryTest {
             val flow =
                 repository.loadApps(
                     field = AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
@@ -354,7 +374,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -381,7 +401,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -407,7 +427,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -425,7 +445,7 @@ class AppRepositoryTest {
     fun `given app with null package name, when loadApps called, then it handles it safely`() =
         runTest {
             val appInfo =
-                createApplicationInfo(null).apply {
+                createApplicationInfo(null, isSystemApp = true).apply {
                     metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
@@ -438,7 +458,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         field = AppInfoField.VERSION,
-                        showSystemApps = true,
+                        systemAppsOnly = true,
                         showArchivedApps = true,
                         descending = false,
                         reload = false,
@@ -453,7 +473,7 @@ class AppRepositoryTest {
     fun `given SDK 34, when loadApps called, then it uses isArchivedApp utility`() =
         runTest {
             val appInfo =
-                createApplicationInfo("com.test.archived").apply {
+                createApplicationInfo("com.test.archived", isSystemApp = true).apply {
                     metaData = Bundle().apply { putBoolean(AppStoreService.GOOGLE_PLAY_ARCHIVE_KEY, true) }
                 }
             every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
@@ -464,7 +484,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = true,
+                        systemAppsOnly = true,
                         showArchivedApps = true,
                         descending = false,
                         reload = false,
@@ -509,7 +529,7 @@ class AppRepositoryTest {
                 nullReporterRepository
                     .loadApps(
                         field = AppInfoField.TARGET_SDK,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = true,
@@ -531,7 +551,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -596,7 +616,7 @@ class AppRepositoryTest {
             repository
                 .loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
@@ -619,7 +639,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -643,7 +663,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -667,7 +687,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -693,7 +713,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -725,7 +745,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = false,
                         descending = false,
                         reload = false,
@@ -749,7 +769,7 @@ class AppRepositoryTest {
                 repository
                     .loadApps(
                         AppInfoField.VERSION,
-                        showSystemApps = false,
+                        systemAppsOnly = false,
                         showArchivedApps = true,
                         descending = false,
                         reload = false,
@@ -907,7 +927,7 @@ class AppRepositoryTest {
             repository
                 .loadApps(
                     AppInfoField.VERSION,
-                    showSystemApps = false,
+                    systemAppsOnly = false,
                     showArchivedApps = false,
                     descending = false,
                     reload = false,
