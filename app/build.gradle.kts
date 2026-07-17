@@ -4,7 +4,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("jacoco")
-    id("com.google.devtools.ksp") version "2.3.9"
+    id("com.google.devtools.ksp") version "2.3.10"
 }
 
 kotlin {
