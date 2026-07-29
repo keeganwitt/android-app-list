@@ -82,6 +82,39 @@ class AppListViewModel(
         loadApps(reload = true)
     }
 
+    fun enterSelectionMode() {
+        _uiState.update { it.copy(isSelectionMode = true) }
+        applyFilterAndEmit()
+    }
+
+    fun exitSelectionMode() {
+        _uiState.update { it.copy(isSelectionMode = false, selectedPackageNames = emptySet()) }
+        applyFilterAndEmit()
+    }
+
+    fun toggleSelection(packageName: String) {
+        val selectedPackageNames = LinkedHashSet(_uiState.value.selectedPackageNames)
+        if (!selectedPackageNames.add(packageName)) {
+            selectedPackageNames.remove(packageName)
+        }
+        _uiState.update { it.copy(selectedPackageNames = selectedPackageNames) }
+        applyFilterAndEmit()
+    }
+
+    fun selectAllVisible() {
+        val selectedPackageNames = LinkedHashSet(_uiState.value.selectedPackageNames)
+        selectedPackageNames.addAll(_uiState.value.items.map { it.packageName })
+        _uiState.update { it.copy(selectedPackageNames = selectedPackageNames) }
+        applyFilterAndEmit()
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedPackageNames = emptySet()) }
+        applyFilterAndEmit()
+    }
+
+    fun selectedPackageNames(): List<String> = _uiState.value.selectedPackageNames.toList()
+
     private var loadJob: kotlinx.coroutines.Job? = null
 
     private fun loadApps(reload: Boolean) {
@@ -129,7 +162,17 @@ class AppListViewModel(
                         item.infoText.contains(state.query, ignoreCase = true)
                 }
             }
-        _uiState.update { it.copy(items = filtered) }
+        _uiState.update {
+            it.copy(
+                items =
+                    filtered.map { item ->
+                        item.copy(
+                            isSelected = item.packageName in state.selectedPackageNames,
+                            isSelectionMode = state.isSelectionMode,
+                        )
+                    },
+            )
+        }
 
         viewModelScope.launch(dispatchers.default) {
             val filteredApps =
