@@ -374,7 +374,7 @@ class MainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                appExporter.export()
+                appExporter.export(latestState.items.map { it.packageName })
                 return true
             }
 
