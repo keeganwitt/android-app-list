@@ -216,7 +216,9 @@ class MainActivity :
                             (latestState.summary == null) != (state.summary == null) ||
                             latestState.systemAppsOnly != state.systemAppsOnly ||
                             latestState.showArchived != state.showArchived ||
-                            latestState.selectedField != state.selectedField
+                            latestState.selectedField != state.selectedField ||
+                            latestState.isSelectionMode != state.isSelectionMode ||
+                            latestState.selectedPackageNames != state.selectedPackageNames
                     latestState = state
                     appAdapter.submitList(state.items)
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
@@ -265,6 +267,20 @@ class MainActivity :
         archivedToggle.isEnabled = !isArchivedFieldSelected
 
         val summaryItem = menu.findItem(R.id.summary)
+        val selectionMode = latestState.isSelectionMode
+        menu.findItem(R.id.selectionMode).isVisible = !selectionMode
+        menu.findItem(R.id.selectAllVisible).isVisible = selectionMode
+        menu.findItem(R.id.clearSelection).isVisible = selectionMode
+        menu.findItem(R.id.cancelSelection).isVisible = selectionMode
+        menu.findItem(R.id.export).apply {
+            isEnabled = !selectionMode || latestState.selectedPackageNames.isNotEmpty()
+            title =
+                if (selectionMode) {
+                    getString(R.string.selection_count, latestState.selectedPackageNames.size)
+                } else {
+                    getString(R.string.export)
+                }
+        }
         if (!latestState.isFullyLoaded) {
             summaryItem.isEnabled = false
             summaryItem.title = getString(R.string.summary_loading)
@@ -313,6 +329,10 @@ class MainActivity :
 
     override fun onStoreUrlClick(url: String) {
         startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    }
+
+    override fun onSelectionChanged(packageName: String) {
+        appListViewModel.toggleSelection(packageName)
     }
 
     override fun onItemSelected(
@@ -374,7 +394,33 @@ class MainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                appExporter.export(latestState.items.map { it.packageName })
+                val packageNames =
+                    if (latestState.isSelectionMode) {
+                        appListViewModel.selectedPackageNames()
+                    } else {
+                        latestState.items.map { it.packageName }
+                    }
+                appExporter.export(packageNames)
+                return true
+            }
+
+            R.id.selectionMode -> {
+                appListViewModel.enterSelectionMode()
+                return true
+            }
+
+            R.id.selectAllVisible -> {
+                appListViewModel.selectAllVisible()
+                return true
+            }
+
+            R.id.clearSelection -> {
+                appListViewModel.clearSelection()
+                return true
+            }
+
+            R.id.cancelSelection -> {
+                appListViewModel.exitSelectionMode()
                 return true
             }
 

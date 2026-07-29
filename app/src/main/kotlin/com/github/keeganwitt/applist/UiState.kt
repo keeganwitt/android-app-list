@@ -10,6 +10,8 @@ data class UiState(
     val isFullyLoaded: Boolean = false,
     val items: List<AppItemUiModel> = emptyList(),
     val filteredApps: List<App> = emptyList(),
+    val isSelectionMode: Boolean = false,
+    val selectedPackageNames: Set<String> = emptySet(),
     val summary: SummaryItem? = null,
     val syncState: SyncState = SyncState.Idle,
 )

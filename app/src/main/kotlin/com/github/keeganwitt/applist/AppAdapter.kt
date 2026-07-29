@@ -50,6 +50,9 @@ class AppAdapter(
         binding.appName.text = item.appName
         bindAppInfo(binding.appInfo, item)
         binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
+        binding.appSelectionCheckbox.visibility = if (item.isSelectionMode) View.VISIBLE else View.GONE
+        binding.appSelectionCheckbox.isChecked = item.isSelected
+        binding.appSelectionCheckbox.setOnClickListener { onClickListener.onSelectionChanged(item.packageName) }
     }
 
     private fun bindAppInfo(
@@ -88,6 +91,8 @@ class AppAdapter(
         fun onClick(position: Int)
 
         fun onStoreUrlClick(url: String)
+
+        fun onSelectionChanged(packageName: String)
     }
 
     inner class AppInfoViewHolder(
@@ -101,7 +106,12 @@ class AppAdapter(
         override fun onClick(v: View?) {
             val position = getBindingAdapterPosition()
             if (position != RecyclerView.NO_POSITION) {
-                onClickListener.onClick(position)
+                val item = currentList[position]
+                if (item.isSelectionMode) {
+                    onClickListener.onSelectionChanged(item.packageName)
+                } else {
+                    onClickListener.onClick(position)
+                }
             }
         }
     }

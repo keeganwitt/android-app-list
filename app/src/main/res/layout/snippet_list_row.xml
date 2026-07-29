@@ -44,4 +44,11 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal" />
 
+  <CheckBox
+    android:id="@+id/app_selection_checkbox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    android:contentDescription="@string/select_app" />
+
 </LinearLayout>

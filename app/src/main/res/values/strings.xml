@@ -33,6 +33,12 @@
     <string name="boolean_true">True</string>
     <string name="boolean_false">False</string>
     <string name="export">Export</string>
+    <string name="select_apps">Select apps</string>
+    <string name="select_app">Select app</string>
+    <string name="selection_count">%1$d selected</string>
+    <string name="select_all_visible">Select all visible</string>
+    <string name="clear_selection">Clear selection</string>
+    <string name="cancel_selection">Cancel selection</string>
     <string name="export_as">Export as</string>
     <string name="export_xml" translatable="false">XML</string>
     <string name="export_html" translatable="false">HTML</string>
