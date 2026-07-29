@@ -26,6 +26,7 @@ class AppExporter(
     registry: ActivityResultRegistry = activity.activityResultRegistry,
 ) {
     private var pendingExportFormat: ExportFormat? = null
+    private var pendingPackageNames: List<String>? = null
 
     private val exportLauncher =
         registry.register(
@@ -50,11 +51,13 @@ class AppExporter(
             uri?.let {
                 val format = pendingExportFormat ?: ExportFormat.XML
                 pendingExportFormat = null
-                writeToFile(it, format)
+                val packageNames = pendingPackageNames
+                pendingPackageNames = null
+                writeToFile(it, format, packageNames)
             }
         }
 
-    fun export() {
+    fun export(packageNames: List<String>? = null) {
         val view = activity.layoutInflater.inflate(R.layout.dialog_export_type, null)
         val radioGroup = view.findViewById<RadioGroup>(R.id.export_radio_group)
 
@@ -72,6 +75,7 @@ class AppExporter(
                         else -> ExportFormat.XML
                     }
                 pendingExportFormat = format
+                pendingPackageNames = packageNames
                 exportLauncher.launch(format)
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
@@ -80,6 +84,7 @@ class AppExporter(
     internal fun writeToFile(
         uri: Uri,
         format: ExportFormat,
+        packageNames: List<String>? = null,
     ) {
         val includeUsageStats = shouldIncludeUsageStats()
         val loadingFailedValue = activity.getString(R.string.export_loading_failed)
@@ -87,7 +92,12 @@ class AppExporter(
             try {
                 // Force refresh cache to ensure export has fresh data
                 repository.refreshCache(force = true)
-                val apps = repository.getCachedApps()
+                val cachedApps = repository.getCachedApps()
+                val apps =
+                    packageNames?.let { names ->
+                        val appsByPackageName = cachedApps.associateBy { it.packageName }
+                        names.mapNotNull(appsByPackageName::get)
+                    } ?: cachedApps
                 exportToFile(uri, format) {
                     formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
                 }

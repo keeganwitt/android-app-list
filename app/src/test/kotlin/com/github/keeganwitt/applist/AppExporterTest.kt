@@ -125,6 +125,45 @@ class AppExporterTest {
     }
 
     @Test
+    fun `writeToFile exports captured packages in captured order after refresh`() {
+        val refreshedApps =
+            listOf(
+                createTestApp("com.example.app1", "App 1 refreshed"),
+                createTestApp("com.example.app2", "App 2 refreshed"),
+                createTestApp("com.example.extra", "Extra"),
+            )
+        coEvery { repository.getCachedApps() } returns refreshedApps
+        val exporter =
+            AppExporter(
+                activity,
+                repository,
+                formatter,
+                appSettings,
+                crashReporter,
+                testDispatchers,
+                mockk<ActivityResultRegistry>(relaxed = true),
+            )
+        val file = File.createTempFile("apps", ".xml").apply { deleteOnExit() }
+
+        exporter.writeToFile(
+            Uri.fromFile(file),
+            ExportFormat.XML,
+            listOf("com.example.app2", "com.example.app1", "com.example.missing"),
+        )
+        Shadows.shadowOf(activity.mainLooper).idle()
+
+        verify {
+            formatter.write(
+                ExportFormat.XML,
+                any(),
+                listOf(refreshedApps[1], refreshedApps[0]),
+                true,
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun onActivityResult_withXml_exportsXml() {
         val registry = mockk<ActivityResultRegistry>(relaxed = true)
         val callbackSlot = slot<ActivityResultCallback<Uri?>>()
