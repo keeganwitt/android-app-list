@@ -6,4 +6,6 @@ data class AppItemUiModel(
     val infoText: String,
     val infoUrl: String? = null,
     val isLoading: Boolean = false,
+    val isSelected: Boolean = false,
+    val isSelectionMode: Boolean = false,
 )

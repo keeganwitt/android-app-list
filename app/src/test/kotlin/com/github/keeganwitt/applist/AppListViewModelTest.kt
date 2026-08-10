@@ -217,6 +217,60 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given selection mode, when query changes, then hidden selections are retained`() =
+        runTest {
+            val firstApp = createTestApp("com.test.first", "First App")
+            val secondApp = createTestApp("com.test.second", "Second App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(firstApp, secondApp))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            viewModel.enterSelectionMode()
+            viewModel.toggleSelection(firstApp.packageName)
+            viewModel.setQuery("Second")
+            advanceUntilIdle()
+
+            assertEquals(listOf(firstApp.packageName), viewModel.selectedPackageNames())
+            assertEquals(listOf(secondApp.packageName), viewModel.uiState.value.items.map { it.packageName })
+        }
+
+    @Test
+    fun `given selection mode, when select all visible then clear and exit then selection is removed`() =
+        runTest {
+            val firstApp = createTestApp("com.test.first", "First App")
+            val secondApp = createTestApp("com.test.second", "Second App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(firstApp, secondApp))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            viewModel.enterSelectionMode()
+            viewModel.selectAllVisible()
+            assertEquals(listOf(firstApp.packageName, secondApp.packageName), viewModel.selectedPackageNames())
+            assertTrue(viewModel.uiState.value.items.all { it.isSelected })
+
+            viewModel.clearSelection()
+            assertTrue(viewModel.selectedPackageNames().isEmpty())
+
+            viewModel.toggleSelection(firstApp.packageName)
+            viewModel.exitSelectionMode()
+            assertFalse(viewModel.uiState.value.isSelectionMode)
+            assertTrue(viewModel.selectedPackageNames().isEmpty())
+            assertTrue(viewModel.uiState.value.items.none { it.isSelected })
+        }
+
+    @Test
     fun `when toggleDescending called, then descending is toggled`() =
         runTest {
             viewModel.setDescending(true)
