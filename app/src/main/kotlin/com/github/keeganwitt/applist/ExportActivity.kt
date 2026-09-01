@@ -86,6 +86,17 @@ internal class ExportActivity : AppCompatActivity() {
         binding.includeArchived.setOnCheckedChangeListener { _, checked ->
             if (!renderingState) viewModel.setIncludeArchived(checked)
         }
+        binding.appTypeFilter.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (!renderingState) {
+                val filter =
+                    when (checkedIds.firstOrNull()) {
+                        R.id.filter_user_apps -> ExportAppTypeFilter.USER
+                        R.id.filter_system_apps -> ExportAppTypeFilter.SYSTEM
+                        else -> ExportAppTypeFilter.ALL
+                    }
+                viewModel.setAppTypeFilter(filter)
+            }
+        }
         binding.exportFormat.setOnCheckedChangeListener { _, checkedId ->
             if (!renderingState) viewModel.setFormat(checkedId.toExportFormat())
         }
@@ -120,6 +131,13 @@ internal class ExportActivity : AppCompatActivity() {
         renderingState = true
         binding.exportScope.check(state.scope.toViewId())
         binding.includeArchived.isChecked = state.includeArchived
+        binding.appTypeFilter.check(
+            when (state.appTypeFilter) {
+                ExportAppTypeFilter.ALL -> R.id.filter_all_types
+                ExportAppTypeFilter.USER -> R.id.filter_user_apps
+                ExportAppTypeFilter.SYSTEM -> R.id.filter_system_apps
+            },
+        )
         binding.exportFormat.check(state.format.toViewId())
         if (binding.appSearch.query.toString() != state.query) {
             binding.appSearch.setQuery(state.query, false)
@@ -129,6 +147,10 @@ internal class ExportActivity : AppCompatActivity() {
         adapter.submitList(state.visibleApps)
         val count = state.selectedCount
         binding.selectedCount.text = resources.getQuantityString(R.plurals.export_selected_count, count, count)
+        val hiddenCount = state.hiddenSelectedCount
+        binding.hiddenSelectedCount.text =
+            resources.getQuantityString(R.plurals.export_hidden_selected_count, hiddenCount, hiddenCount)
+        binding.hiddenSelectedCount.visibility = if (hiddenCount > 0) View.VISIBLE else View.GONE
         binding.exportButton.text = resources.getQuantityString(R.plurals.export_action_count, count, count)
 
         val loaded = !state.isLoading && !state.loadFailed
@@ -138,6 +160,7 @@ internal class ExportActivity : AppCompatActivity() {
         binding.customControls.visibility =
             if (loaded && state.scope == ExportScope.CUSTOM) View.VISIBLE else View.GONE
         binding.emptyState.visibility = if (loaded && count == 0) View.VISIBLE else View.GONE
+        binding.noResults.visibility = if (state.visibleApps.isEmpty()) View.VISIBLE else View.GONE
 
         val controlsEnabled = loaded && !state.isExporting
         binding.exportScope.isEnabled = controlsEnabled
@@ -145,6 +168,9 @@ internal class ExportActivity : AppCompatActivity() {
             binding.exportScope.getChildAt(index).isEnabled = controlsEnabled
         }
         binding.includeArchived.isEnabled = controlsEnabled
+        for (index in 0 until binding.appTypeFilter.childCount) {
+            binding.appTypeFilter.getChildAt(index).isEnabled = controlsEnabled
+        }
         binding.exportFormat.isEnabled = controlsEnabled
         for (index in 0 until binding.exportFormat.childCount) {
             binding.exportFormat.getChildAt(index).isEnabled = controlsEnabled

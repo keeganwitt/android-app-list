@@ -17,7 +17,13 @@
     <string name="export_format_title">Format</string>
     <string name="export_search_apps">Search apps</string>
     <string name="export_select_all_results">Select all results</string>
-    <string name="export_clear_selection">Clear selection</string>
+    <string name="export_clear_selection">Clear all selections</string>
+    <string name="export_show_in_list">Show in list</string>
+    <string name="export_filter_all">All types</string>
+    <string name="export_filter_user">User</string>
+    <string name="export_filter_system">System</string>
+    <string name="export_filter_hint">Changing the app type or search keeps your selections.</string>
+    <string name="export_no_results">No apps match these filters.</string>
     <string name="export_retry">Retry</string>
     <string name="export_load_failed">Couldn’t load apps.</string>
     <string name="export_empty">No apps selected.</string>
@@ -28,5 +34,9 @@
     <plurals name="export_action_count">
         <item quantity="one">Export %d app</item>
         <item quantity="other">Export %d apps</item>
+    </plurals>
+    <plurals name="export_hidden_selected_count">
+        <item quantity="one">%d selected app hidden by filters</item>
+        <item quantity="other">%d selected apps hidden by filters</item>
     </plurals>
 </resources>

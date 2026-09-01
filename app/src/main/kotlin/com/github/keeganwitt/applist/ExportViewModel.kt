@@ -45,7 +45,7 @@ internal class ExportViewModel(
             _uiState.value = current.copy(scope = scope)
         } else {
             selectedPackageNames = packageNamesForScope(scope, current.includeArchived)
-            _uiState.value = current.copy(scope = scope, query = "")
+            _uiState.value = current.copy(scope = scope, query = "", appTypeFilter = ExportAppTypeFilter.ALL)
         }
         emitState()
     }
@@ -70,6 +70,12 @@ internal class ExportViewModel(
     fun setQuery(query: String) {
         if (_uiState.value.isExporting) return
         _uiState.update { it.copy(query = query) }
+        emitState()
+    }
+
+    fun setAppTypeFilter(filter: ExportAppTypeFilter) {
+        if (_uiState.value.isExporting) return
+        _uiState.update { it.copy(appTypeFilter = filter) }
         emitState()
     }
 
@@ -149,6 +155,12 @@ internal class ExportViewModel(
                     .asSequence()
                     .filter { it.archived != true || state.includeArchived }
                     .filter {
+                        when (state.appTypeFilter) {
+                            ExportAppTypeFilter.ALL -> true
+                            ExportAppTypeFilter.USER -> it.isUserInstalled
+                            ExportAppTypeFilter.SYSTEM -> !it.isUserInstalled
+                        }
+                    }.filter {
                         state.query.isBlank() ||
                             it.name.contains(state.query, ignoreCase = true) ||
                             it.packageName.contains(state.query, ignoreCase = true)

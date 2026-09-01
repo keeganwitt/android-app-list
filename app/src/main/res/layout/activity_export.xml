@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:filterTouchesWhenObscured="true"
@@ -145,12 +146,65 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/export_show_in_list"
+                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/app_type_filter"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        app:checkedChip="@id/filter_all_types"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/filter_all_types"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_filter_all" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/filter_user_apps"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_filter_user" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/filter_system_apps"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_filter_system" />
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:text="@string/export_filter_hint" />
+
                     <androidx.appcompat.widget.SearchView
                         android:id="@+id/app_search"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:iconifiedByDefault="false"
                         android:queryHint="@string/export_search_apps" />
+
+                    <TextView
+                        android:id="@+id/hidden_selected_count"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:accessibilityLiveRegion="polite"
+                        android:visibility="gone" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -173,6 +227,14 @@
                             android:layout_height="wrap_content"
                             android:text="@string/export_clear_selection" />
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/no_results"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:text="@string/export_no_results"
+                        android:visibility="gone" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/app_list"
