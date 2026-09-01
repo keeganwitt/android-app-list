@@ -114,7 +114,7 @@ class ExportViewModelTest {
             advanceUntilIdle()
 
             viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setQuery("system")
+            viewModel.setQuery("system.gamma")
 
             assertEquals(
                 listOf("system.gamma"),
@@ -229,6 +229,7 @@ class ExportViewModelTest {
             advanceUntilIdle()
 
             viewModel.setFormat(ExportFormat.CSV)
+            viewModel.setIncludeArchived(false)
             val request = viewModel.beginExport()
 
             assertEquals(ExportFormat.CSV, viewModel.uiState.value.format)
@@ -240,15 +241,52 @@ class ExportViewModelTest {
 
             viewModel.setScope(ExportScope.ALL_APPS)
             viewModel.setFormat(ExportFormat.HTML)
+            viewModel.setIncludeArchived(true)
+            viewModel.setQuery("ignored")
+            viewModel.selectAllVisible()
             viewModel.clearSelection()
+            viewModel.toggleSelection("alpha")
+            assertEquals(null, viewModel.beginExport())
             assertEquals(ExportScope.USER_APPS, viewModel.uiState.value.scope)
             assertEquals(ExportFormat.CSV, viewModel.uiState.value.format)
             assertEquals(2, viewModel.uiState.value.selectedCount)
 
             viewModel.handleExportOutcome(ExportOutcome.CANCELED)
             assertEquals(null, viewModel.pendingExportRequest())
+            viewModel.toggleSelection("alpha")
+            viewModel.toggleSelection("missing")
             assertTrue(viewModel.uiState.value.canExport)
         }
+
+    @Test
+    fun `canExport rejects every unavailable state`() {
+        val selected =
+            listOf(
+                ExportAppItemUiModel("app", "App", true, false, true),
+            )
+
+        assertFalse(ExportUiState(selectedApps = selected).canExport)
+        assertFalse(
+            ExportUiState(
+                selectedApps = selected,
+                isLoading = false,
+                loadFailed = true,
+            ).canExport,
+        )
+        assertFalse(
+            ExportUiState(
+                selectedApps = selected,
+                isLoading = false,
+                isExporting = true,
+            ).canExport,
+        )
+        assertTrue(
+            ExportUiState(
+                selectedApps = selected,
+                isLoading = false,
+            ).canExport,
+        )
+    }
 
     private fun createViewModel(): ExportViewModel =
         ExportViewModel(

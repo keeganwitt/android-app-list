@@ -23,4 +23,15 @@ class AppRepositoryFactoryTest {
 
         assertTrue(repository is AndroidAppRepository)
     }
+
+    @Test
+    fun `factory supports the default crash reporter`() {
+        val repository =
+            AppRepositoryFactory.create(
+                context = ApplicationProvider.getApplicationContext(),
+                appStoreService = mockk<AppStoreService>(relaxed = true),
+            )
+
+        assertTrue(repository is AndroidAppRepository)
+    }
 }

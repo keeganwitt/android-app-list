@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class ExportViewModel(
     val repository: AppRepository,
@@ -32,13 +31,9 @@ internal class ExportViewModel(
                 repository.refreshCache(force = true)
                 allApps = repository.getCachedApps().sortedWith(appComparator)
                 selectedPackageNames = packageNamesForScope(ExportScope.USER_APPS, includeArchived = false)
-                withContext(dispatchers.main) {
-                    emitState()
-                }
+                emitState()
             } catch (_: Exception) {
-                withContext(dispatchers.main) {
-                    _uiState.update { it.copy(isLoading = false, loadFailed = true) }
-                }
+                _uiState.update { it.copy(isLoading = false, loadFailed = true) }
             }
         }
     }
