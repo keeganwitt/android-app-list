@@ -2,34 +2,37 @@ package com.github.keeganwitt.applist
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.widget.RadioGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.ActivityResultRegistry
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class AppExporter(
+internal enum class ExportOutcome {
+    SUCCESS,
+    FAILURE,
+    CANCELED,
+}
+
+internal class AppExporter(
     private val activity: AppCompatActivity,
-    private val repository: AppRepository,
     private val formatter: ExportFormatter,
     private val appSettings: AppSettings,
     private val crashReporter: CrashReporter? = null,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
     registry: ActivityResultRegistry = activity.activityResultRegistry,
+    private val onOutcome: (ExportOutcome) -> Unit = {},
 ) {
     private var pendingExportFormat: ExportFormat? = null
+    private var pendingApps: List<App>? = null
 
     private val exportLauncher =
         registry.register(
-            "app_exporter_${System.identityHashCode(this)}",
+            "app_exporter",
             activity,
             object : ActivityResultContract<ExportFormat, Uri?>() {
                 override fun createIntent(
@@ -47,54 +50,64 @@ class AppExporter(
                 ): Uri? = if (resultCode == Activity.RESULT_OK) intent?.data else null
             },
         ) { uri ->
-            uri?.let {
-                val format = pendingExportFormat ?: ExportFormat.XML
-                pendingExportFormat = null
-                writeToFile(it, format)
+            val format = pendingExportFormat
+            val apps = pendingApps
+            pendingExportFormat = null
+            pendingApps = null
+            if (uri == null) {
+                if (format != null && apps != null) onOutcome(ExportOutcome.CANCELED)
+            } else if (format != null && apps != null) {
+                writeToFile(uri, format, apps)
+            } else {
+                onOutcome(ExportOutcome.FAILURE)
             }
         }
 
-    fun export() {
-        val view = activity.layoutInflater.inflate(R.layout.dialog_export_type, null)
-        val radioGroup = view.findViewById<RadioGroup>(R.id.export_radio_group)
+    fun export(
+        format: ExportFormat,
+        apps: List<App>,
+    ) {
+        if (apps.isEmpty()) {
+            onOutcome(ExportOutcome.FAILURE)
+            return
+        }
+        pendingExportFormat = format
+        pendingApps = apps.toList()
+        try {
+            exportLauncher.launch(format)
+        } catch (e: Exception) {
+            pendingExportFormat = null
+            pendingApps = null
+            crashReporter?.recordException(e, "Error opening export picker")
+            Toast
+                .makeText(
+                    activity,
+                    activity.getString(R.string.export_failed, e.message),
+                    Toast.LENGTH_SHORT,
+                ).show()
+            onOutcome(ExportOutcome.FAILURE)
+        }
+    }
 
-        AlertDialog
-            .Builder(activity)
-            .setTitle(R.string.export_as)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
-                val format =
-                    when (radioGroup.checkedRadioButtonId) {
-                        R.id.radio_xml -> ExportFormat.XML
-                        R.id.radio_html -> ExportFormat.HTML
-                        R.id.radio_csv -> ExportFormat.CSV
-                        R.id.radio_tsv -> ExportFormat.TSV
-                        else -> ExportFormat.XML
-                    }
-                pendingExportFormat = format
-                exportLauncher.launch(format)
-            }.setNegativeButton(android.R.string.cancel, null)
-            .show()
+    internal fun restorePendingRequest(request: ExportRequest) {
+        pendingExportFormat = request.format
+        pendingApps = request.apps.toList()
     }
 
     internal fun writeToFile(
         uri: Uri,
         format: ExportFormat,
+        apps: List<App>,
     ) {
+        if (apps.isEmpty()) {
+            onOutcome(ExportOutcome.FAILURE)
+            return
+        }
         val includeUsageStats = shouldIncludeUsageStats()
         val loadingFailedValue = activity.getString(R.string.export_loading_failed)
         activity.lifecycleScope.launch(dispatchers.io) {
-            try {
-                // Force refresh cache to ensure export has fresh data
-                repository.refreshCache(force = true)
-                val apps = repository.getCachedApps()
-                exportToFile(uri, format) {
-                    formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
-                }
-            } catch (e: Exception) {
-                withContext(dispatchers.main) {
-                    Toast.makeText(activity, R.string.export_failed, Toast.LENGTH_SHORT).show()
-                }
+            exportToFile(uri, format) {
+                formatter.write(format, it, apps, includeUsageStats, loadingFailedValue)
             }
         }
     }
@@ -119,6 +132,7 @@ class AppExporter(
                         activity.getString(R.string.export_successful),
                         Toast.LENGTH_SHORT,
                     ).show()
+                onOutcome(ExportOutcome.SUCCESS)
             }
         } catch (e: Exception) {
             crashReporter?.recordException(e, "Error exporting ${format.name}")
@@ -129,6 +143,7 @@ class AppExporter(
                         activity.getString(R.string.export_failed, e.message),
                         Toast.LENGTH_SHORT,
                     ).show()
+                onOutcome(ExportOutcome.FAILURE)
             }
         }
     }

@@ -126,6 +126,8 @@ val fileFilter =
         "**/AppListApplication.class",
         "**/AppSettings.class",
         "**/AppExporter*.class",
+        "**/ExportActivity*.class",
+        "**/ExportAppAdapter*.class",
         "**/GridAutofitLayoutManager*.class",
         "**/MainActivity*.class",
         "**/SettingsActivity*.class",

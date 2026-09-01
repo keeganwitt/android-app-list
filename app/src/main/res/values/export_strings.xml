@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation"
+    tools:locale="en">
+    <string name="export_user_app">User app</string>
+    <string name="export_system_app">System app</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Select %1$s</string>
+    <string name="export_deselect_app">Deselect %1$s</string>
+    <string name="export_title">Export apps</string>
+    <string name="export_scope_title">Apps to export</string>
+    <string name="export_scope_user">User apps</string>
+    <string name="export_scope_system">System apps</string>
+    <string name="export_scope_all">All apps</string>
+    <string name="export_scope_choose">Choose apps</string>
+    <string name="export_include_archived">Include archived apps</string>
+    <string name="export_format_title">Format</string>
+    <string name="export_search_apps">Search apps</string>
+    <string name="export_select_all_results">Select all results</string>
+    <string name="export_clear_selection">Clear selection</string>
+    <string name="export_retry">Retry</string>
+    <string name="export_load_failed">Couldn’t load apps.</string>
+    <string name="export_empty">No apps selected.</string>
+    <plurals name="export_selected_count">
+        <item quantity="one">%d app selected</item>
+        <item quantity="other">%d apps selected</item>
+    </plurals>
+    <plurals name="export_action_count">
+        <item quantity="one">Export %d app</item>
+        <item quantity="other">Export %d apps</item>
+    </plurals>
+</resources>

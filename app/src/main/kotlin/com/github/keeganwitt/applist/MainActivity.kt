@@ -26,10 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
-import com.github.keeganwitt.applist.db.AppDatabase
-import com.github.keeganwitt.applist.services.AndroidPackageService
-import com.github.keeganwitt.applist.services.AndroidStorageService
-import com.github.keeganwitt.applist.services.AndroidUsageStatsService
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
@@ -44,9 +40,7 @@ class MainActivity :
     private lateinit var appInfoFields: List<AppInfoField>
     private lateinit var appAdapter: AppAdapter
     private lateinit var binding: ActivityMainBinding
-    private lateinit var appExporter: AppExporter
     private lateinit var appListViewModel: AppListViewModel
-    private lateinit var appRepository: AppRepository
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
@@ -62,7 +56,6 @@ class MainActivity :
         setupTheme()
         setupRecyclerView()
         setupViewModel()
-        setupExporter()
         setupSpinner()
         setupListeners()
     }
@@ -103,19 +96,8 @@ class MainActivity :
                 this,
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        val pkg = AndroidPackageService(applicationContext)
-                        val usage = AndroidUsageStatsService(applicationContext, crashReporter = crashReporter)
-                        val storage = AndroidStorageService(applicationContext, crashReporter = crashReporter)
                         val store = DefaultAppStoreService(crashReporter = crashReporter)
-                        val repository =
-                            AndroidAppRepository(
-                                pkg,
-                                usage,
-                                storage,
-                                store,
-                                AppDatabase.getDatabase(applicationContext).appDao(),
-                                crashReporter,
-                            )
+                        val repository = AppRepositoryFactory.create(applicationContext, store, crashReporter)
                         val vm =
                             AppListViewModel(
                                 repository,
@@ -133,20 +115,7 @@ class MainActivity :
                     }
                 },
             )[AppListViewModel::class.java]
-        appRepository = appListViewModel.repository
         observeViewModel()
-    }
-
-    private fun setupExporter() {
-        val crashReporter = FirebaseCrashReporter()
-        appExporter =
-            AppExporter(
-                this,
-                repository = appRepository,
-                formatter = ExportFormatter(),
-                appSettings = appSettings,
-                crashReporter = crashReporter,
-            )
     }
 
     private fun setupSpinner() {
@@ -374,7 +343,7 @@ class MainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.export -> {
-                appExporter.export()
+                startActivity(Intent(this, ExportActivity::class.java))
                 return true
             }
 
