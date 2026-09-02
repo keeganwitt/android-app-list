@@ -91,6 +91,26 @@ class ExportFileWriterTest {
             assertEquals(ExportCompletion(ExportOutcome.FAILURE, "Failed to open output stream"), completion)
         }
 
+    @Test
+    fun `formatter failure is returned without a crash reporter`() =
+        runTest {
+            val formatter = mockk<ExportFormatter>()
+            every { formatter.write(any(), any(), any(), any(), any()) } throws IOException("Disk full")
+            val file = File.createTempFile("app-export", ".xml").apply { deleteOnExit() }
+            val context = ApplicationProvider.getApplicationContext<TestAppListApplication>()
+            val writer =
+                DefaultExportFileWriter(
+                    contentResolver = context.contentResolver,
+                    formatter = formatter,
+                    appSettings = settings,
+                    loadingFailedValue = "Loading failed",
+                )
+
+            val completion = writer.write(Uri.fromFile(file), request)
+
+            assertEquals(ExportCompletion(ExportOutcome.FAILURE, "Disk full"), completion)
+        }
+
     private fun createWriter(formatter: ExportFormatter): DefaultExportFileWriter {
         val context = ApplicationProvider.getApplicationContext<TestAppListApplication>()
         return DefaultExportFileWriter(

@@ -353,6 +353,40 @@ class ExportViewModelTest {
         }
 
     @Test
+    fun `picker launch failure unfreezes choices and exposes one failure`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            viewModel = createViewModel()
+            advanceUntilIdle()
+            val beforeExport = viewModel.uiState.value
+            viewModel.beginExport()
+
+            viewModel.failPendingExport("Picker unavailable")
+
+            assertEquals(beforeExport, viewModel.uiState.value)
+            assertEquals(null, viewModel.pendingExportRequest())
+            assertEquals(
+                ExportCompletion(ExportOutcome.FAILURE, "Picker unavailable"),
+                viewModel.exportCompletion.value,
+            )
+        }
+
+    @Test
+    fun `destination callbacks without an available request are ignored`() =
+        runTest(dispatcher) {
+            viewModel = createViewModel()
+            advanceUntilIdle()
+
+            viewModel.writePendingExport(io.mockk.mockk())
+            viewModel.cancelPendingExport()
+            viewModel.failPendingExport("Ignored")
+
+            assertEquals(null, viewModel.pendingExportRequest())
+            assertEquals(null, viewModel.exportCompletion.value)
+            assertFalse(viewModel.uiState.value.isExporting)
+        }
+
+    @Test
     fun `canExport rejects every unavailable state`() {
         val selected = listOf(ExportAppItemUiModel("app", "App", true, false, true))
 
