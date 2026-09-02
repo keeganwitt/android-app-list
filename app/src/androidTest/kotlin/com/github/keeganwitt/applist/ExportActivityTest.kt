@@ -106,6 +106,7 @@ class ExportActivityTest {
             }
             assertNotEquals(countBefore, countAfter)
             onView(withId(R.id.export_button)).check(matches(withText(expectedExportLabel)))
+            onView(withId(R.id.review_selected)).check(matches(withEffectiveVisibility(VISIBLE)))
             onView(withId(R.id.review_selected)).check(matches(isEnabled()))
 
             onView(withId(R.id.review_selected)).perform(click())
