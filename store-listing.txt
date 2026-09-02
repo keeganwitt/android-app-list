@@ -1,5 +1,33 @@
 App List
 
-Lists a piece of application info across all apps
+Compare app details across every app on your device
 
-This app lists a selected piece of application info across all apps, to see that information at a glance. For example, you can view the package manager that installed all your apps, the target SDK of all your apps, the number of requested/granted permissions for all your apps, or what apps are enabled/disabled.
+App List lets you select one application field and compare it across all the apps on your Android device at a glance.
+
+Available fields:
+
+• App name
+• Package name
+• APK size
+• App size
+• Archived status
+• Cache size
+• Data size
+• Enabled status
+• Whether the app exists in an app store
+• External cache size
+• First installed date
+• Granted permission count
+• Last updated date
+• Last used date
+• Minimum SDK
+• Package manager or installer
+• Requested permission count
+• Store URL
+• Target SDK
+• Total size
+• Version
+
+Search and sort the app list, show or hide system and archived apps, and view summaries of the selected field. Export any selection of user, system, or archived apps as XML, HTML, CSV, or TSV.
+
+Storage and last-used fields may require optional Usage Access permission.
