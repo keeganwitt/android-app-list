@@ -229,6 +229,7 @@ class AppStoreServiceTest {
                 AppStoreService.VIVO_APP_STORE to "Vivo App Store",
                 AppStoreService.DROIDIFY to "Droid-ify",
                 AppStoreService.NEO_STORE to "Neo Store",
+                AppStoreService.OBTAINIUM to "Obtainium",
             )
 
         installers.forEach { (pkg, name) ->

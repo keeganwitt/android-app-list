@@ -48,6 +48,7 @@ interface AppStoreService {
         const val F_DROID = "org.fdroid.fdroid"
         const val DROIDIFY = "com.looker.droidify"
         const val NEO_STORE = "com.machaiv3lli.fdroid"
+        const val OBTAINIUM = "dev.imranr.obtainium"
         const val GOOGLE_PLAY_ARCHIVE_KEY = "com.android.vending.archive"
     }
 }
@@ -159,6 +160,7 @@ open class DefaultAppStoreService(
                 AppStoreService.VIVO_APP_STORE to "Vivo App Store",
                 AppStoreService.DROIDIFY to "Droid-ify",
                 AppStoreService.NEO_STORE to "Neo Store",
+                AppStoreService.OBTAINIUM to "Obtainium",
             )
     }
 }
