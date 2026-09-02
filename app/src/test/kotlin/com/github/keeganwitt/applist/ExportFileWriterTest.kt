@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.content.ContentProvider
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 
@@ -49,6 +51,27 @@ class ExportFileWriterTest {
                 assertTrue(text.indexOf("Beta") < text.indexOf("Alpha"))
                 assertTrue(text.indexOf("beta") < text.indexOf("alpha"))
             }
+        }
+
+    @Test
+    fun `write truncates an existing destination`() =
+        runTest {
+            val contentResolver = mockk<ContentResolver>()
+            val destination = Uri.parse("content://exports/apps.xml")
+            every { contentResolver.openOutputStream(destination, "wt") } returns ByteArrayOutputStream()
+            val writer =
+                DefaultExportFileWriter(
+                    contentResolver = contentResolver,
+                    formatter = ExportFormatter(),
+                    appSettings = settings,
+                    loadingFailedValue = "Loading failed",
+                    crashReporter = crashReporter,
+                )
+
+            val completion = writer.write(destination, request)
+
+            assertEquals(ExportOutcome.SUCCESS, completion.outcome)
+            verify(exactly = 1) { contentResolver.openOutputStream(destination, "wt") }
         }
 
     @Test

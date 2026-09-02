@@ -93,7 +93,11 @@ internal class ExportViewModel(
     fun pendingExportRequest(): ExportRequest? = pendingExportRequest
 
     fun writePendingExport(uri: Uri) {
-        val request = pendingExportRequest ?: return
+        val request = pendingExportRequest
+        if (request == null) {
+            completeExport(ExportCompletion(ExportOutcome.FAILURE))
+            return
+        }
         if (exportWriteStarted) return
         exportWriteStarted = true
         viewModelScope.launch(dispatchers.io) {

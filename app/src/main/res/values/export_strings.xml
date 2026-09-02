@@ -8,6 +8,7 @@
     <string name="export_select_app">Select %1$s</string>
     <string name="export_deselect_app">Deselect %1$s</string>
     <string name="export_title">Export apps</string>
+    <string name="export_failed_generic">Export failed</string>
     <string name="export_show_archived">Show archived apps</string>
     <string name="export_format_title">Format</string>
     <string name="export_search_apps">Search apps</string>

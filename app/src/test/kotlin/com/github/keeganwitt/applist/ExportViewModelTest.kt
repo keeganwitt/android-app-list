@@ -372,12 +372,23 @@ class ExportViewModelTest {
         }
 
     @Test
-    fun `destination callbacks without an available request are ignored`() =
+    fun `destination without a retained request exposes a failure`() =
         runTest(dispatcher) {
             viewModel = createViewModel()
             advanceUntilIdle()
 
             viewModel.writePendingExport(io.mockk.mockk())
+
+            assertEquals(ExportCompletion(ExportOutcome.FAILURE), viewModel.exportCompletion.value)
+            assertFalse(viewModel.uiState.value.isExporting)
+        }
+
+    @Test
+    fun `cancel and launch failure callbacks without an available request are ignored`() =
+        runTest(dispatcher) {
+            viewModel = createViewModel()
+            advanceUntilIdle()
+
             viewModel.cancelPendingExport()
             viewModel.failPendingExport("Ignored")
 

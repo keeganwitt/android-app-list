@@ -28,7 +28,7 @@ internal class DefaultExportFileWriter(
         request: ExportRequest,
     ): ExportCompletion =
         try {
-            contentResolver.openOutputStream(uri)?.use { outputStream ->
+            contentResolver.openOutputStream(uri, "wt")?.use { outputStream ->
                 outputStream.bufferedWriter().use { writer ->
                     formatter.write(
                         request.format,

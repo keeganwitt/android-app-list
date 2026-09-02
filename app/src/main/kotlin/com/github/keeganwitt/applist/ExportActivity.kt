@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -139,7 +140,7 @@ internal class ExportActivity : AppCompatActivity() {
                             Toast
                                 .makeText(
                                     this@ExportActivity,
-                                    getString(R.string.export_failed, completion.errorMessage),
+                                    exportFailureMessage(this@ExportActivity, completion.errorMessage),
                                     Toast.LENGTH_SHORT,
                                 ).show()
                         ExportOutcome.CANCELED -> Unit
@@ -232,3 +233,13 @@ internal class ExportActivity : AppCompatActivity() {
             ExportFormat.TSV -> R.id.format_tsv
         }
 }
+
+internal fun exportFailureMessage(
+    context: Context,
+    errorMessage: String?,
+): String =
+    if (errorMessage.isNullOrBlank()) {
+        context.getString(R.string.export_failed_generic)
+    } else {
+        context.getString(R.string.export_failed, errorMessage)
+    }
