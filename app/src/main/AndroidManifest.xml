@@ -37,6 +37,12 @@
       android:label="@string/settings"
       android:parentActivityName=".MainActivity"
       android:theme="@style/Theme.AppList.Settings" />
+    <activity
+      android:name=".ExportActivity"
+      android:exported="false"
+      android:label="@string/export_title"
+      android:parentActivityName=".MainActivity"
+      android:theme="@style/Theme.AppList.Export" />
   </application>
 
 </manifest>

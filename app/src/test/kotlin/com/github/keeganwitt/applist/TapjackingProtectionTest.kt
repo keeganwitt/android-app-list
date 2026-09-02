@@ -36,11 +36,15 @@ class TapjackingProtectionTest {
     }
 
     @Test
-    fun `dialog_export_type layout should have filterTouchesWhenObscured set to true`() {
-        val context = ApplicationProvider.getApplicationContext<AppListApplication>()
+    fun `activity_export layout should have filterTouchesWhenObscured set to true`() {
+        val context =
+            ContextThemeWrapper(
+                ApplicationProvider.getApplicationContext(),
+                R.style.Theme_AppList_Export,
+            )
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.dialog_export_type, null)
+        val view = inflater.inflate(R.layout.activity_export, null)
 
-        assertTrue("dialog_export_type.xml root view should filter touches when obscured", view.filterTouchesWhenObscured)
+        assertTrue("activity_export.xml root view should filter touches when obscured", view.filterTouchesWhenObscured)
     }
 }

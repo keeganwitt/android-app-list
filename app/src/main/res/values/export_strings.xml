@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation"
+    tools:locale="en">
+    <string name="export_user_app">User app</string>
+    <string name="export_system_app">System app</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Select %1$s</string>
+    <string name="export_deselect_app">Deselect %1$s</string>
+    <string name="export_title">Export apps</string>
+    <string name="export_failed_generic">Export failed</string>
+    <string name="export_show_archived">Show archived apps</string>
+    <string name="export_format_title">Format</string>
+    <string name="export_search_apps">Search apps</string>
+    <string name="export_select_all_results">Select all results</string>
+    <string name="export_clear_selection">Clear all selections</string>
+    <string name="export_clear_all">Clear all</string>
+    <string name="export_review_title">Selected apps</string>
+    <string name="export_return_to_browse">Back to app list</string>
+    <string name="export_review">Review</string>
+    <string name="export_show_in_list">Show in list</string>
+    <string name="export_filter_all">All types</string>
+    <string name="export_filter_user">User</string>
+    <string name="export_filter_system">System</string>
+    <string name="export_filter_hint">Filters and search do not change your selections.</string>
+    <string name="export_no_results">No apps match these filters.</string>
+    <string name="export_retry">Retry</string>
+    <string name="export_load_failed">Couldn’t load apps.</string>
+    <string name="export_empty">No apps selected.</string>
+    <plurals name="export_selected_count">
+        <item quantity="one">%d app selected</item>
+        <item quantity="other">%d apps selected</item>
+    </plurals>
+    <plurals name="export_action_count">
+        <item quantity="one">Export %d app</item>
+        <item quantity="other">Export %d apps</item>
+    </plurals>
+    <plurals name="export_review_selected_count">
+        <item quantity="one">Review %d selected</item>
+        <item quantity="other">Review %d selected</item>
+    </plurals>
+    <plurals name="export_hidden_selected_count">
+        <item quantity="one">%d selected app hidden by filters</item>
+        <item quantity="other">%d selected apps hidden by filters</item>
+    </plurals>
+</resources>

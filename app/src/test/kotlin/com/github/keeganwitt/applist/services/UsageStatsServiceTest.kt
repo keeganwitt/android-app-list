@@ -60,7 +60,7 @@ class UsageStatsServiceTest {
     }
 
     @Test
-    fun `given queryAndAggregateUsageStats throws SecurityException, when getLastUsedEpochs called, then returns null and does not log to crash reporter`() {
+    fun `queryAndAggregateUsageStats SecurityException returns null without reporting`() {
         every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } throws SecurityException("No permission")
 
         val result = service.getLastUsedEpochs(reload = false)
@@ -71,7 +71,7 @@ class UsageStatsServiceTest {
     }
 
     @Test
-    fun `given queryAndAggregateUsageStats throws generic Exception, when getLastUsedEpochs called, then records exception to crash reporter and returns null`() {
+    fun `queryAndAggregateUsageStats exception returns null and reports failure`() {
         val exception = RuntimeException("Something went wrong")
         every { usageStatsManager.queryAndAggregateUsageStats(any(), any()) } throws exception
 

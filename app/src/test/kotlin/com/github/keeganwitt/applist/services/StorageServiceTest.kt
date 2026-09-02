@@ -169,7 +169,7 @@ class StorageServiceTest {
     }
 
     @Test
-    fun `given queryStatsForPackage throws SecurityException, when getStorageUsage called, then returns empty results and does not log to crash reporter`() {
+    fun `queryStatsForPackage SecurityException returns empty results without reporting`() {
         val appInfo = ApplicationInfo().apply { packageName = "com.test.app" }
         val storageVolume = mockk<StorageVolume>()
         val testUuid = UUID.randomUUID()

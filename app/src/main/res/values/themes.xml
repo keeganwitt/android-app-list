@@ -3,4 +3,6 @@
     <style name="Theme.AppList.Settings" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
+
+    <style name="Theme.AppList.Export" parent="Theme.Material3.DayNight.NoActionBar" />
 </resources>

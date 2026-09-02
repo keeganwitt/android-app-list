@@ -13,10 +13,10 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANCE: AppDatabase? = null
+        private var databaseInstance: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase =
-            INSTANCE ?: synchronized(this) {
+            databaseInstance ?: synchronized(this) {
                 val instance =
                     Room
                         .databaseBuilder(
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                             "app_list_cache",
                         ).fallbackToDestructiveMigration(true)
                         .build()
-                INSTANCE = instance
+                databaseInstance = instance
                 instance
             }
     }

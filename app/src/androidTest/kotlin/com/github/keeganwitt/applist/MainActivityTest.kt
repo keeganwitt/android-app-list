@@ -14,6 +14,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -107,5 +108,22 @@ class MainActivityTest {
     fun mainActivity_whenRecreated_thenNoCrashOccurs() {
         scenario.recreate()
         assertEquals(Lifecycle.State.RESUMED, scenario.state)
+    }
+
+    @Test
+    fun mainActivity_whenExportSelected_thenExportActivityOpens() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(ExportActivity::class.java.name, null, false)
+        scenario.onActivity { activity ->
+            val menu = MenuBuilder(activity)
+            activity.onCreateOptionsMenu(menu)
+
+            activity.onOptionsItemSelected(menu.findItem(R.id.export))
+        }
+
+        val exportActivity = instrumentation.waitForMonitorWithTimeout(monitor, 5000)
+        assertNotNull(exportActivity)
+        exportActivity?.finish()
+        instrumentation.removeMonitor(monitor)
     }
 }
