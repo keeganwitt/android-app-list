@@ -1,9 +1,9 @@
 package com.github.keeganwitt.applist
 
+import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -11,8 +11,10 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,13 +26,14 @@ class MainActivityTest {
 
     @Before
     fun setup() {
-        InstrumentationRegistry
-            .getInstrumentation()
-            .targetContext
+        val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
+        targetContext
             .getSharedPreferences(
-                InstrumentationRegistry.getInstrumentation().targetContext.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX,
+                targetContext.packageName + AppSettings.DEFAULT_PREF_NAME_SUFFIX,
                 android.content.Context.MODE_PRIVATE,
-            ).edit().clear().commit()
+            ).edit()
+            .clear()
+            .commit()
         scenario = ActivityScenario.launch(MainActivity::class.java)
         waitFor(3000)
     }
@@ -81,17 +84,21 @@ class MainActivityTest {
             val item = menu.findItem(R.id.systemAppToggle)
 
             assertEquals(false, item.isChecked)
-            assertEquals(
-                activity.getDrawable(R.drawable.ic_system_apps_on)?.constantState,
-                item.icon?.constantState,
+            assertTrue(
+                "User-app scope should show the enable-system-apps icon",
+                requireNotNull(activity.getDrawable(R.drawable.ic_system_apps_on))
+                    .toBitmap()
+                    .sameAs(requireNotNull(item.icon).toBitmap()),
             )
 
             activity.onOptionsItemSelected(item)
 
             assertEquals(true, item.isChecked)
-            assertEquals(
-                activity.getDrawable(R.drawable.ic_system_apps_off)?.constantState,
-                item.icon?.constantState,
+            assertTrue(
+                "System-app scope should show the disable-system-apps icon",
+                requireNotNull(activity.getDrawable(R.drawable.ic_system_apps_off))
+                    .toBitmap()
+                    .sameAs(requireNotNull(item.icon).toBitmap()),
             )
         }
     }

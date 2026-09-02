@@ -8,14 +8,12 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withClassName
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import org.hamcrest.Matchers.endsWith
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -131,9 +129,15 @@ class SettingsActivityTest {
         appSettings.setCrashReportingEnabled(true)
         scenario.recreate()
         waitFor(1000)
-        onView(withClassName(endsWith("SwitchCompat"))).perform(click())
+        val toggleCrashReporting =
+            RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
+                hasDescendant(withText(R.string.crash_reporting_title)),
+                click(),
+            )
+        onView(withId(androidx.preference.R.id.recycler_view)).perform(toggleCrashReporting)
         waitFor(1000)
-        onView(withClassName(endsWith("SwitchCompat"))).perform(click())
+        assertFalse(appSettings.isCrashReportingEnabled())
+        onView(withId(androidx.preference.R.id.recycler_view)).perform(toggleCrashReporting)
         waitFor(1000)
         assertTrue(appSettings.isCrashReportingEnabled())
     }

@@ -1,23 +1,25 @@
 package com.github.keeganwitt.applist
 
+import android.view.View
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
+import androidx.test.espresso.matcher.ViewMatchers.isRoot
+import org.hamcrest.Matcher
 
 fun waitFor(delay: Long) {
-    val idlingResource = ElapsedTimeIdlingResource(delay)
-    try {
-        IdlingRegistry.getInstance().register(idlingResource)
-        Espresso
-            .onView(
-                ViewMatchers
-                    .withId(android.R.id.content),
-            ).perform(
-                ViewActions
-                    .swipeUp(),
-            )
-    } finally {
-        IdlingRegistry.getInstance().unregister(idlingResource)
-    }
+    Espresso.onView(isRoot()).perform(
+        object : ViewAction {
+            override fun getConstraints(): Matcher<View> = isRoot()
+
+            override fun getDescription(): String = "wait for $delay milliseconds"
+
+            override fun perform(
+                uiController: UiController,
+                view: View,
+            ) {
+                uiController.loopMainThreadForAtLeast(delay)
+            }
+        },
+    )
 }
