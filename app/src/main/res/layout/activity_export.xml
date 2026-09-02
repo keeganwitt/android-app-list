@@ -125,6 +125,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="16dp"
                             android:hint="@string/export_search_apps"
+                            app:boxBackgroundMode="outline"
                             app:endIconMode="clear_text"
                             app:startIconDrawable="@drawable/ic_search">
 

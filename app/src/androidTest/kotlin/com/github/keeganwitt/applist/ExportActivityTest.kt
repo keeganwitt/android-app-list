@@ -9,11 +9,13 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE
 import androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
@@ -22,7 +24,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +42,14 @@ class ExportActivityTest {
             waitFor(3000)
 
             onView(withId(R.id.app_search)).check(matches(isAssignableFrom(TextInputEditText::class.java)))
+            scenario.onActivity { activity ->
+                val search = activity.findViewById<TextInputEditText>(R.id.app_search)
+                val layout =
+                    generateSequence(search as android.view.View?) { it.parent as? android.view.View }
+                        .filterIsInstance<TextInputLayout>()
+                        .first()
+                assertEquals(TextInputLayout.BOX_BACKGROUND_OUTLINE, layout.boxBackgroundMode)
+            }
             onView(withId(R.id.app_search)).perform(click(), replaceText("not-a-real-app-package"))
             onView(withId(R.id.no_results)).check(matches(withEffectiveVisibility(VISIBLE)))
             waitFor(300)
@@ -70,6 +82,36 @@ class ExportActivityTest {
             onView(withId(R.id.review_selected)).check(matches(withEffectiveVisibility(GONE)))
             onView(withId(R.id.selected_count)).check(matches(withText(selectedCount)))
             onView(withId(R.id.export_button)).check(matches(withText(exportLabel)))
+        }
+    }
+
+    @Test
+    fun selectionChangeSynchronizesFooterAndExportBeforeAndDuringReview() {
+        ActivityScenario.launch(ExportActivity::class.java).use { scenario ->
+            waitFor(3000)
+            var countBefore = ""
+            scenario.onActivity { activity ->
+                countBefore = activity.findViewById<android.widget.TextView>(R.id.selected_count).text.toString()
+            }
+
+            onView(withId(R.id.app_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition<androidx.recyclerview.widget.RecyclerView.ViewHolder>(0, click()))
+
+            var countAfter = ""
+            var expectedExportLabel = ""
+            scenario.onActivity { activity ->
+                countAfter = activity.findViewById<android.widget.TextView>(R.id.selected_count).text.toString()
+                val count = countAfter.substringBefore(" app").toInt()
+                expectedExportLabel = activity.resources.getQuantityString(R.plurals.export_action_count, count, count)
+            }
+            assertNotEquals(countBefore, countAfter)
+            onView(withId(R.id.export_button)).check(matches(withText(expectedExportLabel)))
+            onView(withId(R.id.review_selected)).check(matches(isEnabled()))
+
+            onView(withId(R.id.review_selected)).perform(click())
+            onView(withId(R.id.review_selected)).check(matches(withEffectiveVisibility(GONE)))
+            onView(withId(R.id.selected_count)).check(matches(withText(countAfter)))
+            onView(withId(R.id.export_button)).check(matches(withText(expectedExportLabel)))
         }
     }
 
