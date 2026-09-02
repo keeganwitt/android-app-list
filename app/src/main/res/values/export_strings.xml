@@ -16,6 +16,7 @@
     <string name="export_clear_all">Clear all</string>
     <string name="export_review_title">Selected apps</string>
     <string name="export_return_to_browse">Back to app list</string>
+    <string name="export_review">Review</string>
     <string name="export_show_in_list">Show in list</string>
     <string name="export_filter_all">All types</string>
     <string name="export_filter_user">User</string>

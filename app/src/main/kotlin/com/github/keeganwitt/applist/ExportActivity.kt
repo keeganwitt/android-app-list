@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -99,16 +99,9 @@ internal class ExportActivity : AppCompatActivity() {
         binding.exportFormat.setOnCheckedChangeListener { _, checkedId ->
             if (!renderingState) viewModel.setFormat(checkedId.toExportFormat())
         }
-        binding.appSearch.setOnQueryTextListener(
-            object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = true
-
-                override fun onQueryTextChange(query: String?): Boolean {
-                    if (!renderingState) viewModel.setQuery(query.orEmpty())
-                    return true
-                }
-            },
-        )
+        binding.appSearch.doAfterTextChanged { query ->
+            if (!renderingState) viewModel.setQuery(query?.toString().orEmpty())
+        }
         binding.selectAllResults.setOnClickListener { viewModel.selectAllVisible() }
         binding.clearSelection.setOnClickListener { viewModel.clearSelection() }
         binding.reviewSelected.setOnClickListener { viewModel.showSelectionReview() }
@@ -139,16 +132,14 @@ internal class ExportActivity : AppCompatActivity() {
             },
         )
         binding.exportFormat.check(state.format.toViewId())
-        if (binding.appSearch.query.toString() != state.query) {
-            binding.appSearch.setQuery(state.query, false)
+        if (binding.appSearch.text.toString() != state.query) {
+            binding.appSearch.setText(state.query)
         }
         renderingState = false
 
         adapter.submitList(state.visibleApps)
         val count = state.selectedCount
         binding.selectedCount.text = resources.getQuantityString(R.plurals.export_selected_count, count, count)
-        binding.reviewSelected.text =
-            resources.getQuantityString(R.plurals.export_review_selected_count, count, count)
         val hiddenCount = state.hiddenSelectedCount
         binding.hiddenSelectedCount.text =
             resources.getQuantityString(R.plurals.export_hidden_selected_count, hiddenCount, hiddenCount)
@@ -160,6 +151,7 @@ internal class ExportActivity : AppCompatActivity() {
         binding.loadFailure.visibility = if (state.loadFailed) View.VISIBLE else View.GONE
         binding.exportOptions.visibility = if (loaded) View.VISIBLE else View.GONE
         binding.selectionControls.visibility = if (loaded) View.VISIBLE else View.GONE
+        binding.selectionFooter.visibility = if (loaded) View.VISIBLE else View.GONE
         binding.browseFilters.visibility = if (state.isReviewingSelection) View.GONE else View.VISIBLE
         binding.reviewHeader.visibility = if (state.isReviewingSelection) View.VISIBLE else View.GONE
         binding.selectAllResults.visibility = if (state.isReviewingSelection) View.GONE else View.VISIBLE

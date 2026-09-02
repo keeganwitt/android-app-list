@@ -37,21 +37,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/selected_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:accessibilityLiveRegion="polite"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/review_selected"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp" />
-
                     <LinearLayout
                         android:id="@+id/review_header"
                         android:layout_width="match_parent"
@@ -135,12 +120,19 @@
                             android:layout_marginHorizontal="16dp"
                             android:text="@string/export_filter_hint" />
 
-                        <androidx.appcompat.widget.SearchView
-                            android:id="@+id/app_search"
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:iconifiedByDefault="false"
-                            android:queryHint="@string/export_search_apps" />
+                            android:layout_marginHorizontal="16dp"
+                            android:hint="@string/export_search_apps"
+                            app:endIconMode="clear_text"
+                            app:startIconDrawable="@drawable/ic_search">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/app_search"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <TextView
                             android:id="@+id/hidden_selected_count"
@@ -154,7 +146,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
+                        android:gravity="start"
                         android:orientation="horizontal"
                         android:paddingHorizontal="8dp">
 
@@ -259,6 +251,30 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
     </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/selection_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/selected_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:accessibilityLiveRegion="polite"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/review_selected"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/export_review" />
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/export_button"
