@@ -131,7 +131,10 @@ class SummaryCalculatorTest {
         val app = createApp(enabled = true, archived = true, apkSize = 100)
         AppInfoField.entries.forEach { field ->
             val result = calculator.calculate(listOf(app), field)
-            if (field == AppInfoField.VERSION || field == AppInfoField.APP_NAME || field == AppInfoField.PACKAGE_NAME ||
+            if (
+                field == AppInfoField.VERSION ||
+                field == AppInfoField.APP_NAME ||
+                field == AppInfoField.PACKAGE_NAME ||
                 field == AppInfoField.STORE_URL
             ) {
                 assertNull(result)

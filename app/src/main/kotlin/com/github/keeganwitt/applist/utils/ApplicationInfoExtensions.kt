@@ -5,10 +5,6 @@ import android.os.Build
 import com.github.keeganwitt.applist.services.AppStoreService
 
 /**
- * Extension properties for [ApplicationInfo].
- */
-
-/**
  * Checks if the application is archived.
  * On API 35+, it uses the system [ApplicationInfo.isArchived] property.
  * On older versions, it checks for the "com.android.vending.archive" metadata key.
