@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +13,7 @@ internal class ExportViewModel(
     val repository: AppRepository,
     private val dispatchers: DispatcherProvider,
     private val appComparator: Comparator<App>,
+    private val exportFileWriter: ExportFileWriter,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ExportUiState())
     val uiState: StateFlow<ExportUiState> = _uiState.asStateFlow()
@@ -19,6 +21,9 @@ internal class ExportViewModel(
     private var allApps: List<App> = emptyList()
     private var selectedPackageNames: Set<String> = emptySet()
     private var pendingExportRequest: ExportRequest? = null
+    private var exportWriteStarted = false
+    private val _exportCompletion = MutableStateFlow<ExportCompletion?>(null)
+    val exportCompletion: StateFlow<ExportCompletion?> = _exportCompletion.asStateFlow()
 
     init {
         refresh()
@@ -87,9 +92,36 @@ internal class ExportViewModel(
 
     fun pendingExportRequest(): ExportRequest? = pendingExportRequest
 
-    fun handleExportOutcome(outcome: ExportOutcome) {
+    fun writePendingExport(uri: Uri) {
+        val request = pendingExportRequest ?: return
+        if (exportWriteStarted) return
+        exportWriteStarted = true
+        viewModelScope.launch(dispatchers.io) {
+            completeExport(exportFileWriter.write(uri, request))
+        }
+    }
+
+    fun cancelPendingExport() {
+        if (pendingExportRequest == null || exportWriteStarted) return
+        completeExport(ExportCompletion(ExportOutcome.CANCELED))
+    }
+
+    fun failPendingExport(errorMessage: String?) {
+        if (pendingExportRequest == null || exportWriteStarted) return
+        completeExport(ExportCompletion(ExportOutcome.FAILURE, errorMessage))
+    }
+
+    fun consumeExportCompletion(completion: ExportCompletion): Boolean {
+        if (_exportCompletion.value !== completion) return false
+        _exportCompletion.value = null
+        return true
+    }
+
+    private fun completeExport(completion: ExportCompletion) {
         pendingExportRequest = null
+        exportWriteStarted = false
         _uiState.update { it.copy(isExporting = false) }
+        _exportCompletion.value = completion
     }
 
     fun selectAllVisible() {

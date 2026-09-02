@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
@@ -50,8 +51,16 @@ internal class ExportActivity : AppCompatActivity() {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         val store = DefaultAppStoreService(crashReporter = crashReporter)
                         val repository = AppRepositoryFactory.create(applicationContext, store, crashReporter)
+                        val writer =
+                            DefaultExportFileWriter(
+                                contentResolver = applicationContext.contentResolver,
+                                formatter = ExportFormatter(),
+                                appSettings = SharedPreferencesAppSettings(applicationContext),
+                                loadingFailedValue = applicationContext.getString(R.string.export_loading_failed),
+                                crashReporter = crashReporter,
+                            )
                         @Suppress("UNCHECKED_CAST")
-                        return ExportViewModel(repository, DefaultDispatcherProvider(), comparator) as T
+                        return ExportViewModel(repository, DefaultDispatcherProvider(), comparator, writer) as T
                     }
                 },
             )[ExportViewModel::class.java]
@@ -61,15 +70,12 @@ internal class ExportActivity : AppCompatActivity() {
         exporter =
             AppExporter(
                 activity = this,
-                formatter = ExportFormatter(),
-                appSettings = SharedPreferencesAppSettings(this),
                 crashReporter = FirebaseCrashReporter(),
-                onOutcome = { outcome ->
-                    viewModel.handleExportOutcome(outcome)
-                    if (outcome == ExportOutcome.SUCCESS) finish()
+                onResult = { uri ->
+                    if (uri == null) viewModel.cancelPendingExport() else viewModel.writePendingExport(uri)
                 },
+                onLaunchFailure = viewModel::failPendingExport,
             )
-        viewModel.pendingExportRequest()?.let(exporter::restorePendingRequest)
     }
 
     private fun setupViews() {
@@ -109,7 +115,7 @@ internal class ExportActivity : AppCompatActivity() {
         binding.retry.setOnClickListener { viewModel.refresh() }
         binding.exportButton.setOnClickListener {
             val request = viewModel.beginExport() ?: return@setOnClickListener
-            exporter.export(request.format, request.apps)
+            exporter.export(request.format)
         }
     }
 
@@ -117,6 +123,28 @@ internal class ExportActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collectLatest(::render)
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.exportCompletion.collectLatest { completion ->
+                    completion ?: return@collectLatest
+                    if (!viewModel.consumeExportCompletion(completion)) return@collectLatest
+                    when (completion.outcome) {
+                        ExportOutcome.SUCCESS -> {
+                            Toast.makeText(this@ExportActivity, R.string.export_successful, Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        ExportOutcome.FAILURE ->
+                            Toast
+                                .makeText(
+                                    this@ExportActivity,
+                                    getString(R.string.export_failed, completion.errorMessage),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        ExportOutcome.CANCELED -> Unit
+                    }
+                }
             }
         }
     }

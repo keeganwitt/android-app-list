@@ -1,6 +1,8 @@
 package com.github.keeganwitt.applist
 
+import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -297,9 +299,57 @@ class ExportViewModelTest {
             assertTrue(viewModel.uiState.value.isExporting)
             assertFalse(viewModel.uiState.value.canExport)
 
-            viewModel.handleExportOutcome(ExportOutcome.CANCELED)
+            viewModel.cancelPendingExport()
             assertEquals(null, viewModel.pendingExportRequest())
             assertEquals(beforeExport, viewModel.uiState.value)
+        }
+
+    @Test
+    fun `retained export write completes once across owner recreation`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            val writer = ControllableExportFileWriter()
+            viewModel = createViewModel(writer)
+            advanceUntilIdle()
+            viewModel.beginExport()
+            val destination = io.mockk.mockk<Uri>()
+
+            viewModel.writePendingExport(destination)
+            testScheduler.runCurrent()
+            viewModel.writePendingExport(destination)
+            assertEquals(1, writer.writeCount)
+            assertTrue(viewModel.uiState.value.isExporting)
+
+            writer.result.complete(ExportCompletion(ExportOutcome.SUCCESS))
+            advanceUntilIdle()
+
+            assertEquals(1, writer.writeCount)
+            assertFalse(viewModel.uiState.value.isExporting)
+            val completion = viewModel.exportCompletion.value!!
+            assertTrue(viewModel.consumeExportCompletion(completion))
+            assertFalse(viewModel.consumeExportCompletion(completion))
+        }
+
+    @Test
+    fun `failed retained write unfreezes choices and exposes one failure`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            val writer = ControllableExportFileWriter()
+            viewModel = createViewModel(writer)
+            advanceUntilIdle()
+            val beforeExport = viewModel.uiState.value
+            viewModel.beginExport()
+            viewModel.writePendingExport(io.mockk.mockk())
+            testScheduler.runCurrent()
+
+            writer.result.complete(ExportCompletion(ExportOutcome.FAILURE, "Disk full"))
+            advanceUntilIdle()
+
+            assertEquals(beforeExport, viewModel.uiState.value)
+            assertEquals(
+                ExportCompletion(ExportOutcome.FAILURE, "Disk full"),
+                viewModel.exportCompletion.value,
+            )
         }
 
     @Test
@@ -312,7 +362,9 @@ class ExportViewModelTest {
         assertTrue(ExportUiState(selectedApps = selected, isLoading = false).canExport)
     }
 
-    private fun createViewModel(): ExportViewModel =
+    private fun createViewModel(
+        exportFileWriter: ExportFileWriter = ExportFileWriter { _, _ -> ExportCompletion(ExportOutcome.SUCCESS) },
+    ): ExportViewModel =
         ExportViewModel(
             repository = repository,
             dispatchers =
@@ -322,7 +374,21 @@ class ExportViewModelTest {
                     override val default = dispatcher
                 },
             appComparator = compareBy<App> { it.name }.thenBy { it.packageName },
+            exportFileWriter = exportFileWriter,
         )
+
+    private class ControllableExportFileWriter : ExportFileWriter {
+        val result = CompletableDeferred<ExportCompletion>()
+        var writeCount = 0
+
+        override suspend fun write(
+            uri: Uri,
+            request: ExportRequest,
+        ): ExportCompletion {
+            writeCount++
+            return result.await()
+        }
+    }
 
     private fun app(
         packageName: String,

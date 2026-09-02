@@ -1,7 +1,12 @@
 package com.github.keeganwitt.applist
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -52,9 +57,38 @@ internal class ExportAppAdapter(
             )
         binding.appSelectionCheckbox.setOnClickListener(null)
         binding.appSelectionCheckbox.isChecked = item.isSelected
-        binding.appSelectionCheckbox.contentDescription = selectionDescription
-        binding.root.contentDescription = selectionDescription
+        binding.appSelectionCheckbox.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        binding.appSelectionCheckbox.isFocusable = false
+        val accessibilityDescription =
+            listOf(
+                item.appName,
+                item.packageName,
+                type,
+                if (item.isArchived) context.getString(R.string.archived) else null,
+                selectionDescription,
+            ).filterNotNull().joinToString(", ")
+        binding.root.contentDescription = accessibilityDescription
         binding.root.isActivated = item.isSelected
+        ViewCompat.setAccessibilityDelegate(
+            binding.root,
+            object : AccessibilityDelegateCompat() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfoCompat,
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.contentDescription = accessibilityDescription
+                    info.isCheckable = true
+                    info.isChecked = item.isSelected
+                    info.addAction(
+                        AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                            AccessibilityNodeInfo.ACTION_CLICK,
+                            selectionDescription,
+                        ),
+                    )
+                }
+            },
+        )
         binding.root.setOnClickListener { onSelectionChanged(item.packageName) }
         binding.appSelectionCheckbox.setOnClickListener { onSelectionChanged(item.packageName) }
     }

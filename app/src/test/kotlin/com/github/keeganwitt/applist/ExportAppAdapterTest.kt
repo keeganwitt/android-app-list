@@ -1,5 +1,7 @@
 package com.github.keeganwitt.applist
 
+import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
@@ -58,7 +60,7 @@ class ExportAppAdapterTest {
         )
         assertTrue(holder.binding.appSelectionCheckbox.isChecked)
         assertEquals(
-            "Deselect Example",
+            "Example, com.example.app, User app, Deselect Example",
             holder.binding.root.contentDescription
                 .toString(),
         )
@@ -89,7 +91,7 @@ class ExportAppAdapterTest {
         )
         assertFalse(holder.binding.appSelectionCheckbox.isChecked)
         assertEquals(
-            "Select Active",
+            "Active, user.active, User app, Select Active",
             holder.binding.root.contentDescription
                 .toString(),
         )
@@ -109,6 +111,28 @@ class ExportAppAdapterTest {
         holder.binding.appSelectionCheckbox.performClick()
 
         assertEquals(listOf("com.example.app", "com.example.app"), selectedPackages)
+    }
+
+    @Test
+    fun `row is the single accessible checkable selection action`() {
+        val holder = createViewHolder()
+        adapter.submitList(
+            listOf(
+                ExportAppItemUiModel("com.example.app", "Example", false, true, true),
+            ),
+        )
+        adapter.onBindViewHolder(holder, 0)
+
+        val rowInfo = holder.binding.root.createAccessibilityNodeInfo()
+        assertTrue(rowInfo.isCheckable)
+        assertTrue(rowInfo.isChecked)
+        assertEquals(
+            1,
+            rowInfo.actionList.count { it.id == AccessibilityNodeInfo.ACTION_CLICK },
+        )
+        assertEquals("Example, com.example.app, System app, Archived, Deselect Example", rowInfo.contentDescription)
+        assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO, holder.binding.appSelectionCheckbox.importantForAccessibility)
+        assertFalse(holder.binding.appSelectionCheckbox.isFocusable)
     }
 
     private fun createViewHolder(): ExportAppAdapter.ExportAppViewHolder {
