@@ -31,71 +31,162 @@
                 android:orientation="vertical"
                 android:paddingTop="12dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:text="@string/export_scope_title"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                <RadioGroup
-                    android:id="@+id/export_scope"
+                <LinearLayout
+                    android:id="@+id/selection_controls"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checkedButton="@id/scope_user_apps"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="16dp">
+                    android:orientation="vertical">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/scope_user_apps"
+                    <TextView
+                        android:id="@+id/selected_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/review_selected"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="8dp" />
+
+                    <LinearLayout
+                        android:id="@+id/review_header"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/export_scope_user" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp"
+                        android:visibility="gone">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/scope_system_apps"
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:text="@string/export_review_title"
+                            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/return_to_browse"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_return_to_browse" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/browse_filters"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/export_scope_system" />
+                        android:orientation="vertical">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/scope_all_apps"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/export_show_in_list"
+                            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/app_type_filter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            app:checkedChip="@id/filter_user_apps"
+                            app:selectionRequired="true"
+                            app:singleSelection="true">
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/filter_all_types"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/export_filter_all" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/filter_user_apps"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/export_filter_user" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/filter_system_apps"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/export_filter_system" />
+                        </com.google.android.material.chip.ChipGroup>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/show_archived"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:text="@string/export_show_archived" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:text="@string/export_filter_hint" />
+
+                        <androidx.appcompat.widget.SearchView
+                            android:id="@+id/app_search"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:iconifiedByDefault="false"
+                            android:queryHint="@string/export_search_apps" />
+
+                        <TextView
+                            android:id="@+id/hidden_selected_count"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:accessibilityLiveRegion="polite"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/export_scope_all" />
+                        android:gravity="end"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/scope_choose_apps"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/select_all_results"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_select_all_results" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/clear_selection"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/export_clear_selection" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/no_results"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/export_scope_choose" />
-                </RadioGroup>
+                        android:layout_marginHorizontal="16dp"
+                        android:visibility="gone" />
 
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/include_archived"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:text="@string/export_include_archived" />
-
-                <TextView
-                    android:id="@+id/selected_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="8dp"
-                    android:accessibilityLiveRegion="polite"
-                    android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-                <TextView
-                    android:id="@+id/empty_state"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/export_empty"
-                    android:visibility="gone" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/app_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="320dp"
+                        android:nestedScrollingEnabled="true" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -138,110 +229,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/export_tsv" />
                 </RadioGroup>
-
-                <LinearLayout
-                    android:id="@+id/custom_controls"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/export_show_in_list"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/app_type_filter"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        app:checkedChip="@id/filter_all_types"
-                        app:selectionRequired="true"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/filter_all_types"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/export_filter_all" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/filter_user_apps"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/export_filter_user" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/filter_system_apps"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/export_filter_system" />
-                    </com.google.android.material.chip.ChipGroup>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:text="@string/export_filter_hint" />
-
-                    <androidx.appcompat.widget.SearchView
-                        android:id="@+id/app_search"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:iconifiedByDefault="false"
-                        android:queryHint="@string/export_search_apps" />
-
-                    <TextView
-                        android:id="@+id/hidden_selected_count"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:accessibilityLiveRegion="polite"
-                        android:visibility="gone" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="8dp">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/select_all_results"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/export_select_all_results" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/clear_selection"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/export_clear_selection" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/no_results"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:text="@string/export_no_results"
-                        android:visibility="gone" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/app_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="320dp"
-                        android:nestedScrollingEnabled="true" />
-                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 

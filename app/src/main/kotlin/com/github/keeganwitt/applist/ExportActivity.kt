@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Lifecycle
@@ -74,17 +75,15 @@ internal class ExportActivity : AppCompatActivity() {
     private fun setupViews() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        binding.toolbar.setNavigationOnClickListener { handleBackNavigation() }
+        onBackPressedDispatcher.addCallback(this) { handleBackNavigation() }
 
         adapter = ExportAppAdapter(viewModel::toggleSelection)
         binding.appList.layoutManager = LinearLayoutManager(this)
         binding.appList.adapter = adapter
 
-        binding.exportScope.setOnCheckedChangeListener { _, checkedId ->
-            if (!renderingState) viewModel.setScope(checkedId.toExportScope())
-        }
-        binding.includeArchived.setOnCheckedChangeListener { _, checked ->
-            if (!renderingState) viewModel.setIncludeArchived(checked)
+        binding.showArchived.setOnCheckedChangeListener { _, checked ->
+            if (!renderingState) viewModel.setShowArchived(checked)
         }
         binding.appTypeFilter.setOnCheckedStateChangeListener { _, checkedIds ->
             if (!renderingState) {
@@ -112,6 +111,8 @@ internal class ExportActivity : AppCompatActivity() {
         )
         binding.selectAllResults.setOnClickListener { viewModel.selectAllVisible() }
         binding.clearSelection.setOnClickListener { viewModel.clearSelection() }
+        binding.reviewSelected.setOnClickListener { viewModel.showSelectionReview() }
+        binding.returnToBrowse.setOnClickListener { handleBackNavigation() }
         binding.retry.setOnClickListener { viewModel.refresh() }
         binding.exportButton.setOnClickListener {
             val request = viewModel.beginExport() ?: return@setOnClickListener
@@ -129,8 +130,7 @@ internal class ExportActivity : AppCompatActivity() {
 
     private fun render(state: ExportUiState) {
         renderingState = true
-        binding.exportScope.check(state.scope.toViewId())
-        binding.includeArchived.isChecked = state.includeArchived
+        binding.showArchived.isChecked = state.showArchived
         binding.appTypeFilter.check(
             when (state.appTypeFilter) {
                 ExportAppTypeFilter.ALL -> R.id.filter_all_types
@@ -147,6 +147,8 @@ internal class ExportActivity : AppCompatActivity() {
         adapter.submitList(state.visibleApps)
         val count = state.selectedCount
         binding.selectedCount.text = resources.getQuantityString(R.plurals.export_selected_count, count, count)
+        binding.reviewSelected.text =
+            resources.getQuantityString(R.plurals.export_review_selected_count, count, count)
         val hiddenCount = state.hiddenSelectedCount
         binding.hiddenSelectedCount.text =
             resources.getQuantityString(R.plurals.export_hidden_selected_count, hiddenCount, hiddenCount)
@@ -157,17 +159,19 @@ internal class ExportActivity : AppCompatActivity() {
         binding.loading.visibility = if (state.isLoading) View.VISIBLE else View.GONE
         binding.loadFailure.visibility = if (state.loadFailed) View.VISIBLE else View.GONE
         binding.exportOptions.visibility = if (loaded) View.VISIBLE else View.GONE
-        binding.customControls.visibility =
-            if (loaded && state.scope == ExportScope.CUSTOM) View.VISIBLE else View.GONE
-        binding.emptyState.visibility = if (loaded && count == 0) View.VISIBLE else View.GONE
+        binding.selectionControls.visibility = if (loaded) View.VISIBLE else View.GONE
+        binding.browseFilters.visibility = if (state.isReviewingSelection) View.GONE else View.VISIBLE
+        binding.reviewHeader.visibility = if (state.isReviewingSelection) View.VISIBLE else View.GONE
+        binding.selectAllResults.visibility = if (state.isReviewingSelection) View.GONE else View.VISIBLE
+        binding.reviewSelected.visibility = if (state.isReviewingSelection) View.GONE else View.VISIBLE
+        binding.clearSelection.text =
+            getString(if (state.isReviewingSelection) R.string.export_clear_all else R.string.export_clear_selection)
+        binding.noResults.text =
+            getString(if (state.isReviewingSelection) R.string.export_empty else R.string.export_no_results)
         binding.noResults.visibility = if (state.visibleApps.isEmpty()) View.VISIBLE else View.GONE
 
         val controlsEnabled = loaded && !state.isExporting
-        binding.exportScope.isEnabled = controlsEnabled
-        for (index in 0 until binding.exportScope.childCount) {
-            binding.exportScope.getChildAt(index).isEnabled = controlsEnabled
-        }
-        binding.includeArchived.isEnabled = controlsEnabled
+        binding.showArchived.isEnabled = controlsEnabled
         for (index in 0 until binding.appTypeFilter.childCount) {
             binding.appTypeFilter.getChildAt(index).isEnabled = controlsEnabled
         }
@@ -179,16 +183,18 @@ internal class ExportActivity : AppCompatActivity() {
         binding.appList.isEnabled = controlsEnabled
         binding.selectAllResults.isEnabled = controlsEnabled && state.visibleApps.isNotEmpty()
         binding.clearSelection.isEnabled = controlsEnabled && count > 0
+        binding.reviewSelected.isEnabled = controlsEnabled && count > 0
+        binding.returnToBrowse.isEnabled = controlsEnabled
         binding.exportButton.isEnabled = state.canExport
     }
 
-    private fun Int.toExportScope(): ExportScope =
-        when (this) {
-            R.id.scope_system_apps -> ExportScope.SYSTEM_APPS
-            R.id.scope_all_apps -> ExportScope.ALL_APPS
-            R.id.scope_choose_apps -> ExportScope.CUSTOM
-            else -> ExportScope.USER_APPS
+    private fun handleBackNavigation() {
+        if (viewModel.uiState.value.isReviewingSelection) {
+            viewModel.showBrowse()
+        } else {
+            finish()
         }
+    }
 
     private fun Int.toExportFormat(): ExportFormat =
         when (this) {
@@ -196,14 +202,6 @@ internal class ExportActivity : AppCompatActivity() {
             R.id.format_csv -> ExportFormat.CSV
             R.id.format_tsv -> ExportFormat.TSV
             else -> ExportFormat.XML
-        }
-
-    private fun ExportScope.toViewId(): Int =
-        when (this) {
-            ExportScope.USER_APPS -> R.id.scope_user_apps
-            ExportScope.SYSTEM_APPS -> R.id.scope_system_apps
-            ExportScope.ALL_APPS -> R.id.scope_all_apps
-            ExportScope.CUSTOM -> R.id.scope_choose_apps
         }
 
     private fun ExportFormat.toViewId(): Int =

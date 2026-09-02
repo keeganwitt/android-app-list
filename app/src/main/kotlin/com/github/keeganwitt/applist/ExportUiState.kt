@@ -14,22 +14,22 @@ internal data class ExportRequest(
 )
 
 internal data class ExportUiState(
-    val scope: ExportScope = ExportScope.USER_APPS,
     val format: ExportFormat = ExportFormat.XML,
-    val includeArchived: Boolean = false,
+    val showArchived: Boolean = false,
     val query: String = "",
-    val appTypeFilter: ExportAppTypeFilter = ExportAppTypeFilter.ALL,
+    val appTypeFilter: ExportAppTypeFilter = ExportAppTypeFilter.USER,
     val visibleApps: List<ExportAppItemUiModel> = emptyList(),
     val selectedApps: List<ExportAppItemUiModel> = emptyList(),
     val isLoading: Boolean = true,
     val loadFailed: Boolean = false,
     val isExporting: Boolean = false,
+    val isReviewingSelection: Boolean = false,
 ) {
     val selectedCount: Int
         get() = selectedApps.size
 
     val hiddenSelectedCount: Int
-        get() = if (scope == ExportScope.CUSTOM) selectedCount - visibleApps.count { it.isSelected } else 0
+        get() = if (isReviewingSelection) 0 else selectedCount - visibleApps.count { it.isSelected }
 
     val canExport: Boolean
         get() = selectedApps.isNotEmpty() && !isLoading && !loadFailed && !isExporting

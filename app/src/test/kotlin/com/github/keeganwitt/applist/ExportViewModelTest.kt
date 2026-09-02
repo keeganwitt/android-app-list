@@ -39,7 +39,7 @@ class ExportViewModelTest {
     }
 
     @Test
-    fun `initial load refreshes and selects visible user apps in name order`() =
+    fun `initial load shows and selects non-archived user apps in name order`() =
         runTest(dispatcher) {
             repository.apps =
                 listOf(
@@ -54,10 +54,11 @@ class ExportViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
-            assertEquals(listOf("Alpha", "Zulu"), state.selectedApps.map { it.appName })
-            assertEquals(ExportScope.USER_APPS, state.scope)
+            assertEquals(ExportAppTypeFilter.USER, state.appTypeFilter)
+            assertEquals(listOf("Alpha", "Hidden", "Zulu"), state.visibleApps.map { it.appName })
+            assertEquals(listOf("Alpha", "Hidden", "Zulu"), state.selectedApps.map { it.appName })
             assertEquals(ExportFormat.XML, state.format)
-            assertFalse(state.includeArchived)
+            assertFalse(state.showArchived)
             assertFalse(state.isLoading)
             assertEquals(listOf(true), repository.refreshForces)
         }
@@ -75,66 +76,41 @@ class ExportViewModelTest {
         }
 
     @Test
-    fun `system and all scopes apply their documented visibility rules`() =
+    fun `changing type filter preserves selection and includes non-launchable packages`() =
         runTest(dispatcher) {
             repository.apps =
                 listOf(
-                    app("user.visible", "User Visible"),
-                    app("user.hidden", "User Hidden", hasLaunchIntent = false),
-                    app("system.visible", "System Visible", isUserInstalled = false),
-                    app("system.hidden", "System Hidden", isUserInstalled = false, hasLaunchIntent = false),
-                    app("system.archived", "System Archived", isUserInstalled = false, archived = true, hasLaunchIntent = false),
+                    app("user.visible", "Alpha"),
+                    app("user.hidden", "Beta", hasLaunchIntent = false),
+                    app("system.visible", "Gamma", isUserInstalled = false),
+                    app("system.hidden", "Delta", isUserInstalled = false, hasLaunchIntent = false),
                 )
             viewModel = createViewModel()
             advanceUntilIdle()
 
-            viewModel.setScope(ExportScope.SYSTEM_APPS)
-            assertEquals(listOf("system.visible"), viewModel.appsForExport().map { it.packageName })
+            assertEquals(2, viewModel.uiState.value.selectedCount)
+            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
 
-            viewModel.setScope(ExportScope.ALL_APPS)
+            assertEquals(2, viewModel.uiState.value.selectedCount)
+            assertEquals(
+                listOf("system.hidden", "system.visible"),
+                viewModel.uiState.value.visibleApps
+                    .map { it.packageName },
+            )
+
+            viewModel.selectAllVisible()
             assertEquals(
                 listOf("system.hidden", "system.visible", "user.hidden", "user.visible"),
                 viewModel.appsForExport().map { it.packageName }.sorted(),
             )
 
-            viewModel.setIncludeArchived(true)
-            assertEquals(5, viewModel.appsForExport().size)
+            viewModel.setAppTypeFilter(ExportAppTypeFilter.ALL)
+            assertEquals(4, viewModel.uiState.value.selectedCount)
+            assertEquals(4, viewModel.uiState.value.visibleApps.size)
         }
 
     @Test
-    fun `custom scope keeps preset selection while search only filters visible choices`() =
-        runTest(dispatcher) {
-            repository.apps =
-                listOf(
-                    app("user.alpha", "Alpha"),
-                    app("user.beta", "Beta"),
-                    app("system.gamma", "Gamma System", isUserInstalled = false),
-                )
-            viewModel = createViewModel()
-            advanceUntilIdle()
-
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setQuery("system.gamma")
-
-            assertEquals(
-                listOf("system.gamma"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-            assertEquals(2, viewModel.uiState.value.selectedCount)
-
-            viewModel.selectAllVisible()
-            assertEquals(3, viewModel.uiState.value.selectedCount)
-
-            viewModel.clearSelection()
-            assertFalse(viewModel.uiState.value.canExport)
-
-            viewModel.toggleSelection("user.alpha")
-            assertEquals(listOf("user.alpha"), viewModel.appsForExport().map { it.packageName })
-        }
-
-    @Test
-    fun `leaving custom scope clears search and replaces custom selection`() =
+    fun `changing type filter retains query and selection`() =
         runTest(dispatcher) {
             repository.apps =
                 listOf(
@@ -143,45 +119,39 @@ class ExportViewModelTest {
                 )
             viewModel = createViewModel()
             advanceUntilIdle()
-
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.clearSelection()
-            viewModel.toggleSelection("system.app")
             viewModel.setQuery("system")
-            viewModel.setScope(ExportScope.USER_APPS)
 
-            assertEquals("", viewModel.uiState.value.query)
+            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
+
+            assertEquals("system", viewModel.uiState.value.query)
+            assertEquals(
+                listOf("system.app"),
+                viewModel.uiState.value.visibleApps
+                    .map { it.packageName },
+            )
             assertEquals(listOf("user.app"), viewModel.appsForExport().map { it.packageName })
         }
 
     @Test
-    fun `archived toggle adds preset apps but never implicitly adds custom apps`() =
+    fun `search hides selections without clearing them and select all adds visible results`() =
         runTest(dispatcher) {
-            repository.apps =
-                listOf(
-                    app("user.active", "Active"),
-                    app("user.archived", "Archived", archived = true, hasLaunchIntent = false),
-                )
+            repository.apps = listOf(app("user.alpha", "Alpha"), app("user.beta", "Beta"))
             viewModel = createViewModel()
             advanceUntilIdle()
-
-            viewModel.setIncludeArchived(true)
-            assertEquals(2, viewModel.uiState.value.selectedCount)
-
-            viewModel.setScope(ExportScope.CUSTOM)
             viewModel.clearSelection()
-            viewModel.setIncludeArchived(false)
-            viewModel.setIncludeArchived(true)
+            viewModel.setQuery("Alpha")
+            viewModel.selectAllVisible()
 
-            assertTrue(
-                viewModel.uiState.value.visibleApps
-                    .any { it.packageName == "user.archived" },
-            )
-            assertEquals(0, viewModel.uiState.value.selectedCount)
+            viewModel.setQuery("Beta")
+
+            assertEquals(listOf("user.alpha"), viewModel.appsForExport().map { it.packageName })
+            assertEquals(1, viewModel.uiState.value.hiddenSelectedCount)
+            viewModel.selectAllVisible()
+            assertEquals(listOf("user.alpha", "user.beta"), viewModel.appsForExport().map { it.packageName })
         }
 
     @Test
-    fun `disabling archived apps removes archived custom selections`() =
+    fun `archived filter exposes without selecting and hiding preserves archived selections`() =
         runTest(dispatcher) {
             repository.apps =
                 listOf(
@@ -191,15 +161,97 @@ class ExportViewModelTest {
             viewModel = createViewModel()
             advanceUntilIdle()
 
-            viewModel.setIncludeArchived(true)
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setIncludeArchived(false)
+            viewModel.setShowArchived(true)
 
+            assertEquals(2, viewModel.uiState.value.visibleApps.size)
             assertEquals(listOf("user.active"), viewModel.appsForExport().map { it.packageName })
+            viewModel.selectAllVisible()
+            assertEquals(2, viewModel.uiState.value.selectedCount)
+
+            viewModel.setShowArchived(false)
+
+            assertEquals(listOf("user.active", "user.archived"), viewModel.appsForExport().map { it.packageName })
+            assertEquals(
+                listOf("user.active"),
+                viewModel.uiState.value.visibleApps
+                    .map { it.packageName },
+            )
+            assertEquals(1, viewModel.uiState.value.hiddenSelectedCount)
+        }
+
+    @Test
+    fun `review shows every selection and returning restores browse filters`() =
+        runTest(dispatcher) {
+            repository.apps =
+                listOf(
+                    app("user.alpha", "Alpha"),
+                    app("user.archived", "Archived", archived = true),
+                    app("system.beta", "Beta", isUserInstalled = false),
+                )
+            viewModel = createViewModel()
+            advanceUntilIdle()
+            viewModel.setShowArchived(true)
+            viewModel.selectAllVisible()
+            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
+            viewModel.selectAllVisible()
+            viewModel.setQuery("no match")
+
+            viewModel.showSelectionReview()
+
+            assertTrue(viewModel.uiState.value.isReviewingSelection)
+            assertEquals(
+                listOf("user.alpha", "user.archived", "system.beta"),
+                viewModel.uiState.value.visibleApps
+                    .map { it.packageName },
+            )
+            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
+
+            viewModel.toggleSelection("user.archived")
+            assertEquals(listOf("user.alpha", "system.beta"), viewModel.appsForExport().map { it.packageName })
+
+            viewModel.showBrowse()
+
+            assertFalse(viewModel.uiState.value.isReviewingSelection)
+            assertEquals(ExportAppTypeFilter.SYSTEM, viewModel.uiState.value.appTypeFilter)
+            assertEquals("no match", viewModel.uiState.value.query)
             assertTrue(
                 viewModel.uiState.value.visibleApps
-                    .none { it.packageName == "user.archived" },
+                    .isEmpty(),
             )
+        }
+
+    @Test
+    fun `clear selection empties review`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            viewModel = createViewModel()
+            advanceUntilIdle()
+            viewModel.showSelectionReview()
+
+            viewModel.clearSelection()
+
+            assertTrue(viewModel.uiState.value.isReviewingSelection)
+            assertTrue(
+                viewModel.uiState.value.visibleApps
+                    .isEmpty(),
+            )
+            assertFalse(viewModel.uiState.value.canExport)
+        }
+
+    @Test
+    fun `row toggles and clear selection update export availability`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            viewModel = createViewModel()
+            advanceUntilIdle()
+
+            viewModel.toggleSelection("user.app")
+            assertFalse(viewModel.uiState.value.canExport)
+            viewModel.toggleSelection("user.app")
+            viewModel.toggleSelection("missing")
+            assertTrue(viewModel.uiState.value.canExport)
+            viewModel.clearSelection()
+            assertFalse(viewModel.uiState.value.canExport)
         }
 
     @Test
@@ -222,225 +274,43 @@ class ExportViewModelTest {
         }
 
     @Test
-    fun `export request captures format and order while outcomes re-enable export`() =
+    fun `export request captures format and order while controls remain frozen`() =
         runTest(dispatcher) {
             repository.apps = listOf(app("zulu", "Zulu"), app("alpha", "Alpha"))
             viewModel = createViewModel()
             advanceUntilIdle()
-
             viewModel.setFormat(ExportFormat.CSV)
-            viewModel.setIncludeArchived(false)
-            val request = viewModel.beginExport()
+            val beforeExport = viewModel.uiState.value
 
-            assertEquals(ExportFormat.CSV, viewModel.uiState.value.format)
+            val request = viewModel.beginExport()
+            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
+            viewModel.setFormat(ExportFormat.HTML)
+            viewModel.setShowArchived(true)
+            viewModel.setQuery("ignored")
+            viewModel.selectAllVisible()
+            viewModel.clearSelection()
+            viewModel.toggleSelection("alpha")
+
             assertEquals(ExportFormat.CSV, request?.format)
             assertEquals(listOf("alpha", "zulu"), request?.apps?.map { it.packageName })
             assertEquals(request, viewModel.pendingExportRequest())
             assertTrue(viewModel.uiState.value.isExporting)
             assertFalse(viewModel.uiState.value.canExport)
 
-            viewModel.setScope(ExportScope.ALL_APPS)
-            viewModel.setFormat(ExportFormat.HTML)
-            viewModel.setIncludeArchived(true)
-            viewModel.setQuery("ignored")
-            viewModel.selectAllVisible()
-            viewModel.clearSelection()
-            viewModel.toggleSelection("alpha")
-            assertEquals(null, viewModel.beginExport())
-            assertEquals(ExportScope.USER_APPS, viewModel.uiState.value.scope)
-            assertEquals(ExportFormat.CSV, viewModel.uiState.value.format)
-            assertEquals(2, viewModel.uiState.value.selectedCount)
-
             viewModel.handleExportOutcome(ExportOutcome.CANCELED)
             assertEquals(null, viewModel.pendingExportRequest())
-            viewModel.toggleSelection("alpha")
-            viewModel.toggleSelection("missing")
-            assertTrue(viewModel.uiState.value.canExport)
+            assertEquals(beforeExport, viewModel.uiState.value)
         }
 
     @Test
     fun `canExport rejects every unavailable state`() {
-        val selected =
-            listOf(
-                ExportAppItemUiModel("app", "App", true, false, true),
-            )
+        val selected = listOf(ExportAppItemUiModel("app", "App", true, false, true))
 
         assertFalse(ExportUiState(selectedApps = selected).canExport)
-        assertFalse(
-            ExportUiState(
-                selectedApps = selected,
-                isLoading = false,
-                loadFailed = true,
-            ).canExport,
-        )
-        assertFalse(
-            ExportUiState(
-                selectedApps = selected,
-                isLoading = false,
-                isExporting = true,
-            ).canExport,
-        )
-        assertTrue(
-            ExportUiState(
-                selectedApps = selected,
-                isLoading = false,
-            ).canExport,
-        )
+        assertFalse(ExportUiState(selectedApps = selected, isLoading = false, loadFailed = true).canExport)
+        assertFalse(ExportUiState(selectedApps = selected, isLoading = false, isExporting = true).canExport)
+        assertTrue(ExportUiState(selectedApps = selected, isLoading = false).canExport)
     }
-
-    @Test
-    fun `type filter narrows custom checklist without changing selection or excluding non-launchable apps`() =
-        runTest(dispatcher) {
-            repository.apps =
-                listOf(
-                    app("user.visible", "Alpha"),
-                    app("user.hidden", "Beta", hasLaunchIntent = false),
-                    app("system.visible", "Gamma", isUserInstalled = false),
-                    app("system.hidden", "Delta", isUserInstalled = false, hasLaunchIntent = false),
-                )
-            viewModel = createViewModel()
-            advanceUntilIdle()
-            viewModel.setScope(ExportScope.CUSTOM)
-
-            assertEquals(ExportAppTypeFilter.ALL, viewModel.uiState.value.appTypeFilter)
-            assertEquals(4, viewModel.uiState.value.visibleApps.size)
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.USER)
-            assertEquals(
-                listOf("user.visible", "user.hidden"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            assertEquals(
-                listOf("system.hidden", "system.visible"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-            assertEquals(1, viewModel.uiState.value.hiddenSelectedCount)
-            assertEquals(ExportScope.CUSTOM, viewModel.uiState.value.scope)
-            assertEquals(listOf("user.visible"), viewModel.appsForExport().map { it.packageName })
-
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.ALL)
-            assertEquals(4, viewModel.uiState.value.visibleApps.size)
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-        }
-
-    @Test
-    fun `select all results combines type search and archive filters while clear removes hidden selections`() =
-        runTest(dispatcher) {
-            repository.apps =
-                listOf(
-                    app("user.alpha", "Alpha"),
-                    app("system.alpha", "Alpha System", isUserInstalled = false),
-                    app("system.beta", "Beta", isUserInstalled = false),
-                    app("system.archived", "Alpha Archived", isUserInstalled = false, archived = true),
-                )
-            viewModel = createViewModel()
-            advanceUntilIdle()
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            viewModel.setQuery("ALPHA")
-
-            assertEquals(
-                listOf("system.alpha"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-            viewModel.selectAllVisible()
-            assertEquals(listOf("user.alpha", "system.alpha"), viewModel.appsForExport().map { it.packageName })
-            assertEquals(2, viewModel.uiState.value.selectedCount)
-            assertEquals(1, viewModel.uiState.value.hiddenSelectedCount)
-
-            viewModel.setQuery("no matches")
-            assertTrue(
-                viewModel.uiState.value.visibleApps
-                    .isEmpty(),
-            )
-            assertEquals(2, viewModel.uiState.value.hiddenSelectedCount)
-            viewModel.selectAllVisible()
-            assertEquals(2, viewModel.uiState.value.selectedCount)
-            viewModel.clearSelection()
-            assertFalse(viewModel.uiState.value.canExport)
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-        }
-
-    @Test
-    fun `archived eligibility removes custom selections even when hidden by type filter`() =
-        runTest(dispatcher) {
-            repository.apps =
-                listOf(
-                    app("user.active", "Active"),
-                    app("system.archived", "Archived", isUserInstalled = false, archived = true),
-                )
-            viewModel = createViewModel()
-            advanceUntilIdle()
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            viewModel.setIncludeArchived(true)
-
-            assertEquals(
-                listOf("system.archived"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-            assertEquals(listOf("user.active"), viewModel.appsForExport().map { it.packageName })
-            viewModel.selectAllVisible()
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.USER)
-            assertEquals(1, viewModel.uiState.value.hiddenSelectedCount)
-            viewModel.setIncludeArchived(false)
-            assertEquals(listOf("user.active"), viewModel.appsForExport().map { it.packageName })
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-        }
-
-    @Test
-    fun `leaving custom and opening a new session reset type filter`() =
-        runTest(dispatcher) {
-            repository.apps = listOf(app("user.app", "User"), app("system.app", "System", isUserInstalled = false))
-            viewModel = createViewModel()
-            advanceUntilIdle()
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            viewModel.setQuery("system")
-            viewModel.setScope(ExportScope.USER_APPS)
-
-            assertEquals(ExportAppTypeFilter.ALL, viewModel.uiState.value.appTypeFilter)
-            assertEquals("", viewModel.uiState.value.query)
-            assertEquals(0, viewModel.uiState.value.hiddenSelectedCount)
-            viewModel.setScope(ExportScope.CUSTOM)
-            assertEquals(2, viewModel.uiState.value.visibleApps.size)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            val freshSession = createViewModel()
-            advanceUntilIdle()
-            freshSession.setScope(ExportScope.CUSTOM)
-            assertEquals(2, freshSession.uiState.value.visibleApps.size)
-        }
-
-    @Test
-    fun `type filter is frozen during export and restored after cancellation`() =
-        runTest(dispatcher) {
-            repository.apps = listOf(app("user.app", "User"), app("system.app", "System", isUserInstalled = false))
-            viewModel = createViewModel()
-            advanceUntilIdle()
-            viewModel.setScope(ExportScope.CUSTOM)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.SYSTEM)
-            val beforeExport = viewModel.uiState.value
-            val request = viewModel.beginExport()
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.USER)
-
-            assertEquals(ExportAppTypeFilter.SYSTEM, viewModel.uiState.value.appTypeFilter)
-            assertEquals(listOf("user.app"), request?.apps?.map { it.packageName })
-            viewModel.handleExportOutcome(ExportOutcome.CANCELED)
-            assertEquals(beforeExport, viewModel.uiState.value)
-            viewModel.setAppTypeFilter(ExportAppTypeFilter.USER)
-            assertEquals(
-                listOf("user.app"),
-                viewModel.uiState.value.visibleApps
-                    .map { it.packageName },
-            )
-        }
 
     private fun createViewModel(): ExportViewModel =
         ExportViewModel(
