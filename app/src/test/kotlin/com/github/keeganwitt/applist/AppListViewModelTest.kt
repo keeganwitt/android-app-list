@@ -5,8 +5,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -14,6 +18,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -969,6 +974,100 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(any(), any(), any(), any(), any())
             }
+        }
+
+    @Test
+    fun `given load fails before emitting apps, when initialized, then failure is exposed`() =
+        runTest {
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("load failed") }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertFalse(state.isFullyLoaded)
+            assertTrue(state.loadFailed)
+            assertTrue(state.items.isEmpty())
+        }
+
+    @Test
+    fun `given load fails after emitting cached apps, when initialized, then apps remain visible with failure`() =
+        runTest {
+            val cachedApp = createTestApp("com.cached.app", "Cached App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow {
+                    emit(listOf(cachedApp))
+                    throw IllegalStateException("refresh failed")
+                }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertFalse(state.isFullyLoaded)
+            assertTrue(state.loadFailed)
+            assertEquals(listOf("com.cached.app"), state.items.map { it.packageName })
+        }
+
+    @Test
+    fun `given canceled load is still cleaning up, when load is replaced, then replacement waits`() =
+        runTest {
+            val cleanupStarted = CompletableDeferred<Unit>()
+            val allowCleanup = CompletableDeferred<Unit>()
+            val replacementStarted = CompletableDeferred<Unit>()
+            var loadCount = 0
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } answers {
+                loadCount++
+                if (loadCount == 1) {
+                    flow {
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            withContext(NonCancellable) {
+                                cleanupStarted.complete(Unit)
+                                allowCleanup.await()
+                            }
+                        }
+                    }
+                } else {
+                    flow {
+                        replacementStarted.complete(Unit)
+                        emit(emptyList())
+                    }
+                }
+            }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            runCurrent()
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+
+            assertTrue(cleanupStarted.isCompleted)
+            assertFalse(replacementStarted.isCompleted)
+
+            allowCleanup.complete(Unit)
+            advanceUntilIdle()
+
+            assertTrue(replacementStarted.isCompleted)
         }
 
     @Test

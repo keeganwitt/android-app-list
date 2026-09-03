@@ -2,11 +2,14 @@ package com.github.keeganwitt.applist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class AppListViewModel(
@@ -31,6 +34,7 @@ class AppListViewModel(
     private var allApps: List<App> = emptyList()
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null
+    private val loadMutex = Mutex()
 
     fun init(
         initialField: AppInfoField,
@@ -87,28 +91,39 @@ class AppListViewModel(
     private fun loadApps(reload: Boolean) {
         loadJob?.cancel()
         val state = _uiState.value
-        _uiState.update { it.copy(isLoading = true, isFullyLoaded = false, summary = null) }
+        _uiState.update { it.copy(isLoading = true, loadFailed = false, isFullyLoaded = false, summary = null) }
 
         loadJob =
             viewModelScope.launch(dispatchers.io) {
-                repository
-                    .loadApps(
-                        field = state.selectedField,
-                        systemAppsOnly = state.systemAppsOnly,
-                        showArchivedApps = state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
-                        descending = state.descending,
-                        reload = reload,
-                    ).collect { apps ->
-                        withContext(dispatchers.main) {
-                            allApps = apps
-                            val field = _uiState.value.selectedField
-                            cachedMappedItems = apps.map { mapToItem(it, field) }
-                            cachedMappedItemsField = field
-                            val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
-                            _uiState.update { it.copy(isLoading = false, isFullyLoaded = fullyLoaded) }
-                            applyFilterAndEmit()
-                        }
+                try {
+                    loadMutex.withLock {
+                        repository
+                            .loadApps(
+                                field = state.selectedField,
+                                systemAppsOnly = state.systemAppsOnly,
+                                showArchivedApps = state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
+                                descending = state.descending,
+                                reload = reload,
+                            ).collect { apps ->
+                                withContext(dispatchers.main) {
+                                    allApps = apps
+                                    val field = _uiState.value.selectedField
+                                    cachedMappedItems = apps.map { mapToItem(it, field) }
+                                    cachedMappedItemsField = field
+                                    val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
+                                    _uiState.update {
+                                        it.copy(isLoading = false, loadFailed = false, isFullyLoaded = fullyLoaded)
+                                    }
+                                    applyFilterAndEmit()
+                                }
+                            }
                     }
+                } catch (exception: Exception) {
+                    if (exception is CancellationException) throw exception
+                    _uiState.update {
+                        it.copy(isLoading = false, loadFailed = true, isFullyLoaded = false, summary = null)
+                    }
+                }
             }
     }
 
