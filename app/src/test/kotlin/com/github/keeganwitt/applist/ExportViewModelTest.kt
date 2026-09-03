@@ -3,12 +3,17 @@ package com.github.keeganwitt.applist
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -318,6 +323,53 @@ class ExportViewModelTest {
         }
 
     @Test
+    fun `retry force refreshes a partial cache left by a failed initial sync`() =
+        runTest(dispatcher) {
+            var attempts = 0
+            repository.refreshBlock = {
+                attempts++
+                if (attempts == 1) {
+                    repository.apps = listOf(app("partial.app", "Partial"))
+                    throw IllegalStateException("sync failed")
+                }
+                repository.apps = listOf(app("complete.app", "Complete"))
+            }
+            viewModel = createViewModel()
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.loadFailed)
+            assertEquals(listOf(true), repository.refreshForces)
+
+            viewModel.refresh()
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.loadFailed)
+            assertEquals(listOf(true, true), repository.refreshForces)
+            assertEquals(listOf("complete.app"), viewModel.appsForExport().map { it.packageName })
+        }
+
+    @Test
+    fun `refresh replaces active observation without exposing cancellation as failure`() =
+        runTest(dispatcher) {
+            repository.apps = listOf(app("user.app", "User"))
+            val ioDispatcher = StandardTestDispatcher(testScheduler)
+            val mainDispatcher = StandardTestDispatcher(testScheduler)
+            viewModel = createViewModel(ioDispatcher = ioDispatcher, mainDispatcher = mainDispatcher)
+            val loadFailures = mutableListOf<Boolean>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                viewModel.uiState.map { it.loadFailed }.toList(loadFailures)
+            }
+            advanceUntilIdle()
+
+            viewModel.refresh()
+            advanceUntilIdle()
+
+            assertFalse(loadFailures.any { it })
+            assertFalse(viewModel.uiState.value.loadFailed)
+            assertEquals(listOf("user.app"), viewModel.appsForExport().map { it.packageName })
+        }
+
+    @Test
     fun `export request captures format and order while controls remain frozen`() =
         runTest(dispatcher) {
             repository.apps = listOf(app("zulu", "Zulu"), app("alpha", "Alpha"))
@@ -451,14 +503,16 @@ class ExportViewModelTest {
 
     private fun createViewModel(
         exportFileWriter: ExportFileWriter = ExportFileWriter { _, _ -> ExportCompletion(ExportOutcome.SUCCESS) },
+        ioDispatcher: CoroutineDispatcher = dispatcher,
+        mainDispatcher: CoroutineDispatcher = dispatcher,
     ): ExportViewModel =
         ExportViewModel(
             repository = repository,
             dispatchers =
                 object : DispatcherProvider {
-                    override val io = dispatcher
-                    override val main = dispatcher
-                    override val default = dispatcher
+                    override val io = ioDispatcher
+                    override val main = mainDispatcher
+                    override val default = ioDispatcher
                 },
             appComparator = compareBy<App> { it.name }.thenBy { it.packageName },
             exportFileWriter = exportFileWriter,
@@ -513,6 +567,7 @@ class ExportViewModelTest {
                 appsFlow.value = value
             }
         var refreshError: Exception? = null
+        var refreshBlock: (() -> Unit)? = null
         val refreshForces = mutableListOf<Boolean>()
 
         override fun loadApps(
@@ -529,6 +584,7 @@ class ExportViewModelTest {
 
         override suspend fun refreshCache(force: Boolean) {
             refreshForces += force
+            refreshBlock?.invoke()
             refreshError?.let { throw it }
         }
 

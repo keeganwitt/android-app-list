@@ -36,13 +36,14 @@ internal class ExportViewModel(
     }
 
     fun refresh() {
+        val isRetry = _uiState.value.loadFailed
         _uiState.update { it.copy(isLoading = true, loadFailed = false) }
         cacheObservationJob?.cancel()
         cacheObservationJob =
             viewModelScope.launch(dispatchers.io) {
                 try {
                     var cachedApps = repository.getCachedApps()
-                    if (cachedApps.isEmpty()) {
+                    if (isRetry || cachedApps.isEmpty()) {
                         repository.refreshCache(force = true)
                         cachedApps = repository.getCachedApps()
                     }
