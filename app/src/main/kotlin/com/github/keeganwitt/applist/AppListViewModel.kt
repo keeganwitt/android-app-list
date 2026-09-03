@@ -87,8 +87,10 @@ class AppListViewModel(
     }
 
     private var loadJob: kotlinx.coroutines.Job? = null
+    private var loadRequestId = 0L
 
     private fun loadApps(reload: Boolean) {
+        val requestId = ++loadRequestId
         loadJob?.cancel()
         val state = _uiState.value
         _uiState.update { it.copy(isLoading = true, loadFailed = false, isFullyLoaded = false, summary = null) }
@@ -120,8 +122,11 @@ class AppListViewModel(
                     }
                 } catch (exception: Exception) {
                     if (exception is CancellationException) throw exception
-                    _uiState.update {
-                        it.copy(isLoading = false, loadFailed = true, isFullyLoaded = false, summary = null)
+                    withContext(dispatchers.main) {
+                        if (requestId != loadRequestId) return@withContext
+                        _uiState.update {
+                            it.copy(isLoading = false, loadFailed = true, isFullyLoaded = false, summary = null)
+                        }
                     }
                 }
             }

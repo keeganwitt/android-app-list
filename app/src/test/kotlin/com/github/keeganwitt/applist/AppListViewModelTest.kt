@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -995,6 +996,49 @@ class AppListViewModelTest {
             assertFalse(state.isFullyLoaded)
             assertTrue(state.loadFailed)
             assertTrue(state.items.isEmpty())
+        }
+
+    @Test
+    fun `given canceled producer throws, when replacement awaits results, then loading state belongs to replacement`() =
+        runTest {
+            val replacementResult = CompletableDeferred<List<App>>()
+            var loadCount = 0
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } answers {
+                loadCount++
+                if (loadCount == 1) {
+                    channelFlow {
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            throw IllegalStateException("canceled producer failed")
+                        }
+                    }
+                } else {
+                    flow { emit(replacementResult.await()) }
+                }
+            }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            runCurrent()
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+            val pendingState = viewModel.uiState.value
+
+            replacementResult.complete(listOf(createTestApp("com.replacement.app", "Replacement")))
+            advanceUntilIdle()
+
+            assertEquals(2, loadCount)
+            assertTrue(pendingState.isLoading)
+            assertFalse(pendingState.loadFailed)
+            val completedState = viewModel.uiState.value
+            assertFalse(completedState.loadFailed)
+            assertEquals(listOf("com.replacement.app"), completedState.items.map { it.packageName })
         }
 
     @Test
