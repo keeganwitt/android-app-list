@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Ứng dụng người dùng</string><string name="export_system_app">Ứng dụng hệ thống</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Chọn %1$s</string><string name="export_deselect_app">Bỏ chọn %1$s</string><string name="export_title">Xuất ứng dụng</string>
+    <string name="export_failed_generic">Xuất không thành công</string><string name="export_show_archived">Hiển thị ứng dụng đã lưu trữ</string><string name="export_format_title">Định dạng</string>
+    <string name="export_search_apps">Tìm kiếm ứng dụng</string><string name="export_select_all_results">Chọn tất cả kết quả</string><string name="export_clear_selection">Xóa tất cả lựa chọn</string>
+    <string name="export_clear_all">Xóa tất cả</string><string name="export_review_title">Ứng dụng đã chọn</string><string name="export_return_to_browse">Quay lại danh sách ứng dụng</string>
+    <string name="export_review">Xem lại</string><string name="export_show_in_list">Hiển thị trong danh sách</string><string name="export_filter_all">Tất cả loại</string>
+    <string name="export_filter_user">Người dùng</string><string name="export_filter_system">Hệ thống</string><string name="export_filter_hint">Bộ lọc và tìm kiếm không thay đổi lựa chọn của bạn.</string>
+    <string name="export_no_results">Không có ứng dụng nào khớp với các bộ lọc này.</string><string name="export_retry">Thử lại</string><string name="export_load_failed">Không thể tải ứng dụng.</string><string name="export_empty">Chưa chọn ứng dụng nào.</string>
+    <plurals name="export_selected_count"><item quantity="other">Đã chọn %d ứng dụng</item></plurals><plurals name="export_action_count"><item quantity="other">Xuất %d ứng dụng</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">Xem lại %d mục đã chọn</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">%d ứng dụng đã chọn bị bộ lọc ẩn</item></plurals>
+</resources>

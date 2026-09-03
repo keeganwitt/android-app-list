@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Benutzer-App</string>
+    <string name="export_system_app">System-App</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s auswählen</string>
+    <string name="export_deselect_app">Auswahl von %1$s aufheben</string>
+    <string name="export_title">Apps exportieren</string>
+    <string name="export_failed_generic">Export fehlgeschlagen</string>
+    <string name="export_show_archived">Archivierte Apps anzeigen</string>
+    <string name="export_format_title">Format</string>
+    <string name="export_search_apps">Apps suchen</string>
+    <string name="export_select_all_results">Alle Ergebnisse auswählen</string>
+    <string name="export_clear_selection">Gesamte Auswahl aufheben</string>
+    <string name="export_clear_all">Alles löschen</string>
+    <string name="export_review_title">Ausgewählte Apps</string>
+    <string name="export_return_to_browse">Zurück zur App-Liste</string>
+    <string name="export_review">Überprüfen</string>
+    <string name="export_show_in_list">In Liste anzeigen</string>
+    <string name="export_filter_all">Alle Typen</string>
+    <string name="export_filter_user">Benutzer</string>
+    <string name="export_filter_system">System</string>
+    <string name="export_filter_hint">Filter und Suche ändern Ihre Auswahl nicht.</string>
+    <string name="export_no_results">Keine Apps entsprechen diesen Filtern.</string>
+    <string name="export_retry">Erneut versuchen</string>
+    <string name="export_load_failed">Apps konnten nicht geladen werden.</string>
+    <string name="export_empty">Keine Apps ausgewählt.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d App ausgewählt</item><item quantity="other">%d Apps ausgewählt</item></plurals>
+    <plurals name="export_action_count"><item quantity="one">%d App exportieren</item><item quantity="other">%d Apps exportieren</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">%d ausgewählte App überprüfen</item><item quantity="other">%d ausgewählte Apps überprüfen</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="one">%d ausgewählte App durch Filter ausgeblendet</item><item quantity="other">%d ausgewählte Apps durch Filter ausgeblendet</item></plurals>
+</resources>

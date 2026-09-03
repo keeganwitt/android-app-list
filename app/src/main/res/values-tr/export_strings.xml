@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Kullanıcı uygulaması</string><string name="export_system_app">Sistem uygulaması</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s seç</string><string name="export_deselect_app">%1$s seçimini kaldır</string><string name="export_title">Uygulamaları dışa aktar</string>
+    <string name="export_failed_generic">Dışa aktarma başarısız</string><string name="export_show_archived">Arşivlenen uygulamaları göster</string><string name="export_format_title">Biçim</string>
+    <string name="export_search_apps">Uygulamalarda ara</string><string name="export_select_all_results">Tüm sonuçları seç</string><string name="export_clear_selection">Tüm seçimleri temizle</string>
+    <string name="export_clear_all">Tümünü temizle</string><string name="export_review_title">Seçilen uygulamalar</string><string name="export_return_to_browse">Uygulama listesine dön</string>
+    <string name="export_review">İncele</string><string name="export_show_in_list">Listede göster</string><string name="export_filter_all">Tüm türler</string>
+    <string name="export_filter_user">Kullanıcı</string><string name="export_filter_system">Sistem</string><string name="export_filter_hint">Filtreler ve arama seçimlerinizi değiştirmez.</string>
+    <string name="export_no_results">Bu filtrelerle eşleşen uygulama yok.</string><string name="export_retry">Yeniden dene</string><string name="export_load_failed">Uygulamalar yüklenemedi.</string><string name="export_empty">Uygulama seçilmedi.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d uygulama seçildi</item><item quantity="other">%d uygulama seçildi</item></plurals><plurals name="export_action_count"><item quantity="one">%d uygulamayı dışa aktar</item><item quantity="other">%d uygulamayı dışa aktar</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">Seçilen %d öğeyi incele</item><item quantity="other">Seçilen %d öğeyi incele</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">Seçilen %d uygulama filtreler tarafından gizlendi</item><item quantity="other">Seçilen %d uygulama filtreler tarafından gizlendi</item></plurals>
+</resources>

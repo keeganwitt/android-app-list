@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">사용자 앱</string><string name="export_system_app">시스템 앱</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s 선택</string><string name="export_deselect_app">%1$s 선택 해제</string><string name="export_title">앱 내보내기</string>
+    <string name="export_failed_generic">내보내기 실패</string><string name="export_show_archived">보관된 앱 표시</string><string name="export_format_title">형식</string>
+    <string name="export_search_apps">앱 검색</string><string name="export_select_all_results">모든 결과 선택</string><string name="export_clear_selection">모든 선택 해제</string>
+    <string name="export_clear_all">모두 지우기</string><string name="export_review_title">선택한 앱</string><string name="export_return_to_browse">앱 목록으로 돌아가기</string>
+    <string name="export_review">검토</string><string name="export_show_in_list">목록에 표시</string><string name="export_filter_all">모든 유형</string>
+    <string name="export_filter_user">사용자</string><string name="export_filter_system">시스템</string><string name="export_filter_hint">필터와 검색은 선택 항목을 변경하지 않습니다.</string>
+    <string name="export_no_results">이 필터와 일치하는 앱이 없습니다.</string><string name="export_retry">다시 시도</string><string name="export_load_failed">앱을 불러올 수 없습니다.</string><string name="export_empty">선택한 앱이 없습니다.</string>
+    <plurals name="export_selected_count"><item quantity="other">앱 %d개 선택됨</item></plurals><plurals name="export_action_count"><item quantity="other">앱 %d개 내보내기</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">선택한 %d개 검토</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">선택한 앱 %d개가 필터로 숨겨짐</item></plurals>
+</resources>

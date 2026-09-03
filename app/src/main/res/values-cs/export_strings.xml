@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Uživatelská aplikace</string>
+    <string name="export_system_app">Systémová aplikace</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Vybrat %1$s</string>
+    <string name="export_deselect_app">Zrušit výběr %1$s</string>
+    <string name="export_title">Exportovat aplikace</string>
+    <string name="export_failed_generic">Export se nezdařil</string>
+    <string name="export_show_archived">Zobrazit archivované aplikace</string>
+    <string name="export_format_title">Formát</string>
+    <string name="export_search_apps">Hledat aplikace</string>
+    <string name="export_select_all_results">Vybrat všechny výsledky</string>
+    <string name="export_clear_selection">Zrušit všechny výběry</string>
+    <string name="export_clear_all">Vymazat vše</string>
+    <string name="export_review_title">Vybrané aplikace</string>
+    <string name="export_return_to_browse">Zpět na seznam aplikací</string>
+    <string name="export_review">Zkontrolovat</string>
+    <string name="export_show_in_list">Zobrazit v seznamu</string>
+    <string name="export_filter_all">Všechny typy</string>
+    <string name="export_filter_user">Uživatelské</string>
+    <string name="export_filter_system">Systémové</string>
+    <string name="export_filter_hint">Filtry a hledání nemění váš výběr.</string>
+    <string name="export_no_results">Těmto filtrům neodpovídají žádné aplikace.</string>
+    <string name="export_retry">Opakovat</string>
+    <string name="export_load_failed">Aplikace se nepodařilo načíst.</string>
+    <string name="export_empty">Nejsou vybrány žádné aplikace.</string>
+    <plurals name="export_selected_count"><item quantity="one">Vybrána %d aplikace</item><item quantity="few">Vybrány %d aplikace</item><item quantity="many">Vybráno %d aplikace</item><item quantity="other">Vybráno %d aplikací</item></plurals>
+    <plurals name="export_action_count"><item quantity="one">Exportovat %d aplikaci</item><item quantity="few">Exportovat %d aplikace</item><item quantity="many">Exportovat %d aplikace</item><item quantity="other">Exportovat %d aplikací</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">Zkontrolovat %d vybranou</item><item quantity="few">Zkontrolovat %d vybrané</item><item quantity="many">Zkontrolovat %d vybrané</item><item quantity="other">Zkontrolovat %d vybraných</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="one">%d vybraná aplikace skryta filtry</item><item quantity="few">%d vybrané aplikace skryty filtry</item><item quantity="many">%d vybrané aplikace skryty filtry</item><item quantity="other">%d vybraných aplikací skryto filtry</item></plurals>
+</resources>

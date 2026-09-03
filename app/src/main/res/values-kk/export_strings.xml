@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Пайдаланушы қолданбасы</string><string name="export_system_app">Жүйелік қолданба</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s қолданбасын таңдау</string><string name="export_deselect_app">%1$s таңдауын алып тастау</string><string name="export_title">Қолданбаларды экспорттау</string>
+    <string name="export_failed_generic">Экспорттау сәтсіз аяқталды</string><string name="export_show_archived">Мұрағатталған қолданбаларды көрсету</string><string name="export_format_title">Пішім</string>
+    <string name="export_search_apps">Қолданбаларды іздеу</string><string name="export_select_all_results">Барлық нәтижені таңдау</string><string name="export_clear_selection">Барлық таңдауды тазалау</string>
+    <string name="export_clear_all">Барлығын тазалау</string><string name="export_review_title">Таңдалған қолданбалар</string><string name="export_return_to_browse">Қолданбалар тізіміне оралу</string>
+    <string name="export_review">Қарап шығу</string><string name="export_show_in_list">Тізімде көрсету</string><string name="export_filter_all">Барлық түрі</string>
+    <string name="export_filter_user">Пайдаланушы</string><string name="export_filter_system">Жүйе</string><string name="export_filter_hint">Сүзгілер мен іздеу таңдауларыңызды өзгертпейді.</string>
+    <string name="export_no_results">Бұл сүзгілерге сәйкес қолданбалар жоқ.</string><string name="export_retry">Қайталау</string><string name="export_load_failed">Қолданбаларды жүктеу мүмкін болмады.</string><string name="export_empty">Қолданбалар таңдалмаған.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d қолданба таңдалды</item><item quantity="other">%d қолданба таңдалды</item></plurals><plurals name="export_action_count"><item quantity="one">%d қолданбаны экспорттау</item><item quantity="other">%d қолданбаны экспорттау</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">Таңдалған %d қолданбаны қарап шығу</item><item quantity="other">Таңдалған %d қолданбаны қарап шығу</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">Таңдалған %d қолданба сүзгілермен жасырылған</item><item quantity="other">Таңдалған %d қолданба сүзгілермен жасырылған</item></plurals>
+</resources>

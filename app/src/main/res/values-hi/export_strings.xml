@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">उपयोगकर्ता ऐप</string><string name="export_system_app">सिस्टम ऐप</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s चुनें</string><string name="export_deselect_app">%1$s का चयन हटाएँ</string><string name="export_title">ऐप निर्यात करें</string>
+    <string name="export_failed_generic">निर्यात विफल</string><string name="export_show_archived">संग्रहित ऐप दिखाएँ</string><string name="export_format_title">प्रारूप</string>
+    <string name="export_search_apps">ऐप खोजें</string><string name="export_select_all_results">सभी परिणाम चुनें</string><string name="export_clear_selection">सभी चयन हटाएँ</string>
+    <string name="export_clear_all">सभी साफ़ करें</string><string name="export_review_title">चुने गए ऐप</string><string name="export_return_to_browse">ऐप सूची पर वापस जाएँ</string>
+    <string name="export_review">समीक्षा करें</string><string name="export_show_in_list">सूची में दिखाएँ</string><string name="export_filter_all">सभी प्रकार</string>
+    <string name="export_filter_user">उपयोगकर्ता</string><string name="export_filter_system">सिस्टम</string><string name="export_filter_hint">फ़िल्टर और खोज आपके चयन नहीं बदलते।</string>
+    <string name="export_no_results">इन फ़िल्टर से कोई ऐप मेल नहीं खाता।</string><string name="export_retry">फिर से कोशिश करें</string><string name="export_load_failed">ऐप लोड नहीं किए जा सके।</string><string name="export_empty">कोई ऐप नहीं चुना गया।</string>
+    <plurals name="export_selected_count"><item quantity="one">%d ऐप चुना गया</item><item quantity="other">%d ऐप चुने गए</item></plurals><plurals name="export_action_count"><item quantity="one">%d ऐप निर्यात करें</item><item quantity="other">%d ऐप निर्यात करें</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">चुने गए %d की समीक्षा करें</item><item quantity="other">चुने गए %d की समीक्षा करें</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">%d चुना गया ऐप फ़िल्टर से छिपा है</item><item quantity="other">%d चुने गए ऐप फ़िल्टर से छिपे हैं</item></plurals>
+</resources>

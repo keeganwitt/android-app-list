@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">تطبيق مستخدم</string><string name="export_system_app">تطبيق نظام</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">اختيار %1$s</string><string name="export_deselect_app">إلغاء اختيار %1$s</string><string name="export_title">تصدير التطبيقات</string>
+    <string name="export_failed_generic">فشل التصدير</string><string name="export_show_archived">إظهار التطبيقات المؤرشفة</string><string name="export_format_title">التنسيق</string>
+    <string name="export_search_apps">البحث عن تطبيقات</string><string name="export_select_all_results">اختيار كل النتائج</string><string name="export_clear_selection">مسح كل الاختيارات</string>
+    <string name="export_clear_all">مسح الكل</string><string name="export_review_title">التطبيقات المختارة</string><string name="export_return_to_browse">العودة إلى قائمة التطبيقات</string>
+    <string name="export_review">مراجعة</string><string name="export_show_in_list">إظهار في القائمة</string><string name="export_filter_all">كل الأنواع</string>
+    <string name="export_filter_user">المستخدم</string><string name="export_filter_system">النظام</string><string name="export_filter_hint">لا تغيّر عوامل التصفية والبحث اختياراتك.</string>
+    <string name="export_no_results">لا توجد تطبيقات تطابق عوامل التصفية هذه.</string><string name="export_retry">إعادة المحاولة</string><string name="export_load_failed">تعذر تحميل التطبيقات.</string><string name="export_empty">لم يتم اختيار أي تطبيقات.</string>
+    <plurals name="export_selected_count"><item quantity="zero">تم اختيار %d تطبيقات</item><item quantity="one">تم اختيار %d تطبيق</item><item quantity="two">تم اختيار %d تطبيقين</item><item quantity="few">تم اختيار %d تطبيقات</item><item quantity="many">تم اختيار %d تطبيقًا</item><item quantity="other">تم اختيار %d تطبيق</item></plurals>
+    <plurals name="export_action_count"><item quantity="zero">تصدير %d تطبيق</item><item quantity="one">تصدير %d تطبيق</item><item quantity="two">تصدير %d تطبيقين</item><item quantity="few">تصدير %d تطبيقات</item><item quantity="many">تصدير %d تطبيقًا</item><item quantity="other">تصدير %d تطبيق</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="zero">مراجعة %d تطبيق محدد</item><item quantity="one">مراجعة %d تطبيق محدد</item><item quantity="two">مراجعة %d تطبيقين محددين</item><item quantity="few">مراجعة %d تطبيقات محددة</item><item quantity="many">مراجعة %d تطبيقًا محددًا</item><item quantity="other">مراجعة %d تطبيق محدد</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="zero">%d تطبيق محدد مخفي بواسطة عوامل التصفية</item><item quantity="one">%d تطبيق محدد مخفي بواسطة عوامل التصفية</item><item quantity="two">%d تطبيقان محددان مخفيان بواسطة عوامل التصفية</item><item quantity="few">%d تطبيقات محددة مخفية بواسطة عوامل التصفية</item><item quantity="many">%d تطبيقًا محددًا مخفيًا بواسطة عوامل التصفية</item><item quantity="other">%d تطبيق محدد مخفي بواسطة عوامل التصفية</item></plurals>
+</resources>

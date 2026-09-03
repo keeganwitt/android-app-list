@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">แอปผู้ใช้</string><string name="export_system_app">แอประบบ</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">เลือก %1$s</string><string name="export_deselect_app">ยกเลิกการเลือก %1$s</string><string name="export_title">ส่งออกแอป</string>
+    <string name="export_failed_generic">ส่งออกไม่สำเร็จ</string><string name="export_show_archived">แสดงแอปที่เก็บถาวร</string><string name="export_format_title">รูปแบบ</string>
+    <string name="export_search_apps">ค้นหาแอป</string><string name="export_select_all_results">เลือกผลลัพธ์ทั้งหมด</string><string name="export_clear_selection">ล้างรายการที่เลือกทั้งหมด</string>
+    <string name="export_clear_all">ล้างทั้งหมด</string><string name="export_review_title">แอปที่เลือก</string><string name="export_return_to_browse">กลับไปยังรายการแอป</string>
+    <string name="export_review">ตรวจสอบ</string><string name="export_show_in_list">แสดงในรายการ</string><string name="export_filter_all">ทุกประเภท</string>
+    <string name="export_filter_user">ผู้ใช้</string><string name="export_filter_system">ระบบ</string><string name="export_filter_hint">ตัวกรองและการค้นหาจะไม่เปลี่ยนรายการที่คุณเลือก</string>
+    <string name="export_no_results">ไม่มีแอปที่ตรงกับตัวกรองเหล่านี้</string><string name="export_retry">ลองอีกครั้ง</string><string name="export_load_failed">โหลดแอปไม่ได้</string><string name="export_empty">ไม่ได้เลือกแอป</string>
+    <plurals name="export_selected_count"><item quantity="other">เลือกแล้ว %d แอป</item></plurals><plurals name="export_action_count"><item quantity="other">ส่งออก %d แอป</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">ตรวจสอบ %d รายการที่เลือก</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">แอปที่เลือก %d รายการถูกซ่อนโดยตัวกรอง</item></plurals>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">ব্যবহারকারীর অ্যাপ</string><string name="export_system_app">সিস্টেম অ্যাপ</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s নির্বাচন করুন</string><string name="export_deselect_app">%1$s অনির্বাচন করুন</string><string name="export_title">অ্যাপ রপ্তানি করুন</string>
+    <string name="export_failed_generic">রপ্তানি ব্যর্থ হয়েছে</string><string name="export_show_archived">আর্কাইভ করা অ্যাপ দেখান</string><string name="export_format_title">ফরম্যাট</string>
+    <string name="export_search_apps">অ্যাপ খুঁজুন</string><string name="export_select_all_results">সব ফলাফল নির্বাচন করুন</string><string name="export_clear_selection">সব নির্বাচন মুছুন</string>
+    <string name="export_clear_all">সব মুছুন</string><string name="export_review_title">নির্বাচিত অ্যাপ</string><string name="export_return_to_browse">অ্যাপ তালিকায় ফিরে যান</string>
+    <string name="export_review">পর্যালোচনা</string><string name="export_show_in_list">তালিকায় দেখান</string><string name="export_filter_all">সব ধরন</string>
+    <string name="export_filter_user">ব্যবহারকারী</string><string name="export_filter_system">সিস্টেম</string><string name="export_filter_hint">ফিল্টার ও অনুসন্ধান আপনার নির্বাচন পরিবর্তন করে না।</string>
+    <string name="export_no_results">কোনো অ্যাপ এই ফিল্টারগুলোর সাথে মেলে না।</string><string name="export_retry">আবার চেষ্টা করুন</string><string name="export_load_failed">অ্যাপ লোড করা যায়নি।</string><string name="export_empty">কোনো অ্যাপ নির্বাচন করা হয়নি।</string>
+    <plurals name="export_selected_count"><item quantity="one">%dটি অ্যাপ নির্বাচিত</item><item quantity="other">%dটি অ্যাপ নির্বাচিত</item></plurals><plurals name="export_action_count"><item quantity="one">%dটি অ্যাপ রপ্তানি করুন</item><item quantity="other">%dটি অ্যাপ রপ্তানি করুন</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">নির্বাচিত %dটি পর্যালোচনা করুন</item><item quantity="other">নির্বাচিত %dটি পর্যালোচনা করুন</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">%dটি নির্বাচিত অ্যাপ ফিল্টারে লুকানো</item><item quantity="other">%dটি নির্বাচিত অ্যাপ ফিল্টারে লুকানো</item></plurals>
+</resources>
