@@ -2,11 +2,15 @@ package com.github.keeganwitt.applist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class AppListViewModel(
@@ -31,6 +35,7 @@ class AppListViewModel(
     private var allApps: List<App> = emptyList()
     private var cachedMappedItems: List<AppItemUiModel>? = null
     private var cachedMappedItemsField: AppInfoField? = null
+    private val loadMutex = Mutex()
 
     fun init(
         initialField: AppInfoField,
@@ -82,38 +87,89 @@ class AppListViewModel(
         loadApps(reload = true)
     }
 
-    private var loadJob: kotlinx.coroutines.Job? = null
+    private var loadJob: Job? = null
+    private var summaryJob: Job? = null
+    private var cachedLoadOptions: LoadOptions? = null
+    private var loadRequestId = 0L
 
     private fun loadApps(reload: Boolean) {
+        val requestId = ++loadRequestId
         loadJob?.cancel()
+        summaryJob?.cancel()
         val state = _uiState.value
-        _uiState.update { it.copy(isLoading = true, isFullyLoaded = false, summary = null) }
+        val options =
+            LoadOptions(
+                state.selectedField,
+                state.systemAppsOnly,
+                state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
+                state.descending,
+            )
+        _uiState.update {
+            it.copy(
+                isLoading = true,
+                loadFailed = false,
+                isFullyLoaded = false,
+                summary = null,
+            )
+        }
 
         loadJob =
             viewModelScope.launch(dispatchers.io) {
-                repository
-                    .loadApps(
-                        field = state.selectedField,
-                        systemAppsOnly = state.systemAppsOnly,
-                        showArchivedApps = state.showArchived || state.selectedField == AppInfoField.ARCHIVED,
-                        descending = state.descending,
-                        reload = reload,
-                    ).collect { apps ->
-                        withContext(dispatchers.main) {
-                            allApps = apps
-                            val field = _uiState.value.selectedField
-                            cachedMappedItems = apps.map { mapToItem(it, field) }
-                            cachedMappedItemsField = field
-                            val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
-                            _uiState.update { it.copy(isLoading = false, isFullyLoaded = fullyLoaded) }
-                            applyFilterAndEmit()
+                try {
+                    loadMutex.withLock {
+                        repository
+                            .loadApps(
+                                field = options.field,
+                                systemAppsOnly = options.systemAppsOnly,
+                                showArchivedApps = options.showArchivedApps,
+                                descending = options.descending,
+                                reload = reload,
+                            ).collect { apps ->
+                                withContext(dispatchers.main) {
+                                    allApps = apps
+                                    val field = _uiState.value.selectedField
+                                    cachedMappedItems = apps.map { mapToItem(it, field) }
+                                    cachedMappedItemsField = field
+                                    cachedLoadOptions = options
+                                    val fullyLoaded = apps.isEmpty() || apps.all { it.isDetailed }
+                                    _uiState.update {
+                                        it.copy(isLoading = false, loadFailed = false, isFullyLoaded = fullyLoaded)
+                                    }
+                                    applyFilterAndEmit()
+                                }
+                            }
+                    }
+                } catch (exception: Exception) {
+                    if (exception is CancellationException) throw exception
+                    withContext(dispatchers.main) {
+                        if (requestId != loadRequestId) return@withContext
+                        val discardResults = options != cachedLoadOptions || options.field != cachedMappedItemsField
+                        if (discardResults) {
+                            summaryJob?.cancel()
+                            allApps = emptyList()
+                            cachedMappedItems = null
+                            cachedMappedItemsField = null
+                            cachedLoadOptions = null
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                loadFailed = true,
+                                isFullyLoaded = false,
+                                items = if (discardResults) emptyList() else it.items,
+                                filteredApps = if (discardResults) emptyList() else it.filteredApps,
+                                summary = null,
+                            )
                         }
                     }
+                }
             }
     }
 
     private fun applyFilterAndEmit() {
+        summaryJob?.cancel()
         val state = _uiState.value
+        val apps = allApps
         if (cachedMappedItems == null || cachedMappedItemsField != state.selectedField) {
             cachedMappedItems = allApps.map { mapToItem(it, state.selectedField) }
             cachedMappedItemsField = state.selectedField
@@ -131,26 +187,27 @@ class AppListViewModel(
             }
         _uiState.update { it.copy(items = filtered) }
 
-        viewModelScope.launch(dispatchers.default) {
-            val filteredApps =
-                if (state.query.isBlank()) {
-                    allApps
-                } else {
-                    val filteredPackageNames = filtered.map { it.packageName }.toSet()
-                    allApps.filter { app -> app.packageName in filteredPackageNames }
-                }
+        summaryJob =
+            viewModelScope.launch(dispatchers.default) {
+                val filteredApps =
+                    if (state.query.isBlank()) {
+                        apps
+                    } else {
+                        val filteredPackageNames = filtered.map { it.packageName }.toSet()
+                        apps.filter { app -> app.packageName in filteredPackageNames }
+                    }
 
-            if (state.isFullyLoaded) {
-                val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
-                withContext(dispatchers.main) {
-                    _uiState.update { it.copy(summary = summary, filteredApps = filteredApps) }
-                }
-            } else {
-                withContext(dispatchers.main) {
-                    _uiState.update { it.copy(summary = null, filteredApps = filteredApps) }
+                if (state.isFullyLoaded) {
+                    val summary = summaryCalculator.calculate(filteredApps, state.selectedField)
+                    withContext(dispatchers.main) {
+                        _uiState.update { it.copy(summary = summary, filteredApps = filteredApps) }
+                    }
+                } else {
+                    withContext(dispatchers.main) {
+                        _uiState.update { it.copy(summary = null, filteredApps = filteredApps) }
+                    }
                 }
             }
-        }
     }
 
     private fun mapToItem(
@@ -179,4 +236,11 @@ class AppListViewModel(
             isLoading = !app.isDetailed,
         )
     }
+
+    private data class LoadOptions(
+        val field: AppInfoField,
+        val systemAppsOnly: Boolean,
+        val showArchivedApps: Boolean,
+        val descending: Boolean,
+    )
 }

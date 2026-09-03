@@ -29,6 +29,7 @@ import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -45,6 +46,7 @@ class MainActivity :
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
     private var latestState: UiState = UiState()
+    private var loadFailureSnackbar: Snackbar? = null
     private var shouldRefreshOnResume = false
     private var ignoreQueryChanges = false
     private var pendingField: AppInfoField? = null
@@ -194,9 +196,25 @@ class MainActivity :
                         ignoreQueryChanges = true
                         invalidateOptionsMenu()
                     }
+                    updateLoadFailureUi(state.loadFailed)
                     updateSyncUi(state.syncState)
                 }
             }
+        }
+    }
+
+    private fun updateLoadFailureUi(loadFailed: Boolean) {
+        if (loadFailed) {
+            if (loadFailureSnackbar?.isShown != true) {
+                loadFailureSnackbar =
+                    Snackbar
+                        .make(binding.root, R.string.loading_failed, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.export_retry) { appListViewModel.refresh() }
+                        .also(Snackbar::show)
+            }
+        } else {
+            loadFailureSnackbar?.dismiss()
+            loadFailureSnackbar = null
         }
     }
 
