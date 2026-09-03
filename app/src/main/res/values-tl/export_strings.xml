@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">App ng user</string><string name="export_system_app">System app</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Piliin ang %1$s</string><string name="export_deselect_app">Alisin sa pagkakapili ang %1$s</string><string name="export_title">I-export ang mga app</string>
+    <string name="export_failed_generic">Hindi na-export</string><string name="export_show_archived">Ipakita ang mga naka-archive na app</string><string name="export_format_title">Format</string>
+    <string name="export_search_apps">Maghanap ng mga app</string><string name="export_select_all_results">Piliin ang lahat ng resulta</string><string name="export_clear_selection">I-clear ang lahat ng pinili</string>
+    <string name="export_clear_all">I-clear lahat</string><string name="export_review_title">Mga napiling app</string><string name="export_return_to_browse">Bumalik sa listahan ng app</string>
+    <string name="export_review">Suriin</string><string name="export_show_in_list">Ipakita sa listahan</string><string name="export_filter_all">Lahat ng uri</string>
+    <string name="export_filter_user">User</string><string name="export_filter_system">System</string><string name="export_filter_hint">Hindi binabago ng mga filter at paghahanap ang iyong mga pinili.</string>
+    <string name="export_no_results">Walang app na tumutugma sa mga filter na ito.</string><string name="export_retry">Subukang muli</string><string name="export_load_failed">Hindi ma-load ang mga app.</string><string name="export_empty">Walang napiling app.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d app ang napili</item><item quantity="other">%d app ang napili</item></plurals><plurals name="export_action_count"><item quantity="one">I-export ang %d app</item><item quantity="other">I-export ang %d app</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">Suriin ang %d napili</item><item quantity="other">Suriin ang %d napili</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">%d napiling app ang itinago ng mga filter</item><item quantity="other">%d napiling app ang itinago ng mga filter</item></plurals>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">App devnydhyer</string>
+    <string name="export_system_app">App an system</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Dewis %1$s</string>
+    <string name="export_deselect_app">Disewis %1$s</string>
+    <string name="export_title">Eksportya appys</string>
+    <string name="export_failed_generic">Eksportya falllys</string>
+    <string name="export_show_archived">Diskwedhes appys archivys</string>
+    <string name="export_format_title">Furv</string>
+    <string name="export_search_apps">Hwilas appys</string>
+    <string name="export_select_all_results">Dewis oll an sewansow</string>
+    <string name="export_clear_selection">Dilea oll an dewisyansow</string>
+    <string name="export_clear_all">Dilea oll</string>
+    <string name="export_review_title">Appys dewisys</string>
+    <string name="export_return_to_browse">Dehweles dhe rol an appys</string>
+    <string name="export_review">Dasweles</string>
+    <string name="export_show_in_list">Diskwedhes y’n rol</string>
+    <string name="export_filter_all">Oll an eghesow</string>
+    <string name="export_filter_user">Devnydhyer</string>
+    <string name="export_filter_system">System</string>
+    <string name="export_filter_hint">Ny wra an sirow ha’n hwithrans chanjya agas dewisyansow.</string>
+    <string name="export_no_results">Nyns eus app vyth ow kwedha an sirow ma.</string>
+    <string name="export_retry">Assaya arta</string>
+    <string name="export_load_failed">Ny yllys karga an appys.</string>
+    <string name="export_empty">App vyth dewisys.</string>
+    <plurals name="export_selected_count"><item quantity="zero">%d app dewisys</item><item quantity="one">%d app dewisys</item><item quantity="two">%d app dewisys</item><item quantity="few">%d app dewisys</item><item quantity="many">%d app dewisys</item><item quantity="other">%d app dewisys</item></plurals>
+    <plurals name="export_action_count"><item quantity="zero">Eksportya %d app</item><item quantity="one">Eksportya %d app</item><item quantity="two">Eksportya %d app</item><item quantity="few">Eksportya %d app</item><item quantity="many">Eksportya %d app</item><item quantity="other">Eksportya %d app</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="zero">Dasweles %d dewisys</item><item quantity="one">Dasweles %d dewisys</item><item quantity="two">Dasweles %d dewisys</item><item quantity="few">Dasweles %d dewisys</item><item quantity="many">Dasweles %d dewisys</item><item quantity="other">Dasweles %d dewisys</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="zero">%d app dewisys kudhys gans sirow</item><item quantity="one">%d app dewisys kudhys gans sirow</item><item quantity="two">%d app dewisys kudhys gans sirow</item><item quantity="few">%d app dewisys kudhys gans sirow</item><item quantity="many">%d app dewisys kudhys gans sirow</item><item quantity="other">%d app dewisys kudhys gans sirow</item></plurals>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Application utilisateur</string>
+    <string name="export_system_app">Application système</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Sélectionner %1$s</string>
+    <string name="export_deselect_app">Désélectionner %1$s</string>
+    <string name="export_title">Exporter les applications</string>
+    <string name="export_failed_generic">Échec de l’exportation</string>
+    <string name="export_show_archived">Afficher les applications archivées</string>
+    <string name="export_format_title">Format</string>
+    <string name="export_search_apps">Rechercher des applications</string>
+    <string name="export_select_all_results">Sélectionner tous les résultats</string>
+    <string name="export_clear_selection">Effacer toutes les sélections</string>
+    <string name="export_clear_all">Tout effacer</string>
+    <string name="export_review_title">Applications sélectionnées</string>
+    <string name="export_return_to_browse">Retour à la liste des applications</string>
+    <string name="export_review">Vérifier</string>
+    <string name="export_show_in_list">Afficher dans la liste</string>
+    <string name="export_filter_all">Tous les types</string>
+    <string name="export_filter_user">Utilisateur</string>
+    <string name="export_filter_system">Système</string>
+    <string name="export_filter_hint">Les filtres et la recherche ne modifient pas vos sélections.</string>
+    <string name="export_no_results">Aucune application ne correspond à ces filtres.</string>
+    <string name="export_retry">Réessayer</string>
+    <string name="export_load_failed">Impossible de charger les applications.</string>
+    <string name="export_empty">Aucune application sélectionnée.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d application sélectionnée</item><item quantity="many">%d applications sélectionnées</item><item quantity="other">%d applications sélectionnées</item></plurals>
+    <plurals name="export_action_count"><item quantity="one">Exporter %d application</item><item quantity="many">Exporter %d applications</item><item quantity="other">Exporter %d applications</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">Vérifier %d sélectionnée</item><item quantity="many">Vérifier %d sélectionnées</item><item quantity="other">Vérifier %d sélectionnées</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="one">%d application sélectionnée masquée par les filtres</item><item quantity="many">%d applications sélectionnées masquées par les filtres</item><item quantity="other">%d applications sélectionnées masquées par les filtres</item></plurals>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">برنامه کاربر</string><string name="export_system_app">برنامه سیستمی</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">انتخاب %1$s</string><string name="export_deselect_app">لغو انتخاب %1$s</string><string name="export_title">صادر کردن برنامه‌ها</string>
+    <string name="export_failed_generic">صادر کردن ناموفق بود</string><string name="export_show_archived">نمایش برنامه‌های بایگانی‌شده</string><string name="export_format_title">قالب</string>
+    <string name="export_search_apps">جستجوی برنامه‌ها</string><string name="export_select_all_results">انتخاب همه نتایج</string><string name="export_clear_selection">پاک کردن همه انتخاب‌ها</string>
+    <string name="export_clear_all">پاک کردن همه</string><string name="export_review_title">برنامه‌های انتخاب‌شده</string><string name="export_return_to_browse">بازگشت به فهرست برنامه‌ها</string>
+    <string name="export_review">بازبینی</string><string name="export_show_in_list">نمایش در فهرست</string><string name="export_filter_all">همه انواع</string>
+    <string name="export_filter_user">کاربر</string><string name="export_filter_system">سیستم</string><string name="export_filter_hint">فیلترها و جستجو انتخاب‌های شما را تغییر نمی‌دهند.</string>
+    <string name="export_no_results">هیچ برنامه‌ای با این فیلترها مطابقت ندارد.</string><string name="export_retry">تلاش دوباره</string><string name="export_load_failed">برنامه‌ها بارگیری نشدند.</string><string name="export_empty">هیچ برنامه‌ای انتخاب نشده است.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d برنامه انتخاب شد</item><item quantity="other">%d برنامه انتخاب شد</item></plurals><plurals name="export_action_count"><item quantity="one">صادر کردن %d برنامه</item><item quantity="other">صادر کردن %d برنامه</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">بازبینی %d مورد انتخاب‌شده</item><item quantity="other">بازبینی %d مورد انتخاب‌شده</item></plurals><plurals name="export_hidden_selected_count"><item quantity="one">%d برنامه انتخاب‌شده با فیلترها پنهان است</item><item quantity="other">%d برنامه انتخاب‌شده با فیلترها پنهان است</item></plurals>
+</resources>

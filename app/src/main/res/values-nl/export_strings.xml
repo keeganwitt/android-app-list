@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Gebruikersapp</string>
+    <string name="export_system_app">Systeemapp</string>
+    <string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$s selecteren</string>
+    <string name="export_deselect_app">Selectie van %1$s opheffen</string>
+    <string name="export_title">Apps exporteren</string>
+    <string name="export_failed_generic">Exporteren mislukt</string>
+    <string name="export_show_archived">Gearchiveerde apps tonen</string>
+    <string name="export_format_title">Indeling</string>
+    <string name="export_search_apps">Apps zoeken</string>
+    <string name="export_select_all_results">Alle resultaten selecteren</string>
+    <string name="export_clear_selection">Alle selecties wissen</string>
+    <string name="export_clear_all">Alles wissen</string>
+    <string name="export_review_title">Geselecteerde apps</string>
+    <string name="export_return_to_browse">Terug naar de app-lijst</string>
+    <string name="export_review">Controleren</string>
+    <string name="export_show_in_list">In lijst tonen</string>
+    <string name="export_filter_all">Alle typen</string>
+    <string name="export_filter_user">Gebruiker</string>
+    <string name="export_filter_system">Systeem</string>
+    <string name="export_filter_hint">Filters en zoeken wijzigen uw selecties niet.</string>
+    <string name="export_no_results">Geen apps komen overeen met deze filters.</string>
+    <string name="export_retry">Opnieuw proberen</string>
+    <string name="export_load_failed">Apps konden niet worden geladen.</string>
+    <string name="export_empty">Geen apps geselecteerd.</string>
+    <plurals name="export_selected_count"><item quantity="one">%d app geselecteerd</item><item quantity="other">%d apps geselecteerd</item></plurals>
+    <plurals name="export_action_count"><item quantity="one">%d app exporteren</item><item quantity="other">%d apps exporteren</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="one">%d geselecteerde app controleren</item><item quantity="other">%d geselecteerde apps controleren</item></plurals>
+    <plurals name="export_hidden_selected_count"><item quantity="one">%d geselecteerde app verborgen door filters</item><item quantity="other">%d geselecteerde apps verborgen door filters</item></plurals>
+</resources>

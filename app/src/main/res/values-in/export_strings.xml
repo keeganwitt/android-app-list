@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">Aplikasi pengguna</string><string name="export_system_app">Aplikasi sistem</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">Pilih %1$s</string><string name="export_deselect_app">Batalkan pilihan %1$s</string><string name="export_title">Ekspor aplikasi</string>
+    <string name="export_failed_generic">Ekspor gagal</string><string name="export_show_archived">Tampilkan aplikasi yang diarsipkan</string><string name="export_format_title">Format</string>
+    <string name="export_search_apps">Cari aplikasi</string><string name="export_select_all_results">Pilih semua hasil</string><string name="export_clear_selection">Hapus semua pilihan</string>
+    <string name="export_clear_all">Hapus semua</string><string name="export_review_title">Aplikasi yang dipilih</string><string name="export_return_to_browse">Kembali ke daftar aplikasi</string>
+    <string name="export_review">Tinjau</string><string name="export_show_in_list">Tampilkan dalam daftar</string><string name="export_filter_all">Semua jenis</string>
+    <string name="export_filter_user">Pengguna</string><string name="export_filter_system">Sistem</string><string name="export_filter_hint">Filter dan pencarian tidak mengubah pilihan Anda.</string>
+    <string name="export_no_results">Tidak ada aplikasi yang cocok dengan filter ini.</string><string name="export_retry">Coba lagi</string><string name="export_load_failed">Aplikasi tidak dapat dimuat.</string><string name="export_empty">Tidak ada aplikasi yang dipilih.</string>
+    <plurals name="export_selected_count"><item quantity="other">%d aplikasi dipilih</item></plurals><plurals name="export_action_count"><item quantity="other">Ekspor %d aplikasi</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">Tinjau %d yang dipilih</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">%d aplikasi terpilih disembunyikan oleh filter</item></plurals>
+</resources>

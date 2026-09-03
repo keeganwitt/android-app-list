@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">ユーザーアプリ</string><string name="export_system_app">システムアプリ</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">%1$sを選択</string><string name="export_deselect_app">%1$sの選択を解除</string><string name="export_title">アプリをエクスポート</string>
+    <string name="export_failed_generic">エクスポートに失敗しました</string><string name="export_show_archived">アーカイブ済みアプリを表示</string><string name="export_format_title">形式</string>
+    <string name="export_search_apps">アプリを検索</string><string name="export_select_all_results">すべての結果を選択</string><string name="export_clear_selection">すべての選択を解除</string>
+    <string name="export_clear_all">すべてクリア</string><string name="export_review_title">選択したアプリ</string><string name="export_return_to_browse">アプリ一覧に戻る</string>
+    <string name="export_review">確認</string><string name="export_show_in_list">一覧に表示</string><string name="export_filter_all">すべての種類</string>
+    <string name="export_filter_user">ユーザー</string><string name="export_filter_system">システム</string><string name="export_filter_hint">フィルターや検索によって選択内容は変わりません。</string>
+    <string name="export_no_results">このフィルターに一致するアプリはありません。</string><string name="export_retry">再試行</string><string name="export_load_failed">アプリを読み込めませんでした。</string><string name="export_empty">アプリが選択されていません。</string>
+    <plurals name="export_selected_count"><item quantity="other">%d 個のアプリを選択</item></plurals><plurals name="export_action_count"><item quantity="other">%d 個のアプリをエクスポート</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">選択した %d 個を確認</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">選択した %d 個のアプリがフィルターにより非表示</item></plurals>
+</resources>

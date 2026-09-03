@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">用户应用</string><string name="export_system_app">系统应用</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">选择%1$s</string><string name="export_deselect_app">取消选择%1$s</string><string name="export_title">导出应用</string>
+    <string name="export_failed_generic">导出失败</string><string name="export_show_archived">显示已归档应用</string><string name="export_format_title">格式</string>
+    <string name="export_search_apps">搜索应用</string><string name="export_select_all_results">选择所有结果</string><string name="export_clear_selection">清除所有选择</string>
+    <string name="export_clear_all">全部清除</string><string name="export_review_title">已选应用</string><string name="export_return_to_browse">返回应用列表</string>
+    <string name="export_review">查看</string><string name="export_show_in_list">在列表中显示</string><string name="export_filter_all">所有类型</string>
+    <string name="export_filter_user">用户</string><string name="export_filter_system">系统</string><string name="export_filter_hint">筛选和搜索不会更改您的选择。</string>
+    <string name="export_no_results">没有应用符合这些筛选条件。</string><string name="export_retry">重试</string><string name="export_load_failed">无法加载应用。</string><string name="export_empty">未选择应用。</string>
+    <plurals name="export_selected_count"><item quantity="other">已选择 %d 个应用</item></plurals><plurals name="export_action_count"><item quantity="other">导出 %d 个应用</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">查看 %d 个已选应用</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">%d 个已选应用被筛选条件隐藏</item></plurals>
+</resources>

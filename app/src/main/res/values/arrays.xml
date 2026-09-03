@@ -5,7 +5,7 @@
         <item>@string/theme_entry_dark</item>
         <item>@string/theme_entry_system</item>
     </string-array>
-    <string-array name="theme_values">
+    <string-array name="theme_values" translatable="false">
         <item>LIGHT</item>
         <item>DARK</item>
         <item>SYSTEM</item>

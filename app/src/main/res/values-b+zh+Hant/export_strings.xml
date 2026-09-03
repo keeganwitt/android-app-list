@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="export_user_app">使用者應用程式</string><string name="export_system_app">系統應用程式</string><string name="export_app_classification">%1$s • %2$s</string>
+    <string name="export_select_app">選取%1$s</string><string name="export_deselect_app">取消選取%1$s</string><string name="export_title">匯出應用程式</string>
+    <string name="export_failed_generic">匯出失敗</string><string name="export_show_archived">顯示已封存的應用程式</string><string name="export_format_title">格式</string>
+    <string name="export_search_apps">搜尋應用程式</string><string name="export_select_all_results">選取所有結果</string><string name="export_clear_selection">清除所有選取項目</string>
+    <string name="export_clear_all">全部清除</string><string name="export_review_title">已選取的應用程式</string><string name="export_return_to_browse">返回應用程式清單</string>
+    <string name="export_review">檢視</string><string name="export_show_in_list">在清單中顯示</string><string name="export_filter_all">所有類型</string>
+    <string name="export_filter_user">使用者</string><string name="export_filter_system">系統</string><string name="export_filter_hint">篩選和搜尋不會變更您的選取項目。</string>
+    <string name="export_no_results">沒有應用程式符合這些篩選條件。</string><string name="export_retry">重試</string><string name="export_load_failed">無法載入應用程式。</string><string name="export_empty">未選取任何應用程式。</string>
+    <plurals name="export_selected_count"><item quantity="other">已選取 %d 個應用程式</item></plurals><plurals name="export_action_count"><item quantity="other">匯出 %d 個應用程式</item></plurals>
+    <plurals name="export_review_selected_count"><item quantity="other">檢視 %d 個已選取項目</item></plurals><plurals name="export_hidden_selected_count"><item quantity="other">%d 個已選取的應用程式被篩選條件隱藏</item></plurals>
+</resources>

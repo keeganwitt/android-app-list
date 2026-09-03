@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation"
-    tools:locale="en">
+<resources>
     <string name="export_user_app">User app</string>
     <string name="export_system_app">System app</string>
     <string name="export_app_classification">%1$s • %2$s</string>
