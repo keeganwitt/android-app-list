@@ -62,7 +62,7 @@ class ExportViewModelTest {
             assertEquals(ExportFormat.XML, state.format)
             assertFalse(state.showArchived)
             assertFalse(state.isLoading)
-            assertEquals(listOf(true), repository.refreshForces)
+            assertTrue(repository.refreshForces.isEmpty())
         }
 
     @Test
@@ -75,6 +75,7 @@ class ExportViewModelTest {
             assertFalse(viewModel.uiState.value.loadFailed)
             assertEquals(0, viewModel.uiState.value.selectedCount)
             assertFalse(viewModel.uiState.value.canExport)
+            assertEquals(listOf(true), repository.refreshForces)
         }
 
     @Test

@@ -33,8 +33,12 @@ internal class ExportViewModel(
         _uiState.update { it.copy(isLoading = true, loadFailed = false) }
         viewModelScope.launch(dispatchers.io) {
             try {
-                repository.refreshCache(force = true)
-                allApps = repository.getCachedApps().sortedWith(appComparator)
+                var cachedApps = repository.getCachedApps()
+                if (cachedApps.isEmpty()) {
+                    repository.refreshCache(force = true)
+                    cachedApps = repository.getCachedApps()
+                }
+                allApps = cachedApps.sortedWith(appComparator)
                 selectedPackageNames =
                     allApps
                         .filter { it.isUserInstalled && it.archived != true }

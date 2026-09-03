@@ -1,5 +1,7 @@
 package com.github.keeganwitt.applist
 
+import android.content.res.Configuration
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.test.core.app.ActivityScenario
@@ -36,6 +38,20 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ExportActivityTest {
+    @Test
+    fun statusBarIconsContrastWithTheCurrentTheme() {
+        ActivityScenario.launch(ExportActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val isLightMode =
+                    activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
+                        Configuration.UI_MODE_NIGHT_YES
+                val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+
+                assertEquals(isLightMode, controller.isAppearanceLightStatusBars)
+            }
+        }
+    }
+
     @Test
     fun searchFieldFiltersImmediatelyClearsAndSurvivesRecreation() {
         ActivityScenario.launch(ExportActivity::class.java).use { scenario ->

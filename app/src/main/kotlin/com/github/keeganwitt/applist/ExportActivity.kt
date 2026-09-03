@@ -1,11 +1,14 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -28,8 +31,15 @@ internal class ExportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityExportBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        val isLightMode =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
+                Configuration.UI_MODE_NIGHT_YES
+        windowInsetsController.isAppearanceLightStatusBars = isLightMode
 
         setupViewModel()
         setupExporter()
