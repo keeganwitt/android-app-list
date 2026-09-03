@@ -1,38 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500" role="img"
-    aria-labelledby="title description">
-    <title id="title">App List feature graphic</title>
-    <desc id="description">List all apps, including system apps, and compare eighteen application
-        fields.
-    </desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500" role="img" aria-labelledby="title description">
+  <title id="title">App List feature graphic</title>
+  <desc id="description">Compare every app at a glance, with a panel showing the package manager for several apps.</desc>
 
-    <rect width="1024" height="500" fill="#3DDC84" />
+  <defs>
+    <filter id="panel-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0B3D22" flood-opacity="0.22" />
+    </filter>
+  </defs>
 
-    <g transform="translate(82 0)">
-        <g fill="#000000" font-family="Roboto, Arial, sans-serif">
-            <text x="36" y="58" font-size="40" font-weight="700">List all apps (including system ones) with</text>
+  <rect width="1024" height="500" fill="#3DDC84" />
+  <circle cx="36" cy="456" r="116" fill="#36CF7B" />
+  <circle cx="987" cy="35" r="92" fill="#46E08E" />
 
-            <g font-size="27" font-weight="600">
-                <text x="38" y="112">• APK Size</text>
-                <text x="38" y="154">• Archived</text>
-                <text x="38" y="196">• Data Size</text>
-                <text x="38" y="238">• Exists in App Store</text>
-                <text x="38" y="280">• First Installed</text>
-                <text x="38" y="322">• Last Updated</text>
-                <text x="38" y="364">• Min SDK</text>
-                <text x="38" y="406">• Requested Permissions</text>
-                <text x="38" y="448">• Total Size</text>
+  <g fill="#000000" font-family="'Segoe UI Variable Display', 'Segoe UI', Roboto, Arial, sans-serif">
+    <text x="104" y="205" font-size="50" font-weight="750" letter-spacing="-0.8">Compare every app</text>
+    <text x="104" y="266" font-size="50" font-weight="750" letter-spacing="-0.8">at a glance</text>
+    <text x="108" y="319" font-size="23" font-weight="500">Each app’s install source</text>
+  </g>
 
-                <text x="534" y="112">• App Size</text>
-                <text x="534" y="154">• Cache Size</text>
-                <text x="534" y="196">• Enabled</text>
-                <text x="534" y="238">• External Cache Size</text>
-                <text x="534" y="280">• Granted Permissions</text>
-                <text x="534" y="322">• Last Used</text>
-                <text x="534" y="364">• Package Manager</text>
-                <text x="534" y="406">• Target SDK</text>
-                <text x="534" y="448">• Version</text>
-            </g>
-        </g>
+  <g filter="url(#panel-shadow)">
+    <rect x="582" y="65" width="338" height="370" rx="26" fill="#FFFFFF" />
+  </g>
+
+  <g font-family="'Segoe UI Variable Display', 'Segoe UI', Roboto, Arial, sans-serif">
+    <text x="612" y="112" fill="#111827" font-size="24" font-weight="700">Package Manager</text>
+    <rect x="612" y="131" width="278" height="2" rx="1" fill="#DCE5E0" />
+
+    <g transform="translate(0 0)">
+      <rect x="612" y="153" width="42" height="42" rx="12" fill="#D7F5E4" />
+      <circle cx="633" cy="174" r="8" fill="#148A4A" />
+      <text x="670" y="171" fill="#111827" font-size="19" font-weight="650">Browser</text>
+      <text x="670" y="190" fill="#65736B" font-size="15" font-weight="500">Google Play</text>
     </g>
+
+    <g transform="translate(0 66)">
+      <rect x="612" y="153" width="42" height="42" rx="12" fill="#E5E7FF" />
+      <rect x="625" y="166" width="16" height="16" rx="4" fill="#5965D8" />
+      <text x="670" y="171" fill="#111827" font-size="19" font-weight="650">Calendar</text>
+      <text x="670" y="190" fill="#65736B" font-size="15" font-weight="500">F-Droid</text>
+    </g>
+
+    <g transform="translate(0 132)">
+      <rect x="612" y="153" width="42" height="42" rx="12" fill="#FFF0D6" />
+      <path d="M625 164h16v20h-16z" fill="#D98218" />
+      <path d="M629 168h8M629 173h8M629 178h6" stroke="#FFF7E8" stroke-width="2" stroke-linecap="round" />
+      <text x="670" y="171" fill="#111827" font-size="19" font-weight="650">Reader</text>
+      <text x="670" y="190" fill="#65736B" font-size="15" font-weight="500">Amazon Appstore</text>
+    </g>
+
+    <g transform="translate(0 198)">
+      <rect x="612" y="153" width="42" height="42" rx="12" fill="#F0E7F7" />
+      <path d="M624 166h18v16h-18z" fill="#8154A1" />
+      <path d="M628 170h10M628 175h7" stroke="#F9F4FC" stroke-width="2" stroke-linecap="round" />
+      <text x="670" y="171" fill="#111827" font-size="19" font-weight="650">Notes</text>
+      <text x="670" y="190" fill="#65736B" font-size="15" font-weight="500">Unknown</text>
+    </g>
+  </g>
 </svg>
