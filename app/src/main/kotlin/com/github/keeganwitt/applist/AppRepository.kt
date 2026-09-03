@@ -180,6 +180,7 @@ class AndroidAppRepository(
                 if (isInitial) _syncState.value = SyncState.BuildingInitial(0, toSync.size)
 
                 val lastUsedEpochs = usageStatsService.getLastUsedEpochs(force)
+                val initialApps = mutableListOf<AppCacheEntity>()
 
                 var processedCount = 0
                 toSync.chunked(10).forEach { chunk ->
@@ -192,7 +193,12 @@ class AndroidAppRepository(
                                         mapToAppDetailed(ai, basic, lastUsedEpochs)
                                     }
                                 }.awaitAll()
-                        appDao.insertApps(apps.map { it.toCacheEntity(System.currentTimeMillis()) })
+                        val cacheEntities = apps.map { it.toCacheEntity(System.currentTimeMillis()) }
+                        if (isInitial) {
+                            initialApps.addAll(cacheEntities)
+                        } else {
+                            appDao.insertApps(cacheEntities)
+                        }
                     }
                     processedCount += chunk.size
 
@@ -200,6 +206,7 @@ class AndroidAppRepository(
                         _syncState.value = SyncState.BuildingInitial(processedCount, toSync.size)
                     }
                 }
+                if (isInitial) appDao.insertApps(initialApps)
             }
         } finally {
             _syncState.value = SyncState.Idle
