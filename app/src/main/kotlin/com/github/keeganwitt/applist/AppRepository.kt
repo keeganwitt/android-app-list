@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -48,6 +49,8 @@ interface AppRepository {
 
     fun getSyncState(): Flow<SyncState>
 
+    fun observeCachedApps(): Flow<List<App>>
+
     suspend fun refreshCache(force: Boolean = false)
 
     suspend fun getCachedApps(): List<App>
@@ -65,6 +68,8 @@ class AndroidAppRepository(
     private val syncMutex = Mutex()
 
     override fun getSyncState(): Flow<SyncState> = _syncState.asStateFlow()
+
+    override fun observeCachedApps() = appDao.getAllAppsFlow().map { entities -> entities.map { it.toDomainModel() } }
 
     override fun loadApps(
         field: AppInfoField,

@@ -3,11 +3,15 @@ package com.github.keeganwitt.applist
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ExportViewModel(
     val repository: AppRepository,
@@ -20,6 +24,8 @@ internal class ExportViewModel(
 
     private var allApps: List<App> = emptyList()
     private var selectedPackageNames: Set<String> = emptySet()
+    private var hasInitializedSelection = false
+    private var cacheObservationJob: Job? = null
     private var pendingExportRequest: ExportRequest? = null
     private var exportWriteStarted = false
     private val _exportCompletion = MutableStateFlow<ExportCompletion?>(null)
@@ -31,23 +37,43 @@ internal class ExportViewModel(
 
     fun refresh() {
         _uiState.update { it.copy(isLoading = true, loadFailed = false) }
-        viewModelScope.launch(dispatchers.io) {
-            try {
-                var cachedApps = repository.getCachedApps()
-                if (cachedApps.isEmpty()) {
-                    repository.refreshCache(force = true)
-                    cachedApps = repository.getCachedApps()
+        cacheObservationJob?.cancel()
+        cacheObservationJob =
+            viewModelScope.launch(dispatchers.io) {
+                try {
+                    var cachedApps = repository.getCachedApps()
+                    if (cachedApps.isEmpty()) {
+                        repository.refreshCache(force = true)
+                        cachedApps = repository.getCachedApps()
+                    }
+                    applyCacheUpdate(cachedApps)
+                    repository.observeCachedApps().collect(::applyCacheUpdate)
+                } catch (exception: Exception) {
+                    if (exception is CancellationException) throw exception
+                    _uiState.update { it.copy(isLoading = false, loadFailed = true) }
                 }
-                allApps = cachedApps.sortedWith(appComparator)
-                selectedPackageNames =
-                    allApps
-                        .filter { it.isUserInstalled && it.archived != true }
-                        .mapTo(mutableSetOf()) { it.packageName }
-                emitState()
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false, loadFailed = true) }
             }
+    }
+
+    private suspend fun applyCacheUpdate(apps: List<App>) {
+        withContext(dispatchers.main) {
+            updateApps(apps)
         }
+    }
+
+    private fun updateApps(apps: List<App>) {
+        allApps = apps.sortedWith(appComparator)
+        val availablePackageNames = allApps.mapTo(mutableSetOf()) { it.packageName }
+        selectedPackageNames =
+            if (hasInitializedSelection) {
+                selectedPackageNames.intersect(availablePackageNames)
+            } else {
+                allApps
+                    .filter { it.isUserInstalled && it.archived != true }
+                    .mapTo(mutableSetOf()) { it.packageName }
+            }
+        hasInitializedSelection = true
+        emitState()
     }
 
     fun setShowArchived(showArchived: Boolean) {

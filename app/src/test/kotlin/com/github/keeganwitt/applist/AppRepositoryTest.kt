@@ -19,6 +19,8 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -171,6 +173,21 @@ class AppRepositoryTest {
             assertEquals(2, result.size)
             assertEquals("pkg1", result[0].packageName)
             assertEquals("pkg2", result[1].packageName)
+        }
+
+    @Test
+    fun `observeCachedApps maps subsequent database updates`() =
+        runTest {
+            dbFlow.value = listOf(createAppEntity("initial.app"))
+            val emissions = mutableListOf<List<App>>()
+            val collection = launch { repository.observeCachedApps().take(2).toList(emissions) }
+            runCurrent()
+
+            dbFlow.value = listOf(createAppEntity("updated.app"))
+            collection.join()
+
+            assertEquals(listOf("initial.app"), emissions[0].map { it.packageName })
+            assertEquals(listOf("updated.app"), emissions[1].map { it.packageName })
         }
 
     @Test

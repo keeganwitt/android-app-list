@@ -164,6 +164,8 @@ class ExportLifecycleTest {
 
         override fun getSyncState(): Flow<SyncState> = flowOf(SyncState.Idle)
 
+        override fun observeCachedApps(): Flow<List<App>> = flowOf(listOf(app))
+
         override suspend fun refreshCache(force: Boolean) = Unit
 
         override suspend fun getCachedApps(): List<App> = listOf(app)

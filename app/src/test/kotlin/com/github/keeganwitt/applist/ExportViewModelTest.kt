@@ -6,6 +6,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -76,6 +77,46 @@ class ExportViewModelTest {
             assertEquals(0, viewModel.uiState.value.selectedCount)
             assertFalse(viewModel.uiState.value.canExport)
             assertEquals(listOf(true), repository.refreshForces)
+        }
+
+    @Test
+    fun `cache updates preserve existing choices exclude new apps and remove uninstalled apps`() =
+        runTest(dispatcher) {
+            repository.apps =
+                listOf(
+                    app("selected.app", "Selected"),
+                    app("deselected.app", "Deselected"),
+                    app("removed.app", "Removed"),
+                )
+            viewModel = createViewModel()
+            advanceUntilIdle()
+            viewModel.toggleSelection("deselected.app")
+
+            repository.apps =
+                listOf(
+                    app("selected.app", "Selected updated"),
+                    app("deselected.app", "Deselected"),
+                    app("new.app", "New"),
+                )
+            advanceUntilIdle()
+
+            assertEquals(listOf("selected.app"), viewModel.appsForExport().map { it.packageName })
+            assertEquals("Selected updated", viewModel.appsForExport().single().name)
+            assertEquals(
+                listOf("deselected.app", "new.app", "selected.app"),
+                viewModel.uiState.value.visibleApps
+                    .map { it.packageName }
+                    .sorted(),
+            )
+            assertFalse(
+                viewModel.uiState.value.visibleApps
+                    .single { it.packageName == "new.app" }
+                    .isSelected,
+            )
+            assertFalse(
+                viewModel.uiState.value.visibleApps
+                    .any { it.packageName == "removed.app" },
+            )
         }
 
     @Test
@@ -465,7 +506,12 @@ class ExportViewModelTest {
         )
 
     private class FakeAppRepository : AppRepository {
-        var apps: List<App> = emptyList()
+        private val appsFlow = MutableStateFlow<List<App>>(emptyList())
+        var apps: List<App>
+            get() = appsFlow.value
+            set(value) {
+                appsFlow.value = value
+            }
         var refreshError: Exception? = null
         val refreshForces = mutableListOf<Boolean>()
 
@@ -478,6 +524,8 @@ class ExportViewModelTest {
         ): Flow<List<App>> = flowOf(apps)
 
         override fun getSyncState(): Flow<SyncState> = flowOf(SyncState.Idle)
+
+        override fun observeCachedApps(): Flow<List<App>> = appsFlow
 
         override suspend fun refreshCache(force: Boolean) {
             refreshForces += force
