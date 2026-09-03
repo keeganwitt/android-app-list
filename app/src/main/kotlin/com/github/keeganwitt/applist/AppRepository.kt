@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -48,6 +49,8 @@ interface AppRepository {
 
     fun getSyncState(): Flow<SyncState>
 
+    fun observeCachedApps(): Flow<List<App>>
+
     suspend fun refreshCache(force: Boolean = false)
 
     suspend fun getCachedApps(): List<App>
@@ -65,6 +68,8 @@ class AndroidAppRepository(
     private val syncMutex = Mutex()
 
     override fun getSyncState(): Flow<SyncState> = _syncState.asStateFlow()
+
+    override fun observeCachedApps() = appDao.getAllAppsFlow().map { entities -> entities.map { it.toDomainModel() } }
 
     override fun loadApps(
         field: AppInfoField,
@@ -175,6 +180,7 @@ class AndroidAppRepository(
                 if (isInitial) _syncState.value = SyncState.BuildingInitial(0, toSync.size)
 
                 val lastUsedEpochs = usageStatsService.getLastUsedEpochs(force)
+                val initialApps = mutableListOf<AppCacheEntity>()
 
                 var processedCount = 0
                 toSync.chunked(10).forEach { chunk ->
@@ -187,7 +193,12 @@ class AndroidAppRepository(
                                         mapToAppDetailed(ai, basic, lastUsedEpochs)
                                     }
                                 }.awaitAll()
-                        appDao.insertApps(apps.map { it.toCacheEntity(System.currentTimeMillis()) })
+                        val cacheEntities = apps.map { it.toCacheEntity(System.currentTimeMillis()) }
+                        if (isInitial) {
+                            initialApps.addAll(cacheEntities)
+                        } else {
+                            appDao.insertApps(cacheEntities)
+                        }
                     }
                     processedCount += chunk.size
 
@@ -195,6 +206,7 @@ class AndroidAppRepository(
                         _syncState.value = SyncState.BuildingInitial(processedCount, toSync.size)
                     }
                 }
+                if (isInitial) appDao.insertApps(initialApps)
             }
         } finally {
             _syncState.value = SyncState.Idle

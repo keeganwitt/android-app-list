@@ -5,15 +5,22 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -969,6 +976,351 @@ class AppListViewModelTest {
                 @Suppress("UnusedFlow")
                 repository.loadApps(any(), any(), any(), any(), any())
             }
+        }
+
+    @Test
+    fun `given load fails before emitting apps, when initialized, then failure is exposed`() =
+        runTest {
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("load failed") }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertFalse(state.isFullyLoaded)
+            assertTrue(state.loadFailed)
+            assertTrue(state.items.isEmpty())
+        }
+
+    @Test
+    fun `given cached apps, when changed options fail before emitting, then old results are cleared`() =
+        runTest {
+            val cachedApp = createTestApp("com.cached.app", "Cached App", versionName = "1.2.3")
+            val changes =
+                listOf<Pair<String, () -> Unit>>(
+                    "field" to { viewModel.updateSelectedField(AppInfoField.ENABLED) },
+                    "sort" to { viewModel.setDescending(true) },
+                    "system apps" to { viewModel.setSystemAppsOnly(true) },
+                    "archived apps" to { viewModel.setShowArchived(true) },
+                    "initial options" to { viewModel.init(AppInfoField.ARCHIVED, true, true, true) },
+                )
+
+            for ((name, change) in changes) {
+                coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(cachedApp))
+                viewModel.init(AppInfoField.VERSION, false, false, false)
+                advanceUntilIdle()
+                assertEquals(
+                    listOf("1.2.3"),
+                    viewModel.uiState.value.items
+                        .map { it.infoText },
+                )
+
+                coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                    flow { throw IllegalStateException("replacement failed") }
+                change()
+                advanceUntilIdle()
+
+                val state = viewModel.uiState.value
+                assertTrue(name, state.loadFailed)
+                assertFalse(name, state.isLoading)
+                assertTrue(name, state.items.isEmpty())
+                assertTrue(name, state.filteredApps.isEmpty())
+                assertNull(name, state.summary)
+
+                viewModel.setQuery("Cached")
+                advanceUntilIdle()
+                assertTrue(
+                    name,
+                    viewModel.uiState.value.items
+                        .isEmpty(),
+                )
+                assertTrue(
+                    name,
+                    viewModel.uiState.value.filteredApps
+                        .isEmpty(),
+                )
+                viewModel.setQuery("")
+                advanceUntilIdle()
+                assertTrue(
+                    name,
+                    viewModel.uiState.value.items
+                        .isEmpty(),
+                )
+            }
+        }
+
+    @Test
+    fun `given field change still loading, when refresh replaces it and fails, then original rows are cleared`() =
+        runTest {
+            val app = createTestApp("com.cached.app", "Cached App", versionName = "1.2.3")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+            viewModel.init(AppInfoField.VERSION, false, false, false)
+            advanceUntilIdle()
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flow { awaitCancellation() }
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("replacement refresh failed") }
+            viewModel.refresh()
+            advanceUntilIdle()
+
+            assertEquals(AppInfoField.ENABLED, viewModel.uiState.value.selectedField)
+            assertTrue(viewModel.uiState.value.loadFailed)
+            assertTrue(
+                viewModel.uiState.value.items
+                    .isEmpty(),
+            )
+            assertTrue(
+                viewModel.uiState.value.filteredApps
+                    .isEmpty(),
+            )
+        }
+
+    @Test
+    fun `given cached rows remapped during loading, when returning to original field fails, then remapped rows are cleared`() =
+        runTest {
+            val app = createTestApp("com.cached.app", "Cached App", versionName = "1.2.3")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+            viewModel.init(AppInfoField.VERSION, false, false, false)
+            advanceUntilIdle()
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flow { awaitCancellation() }
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+            viewModel.setQuery("Cached")
+            advanceUntilIdle()
+            assertEquals(
+                listOf("true"),
+                viewModel.uiState.value.items
+                    .map { it.infoText },
+            )
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("replacement failed") }
+            viewModel.updateSelectedField(AppInfoField.VERSION)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals(AppInfoField.VERSION, state.selectedField)
+            assertTrue(state.loadFailed)
+            assertTrue(state.items.isEmpty())
+            assertTrue(state.filteredApps.isEmpty())
+        }
+
+    @Test
+    fun `given cached apps, when unchanged refresh fails before emitting, then cached results remain`() =
+        runTest {
+            val cachedApp = createTestApp("com.cached.app", "Cached App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(cachedApp))
+            viewModel.init(AppInfoField.VERSION, false, false, false)
+            advanceUntilIdle()
+            val cachedItems = viewModel.uiState.value.items
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("refresh failed") }
+            viewModel.refresh()
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.loadFailed)
+            assertEquals(cachedItems, viewModel.uiState.value.items)
+            assertEquals(listOf(cachedApp), viewModel.uiState.value.filteredApps)
+        }
+
+    @Test
+    fun `given changed field failed, when retry emits then fails, then only replacement results remain`() =
+        runTest {
+            val cachedApp = createTestApp("com.cached.app", "Cached App", versionName = "1.2.3")
+            val replacementApp = createTestApp("com.replacement.app", "Replacement App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(cachedApp))
+            viewModel.init(AppInfoField.VERSION, false, false, false)
+            advanceUntilIdle()
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("replacement failed") }
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            advanceUntilIdle()
+            assertEquals(AppInfoField.ENABLED, viewModel.uiState.value.selectedField)
+            assertTrue(
+                viewModel.uiState.value.items
+                    .isEmpty(),
+            )
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow {
+                    emit(listOf(replacementApp))
+                    throw IllegalStateException("sync failed")
+                }
+            viewModel.refresh()
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.loadFailed)
+            assertEquals(
+                listOf("com.replacement.app"),
+                viewModel.uiState.value.items
+                    .map { it.packageName },
+            )
+            assertEquals(
+                listOf("true"),
+                viewModel.uiState.value.items
+                    .map { it.infoText },
+            )
+        }
+
+    @Test
+    fun `given pending summary, when option change fails, then stale summary cannot restore cleared results`() =
+        runTest {
+            val summaryScheduler = TestCoroutineScheduler()
+            val provider =
+                object : DispatcherProvider {
+                    override val io = testDispatcher
+                    override val main = testDispatcher
+                    override val default = StandardTestDispatcher(summaryScheduler)
+                }
+            viewModel = AppListViewModel(repository, provider, summaryCalculator, { it.toString() }, "Unknown", "Failed")
+            val app = createTestApp("com.cached.app", "Cached App", isDetailed = true)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+            viewModel.init(AppInfoField.VERSION, false, false, false)
+            runCurrent()
+            assertEquals(1, viewModel.uiState.value.items.size)
+
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow { throw IllegalStateException("replacement failed") }
+            viewModel.setDescending(true)
+            runCurrent()
+            summaryScheduler.runCurrent()
+            advanceUntilIdle()
+
+            assertTrue(viewModel.uiState.value.loadFailed)
+            assertNull(viewModel.uiState.value.summary)
+            assertTrue(
+                viewModel.uiState.value.filteredApps
+                    .isEmpty(),
+            )
+        }
+
+    @Test
+    fun `given canceled producer throws, when replacement awaits results, then loading state belongs to replacement`() =
+        runTest {
+            val replacementResult = CompletableDeferred<List<App>>()
+            var loadCount = 0
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } answers {
+                loadCount++
+                if (loadCount == 1) {
+                    channelFlow {
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            throw IllegalStateException("canceled producer failed")
+                        }
+                    }
+                } else {
+                    flow { emit(replacementResult.await()) }
+                }
+            }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            runCurrent()
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+            val pendingState = viewModel.uiState.value
+
+            replacementResult.complete(listOf(createTestApp("com.replacement.app", "Replacement")))
+            advanceUntilIdle()
+
+            assertEquals(2, loadCount)
+            assertTrue(pendingState.isLoading)
+            assertFalse(pendingState.loadFailed)
+            val completedState = viewModel.uiState.value
+            assertFalse(completedState.loadFailed)
+            assertEquals(listOf("com.replacement.app"), completedState.items.map { it.packageName })
+        }
+
+    @Test
+    fun `given load fails after emitting cached apps, when initialized, then apps remain visible with failure`() =
+        runTest {
+            val cachedApp = createTestApp("com.cached.app", "Cached App")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns
+                flow {
+                    emit(listOf(cachedApp))
+                    throw IllegalStateException("refresh failed")
+                }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertFalse(state.isFullyLoaded)
+            assertTrue(state.loadFailed)
+            assertEquals(listOf("com.cached.app"), state.items.map { it.packageName })
+        }
+
+    @Test
+    fun `given canceled load is still cleaning up, when load is replaced, then replacement waits`() =
+        runTest {
+            val cleanupStarted = CompletableDeferred<Unit>()
+            val allowCleanup = CompletableDeferred<Unit>()
+            val replacementStarted = CompletableDeferred<Unit>()
+            var loadCount = 0
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } answers {
+                loadCount++
+                if (loadCount == 1) {
+                    flow {
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            withContext(NonCancellable) {
+                                cleanupStarted.complete(Unit)
+                                allowCleanup.await()
+                            }
+                        }
+                    }
+                } else {
+                    flow {
+                        replacementStarted.complete(Unit)
+                        emit(emptyList())
+                    }
+                }
+            }
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            runCurrent()
+
+            viewModel.updateSelectedField(AppInfoField.ENABLED)
+            runCurrent()
+
+            assertTrue(cleanupStarted.isCompleted)
+            assertFalse(replacementStarted.isCompleted)
+
+            allowCleanup.complete(Unit)
+            advanceUntilIdle()
+
+            assertTrue(replacementStarted.isCompleted)
         }
 
     @Test

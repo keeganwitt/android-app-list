@@ -17,8 +17,12 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -26,6 +30,7 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -160,6 +165,75 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `failed initial sync does not write completed chunks`() =
+        runTest {
+            val installedApps = (1..11).map { createApplicationInfo("com.test.app$it") }
+            every { packageService.getInstalledApplications(any<Long>()) } returns installedApps
+            every { packageService.getLaunchablePackages() } returns installedApps.mapNotNull { it.packageName }.toSet()
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+            every { packageService.loadLabel(any<ApplicationInfo>()) } answers {
+                val packageName = firstArg<ApplicationInfo>().packageName
+                if (packageName == "com.test.app11") throw IllegalStateException("load failed")
+                packageName
+            }
+            every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
+            every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
+
+            try {
+                repository.refreshCache()
+                fail("Expected initial sync to fail")
+            } catch (_: IllegalStateException) {
+            }
+
+            assertTrue(dbFlow.value.isEmpty())
+            coVerify(exactly = 0) { appDao.insertApps(any()) }
+        }
+
+    @Test
+    fun `cancelled initial sync does not expose a partial cache`() =
+        runTest {
+            val installedApps = (1..11).map { createApplicationInfo("com.test.app$it") }
+            every { packageService.getInstalledApplications(any<Long>()) } returns installedApps
+            every { packageService.getLaunchablePackages() } returns installedApps.mapNotNull { it.packageName }.toSet()
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+            every { packageService.loadLabel(any<ApplicationInfo>()) } returns "App"
+            every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
+            every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
+
+            coEvery { appDao.insertApps(any()) } coAnswers {
+                awaitCancellation()
+            }
+            val refreshJob = launch { repository.refreshCache() }
+            runCurrent()
+
+            refreshJob.cancelAndJoin()
+
+            assertTrue(dbFlow.value.isEmpty())
+            coVerify(exactly = 1) { appDao.insertApps(match { it.size == 11 }) }
+        }
+
+    @Test
+    fun `cancelled background sync preserves the existing cache`() =
+        runTest {
+            val cachedApp = createAppEntity("com.test.app")
+            dbFlow.value = listOf(cachedApp)
+            val installedApp = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(installedApp)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+            every { packageService.loadLabel(any<ApplicationInfo>()) } returns "App"
+            every { usageStatsService.getLastUsedEpochs(any<Boolean>()) } returns emptyMap()
+            every { storageService.getStorageUsage(any<ApplicationInfo>()) } returns StorageUsage()
+            coEvery { appDao.insertApps(any()) } coAnswers { awaitCancellation() }
+            val refreshJob = launch { repository.refreshCache(force = true) }
+            runCurrent()
+
+            refreshJob.cancelAndJoin()
+
+            assertEquals(listOf(cachedApp), dbFlow.value)
+        }
+
+    @Test
     fun `given cached apps, then getCachedApps returns them`() =
         runTest {
             val entity1 = createAppEntity("pkg1")
@@ -171,6 +245,21 @@ class AppRepositoryTest {
             assertEquals(2, result.size)
             assertEquals("pkg1", result[0].packageName)
             assertEquals("pkg2", result[1].packageName)
+        }
+
+    @Test
+    fun `observeCachedApps maps subsequent database updates`() =
+        runTest {
+            dbFlow.value = listOf(createAppEntity("initial.app"))
+            val emissions = mutableListOf<List<App>>()
+            val collection = launch { repository.observeCachedApps().take(2).toList(emissions) }
+            runCurrent()
+
+            dbFlow.value = listOf(createAppEntity("updated.app"))
+            collection.join()
+
+            assertEquals(listOf("initial.app"), emissions[0].map { it.packageName })
+            assertEquals(listOf("updated.app"), emissions[1].map { it.packageName })
         }
 
     @Test

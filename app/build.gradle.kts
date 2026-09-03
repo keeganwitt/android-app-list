@@ -11,6 +11,12 @@ kotlin {
     jvmToolchain(21)
 }
 
+val jacocoToolVersion = "0.8.14"
+
+jacoco {
+    toolVersion = jacocoToolVersion
+}
+
 android {
     namespace = "com.github.keeganwitt.applist"
 
@@ -45,7 +51,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.12"
+        jacocoVersion = jacocoToolVersion
     }
 
     compileOptions {
