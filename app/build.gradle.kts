@@ -26,8 +26,8 @@ android {
         applicationId = "com.github.keeganwitt.applist"
         minSdk = 24
         targetSdk = 37
-        versionCode = 34
-        versionName = "1.16.1"
+        versionCode = 35
+        versionName = "1.17.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
