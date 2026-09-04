@@ -379,6 +379,26 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given blank store URL, when store URL field is selected, then no store links are exposed`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(storeUrl = "")
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.STORE_URL,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val item = viewModel.uiState.value.items[0]
+            assertEquals("Unknown", item.infoText)
+            assertEquals(null, item.infoUrl)
+            assertEquals(null, item.storeUrl)
+        }
+
+    @Test
     fun `given app has store URL, when another field is selected, then store action URL is retained`() =
         runTest {
             val storeUrl = "https://play.google.com/store/apps/details?id=com.test.app"

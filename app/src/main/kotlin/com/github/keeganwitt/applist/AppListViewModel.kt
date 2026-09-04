@@ -214,10 +214,13 @@ class AppListViewModel(
         app: App,
         field: AppInfoField,
     ): AppItemUiModel {
+        val storeUrl = app.storeUrl?.takeIf { it.isNotBlank() }
         val rawValue = field.getValue(app)
         val info =
             if (field == AppInfoField.APP_NAME || field == AppInfoField.PACKAGE_NAME) {
                 ""
+            } else if (field == AppInfoField.STORE_URL) {
+                storeUrl ?: unknownValue
             } else if (field in app.failedFields) {
                 loadingFailedValue
             } else if (field.isSize &&
@@ -232,8 +235,8 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
-            infoUrl = app.storeUrl?.takeIf { field == AppInfoField.STORE_URL && it.isNotBlank() },
-            storeUrl = app.storeUrl,
+            infoUrl = storeUrl?.takeIf { field == AppInfoField.STORE_URL },
+            storeUrl = storeUrl,
             isLoading = !app.isDetailed,
         )
     }
