@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Initialer Cache wird aufgebaut…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">Store-URL</string>
+    <string name="open_in_app_store">Im App-Store öffnen</string>
+    <string name="open_in_app_store_description">%1$s im App-Store öffnen</string>
+    <string name="app_store_unavailable">Kein App-Store oder Browser kann diesen Link öffnen</string>
 </resources>

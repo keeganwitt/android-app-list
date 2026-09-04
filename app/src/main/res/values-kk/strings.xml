@@ -59,4 +59,7 @@
     <string name="building_initial_cache">Бастапқы кэш жасалуда…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">Дүкен URL мекенжайы</string>
+    <string name="open_in_app_store">Қолданбалар дүкенінде ашу</string>
+    <string name="open_in_app_store_description">%1$s қолданбасын қолданбалар дүкенінде ашу</string>
+    <string name="app_store_unavailable">Бұл сілтемені ешбір қолданбалар дүкені немесе браузер аша алмайды</string>
 </resources>

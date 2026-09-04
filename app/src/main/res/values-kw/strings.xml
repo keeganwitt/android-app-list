@@ -59,4 +59,7 @@
     <string name="building_initial_cache">O kila kuddhas kynsa…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL Shoppa</string>
+    <string name="open_in_app_store">Ygeri yn shoppa app</string>
+    <string name="open_in_app_store_description">Ygeri %1$s yn shoppa app</string>
+    <string name="app_store_unavailable">Nyns eus shoppa app po peurell a yll ygeri an kevren ma</string>
 </resources>

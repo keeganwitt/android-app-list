@@ -58,4 +58,7 @@
     <string name="building_initial_cache">प्रारंभिक कैश बनाया जा रहा है…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">स्टोर यूआरएल</string>
+    <string name="open_in_app_store">ऐप स्टोर में खोलें</string>
+    <string name="open_in_app_store_description">%1$s को ऐप स्टोर में खोलें</string>
+    <string name="app_store_unavailable">कोई ऐप स्टोर या ब्राउज़र इस लिंक को नहीं खोल सकता</string>
 </resources>

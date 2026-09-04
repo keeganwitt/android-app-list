@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -299,7 +300,11 @@ class MainActivity :
     }
 
     override fun onStoreUrlClick(url: String) {
-        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.app_store_unavailable, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onItemSelected(

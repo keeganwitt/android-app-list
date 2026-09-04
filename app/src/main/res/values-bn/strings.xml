@@ -58,4 +58,7 @@
     <string name="building_initial_cache">প্রাথমিক ক্যাশ তৈরি হচ্ছে…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">স্টোর ইউআরएल</string>
+    <string name="open_in_app_store">অ্যাপ স্টোরে খুলুন</string>
+    <string name="open_in_app_store_description">অ্যাপ স্টোরে %1$s খুলুন</string>
+    <string name="app_store_unavailable">কোনো অ্যাপ স্টোর বা ব্রাউজার এই লিঙ্কটি খুলতে পারে না</string>
 </resources>

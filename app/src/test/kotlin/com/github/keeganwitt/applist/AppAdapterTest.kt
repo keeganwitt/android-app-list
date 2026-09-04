@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.view.View
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
@@ -90,6 +91,29 @@ class AppAdapterTest {
 
         assertTrue(holder.binding.appInfo.isClickable)
         verify { onClickListener.onStoreUrlClick(url) }
+    }
+
+    @Test
+    fun `given item with store URL, when bound and store button clicked, then store URL click is reported`() {
+        val url = "https://play.google.com/store/apps/details?id=com.test.app"
+        val holder = createViewHolder()
+        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0", storeUrl = url)))
+
+        adapter.onBindViewHolder(holder, 0)
+        holder.binding.storeLink.performClick()
+
+        assertEquals(View.VISIBLE, holder.binding.storeLink.visibility)
+        verify { onClickListener.onStoreUrlClick(url) }
+    }
+
+    @Test
+    fun `given item without store URL, when bound, then store button is hidden`() {
+        val holder = createViewHolder()
+        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0")))
+
+        adapter.onBindViewHolder(holder, 0)
+
+        assertEquals(View.GONE, holder.binding.storeLink.visibility)
     }
 
     private fun createViewHolder(): AppAdapter.AppInfoViewHolder {

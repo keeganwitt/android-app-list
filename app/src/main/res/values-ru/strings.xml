@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Создание начального кэша…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL магазина</string>
+    <string name="open_in_app_store">Открыть в магазине приложений</string>
+    <string name="open_in_app_store_description">Открыть %1$s в магазине приложений</string>
+    <string name="app_store_unavailable">Ни один магазин приложений или браузер не может открыть эту ссылку</string>
 </resources>

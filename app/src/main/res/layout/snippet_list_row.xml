@@ -44,4 +44,13 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal" />
 
+  <ImageButton
+    android:id="@+id/store_link"
+    style="?android:attr/borderlessButtonStyle"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:contentDescription="@string/open_in_app_store"
+    android:src="@drawable/ic_store"
+    android:visibility="gone" />
+
 </LinearLayout>

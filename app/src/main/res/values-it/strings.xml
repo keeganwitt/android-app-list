@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Creazione della cache iniziale…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL del negozio</string>
+    <string name="open_in_app_store">Apri nello store di app</string>
+    <string name="open_in_app_store_description">Apri %1$s nello store di app</string>
+    <string name="app_store_unavailable">Nessuno store di app o browser può aprire questo link</string>
 </resources>

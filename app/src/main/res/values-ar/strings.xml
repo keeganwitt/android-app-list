@@ -58,4 +58,7 @@
     <string name="building_initial_cache">جاري بناء ذاكرة التخزين المؤقت الأولية…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">رابط المتجر</string>
+    <string name="open_in_app_store">فتح في متجر التطبيقات</string>
+    <string name="open_in_app_store_description">فتح %1$s في متجر التطبيقات</string>
+    <string name="app_store_unavailable">لا يمكن لأي متجر تطبيقات أو متصفح فتح هذا الرابط</string>
 </resources>

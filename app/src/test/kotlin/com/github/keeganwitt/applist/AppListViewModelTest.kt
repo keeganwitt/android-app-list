@@ -360,6 +360,26 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given app has store URL, when another field is selected, then store action URL is retained`() =
+        runTest {
+            val storeUrl = "https://play.google.com/store/apps/details?id=com.test.app"
+            val app = createTestApp("com.test.app", "Test App").copy(storeUrl = storeUrl)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            val item = viewModel.uiState.value.items[0]
+            assertEquals("1.0.0", item.infoText)
+            assertEquals(storeUrl, item.storeUrl)
+        }
+
+    @Test
     fun `given size field, when mapToItem called, then sizeFormatter is used`() =
         runTest {
             val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))

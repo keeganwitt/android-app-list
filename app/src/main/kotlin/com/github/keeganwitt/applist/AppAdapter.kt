@@ -50,6 +50,24 @@ class AppAdapter(
         binding.appName.text = item.appName
         bindAppInfo(binding.appInfo, item)
         binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
+        bindStoreLink(binding, item)
+    }
+
+    private fun bindStoreLink(
+        binding: SnippetListRowBinding,
+        item: AppItemUiModel,
+    ) {
+        val storeUrl = item.storeUrl
+        if (storeUrl == null) {
+            binding.storeLink.visibility = View.GONE
+            binding.storeLink.setOnClickListener(null)
+            return
+        }
+
+        binding.storeLink.visibility = View.VISIBLE
+        binding.storeLink.contentDescription =
+            binding.root.context.getString(R.string.open_in_app_store_description, item.appName)
+        binding.storeLink.setOnClickListener { onClickListener.onStoreUrlClick(storeUrl) }
     }
 
     private fun bindAppInfo(

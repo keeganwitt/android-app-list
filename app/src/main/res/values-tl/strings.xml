@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Binubuo ang initial cache…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL ng Store</string>
+    <string name="open_in_app_store">Buksan sa app store</string>
+    <string name="open_in_app_store_description">Buksan ang %1$s sa app store</string>
+    <string name="app_store_unavailable">Walang app store o browser na maaaring magbukas ng link na ito</string>
 </resources>

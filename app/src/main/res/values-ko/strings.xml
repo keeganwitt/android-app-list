@@ -58,4 +58,7 @@
     <string name="building_initial_cache">초기 캐시 구축 중…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">스토어 URL</string>
+    <string name="open_in_app_store">앱 스토어에서 열기</string>
+    <string name="open_in_app_store_description">앱 스토어에서 %1$s 열기</string>
+    <string name="app_store_unavailable">이 링크를 열 수 있는 앱 스토어나 브라우저가 없습니다</string>
 </resources>
