@@ -232,7 +232,7 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
-            infoUrl = info.takeIf { field == AppInfoField.STORE_URL && it.isNotBlank() },
+            infoUrl = app.storeUrl?.takeIf { field == AppInfoField.STORE_URL && it.isNotBlank() },
             storeUrl = app.storeUrl,
             isLoading = !app.isDetailed,
         )
