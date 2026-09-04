@@ -58,4 +58,7 @@
     <string name="building_initial_cache">初期キャッシュを構築中…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">ストアURL</string>
+    <string name="open_in_app_store">アプリストアで開く</string>
+    <string name="open_in_app_store_description">%1$s をアプリストアで開く</string>
+    <string name="app_store_unavailable">このリンクを開けるアプリストアまたはブラウザがありません</string>
 </resources>

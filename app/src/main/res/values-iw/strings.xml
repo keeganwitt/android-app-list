@@ -58,4 +58,7 @@
     <string name="building_initial_cache">בונה מטמון ראשוני…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">כתובת URL של החנות</string>
+    <string name="open_in_app_store">פתיחה בחנות האפליקציות</string>
+    <string name="open_in_app_store_description">פתיחת %1$s בחנות האפליקציות</string>
+    <string name="app_store_unavailable">אין חנות אפליקציות או דפדפן שיכולים לפתוח את הקישור הזה</string>
 </resources>

@@ -58,4 +58,7 @@
     <string name="building_initial_cache">正在建立初始缓存…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">店铺网址</string>
+    <string name="open_in_app_store">在应用商店中打开</string>
+    <string name="open_in_app_store_description">在应用商店中打开 %1$s</string>
+    <string name="app_store_unavailable">没有应用商店或浏览器可以打开此链接</string>
 </resources>

@@ -59,4 +59,7 @@
     <string name="building_initial_cache">Vytváření počáteční mezipaměti…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">Adresa URL obchodu</string>
+    <string name="open_in_app_store">Otevřít v obchodě s aplikacemi</string>
+    <string name="open_in_app_store_description">Otevřít %1$s v obchodě s aplikacemi</string>
+    <string name="app_store_unavailable">Tento odkaz nelze otevřít v žádném obchodě s aplikacemi ani prohlížeči</string>
 </resources>

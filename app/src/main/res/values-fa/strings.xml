@@ -58,4 +58,7 @@
     <string name="building_initial_cache">در حال ساخت کش اولیه…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">نشانی اینترنتی فروشگاه</string>
+    <string name="open_in_app_store">باز کردن در فروشگاه برنامه</string>
+    <string name="open_in_app_store_description">باز کردن %1$s در فروشگاه برنامه</string>
+    <string name="app_store_unavailable">هیچ فروشگاه برنامه یا مرورگری نمی‌تواند این پیوند را باز کند</string>
 </resources>

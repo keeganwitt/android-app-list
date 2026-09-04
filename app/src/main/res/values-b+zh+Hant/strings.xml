@@ -58,4 +58,7 @@
     <string name="building_initial_cache">正在建立初始快取…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">店鋪網址</string>
+    <string name="open_in_app_store">在應用程式商店中開啟</string>
+    <string name="open_in_app_store_description">在應用程式商店中開啟 %1$s</string>
+    <string name="app_store_unavailable">沒有應用程式商店或瀏覽器可以開啟此連結</string>
 </resources>

@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Đang xây dựng bộ nhớ đệm ban đầu…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL cửa hàng</string>
+    <string name="open_in_app_store">Mở trong cửa hàng ứng dụng</string>
+    <string name="open_in_app_store_description">Mở %1$s trong cửa hàng ứng dụng</string>
+    <string name="app_store_unavailable">Không có cửa hàng ứng dụng hoặc trình duyệt nào có thể mở liên kết này</string>
 </resources>

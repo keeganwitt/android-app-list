@@ -58,4 +58,7 @@
     <string name="building_initial_cache">Створення початкового кешу…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">URL магазину</string>
+    <string name="open_in_app_store">Відкрити в магазині застосунків</string>
+    <string name="open_in_app_store_description">Відкрити %1$s у магазині застосунків</string>
+    <string name="app_store_unavailable">Жоден магазин застосунків або браузер не може відкрити це посилання</string>
 </resources>
