@@ -22,6 +22,9 @@
     android:supportsRtl="true"
     android:localeConfig="@xml/locales_config"
     android:theme="@style/Theme.Material3.DayNight">
+    <meta-data
+      android:name="firebase_crashlytics_collection_enabled"
+      android:value="false" />
     <activity
       android:name=".MainActivity"
       android:exported="true"

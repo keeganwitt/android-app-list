@@ -15,6 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -173,5 +174,17 @@ class SettingsActivityTest {
         waitFor(1000)
 
         assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.LIGHT)
+    }
+
+    @Test
+    fun settingsActivity_whenRecreated_thenRestoresOneSettingsFragment() {
+        scenario.recreate()
+        waitFor(500)
+
+        scenario.onActivity { activity ->
+            val settingsFragments =
+                activity.supportFragmentManager.fragments.filterIsInstance<SettingsActivity.SettingsFragment>()
+            assertEquals(1, settingsFragments.size)
+        }
     }
 }

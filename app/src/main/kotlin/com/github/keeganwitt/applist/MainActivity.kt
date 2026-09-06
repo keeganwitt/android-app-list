@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
+import com.github.keeganwitt.applist.utils.applySafeDrawingInsets
 import com.github.keeganwitt.applist.utils.nightMode
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
@@ -53,6 +54,7 @@ class MainActivity :
     private var pendingField: AppInfoField? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setupUI()
         setupSettings()
@@ -64,9 +66,9 @@ class MainActivity :
     }
 
     private fun setupUI() {
-        enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySafeDrawingInsets()
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         val isLightMode =

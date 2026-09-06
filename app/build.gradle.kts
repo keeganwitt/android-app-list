@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+
 plugins {
     id("com.android.application")
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
@@ -38,6 +40,9 @@ android {
                 enable = true
             }
             ndk.debugSymbolLevel = "FULL"
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = true
+            }
         }
         getByName("debug") {
             enableUnitTestCoverage = true
@@ -71,9 +76,17 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Android dependencies
-    implementation("androidx.activity:activity-ktx:1.13.0")
+    implementation("androidx.activity:activity-ktx:1.12.4")
     implementation("androidx.appcompat:appcompat:1.8.0")
-    implementation("androidx.core:core-ktx:1.19.0")
+    val coreVersion = "1.17.0"
+    implementation("androidx.core:core:$coreVersion") {
+        version { strictly(coreVersion) }
+        because("Core 1.18+ can invoke an unavailable WindowInsets API on incompatible API 34 runtimes")
+    }
+    implementation("androidx.core:core-ktx:$coreVersion") {
+        version { strictly(coreVersion) }
+        because("Core 1.18+ can invoke an unavailable WindowInsets API on incompatible API 34 runtimes")
+    }
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
     implementation("androidx.preference:preference-ktx:1.2.1")

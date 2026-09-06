@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.keeganwitt.applist.databinding.ActivityExportBinding
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
+import com.github.keeganwitt.applist.utils.applySafeDrawingInsets
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.Collator
@@ -30,10 +31,11 @@ internal class ExportActivity : AppCompatActivity() {
     private var renderingState = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
         binding = ActivityExportBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySafeDrawingInsets()
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         val isLightMode =

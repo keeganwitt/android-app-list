@@ -9,24 +9,28 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.github.keeganwitt.applist.databinding.ActivitySettingsBinding
 import com.github.keeganwitt.applist.utils.PermissionUtils
+import com.github.keeganwitt.applist.utils.applySafeDrawingInsets
 import com.github.keeganwitt.applist.utils.nightMode
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySafeDrawingInsets()
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.settings_container, SettingsFragment())
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings_container, SettingsFragment())
+                .commit()
+        }
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
