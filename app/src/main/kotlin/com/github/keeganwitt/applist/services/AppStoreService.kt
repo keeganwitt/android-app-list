@@ -56,6 +56,7 @@ interface AppStoreService {
 open class DefaultAppStoreService(
     private val httpClient: OkHttpClient = OkHttpClient(),
     private val crashReporter: com.github.keeganwitt.applist.CrashReporter? = null,
+    private val networkStatusProvider: NetworkStatusProvider = NetworkStatusProvider { true },
 ) : AppStoreService {
     private val cache = mutableMapOf<String, Boolean?>()
 
@@ -75,6 +76,7 @@ open class DefaultAppStoreService(
         cache[cacheKey]?.let { return it }
 
         val url = appStoreLink(packageName, installerPackageName) ?: return null
+        if (!networkStatusProvider.hasValidatedInternet()) return null
         val request = Request.Builder().url(url).build()
 
         val response =

@@ -190,7 +190,7 @@ class AndroidAppRepository(
                                 .map { ai ->
                                     async {
                                         val basic = mapToAppBasic(ai, launchablePackages.contains(ai.packageName))
-                                        mapToAppDetailed(ai, basic, lastUsedEpochs)
+                                        mapToAppDetailed(ai, basic, lastUsedEpochs, cachedMap[ai.packageName])
                                     }
                                 }.awaitAll()
                         val cacheEntities = apps.map { it.toCacheEntity(System.currentTimeMillis()) }
@@ -248,6 +248,7 @@ class AndroidAppRepository(
         ai: ApplicationInfo,
         basicApp: App,
         lastUsedEpochs: Map<String, Long>?,
+        cachedApp: AppCacheEntity?,
     ): App {
         var app = basicApp
         val failedFields = mutableSetOf<AppInfoField>()
@@ -313,12 +314,16 @@ class AndroidAppRepository(
         try {
             val installerPackage = packageService.getInstallerPackageName(ai)
             val installerName = appStoreService.installerDisplayName(installerPackage)
-            val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
             val storeUrl = appStoreService.appStoreLink(ai.packageName ?: "", installerPackage)
+            val refreshedExistsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
+            val cachedExistsInStore =
+                cachedApp
+                    ?.takeIf { storeUrl != null && it.storeUrl == storeUrl }
+                    ?.existsInStore
             app =
                 app.copy(
                     installerName = installerName,
-                    existsInStore = existsInStore,
+                    existsInStore = refreshedExistsInStore ?: cachedExistsInStore,
                     storeUrl = storeUrl,
                 )
         } catch (e: Exception) {

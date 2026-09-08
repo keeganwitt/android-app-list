@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.keeganwitt.applist.databinding.ActivityExportBinding
+import com.github.keeganwitt.applist.services.AndroidNetworkStatusProvider
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -60,7 +61,11 @@ internal class ExportActivity : AppCompatActivity() {
                 this,
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        val store = DefaultAppStoreService(crashReporter = crashReporter)
+                        val store =
+                            DefaultAppStoreService(
+                                crashReporter = crashReporter,
+                                networkStatusProvider = AndroidNetworkStatusProvider(applicationContext),
+                            )
                         val repository = AppRepositoryFactory.create(applicationContext, store, crashReporter)
                         val writer =
                             DefaultExportFileWriter(

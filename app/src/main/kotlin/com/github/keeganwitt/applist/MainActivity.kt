@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
+import com.github.keeganwitt.applist.services.AndroidNetworkStatusProvider
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
@@ -99,7 +100,11 @@ class MainActivity :
                 this,
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        val store = DefaultAppStoreService(crashReporter = crashReporter)
+                        val store =
+                            DefaultAppStoreService(
+                                crashReporter = crashReporter,
+                                networkStatusProvider = AndroidNetworkStatusProvider(applicationContext),
+                            )
                         val repository = AppRepositoryFactory.create(applicationContext, store, crashReporter)
                         val vm =
                             AppListViewModel(

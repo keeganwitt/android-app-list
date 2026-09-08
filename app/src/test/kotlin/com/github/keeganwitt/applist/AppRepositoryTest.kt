@@ -909,6 +909,81 @@ class AppRepositoryTest {
             assertEquals("1.1.0", dbFlow.value[0].versionName)
         }
 
+    @Test
+    fun `given matching cached store URL, when availability refresh is unknown, then cached result is preserved`() =
+        runTest {
+            val storeUrl = "https://play.google.com/store/apps/details?id=com.test"
+            val cachedApp =
+                createAppEntity("com.test").copy(
+                    storeUrl = storeUrl,
+                    existsInStore = true,
+                    lastCachedAt = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2),
+                )
+            dbFlow.value = listOf(cachedApp)
+            val appInfo = createApplicationInfo("com.test")
+
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.installerDisplayName(AppStoreService.GOOGLE_PLAY) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test", AppStoreService.GOOGLE_PLAY) } returns storeUrl
+            coEvery { appStoreService.existsInAppStore("com.test", AppStoreService.GOOGLE_PLAY) } returns null
+
+            repository.refreshCache()
+
+            assertEquals(true, dbFlow.value.single().existsInStore)
+            assertEquals(storeUrl, dbFlow.value.single().storeUrl)
+        }
+
+    @Test
+    fun `given changed store URL, when availability refresh is unknown, then cached result is discarded`() =
+        runTest {
+            val cachedApp =
+                createAppEntity("com.test").copy(
+                    storeUrl = "https://play.google.com/store/apps/details?id=com.test",
+                    existsInStore = true,
+                    lastCachedAt = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2),
+                )
+            val newStoreUrl = "https://f-droid.org/packages/com.test/"
+            dbFlow.value = listOf(cachedApp)
+            val appInfo = createApplicationInfo("com.test")
+
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.F_DROID
+            every { appStoreService.installerDisplayName(AppStoreService.F_DROID) } returns "F-Droid"
+            every { appStoreService.appStoreLink("com.test", AppStoreService.F_DROID) } returns newStoreUrl
+            coEvery { appStoreService.existsInAppStore("com.test", AppStoreService.F_DROID) } returns null
+
+            repository.refreshCache()
+
+            assertNull(dbFlow.value.single().existsInStore)
+            assertEquals(newStoreUrl, dbFlow.value.single().storeUrl)
+        }
+
+    @Test
+    fun `given empty cache and unavailable store check, when refreshed, then local store URL is cached`() =
+        runTest {
+            val storeUrl = "https://play.google.com/store/apps/details?id=com.test"
+            val appInfo = createApplicationInfo("com.test")
+
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.loadLabel(appInfo) } returns "Test App"
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.installerDisplayName(AppStoreService.GOOGLE_PLAY) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test", AppStoreService.GOOGLE_PLAY) } returns storeUrl
+            coEvery { appStoreService.existsInAppStore("com.test", AppStoreService.GOOGLE_PLAY) } returns null
+
+            repository.refreshCache()
+
+            assertEquals(storeUrl, dbFlow.value.single().storeUrl)
+            assertNull(dbFlow.value.single().existsInStore)
+        }
+
     private fun createAppEntity(packageName: String): com.github.keeganwitt.applist.db.AppCacheEntity =
         com.github.keeganwitt.applist.db.AppCacheEntity(
             packageName = packageName,

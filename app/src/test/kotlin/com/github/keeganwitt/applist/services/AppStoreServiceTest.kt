@@ -25,14 +25,52 @@ import java.io.IOException
 class AppStoreServiceTest {
     private lateinit var httpClient: OkHttpClient
     private lateinit var crashReporter: CrashReporter
+    private lateinit var networkStatusProvider: NetworkStatusProvider
     private lateinit var service: DefaultAppStoreService
 
     @Before
     fun setup() {
         httpClient = mockk(relaxed = true)
         crashReporter = mockk(relaxed = true)
-        service = DefaultAppStoreService(httpClient, crashReporter)
+        networkStatusProvider = mockk()
+        every { networkStatusProvider.hasValidatedInternet() } returns true
+        service = DefaultAppStoreService(httpClient, crashReporter, networkStatusProvider)
     }
+
+    @Test
+    fun `given no validated internet, when existsInAppStore called, then returns null without HTTP request`() =
+        runBlocking {
+            every { networkStatusProvider.hasValidatedInternet() } returns false
+
+            val result = service.existsInAppStore("com.test.app", AppStoreService.GOOGLE_PLAY)
+
+            assertNull(result)
+            verify(exactly = 0) { httpClient.newCall(any()) }
+            verify(exactly = 0) { crashReporter.recordException(any(), any()) }
+        }
+
+    @Test
+    fun `given cached result and connectivity lost, when existsInAppStore called again, then returns cached result`() =
+        runBlocking {
+            val call = mockk<Call>()
+            val response = mockk<Response>()
+
+            mockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
+            try {
+                every { response.isSuccessful } returns true
+                every { response.close() } returns Unit
+                coEvery { call.await() } returns response
+                every { httpClient.newCall(any()) } returns call
+
+                assertEquals(true, service.existsInAppStore("com.test.app", AppStoreService.GOOGLE_PLAY))
+                every { networkStatusProvider.hasValidatedInternet() } returns false
+
+                assertEquals(true, service.existsInAppStore("com.test.app", AppStoreService.GOOGLE_PLAY))
+                verify(exactly = 1) { httpClient.newCall(any()) }
+            } finally {
+                unmockkStatic("com.github.keeganwitt.applist.utils.OkHttpExtensionsKt")
+            }
+        }
 
     @Test
     fun `given Google Play installer and generic exception, when existsInAppStore called, then records exception to crash reporter`() =
