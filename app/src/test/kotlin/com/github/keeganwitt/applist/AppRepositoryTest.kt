@@ -964,6 +964,32 @@ class AppRepositoryTest {
         }
 
     @Test
+    fun `given store URL no longer available, when availability refresh is unknown, then cached result is discarded`() =
+        runTest {
+            val cachedApp =
+                createAppEntity("com.test").copy(
+                    storeUrl = "https://play.google.com/store/apps/details?id=com.test",
+                    existsInStore = true,
+                    lastCachedAt = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2),
+                )
+            dbFlow.value = listOf(cachedApp)
+            val appInfo = createApplicationInfo("com.test")
+
+            every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.APK
+            every { appStoreService.installerDisplayName(AppStoreService.APK) } returns "APK"
+            every { appStoreService.appStoreLink("com.test", AppStoreService.APK) } returns null
+            coEvery { appStoreService.existsInAppStore("com.test", AppStoreService.APK) } returns null
+
+            repository.refreshCache()
+
+            assertNull(dbFlow.value.single().existsInStore)
+            assertNull(dbFlow.value.single().storeUrl)
+        }
+
+    @Test
     fun `given empty cache and unavailable store check, when refreshed, then local store URL is cached`() =
         runTest {
             val storeUrl = "https://play.google.com/store/apps/details?id=com.test"

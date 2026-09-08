@@ -31,6 +31,26 @@ class NetworkStatusProviderTest {
     }
 
     @Test
+    fun `given active network without capabilities, when checked, then internet is unavailable`() {
+        val network = mockk<Network>()
+        every { connectivityManager.activeNetwork } returns network
+        every { connectivityManager.getNetworkCapabilities(network) } returns null
+
+        assertFalse(provider.hasValidatedInternet())
+    }
+
+    @Test
+    fun `given network without internet capability, when checked, then internet is unavailable`() {
+        val network = mockk<Network>()
+        val capabilities = mockk<NetworkCapabilities>()
+        every { connectivityManager.activeNetwork } returns network
+        every { connectivityManager.getNetworkCapabilities(network) } returns capabilities
+        every { capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) } returns false
+
+        assertFalse(provider.hasValidatedInternet())
+    }
+
+    @Test
     fun `given unvalidated internet network, when checked, then internet is unavailable`() {
         val network = mockk<Network>()
         val capabilities = mockk<NetworkCapabilities>()
