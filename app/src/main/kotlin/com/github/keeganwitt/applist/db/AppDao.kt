@@ -17,6 +17,16 @@ interface AppDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertApps(apps: List<AppCacheEntity>)
 
+    @Query(
+        "UPDATE apps SET existsInStore = :existsInStore " +
+            "WHERE packageName = :packageName AND storeUrl = :storeUrl",
+    )
+    suspend fun updateStoreAvailability(
+        packageName: String,
+        storeUrl: String,
+        existsInStore: Boolean,
+    ): Int
+
     @Query("DELETE FROM apps WHERE packageName IN (:packageNames)")
     suspend fun deleteApps(packageNames: List<String>)
 
