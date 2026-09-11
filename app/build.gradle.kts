@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+
 plugins {
     id("com.android.application")
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
@@ -38,6 +40,9 @@ android {
                 enable = true
             }
             ndk.debugSymbolLevel = "FULL"
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = true
+            }
         }
         getByName("debug") {
             enableUnitTestCoverage = true
