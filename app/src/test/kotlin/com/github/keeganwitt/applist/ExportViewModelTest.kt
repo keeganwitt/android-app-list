@@ -85,6 +85,21 @@ class ExportViewModelTest {
         }
 
     @Test
+    fun `local refresh result is exportable with unknown store availability`() =
+        runTest(dispatcher) {
+            repository.refreshBlock = {
+                repository.apps = listOf(app("offline.app", "Offline"))
+            }
+
+            viewModel = createViewModel()
+            advanceUntilIdle()
+
+            assertFalse(viewModel.uiState.value.isLoading)
+            assertEquals(listOf("offline.app"), viewModel.appsForExport().map { it.packageName })
+            assertEquals(listOf("offline.app"), viewModel.beginExport()?.apps?.map { it.packageName })
+        }
+
+    @Test
     fun `cache updates preserve existing choices exclude new apps and remove uninstalled apps`() =
         runTest(dispatcher) {
             repository.apps =

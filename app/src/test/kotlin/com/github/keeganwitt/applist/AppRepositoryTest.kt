@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
@@ -71,6 +72,18 @@ class AppRepositoryTest {
             val names = it.invocation.args[0] as List<String>
             dbFlow.value = dbFlow.value.filter { it.packageName !in names }
         }
+        coEvery { appDao.updateStoreAvailability(any(), any(), any()) } answers {
+            val packageName = firstArg<String>()
+            val storeUrl = secondArg<String>()
+            val existsInStore = thirdArg<Boolean>()
+            val index = dbFlow.value.indexOfFirst { it.packageName == packageName && it.storeUrl == storeUrl }
+            if (index < 0) {
+                0
+            } else {
+                dbFlow.value = dbFlow.value.toMutableList().also { it[index] = it[index].copy(existsInStore = existsInStore) }
+                1
+            }
+        }
         repository =
             AndroidAppRepository(
                 packageService,
@@ -102,6 +115,138 @@ class AppRepositoryTest {
             assertEquals(1, result.size)
             assertEquals("com.test.app", result[0].packageName)
             coVerify { appDao.insertApps(any()) }
+        }
+
+    @Test
+    fun `refreshCache completes local sync without checking the store`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.installerDisplayName(AppStoreService.GOOGLE_PLAY) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test.app", AppStoreService.GOOGLE_PLAY) } returns STORE_URL
+
+            repository.refreshCache()
+
+            assertTrue(dbFlow.value.single().isDetailed)
+            assertEquals("Google Play", dbFlow.value.single().installerName)
+            assertEquals(STORE_URL, dbFlow.value.single().storeUrl)
+            assertNull(dbFlow.value.single().existsInStore)
+            coVerify(exactly = 0) { appStoreService.existsInAppStore(any(), any()) }
+        }
+
+    @Test
+    fun `loadApps emits detailed local data while store check is suspended`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            val storeCheckStarted = CompletableDeferred<Unit>()
+            val storeCheckCancelled = CompletableDeferred<Unit>()
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.installerDisplayName(AppStoreService.GOOGLE_PLAY) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test.app", AppStoreService.GOOGLE_PLAY) } returns STORE_URL
+            coEvery { appStoreService.existsInAppStore("com.test.app", AppStoreService.GOOGLE_PLAY) } coAnswers {
+                storeCheckStarted.complete(Unit)
+                try {
+                    awaitCancellation()
+                } finally {
+                    storeCheckCancelled.complete(Unit)
+                }
+            }
+
+            val collection =
+                launch {
+                    repository.loadApps(AppInfoField.VERSION, false, false, false, false).collect {}
+                }
+            runCurrent()
+
+            assertTrue(storeCheckStarted.isCompleted)
+            assertTrue(dbFlow.value.single().isDetailed)
+            assertEquals(STORE_URL, dbFlow.value.single().storeUrl)
+            assertEquals(SyncState.Idle, repository.getSyncState().first())
+
+            collection.cancelAndJoin()
+            assertTrue(storeCheckCancelled.isCompleted)
+        }
+
+    @Test
+    fun `background store checks persist true and false results`() =
+        runTest {
+            val available = createApplicationInfo("com.test.available")
+            val unavailable = createApplicationInfo("com.test.unavailable")
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(available, unavailable)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.available", "com.test.unavailable")
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(any()) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.appStoreLink(any(), AppStoreService.GOOGLE_PLAY) } answers {
+                "$STORE_URL/${firstArg<String>()}"
+            }
+            coEvery { appStoreService.existsInAppStore(any(), AppStoreService.GOOGLE_PLAY) } answers {
+                firstArg<String>() == "com.test.available"
+            }
+
+            val collection =
+                launch {
+                    repository.loadApps(AppInfoField.VERSION, false, false, false, false).collect {}
+                }
+            runCurrent()
+
+            assertEquals(true, dbFlow.value.single { it.packageName == "com.test.available" }.existsInStore)
+            assertEquals(false, dbFlow.value.single { it.packageName == "com.test.unavailable" }.existsInStore)
+            coVerify(exactly = 2) { appDao.updateStoreAvailability(any(), any(), any()) }
+            collection.cancelAndJoin()
+        }
+
+    @Test
+    fun `null store result preserves matching cached availability`() =
+        runTest {
+            val appInfo = createApplicationInfo("com.test.app")
+            dbFlow.value = listOf(createAppEntity("com.test.app").copy(storeUrl = STORE_URL, existsInStore = true))
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(appInfo)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.app")
+            every { packageService.getPackageInfo(appInfo) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.appStoreLink("com.test.app", AppStoreService.GOOGLE_PLAY) } returns STORE_URL
+            coEvery { appStoreService.existsInAppStore(any(), any()) } returns null
+
+            val collection =
+                launch {
+                    repository.loadApps(AppInfoField.VERSION, false, false, false, true).collect {}
+                }
+            runCurrent()
+
+            assertEquals(true, dbFlow.value.single().existsInStore)
+            coVerify(exactly = 0) { appDao.updateStoreAvailability(any(), any(), any()) }
+            collection.cancelAndJoin()
+        }
+
+    @Test
+    fun `local sync discards cached availability when store URL changes or disappears`() =
+        runTest {
+            val changed = createApplicationInfo("com.test.changed")
+            val removed = createApplicationInfo("com.test.removed")
+            dbFlow.value =
+                listOf(
+                    createAppEntity("com.test.changed").copy(storeUrl = "$STORE_URL/old", existsInStore = true),
+                    createAppEntity("com.test.removed").copy(storeUrl = "$STORE_URL/removed", existsInStore = false),
+                )
+            every { packageService.getInstalledApplications(any<Long>()) } returns listOf(changed, removed)
+            every { packageService.getLaunchablePackages() } returns setOf("com.test.changed", "com.test.removed")
+            every { packageService.getPackageInfo(any<ApplicationInfo>()) } returns createPackageInfo("1.0")
+            every { packageService.getInstallerPackageName(any()) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.appStoreLink("com.test.changed", AppStoreService.GOOGLE_PLAY) } returns "$STORE_URL/new"
+            every { appStoreService.appStoreLink("com.test.removed", AppStoreService.GOOGLE_PLAY) } returns null
+
+            repository.refreshCache(force = true)
+
+            assertNull(dbFlow.value.single { it.packageName == "com.test.changed" }.existsInStore)
+            assertNull(dbFlow.value.single { it.packageName == "com.test.removed" }.existsInStore)
+            assertNull(dbFlow.value.single { it.packageName == "com.test.removed" }.storeUrl)
+            coVerify(exactly = 0) { appStoreService.existsInAppStore(any(), any()) }
         }
 
     @Test
@@ -769,26 +914,34 @@ class AppRepositoryTest {
         }
 
     @Test
-    fun `given appStoreService fails, when loadApps called, then installer fields are in failedFields`() =
+    fun `store check failure does not block or alter locally generated data`() =
         runTest {
             val appInfo = createApplicationInfo("com.test.store.fail")
             every { packageService.getInstalledApplications(any()) } returns listOf(appInfo)
             every { packageService.getLaunchablePackages() } returns setOf("com.test.store.fail")
             every { packageService.getPackageInfo(any()) } returns createPackageInfo("1.0.0")
+            every { packageService.getInstallerPackageName(appInfo) } returns AppStoreService.GOOGLE_PLAY
+            every { appStoreService.installerDisplayName(AppStoreService.GOOGLE_PLAY) } returns "Google Play"
+            every { appStoreService.appStoreLink("com.test.store.fail", AppStoreService.GOOGLE_PLAY) } returns STORE_URL
             coEvery { appStoreService.existsInAppStore(any(), any()) } throws RuntimeException("Store fail")
 
-            val result =
-                repository
-                    .loadApps(
-                        AppInfoField.VERSION,
-                        systemAppsOnly = false,
-                        showArchivedApps = false,
-                        descending = false,
-                        reload = false,
-                    ).first { it.isNotEmpty() }
+            val collection =
+                launch {
+                    repository.loadApps(AppInfoField.VERSION, false, false, false, false).collect {}
+                }
+            runCurrent()
 
-            assertEquals(1, result.size)
-            assertTrue(result[0].failedFields.containsAll(listOf(AppInfoField.PACKAGE_MANAGER, AppInfoField.EXISTS_IN_APP_STORE)))
+            assertEquals("Google Play", dbFlow.value.single().installerName)
+            assertEquals(STORE_URL, dbFlow.value.single().storeUrl)
+            assertNull(dbFlow.value.single().existsInStore)
+            assertTrue(
+                dbFlow.value
+                    .single()
+                    .failedFields
+                    .none { it == AppInfoField.PACKAGE_MANAGER },
+            )
+            coVerify(exactly = 0) { appDao.updateStoreAvailability(any(), any(), any()) }
+            collection.cancelAndJoin()
         }
 
     @Test
@@ -1030,4 +1183,8 @@ class AppRepositoryTest {
             val flags = flagsSlot.captured
             assertTrue((flags and PackageManager.MATCH_ARCHIVED_PACKAGES) != 0L)
         }
+
+    private companion object {
+        const val STORE_URL = "https://play.google.com/store/apps/details?id=com.test.app"
+    }
 }

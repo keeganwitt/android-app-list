@@ -2,8 +2,10 @@ package com.github.keeganwitt.applist.services
 
 import android.util.Log
 import com.github.keeganwitt.applist.utils.await
+import kotlinx.coroutines.CancellationException
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.IOException
 
 interface AppStoreService {
     fun installerDisplayName(installerPackageName: String?): String
@@ -80,6 +82,11 @@ open class DefaultAppStoreService(
         val response =
             try {
                 httpClient.newCall(request).await()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                Log.w(TAG, "Unable to make HTTP request to $url", e)
+                null
             } catch (e: Exception) {
                 val message = "Unable to make HTTP request to $url"
                 Log.w(TAG, message, e)

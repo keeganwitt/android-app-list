@@ -13,6 +13,7 @@ import com.github.keeganwitt.applist.services.StorageService
 import com.github.keeganwitt.applist.services.UsageStatsService
 import com.github.keeganwitt.applist.utils.isArchivedApp
 import com.github.keeganwitt.applist.utils.isUserInstalled
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -88,7 +89,8 @@ class AndroidAppRepository(
 
             // Trigger sync in background if needed or if reload is true
             launch {
-                refreshCache(force = reload)
+                val storeChecks = refreshLocalCache(force = reload)
+                enrichStoreAvailability(storeChecks)
             }
 
             // Now observe DB for updates
@@ -117,13 +119,17 @@ class AndroidAppRepository(
     }
 
     override suspend fun refreshCache(force: Boolean) {
-        if (!force && _syncState.value != SyncState.Idle) return
+        refreshLocalCache(force)
+    }
+
+    private suspend fun refreshLocalCache(force: Boolean): List<StoreCheckRequest> {
+        if (!force && _syncState.value != SyncState.Idle) return emptyList()
 
         val cachedApps: List<AppCacheEntity>
         val isInitial: Boolean
 
         syncMutex.withLock {
-            if (!force && _syncState.value != SyncState.Idle) return
+            if (!force && _syncState.value != SyncState.Idle) return emptyList()
 
             cachedApps = appDao.getAllApps()
             isInitial = cachedApps.isEmpty()
@@ -135,7 +141,7 @@ class AndroidAppRepository(
             }
         }
 
-        try {
+        return try {
             var flags =
                 (
                     PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES or
@@ -181,24 +187,26 @@ class AndroidAppRepository(
 
                 val lastUsedEpochs = usageStatsService.getLastUsedEpochs(force)
                 val initialApps = mutableListOf<AppCacheEntity>()
+                val storeChecks = mutableListOf<StoreCheckRequest>()
 
                 var processedCount = 0
                 toSync.chunked(10).forEach { chunk ->
                     coroutineScope {
-                        val apps =
+                        val detailedApps =
                             chunk
                                 .map { ai ->
                                     async {
                                         val basic = mapToAppBasic(ai, launchablePackages.contains(ai.packageName))
-                                        mapToAppDetailed(ai, basic, lastUsedEpochs)
+                                        mapToAppDetailed(ai, basic, lastUsedEpochs, cachedMap[ai.packageName])
                                     }
                                 }.awaitAll()
-                        val cacheEntities = apps.map { it.toCacheEntity(System.currentTimeMillis()) }
+                        val cacheEntities = detailedApps.map { it.app.toCacheEntity(System.currentTimeMillis()) }
                         if (isInitial) {
                             initialApps.addAll(cacheEntities)
                         } else {
                             appDao.insertApps(cacheEntities)
                         }
+                        storeChecks.addAll(detailedApps.mapNotNull { it.storeCheck })
                     }
                     processedCount += chunk.size
 
@@ -207,9 +215,46 @@ class AndroidAppRepository(
                     }
                 }
                 if (isInitial) appDao.insertApps(initialApps)
+                storeChecks
+            } else {
+                emptyList()
             }
         } finally {
             _syncState.value = SyncState.Idle
+        }
+    }
+
+    private suspend fun enrichStoreAvailability(storeChecks: List<StoreCheckRequest>) {
+        storeChecks.chunked(STORE_CHECK_BATCH_SIZE).forEach { chunk ->
+            val results =
+                coroutineScope {
+                    chunk
+                        .map { storeCheck ->
+                            async {
+                                val existsInStore =
+                                    try {
+                                        appStoreService.existsInAppStore(
+                                            storeCheck.packageName,
+                                            storeCheck.installerPackageName,
+                                        )
+                                    } catch (exception: CancellationException) {
+                                        throw exception
+                                    } catch (_: Exception) {
+                                        null
+                                    }
+                                storeCheck to existsInStore
+                            }
+                        }.awaitAll()
+                }
+            results.forEach { (storeCheck, existsInStore) ->
+                if (existsInStore != null) {
+                    appDao.updateStoreAvailability(
+                        storeCheck.packageName,
+                        storeCheck.storeUrl,
+                        existsInStore,
+                    )
+                }
+            }
         }
     }
 
@@ -248,8 +293,10 @@ class AndroidAppRepository(
         ai: ApplicationInfo,
         basicApp: App,
         lastUsedEpochs: Map<String, Long>?,
-    ): App {
+        cachedApp: AppCacheEntity?,
+    ): DetailedApp {
         var app = basicApp
+        var storeCheck: StoreCheckRequest? = null
         val failedFields = mutableSetOf<AppInfoField>()
 
         if (lastUsedEpochs == null) {
@@ -313,14 +360,18 @@ class AndroidAppRepository(
         try {
             val installerPackage = packageService.getInstallerPackageName(ai)
             val installerName = appStoreService.installerDisplayName(installerPackage)
-            val existsInStore = appStoreService.existsInAppStore(ai.packageName ?: "", installerPackage)
-            val storeUrl = appStoreService.appStoreLink(ai.packageName ?: "", installerPackage)
+            val packageName = ai.packageName ?: ""
+            val storeUrl = appStoreService.appStoreLink(packageName, installerPackage)
+            val existsInStore = cachedApp?.existsInStore.takeIf { storeUrl != null && cachedApp?.storeUrl == storeUrl }
             app =
                 app.copy(
                     installerName = installerName,
                     existsInStore = existsInStore,
                     storeUrl = storeUrl,
                 )
+            if (storeUrl != null) {
+                storeCheck = StoreCheckRequest(packageName, installerPackage, storeUrl)
+            }
         } catch (e: Exception) {
             crashReporter?.recordException(e, "AndroidAppRepository.loadApps failed to get installer info for ${ai.packageName}")
             failedFields.addAll(
@@ -331,10 +382,14 @@ class AndroidAppRepository(
             )
         }
 
-        return app.copy(
-            lastUsed = lastUsedEpochs?.get(ai.packageName) ?: 0L,
-            isDetailed = true,
-            failedFields = basicApp.failedFields + failedFields,
+        return DetailedApp(
+            app =
+                app.copy(
+                    lastUsed = lastUsedEpochs?.get(ai.packageName) ?: 0L,
+                    isDetailed = true,
+                    failedFields = basicApp.failedFields + failedFields,
+                ),
+            storeCheck = storeCheck,
         )
     }
 
@@ -358,6 +413,18 @@ class AndroidAppRepository(
     // Copy of Android's flag to avoid direct dependency on PackageInfo in signature
     private companion object {
         const val PACKAGEINFO_REQUESTED_PERMISSION_GRANTED: Int = 2
+        const val STORE_CHECK_BATCH_SIZE = 10
         val STALENESS_THRESHOLD = TimeUnit.DAYS.toMillis(1)
     }
+
+    private data class DetailedApp(
+        val app: App,
+        val storeCheck: StoreCheckRequest?,
+    )
+
+    private data class StoreCheckRequest(
+        val packageName: String,
+        val installerPackageName: String?,
+        val storeUrl: String,
+    )
 }
