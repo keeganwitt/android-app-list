@@ -9,12 +9,15 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,10 +69,25 @@ class AppStoreServiceTest {
                 val result = service.existsInAppStore(packageName, AppStoreService.GOOGLE_PLAY)
 
                 assertNull(result)
-                verify { crashReporter.recordException(any(), any()) }
+                verify(exactly = 0) { crashReporter.recordException(any(), any()) }
             } finally {
                 unmockkStatic(Log::class)
             }
+        }
+
+    @Test
+    fun `given cancellation, when existsInAppStore called, then propagates cancellation`() =
+        runBlocking {
+            val cancellation = CancellationException("Store check cancelled")
+            every { httpClient.newCall(any()) } throws cancellation
+
+            try {
+                service.existsInAppStore("com.test.app", AppStoreService.GOOGLE_PLAY)
+                fail("Expected CancellationException")
+            } catch (exception: CancellationException) {
+                assertSame(cancellation, exception)
+            }
+            verify(exactly = 0) { crashReporter.recordException(any(), any()) }
         }
 
     @Test
