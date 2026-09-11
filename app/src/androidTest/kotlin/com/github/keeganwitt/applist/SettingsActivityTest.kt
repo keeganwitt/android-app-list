@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -15,6 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -173,5 +175,30 @@ class SettingsActivityTest {
         waitFor(1000)
 
         assertTrue(appSettings.getThemeMode() == AppSettings.ThemeMode.LIGHT)
+    }
+
+    @Test
+    fun settingsActivity_whenRecreatedWithThemeDialogOpen_thenRestoresExistingFragments() {
+        onView(withId(androidx.preference.R.id.recycler_view))
+            .perform(
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
+                    hasDescendant(withText(R.string.theme_title)),
+                    click(),
+                ),
+            )
+        waitFor(500)
+
+        scenario.recreate()
+        scenario.recreate()
+        waitFor(500)
+
+        scenario.onActivity { activity ->
+            val settingsFragments =
+                activity.supportFragmentManager.fragments.filterIsInstance<SettingsActivity.SettingsFragment>()
+            val dialogFragments =
+                activity.supportFragmentManager.fragments.filterIsInstance<PreferenceDialogFragmentCompat>()
+            assertEquals(1, settingsFragments.size)
+            assertEquals(1, dialogFragments.size)
+        }
     }
 }
