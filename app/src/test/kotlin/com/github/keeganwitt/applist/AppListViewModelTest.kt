@@ -395,14 +395,12 @@ class AppListViewModelTest {
             val item = viewModel.uiState.value.items[0]
             assertEquals("Unknown", item.infoText)
             assertEquals(null, item.infoUrl)
-            assertEquals(null, item.storeUrl)
         }
 
     @Test
-    fun `given app has store URL, when another field is selected, then store action URL is retained`() =
+    fun `given app has launch intent, when mapped, then item is launchable`() =
         runTest {
-            val storeUrl = "https://play.google.com/store/apps/details?id=com.test.app"
-            val app = createTestApp("com.test.app", "Test App").copy(storeUrl = storeUrl)
+            val app = createTestApp("com.test.app", "Test App").copy(hasLaunchIntent = true)
             coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
 
             viewModel.init(
@@ -413,9 +411,30 @@ class AppListViewModelTest {
             )
             advanceUntilIdle()
 
-            val item = viewModel.uiState.value.items[0]
-            assertEquals("1.0.0", item.infoText)
-            assertEquals(storeUrl, item.storeUrl)
+            assertTrue(
+                viewModel.uiState.value.items[0]
+                    .isLaunchable,
+            )
+        }
+
+    @Test
+    fun `given app has no launch intent, when mapped, then item is not launchable`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(hasLaunchIntent = false)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = true,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            assertFalse(
+                viewModel.uiState.value.items[0]
+                    .isLaunchable,
+            )
         }
 
     @Test

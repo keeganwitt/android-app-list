@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.github.keeganwitt.applist.databinding.ActivityMainBinding
+import com.github.keeganwitt.applist.services.AndroidPackageService
 import com.github.keeganwitt.applist.services.DefaultAppStoreService
 import com.github.keeganwitt.applist.utils.PermissionUtils
 import com.github.keeganwitt.applist.utils.nightMode
@@ -46,6 +47,7 @@ class MainActivity :
     private lateinit var labelToFieldMap: Map<String, AppInfoField>
     private lateinit var fieldToLabelMap: Map<AppInfoField, String>
     private lateinit var appSettings: AppSettings
+    private val packageService by lazy { AndroidPackageService(applicationContext) }
     private var latestState: UiState = UiState()
     private var loadFailureSnackbar: Snackbar? = null
     private var shouldRefreshOnResume = false
@@ -291,12 +293,29 @@ class MainActivity :
 
     override fun onClick(position: Int) {
         val app = appAdapter.currentList[position]
+        openAppInfo(app.packageName)
+    }
+
+    private fun openAppInfo(packageName: String) {
         val intent =
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 addCategory(Intent.CATEGORY_DEFAULT)
-                data = ("package:" + app.packageName).toUri()
+                data = ("package:" + packageName).toUri()
             }
         startActivity(intent)
+    }
+
+    override fun onLaunchClick(packageName: String) {
+        val intent = packageService.getLaunchIntentForPackage(packageName)
+        if (intent == null) {
+            openAppInfo(packageName)
+            return
+        }
+        try {
+            startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+            openAppInfo(packageName)
+        }
     }
 
     override fun onStoreUrlClick(url: String) {

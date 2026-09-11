@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
@@ -94,31 +95,63 @@ class AppAdapterTest {
     }
 
     @Test
-    fun `given item with store URL, when bound and store button clicked, then store URL click is reported`() {
-        val url = "https://play.google.com/store/apps/details?id=com.test.app"
+    fun `given launchable item, when launch button clicked, then app launch is reported`() {
         val holder = createViewHolder()
-        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0", storeUrl = url)))
+        adapter.submitList(
+            listOf(
+                AppItemUiModel(
+                    "com.test.app",
+                    "Test App",
+                    "1.0.0",
+                    isLaunchable = true,
+                ),
+            ),
+        )
 
         adapter.onBindViewHolder(holder, 0)
-        holder.binding.storeLink.performClick()
+        holder.binding.launchButton.performClick()
 
-        assertEquals(View.VISIBLE, holder.binding.storeLink.visibility)
-        verify { onClickListener.onStoreUrlClick(url) }
+        assertEquals(View.VISIBLE, holder.binding.launchButton.visibility)
+        assertEquals(
+            "Open app",
+            holder.binding.launchButton.text
+                .toString(),
+        )
+        assertEquals("Open Test App", holder.binding.launchButton.contentDescription)
+        assertTrue(holder.binding.launchButton.icon != null)
+        assertTrue(holder.binding.root.strokeWidth > 0)
+        assertFalse(holder.binding.appIcon.isClickable)
+        verify { onClickListener.onLaunchClick("com.test.app") }
     }
 
     @Test
-    fun `given item without store URL, when bound, then store button is hidden`() {
+    fun `given non-launchable item reuses holder, when bound, then launch button is hidden`() {
         val holder = createViewHolder()
-        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0")))
-
+        adapter.submitList(
+            listOf(
+                AppItemUiModel(
+                    "com.test.launchable",
+                    "Launchable",
+                    "1.0.0",
+                    isLaunchable = true,
+                ),
+            ),
+        )
         adapter.onBindViewHolder(holder, 0)
 
-        assertEquals(View.GONE, holder.binding.storeLink.visibility)
+        adapter.submitList(null)
+        adapter.submitList(listOf(AppItemUiModel("com.test.archived", "Archived", "1.0.0")))
+        adapter.onBindViewHolder(holder, 0)
+        holder.binding.launchButton.performClick()
+
+        assertEquals(View.GONE, holder.binding.launchButton.visibility)
+        verify(exactly = 0) { onClickListener.onLaunchClick("com.test.archived") }
     }
 
     private fun createViewHolder(): AppAdapter.AppInfoViewHolder {
         val context = ApplicationProvider.getApplicationContext<TestAppListApplication>()
-        val parent = FrameLayout(context)
+        val themedContext = ContextThemeWrapper(context, R.style.Theme_AppList_Settings)
+        val parent = FrameLayout(themedContext)
         return adapter.onCreateViewHolder(parent, 0)
     }
 }
