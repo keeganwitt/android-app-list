@@ -5,7 +5,6 @@ data class AppItemUiModel(
     val appName: String,
     val infoText: String,
     val infoUrl: String? = null,
-    val storeUrl: String? = null,
     val isLoading: Boolean = false,
     val isLaunchable: Boolean = false,
 )

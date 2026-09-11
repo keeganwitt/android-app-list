@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">App List</string>
     <string name="app_icon_description">App Icon</string>
+    <string name="open_app">Open app</string>
     <string name="open_app_description">Open %1$s</string>
     <string name="search">Search</string>
     <string name="systemAppToggle">System apps</string>
@@ -80,7 +81,5 @@
     <string name="building_initial_cache">Building initial cache…</string>
     <string name="sync_progress">%1$d / %2$d</string>
     <string name="appInfoField_storeUrl">Store URL</string>
-    <string name="open_in_app_store">Open in app store</string>
-    <string name="open_in_app_store_description">Open %1$s in app store</string>
     <string name="app_store_unavailable">No app store or browser can open this link</string>
 </resources>

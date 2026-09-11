@@ -45,12 +45,12 @@
     android:gravity="center_horizontal" />
 
   <ImageButton
-    android:id="@+id/store_link"
+    android:id="@+id/launch_button"
     style="?android:attr/borderlessButtonStyle"
     android:layout_width="48dp"
     android:layout_height="48dp"
-    android:contentDescription="@string/open_in_app_store"
-    android:src="@drawable/ic_store"
+    android:contentDescription="@string/open_app"
+    android:src="@drawable/ic_launch"
     android:visibility="gone" />
 
 </LinearLayout>

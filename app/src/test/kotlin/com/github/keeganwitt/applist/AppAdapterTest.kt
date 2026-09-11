@@ -94,20 +94,7 @@ class AppAdapterTest {
     }
 
     @Test
-    fun `given item with store URL, when bound and store button clicked, then store URL click is reported`() {
-        val url = "https://play.google.com/store/apps/details?id=com.test.app"
-        val holder = createViewHolder()
-        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0", storeUrl = url)))
-
-        adapter.onBindViewHolder(holder, 0)
-        holder.binding.storeLink.performClick()
-
-        assertEquals(View.VISIBLE, holder.binding.storeLink.visibility)
-        verify { onClickListener.onStoreUrlClick(url) }
-    }
-
-    @Test
-    fun `given launchable item, when app icon clicked, then app launch is reported`() {
+    fun `given launchable item, when launch button clicked, then app launch is reported`() {
         val holder = createViewHolder()
         adapter.submitList(
             listOf(
@@ -121,15 +108,16 @@ class AppAdapterTest {
         )
 
         adapter.onBindViewHolder(holder, 0)
-        holder.binding.appIcon.performClick()
+        holder.binding.launchButton.performClick()
 
-        assertTrue(holder.binding.appIcon.isClickable)
-        assertEquals("Open Test App", holder.binding.appIcon.contentDescription)
-        verify { onClickListener.onAppIconClick("com.test.app") }
+        assertEquals(View.VISIBLE, holder.binding.launchButton.visibility)
+        assertEquals("Open Test App", holder.binding.launchButton.contentDescription)
+        assertFalse(holder.binding.appIcon.isClickable)
+        verify { onClickListener.onLaunchClick("com.test.app") }
     }
 
     @Test
-    fun `given non-launchable item reuses holder, when bound, then app icon launch is cleared`() {
+    fun `given non-launchable item reuses holder, when bound, then launch button is hidden`() {
         val holder = createViewHolder()
         adapter.submitList(
             listOf(
@@ -146,20 +134,10 @@ class AppAdapterTest {
         adapter.submitList(null)
         adapter.submitList(listOf(AppItemUiModel("com.test.archived", "Archived", "1.0.0")))
         adapter.onBindViewHolder(holder, 0)
-        holder.binding.appIcon.performClick()
+        holder.binding.launchButton.performClick()
 
-        assertFalse(holder.binding.appIcon.isClickable)
-        verify(exactly = 0) { onClickListener.onAppIconClick("com.test.archived") }
-    }
-
-    @Test
-    fun `given item without store URL, when bound, then store button is hidden`() {
-        val holder = createViewHolder()
-        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0")))
-
-        adapter.onBindViewHolder(holder, 0)
-
-        assertEquals(View.GONE, holder.binding.storeLink.visibility)
+        assertEquals(View.GONE, holder.binding.launchButton.visibility)
+        verify(exactly = 0) { onClickListener.onLaunchClick("com.test.archived") }
     }
 
     private fun createViewHolder(): AppAdapter.AppInfoViewHolder {

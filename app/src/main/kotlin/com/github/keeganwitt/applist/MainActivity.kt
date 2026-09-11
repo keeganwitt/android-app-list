@@ -305,7 +305,7 @@ class MainActivity :
         startActivity(intent)
     }
 
-    override fun onAppIconClick(packageName: String) {
+    override fun onLaunchClick(packageName: String) {
         val intent = packageService.getLaunchIntentForPackage(packageName)
         if (intent == null) {
             openAppInfo(packageName)

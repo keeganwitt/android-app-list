@@ -45,47 +45,28 @@ class AppAdapter(
         }
         binding.appLoadingProgress.visibility = if (item.isLoading) View.VISIBLE else View.GONE
         binding.appIcon.alpha = if (item.isLoading) 0.5f else 1.0f
-        bindAppIcon(binding, item)
 
         binding.packageName.text = item.packageName
         binding.appName.text = item.appName
         bindAppInfo(binding.appInfo, item)
         binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
-        bindStoreLink(binding, item)
+        bindLaunchButton(binding, item)
     }
 
-    private fun bindAppIcon(
+    private fun bindLaunchButton(
         binding: SnippetListRowBinding,
         item: AppItemUiModel,
     ) {
         if (item.isLaunchable) {
-            binding.appIcon.contentDescription =
+            binding.launchButton.visibility = View.VISIBLE
+            binding.launchButton.contentDescription =
                 binding.root.context.getString(R.string.open_app_description, item.appName)
-            binding.appIcon.isFocusable = true
-            binding.appIcon.setOnClickListener { onClickListener.onAppIconClick(item.packageName) }
+            binding.launchButton.setOnClickListener { onClickListener.onLaunchClick(item.packageName) }
         } else {
-            binding.appIcon.contentDescription = binding.root.context.getString(R.string.app_icon_description)
-            binding.appIcon.isFocusable = false
-            binding.appIcon.setOnClickListener(null)
-            binding.appIcon.isClickable = false
+            binding.launchButton.visibility = View.GONE
+            binding.launchButton.setOnClickListener(null)
+            binding.launchButton.isClickable = false
         }
-    }
-
-    private fun bindStoreLink(
-        binding: SnippetListRowBinding,
-        item: AppItemUiModel,
-    ) {
-        val storeUrl = item.storeUrl
-        if (storeUrl == null) {
-            binding.storeLink.visibility = View.GONE
-            binding.storeLink.setOnClickListener(null)
-            return
-        }
-
-        binding.storeLink.visibility = View.VISIBLE
-        binding.storeLink.contentDescription =
-            binding.root.context.getString(R.string.open_in_app_store_description, item.appName)
-        binding.storeLink.setOnClickListener { onClickListener.onStoreUrlClick(storeUrl) }
     }
 
     private fun bindAppInfo(
@@ -123,7 +104,7 @@ class AppAdapter(
     interface OnClickListener {
         fun onClick(position: Int)
 
-        fun onAppIconClick(packageName: String)
+        fun onLaunchClick(packageName: String)
 
         fun onStoreUrlClick(url: String)
     }
