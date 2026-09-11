@@ -87,6 +87,20 @@ class AppDatabaseTest {
         }
 
     @Test
+    fun updateStoreAvailabilityRequiresMatchingUrl() =
+        runTest {
+            val original = createAppEntity("com.test.app").copy(existsInStore = null)
+            dao.insertApps(listOf(original))
+
+            val staleUpdate = dao.updateStoreAvailability("com.test.app", "https://stale.url", false)
+            val matchingUpdate = dao.updateStoreAvailability("com.test.app", original.storeUrl!!, true)
+
+            assertEquals(0, staleUpdate)
+            assertEquals(1, matchingUpdate)
+            assertEquals(true, dao.getAllApps().single().existsInStore)
+        }
+
+    @Test
     fun clearAll() =
         runTest {
             dao.insertApps(listOf(createAppEntity("com.test.app1")))
