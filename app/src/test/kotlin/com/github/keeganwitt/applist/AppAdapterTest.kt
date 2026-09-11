@@ -2,6 +2,7 @@ package com.github.keeganwitt.applist
 
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
@@ -111,7 +112,14 @@ class AppAdapterTest {
         holder.binding.launchButton.performClick()
 
         assertEquals(View.VISIBLE, holder.binding.launchButton.visibility)
+        assertEquals(
+            "Open app",
+            holder.binding.launchButton.text
+                .toString(),
+        )
         assertEquals("Open Test App", holder.binding.launchButton.contentDescription)
+        assertTrue(holder.binding.launchButton.icon != null)
+        assertTrue(holder.binding.root.strokeWidth > 0)
         assertFalse(holder.binding.appIcon.isClickable)
         verify { onClickListener.onLaunchClick("com.test.app") }
     }
@@ -142,7 +150,8 @@ class AppAdapterTest {
 
     private fun createViewHolder(): AppAdapter.AppInfoViewHolder {
         val context = ApplicationProvider.getApplicationContext<TestAppListApplication>()
-        val parent = FrameLayout(context)
+        val themedContext = ContextThemeWrapper(context, R.style.Theme_AppList_Settings)
+        val parent = FrameLayout(themedContext)
         return adapter.onCreateViewHolder(parent, 0)
     }
 }
