@@ -1,6 +1,7 @@
 package com.github.keeganwitt.applist
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,8 +31,7 @@ class AppListApplicationTest {
     }
 
     @Test
-    fun `given crash reporting enabled when onCreate called then crashlytics is enabled`() {
-        appSettings.setCrashReportingEnabled(true)
+    fun `given default crash reporting preference when onCreate called then crashlytics is enabled`() {
         var enabledCalled = false
         var deleteCalled = false
 
@@ -53,6 +53,17 @@ class AppListApplicationTest {
 
         assertTrue(enabledCalled)
         assertFalse(deleteCalled)
+    }
+
+    @Test
+    fun `manifest disables crashlytics collection before application startup`() {
+        val applicationInfo =
+            context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong()),
+            )
+
+        assertFalse(applicationInfo.metaData.getBoolean("firebase_crashlytics_collection_enabled", true))
     }
 
     @Test
