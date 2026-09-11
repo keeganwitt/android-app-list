@@ -7,4 +7,5 @@ data class AppItemUiModel(
     val infoUrl: String? = null,
     val storeUrl: String? = null,
     val isLoading: Boolean = false,
+    val isLaunchable: Boolean = false,
 )

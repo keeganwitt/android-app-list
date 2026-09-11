@@ -238,6 +238,7 @@ class AppListViewModel(
             infoUrl = storeUrl?.takeIf { field == AppInfoField.STORE_URL },
             storeUrl = storeUrl,
             isLoading = !app.isDetailed,
+            isLaunchable = app.hasLaunchIntent,
         )
     }
 

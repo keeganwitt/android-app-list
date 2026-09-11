@@ -419,6 +419,46 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given app has launch intent, when mapped, then item is launchable`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(hasLaunchIntent = true)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = false,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            assertTrue(
+                viewModel.uiState.value.items[0]
+                    .isLaunchable,
+            )
+        }
+
+    @Test
+    fun `given app has no launch intent, when mapped, then item is not launchable`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(hasLaunchIntent = false)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(
+                AppInfoField.VERSION,
+                initialSystemAppsOnly = false,
+                initialShowArchived = true,
+                initialDescending = false,
+            )
+            advanceUntilIdle()
+
+            assertFalse(
+                viewModel.uiState.value.items[0]
+                    .isLaunchable,
+            )
+        }
+
+    @Test
     fun `given size field, when mapToItem called, then sizeFormatter is used`() =
         runTest {
             val app = createTestApp("com.test.app", "Test App").copy(sizes = StorageUsage(apkBytes = 1024))

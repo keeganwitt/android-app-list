@@ -107,6 +107,52 @@ class AppAdapterTest {
     }
 
     @Test
+    fun `given launchable item, when app icon clicked, then app launch is reported`() {
+        val holder = createViewHolder()
+        adapter.submitList(
+            listOf(
+                AppItemUiModel(
+                    "com.test.app",
+                    "Test App",
+                    "1.0.0",
+                    isLaunchable = true,
+                ),
+            ),
+        )
+
+        adapter.onBindViewHolder(holder, 0)
+        holder.binding.appIcon.performClick()
+
+        assertTrue(holder.binding.appIcon.isClickable)
+        assertEquals("Open Test App", holder.binding.appIcon.contentDescription)
+        verify { onClickListener.onAppIconClick("com.test.app") }
+    }
+
+    @Test
+    fun `given non-launchable item reuses holder, when bound, then app icon launch is cleared`() {
+        val holder = createViewHolder()
+        adapter.submitList(
+            listOf(
+                AppItemUiModel(
+                    "com.test.launchable",
+                    "Launchable",
+                    "1.0.0",
+                    isLaunchable = true,
+                ),
+            ),
+        )
+        adapter.onBindViewHolder(holder, 0)
+
+        adapter.submitList(null)
+        adapter.submitList(listOf(AppItemUiModel("com.test.archived", "Archived", "1.0.0")))
+        adapter.onBindViewHolder(holder, 0)
+        holder.binding.appIcon.performClick()
+
+        assertFalse(holder.binding.appIcon.isClickable)
+        verify(exactly = 0) { onClickListener.onAppIconClick("com.test.archived") }
+    }
+
+    @Test
     fun `given item without store URL, when bound, then store button is hidden`() {
         val holder = createViewHolder()
         adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "1.0.0")))

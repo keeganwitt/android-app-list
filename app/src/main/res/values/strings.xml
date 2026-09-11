@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">App List</string>
     <string name="app_icon_description">App Icon</string>
+    <string name="open_app_description">Open %1$s</string>
     <string name="search">Search</string>
     <string name="systemAppToggle">System apps</string>
     <string name="archivedAppToggle">Archived apps</string>

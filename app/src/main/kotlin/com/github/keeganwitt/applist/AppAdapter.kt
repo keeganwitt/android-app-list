@@ -45,12 +45,30 @@ class AppAdapter(
         }
         binding.appLoadingProgress.visibility = if (item.isLoading) View.VISIBLE else View.GONE
         binding.appIcon.alpha = if (item.isLoading) 0.5f else 1.0f
+        bindAppIcon(binding, item)
 
         binding.packageName.text = item.packageName
         binding.appName.text = item.appName
         bindAppInfo(binding.appInfo, item)
         binding.appInfo.visibility = if (item.infoText.isBlank()) View.GONE else View.VISIBLE
         bindStoreLink(binding, item)
+    }
+
+    private fun bindAppIcon(
+        binding: SnippetListRowBinding,
+        item: AppItemUiModel,
+    ) {
+        if (item.isLaunchable) {
+            binding.appIcon.contentDescription =
+                binding.root.context.getString(R.string.open_app_description, item.appName)
+            binding.appIcon.isFocusable = true
+            binding.appIcon.setOnClickListener { onClickListener.onAppIconClick(item.packageName) }
+        } else {
+            binding.appIcon.contentDescription = binding.root.context.getString(R.string.app_icon_description)
+            binding.appIcon.isFocusable = false
+            binding.appIcon.setOnClickListener(null)
+            binding.appIcon.isClickable = false
+        }
     }
 
     private fun bindStoreLink(
@@ -104,6 +122,8 @@ class AppAdapter(
 
     interface OnClickListener {
         fun onClick(position: Int)
+
+        fun onAppIconClick(packageName: String)
 
         fun onStoreUrlClick(url: String)
     }
