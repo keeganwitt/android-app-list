@@ -4,10 +4,3 @@ updates:
     directory: /
     schedule:
       interval: "weekly"
-    ignore:
-      - dependency-name: "androidx.activity:activity-ktx"
-        versions: ["[1.13.0,)"]
-      - dependency-name: "androidx.core:core"
-        versions: ["[1.18.0,)"]
-      - dependency-name: "androidx.core:core-ktx"
-        versions: ["[1.18.0,)"]

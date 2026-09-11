@@ -1,5 +1,6 @@
 package com.github.keeganwitt.applist
 
+import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -177,14 +178,27 @@ class SettingsActivityTest {
     }
 
     @Test
-    fun settingsActivity_whenRecreated_thenRestoresOneSettingsFragment() {
+    fun settingsActivity_whenRecreatedWithThemeDialogOpen_thenRestoresExistingFragments() {
+        onView(withId(androidx.preference.R.id.recycler_view))
+            .perform(
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
+                    hasDescendant(withText(R.string.theme_title)),
+                    click(),
+                ),
+            )
+        waitFor(500)
+
+        scenario.recreate()
         scenario.recreate()
         waitFor(500)
 
         scenario.onActivity { activity ->
             val settingsFragments =
                 activity.supportFragmentManager.fragments.filterIsInstance<SettingsActivity.SettingsFragment>()
+            val dialogFragments =
+                activity.supportFragmentManager.fragments.filterIsInstance<PreferenceDialogFragmentCompat>()
             assertEquals(1, settingsFragments.size)
+            assertEquals(1, dialogFragments.size)
         }
     }
 }
