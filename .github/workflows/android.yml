@@ -22,6 +22,8 @@ jobs:
         run: chmod +x gradlew
       - name: Run tests and generate coverage report
         run: ./gradlew createDebugUnitTestCoverageReport
+      - name: Verify Crashlytics mapping upload task
+        run: ./gradlew :app:help --task uploadCrashlyticsMappingFileRelease
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v4
         with:
