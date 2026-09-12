@@ -25,15 +25,15 @@ class WindowInsetsExtensionsTest {
                 .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 0, 40))
                 .setInsets(WindowInsetsCompat.Type.captionBar(), Insets.of(10, 0, 0, 0))
                 .setInsets(WindowInsetsCompat.Type.displayCutout(), Insets.of(0, 0, 30, 0))
-                .setInsets(WindowInsetsCompat.Type.systemOverlays(), Insets.of(100, 100, 100, 100))
+                .setInsets(WindowInsetsCompat.Type.systemOverlays(), Insets.of(0, 100, 0, 0))
                 .build()
 
         ViewCompat.dispatchApplyWindowInsets(view, insets)
 
-        assertEquals(101, view.paddingLeft)
+        assertEquals(11, view.paddingLeft)
         assertEquals(102, view.paddingTop)
-        assertEquals(103, view.paddingRight)
-        assertEquals(104, view.paddingBottom)
+        assertEquals(33, view.paddingRight)
+        assertEquals(44, view.paddingBottom)
     }
 
     @Test
