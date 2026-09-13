@@ -28,8 +28,8 @@ android {
         applicationId = "com.github.keeganwitt.applist"
         minSdk = 24
         targetSdk = 37
-        versionCode = 35
-        versionName = "1.17.0"
+        versionCode = 36
+        versionName = "1.18.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
