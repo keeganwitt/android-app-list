@@ -80,6 +80,13 @@ class AppAdapterTest {
     }
 
     @Test
+    fun `given app row, when created, then package name is selectable`() {
+        val holder = createViewHolder()
+
+        assertTrue(holder.binding.packageName.isTextSelectable)
+    }
+
+    @Test
     fun `given item with infoUrl, when bound and link clicked, then store URL click is reported`() {
         val url = "https://play.google.com/store/apps/details?id=com.test.app"
         val holder = createViewHolder()
