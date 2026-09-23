@@ -235,7 +235,11 @@ class AppListViewModel(
             packageName = app.packageName,
             appName = app.name,
             infoText = info,
-            infoUrl = storeUrl?.takeIf { field == AppInfoField.STORE_URL },
+            infoUrl =
+                storeUrl?.takeIf {
+                    field == AppInfoField.STORE_URL ||
+                        (field == AppInfoField.PACKAGE_MANAGER && !app.installerName.isNullOrBlank() && field !in app.failedFields)
+                },
             isLoading = !app.isDetailed,
             isLaunchable = app.hasLaunchIntent,
         )

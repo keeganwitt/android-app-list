@@ -360,6 +360,35 @@ class AppListViewModelTest {
         }
 
     @Test
+    fun `given store name and URL, when package manager field is selected, then store name links to URL`() =
+        runTest {
+            val storeUrl = "https://play.google.com/store/apps/details?id=com.test.app"
+            val app = createTestApp("com.test.app", "Test App").copy(installerName = "Google Play", storeUrl = storeUrl)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.PACKAGE_MANAGER, false, false, false)
+            advanceUntilIdle()
+
+            val item = viewModel.uiState.value.items[0]
+            assertEquals("Google Play", item.infoText)
+            assertEquals(storeUrl, item.infoUrl)
+        }
+
+    @Test
+    fun `given store name without URL, when package manager field is selected, then store name is not linked`() =
+        runTest {
+            val app = createTestApp("com.test.app", "Test App").copy(installerName = "Google Play", storeUrl = null)
+            coEvery { repository.loadApps(any(), any(), any(), any(), any()) } returns flowOf(listOf(app))
+
+            viewModel.init(AppInfoField.PACKAGE_MANAGER, false, false, false)
+            advanceUntilIdle()
+
+            val item = viewModel.uiState.value.items[0]
+            assertEquals("Google Play", item.infoText)
+            assertEquals(null, item.infoUrl)
+        }
+
+    @Test
     fun `given unknown store URL, when store URL field is selected, then unknown text is not a link`() =
         runTest {
             val app = createTestApp("com.test.app", "Test App").copy(storeUrl = null)
