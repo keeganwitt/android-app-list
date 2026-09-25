@@ -83,13 +83,14 @@ class AppAdapterTest {
     fun `given item with infoUrl, when bound and link clicked, then store URL click is reported`() {
         val url = "https://play.google.com/store/apps/details?id=com.test.app"
         val holder = createViewHolder()
-        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", url, infoUrl = url)))
+        adapter.submitList(listOf(AppItemUiModel("com.test.app", "App", "Google Play", infoUrl = url)))
 
         adapter.onBindViewHolder(holder, 0)
         val spanned = holder.binding.appInfo.text as Spanned
         val spans = spanned.getSpans(0, spanned.length, ClickableSpan::class.java)
         spans.single().onClick(holder.binding.appInfo)
 
+        assertEquals("Google Play", spanned.toString())
         assertTrue(holder.binding.appInfo.isClickable)
         verify { onClickListener.onStoreUrlClick(url) }
     }
