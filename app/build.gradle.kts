@@ -98,7 +98,7 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
 
     // Other dependencies
-    implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
     implementation("io.coil-kt:coil:2.7.0")
 
     // Unit test dependencies
@@ -117,7 +117,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.7.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.4.0")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.5.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.5.1")
 }
 
 val fileFilter =
