@@ -4,12 +4,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:9.4.1")
+        classpath("com.android.tools.build:gradle:9.5.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21")
     }
 }
 
 plugins {
-    id("com.google.gms.google-services") version "4.5.0" apply false
+    id("com.google.gms.google-services") version "4.6.0" apply false
     id("com.google.firebase.crashlytics") version "3.0.8" apply false
 }
